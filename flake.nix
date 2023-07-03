@@ -11,7 +11,6 @@
           buildInputs = with pkgs; [
             nodejs
             nodePackages.pnpm
-            nodePackages.vercel
           ];
 
           shellHook = ''
