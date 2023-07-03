@@ -13,6 +13,7 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"devDependencies": {
+		"@beyonk/svelte-mapbox": "^9.1.0",
 		"@fontsource/fira-mono": "^4.5.10",
 		"@neoconfetti/svelte": "^1.0.0",
 		"@playwright/test": "^1.28.1",
@@ -31,5 +32,8 @@
 		"vitest": "^0.25.3",
 		"web-vitals": "^3.3.1"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@vercel/postgres": "^0.4.0"
+	}
 }
