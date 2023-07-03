@@ -1,5 +1,4 @@
-// const ADMIN_LOGIN = "admin:occupa*tionPr$ofessi_onTra2#nsition";
-const ADMIN_LOGIN = process.env.ADMIN_LOGIN;
+const ADMIN_LOGIN = "admin:occupa*tionPr$ofessi_onTra2#nsition";
 
 export async function handle({
     event,
