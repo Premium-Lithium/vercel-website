@@ -6,19 +6,14 @@ export default async function (request: VercelRequest, response: VercelResponse)
   const likes = 100;
  
   try {
-    const result = await sql`create table jobs (
-        id int,
-        customer_name varchar(64),
-        postcode varchar(16),
-        latitude real,
-        longitude real,
-        number_of_quotes_requested int,
-    )`;
+    const result = await sql`
+        select * from information_schema.tables where table_schema = 'public'
+    `;
     console.log(result.rows);
+    response.send(result.rows);
   } catch (error) {
     return response.status(500).json({ error });
   }
 
-  response.send(`Hello world!`);
 }
 

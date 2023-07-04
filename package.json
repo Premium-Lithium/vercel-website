@@ -43,5 +43,4 @@
 		"@prisma/client": "4.13.0"
     },
 	"type": "module"
-	}
 }
