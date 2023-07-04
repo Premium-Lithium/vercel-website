@@ -25,6 +25,7 @@
 		"eslint-plugin-svelte": "^2.26.0",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.8.1",
+		"prisma": "^4.16.2",
 		"svelte": "^3.54.0",
 		"svelte-check": "^3.0.1",
 		"typescript": "^5.0.0",
@@ -38,6 +39,9 @@
 	"type": "module",
 	"dependencies": {
 		"@vercel/postgres": "^0.4.0",
-		"vercel": "^31.0.1"
+		"vercel": "^31.0.1",
+		"@prisma/client": "4.13.0"
+    },
+	"type": "module"
 	}
 }

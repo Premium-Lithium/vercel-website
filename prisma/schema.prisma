@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("POSTGRES_PRISMA_URL")
+  directUrl         = env("POSTGRES_URL_NON_POOLING")
+  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Job {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  customerName String
+  address      String
+  postcode     String
+  latitude     String
+  longitude    String
+  Deal         Deal[]
+}
+
+model Installer {
+  id        Int     @id @default(autoincrement())
+  isPartner Boolean
+  address   String
+  postcode  String
+  latitude  String
+  longitude String
+  Deal      Deal[]
+}
+
+model Deal {
+  id          Int       @id
+  Job         Job       @relation(fields: [jobId], references: [id])
+  jobId       Int
+  Installer   Installer @relation(fields: [installerId], references: [id])
+  installerId Int
+}
+
+enum DealType {
+  SOLICITATION
+  OFFER
+}
