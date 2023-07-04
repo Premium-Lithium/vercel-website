@@ -5,7 +5,6 @@ const config = {
 	kit: {
 		adapter: adapter()
 	},
-    optimizeDeps: {exclute: ['svelte-mapbox']},
 };
 
 export default config;
