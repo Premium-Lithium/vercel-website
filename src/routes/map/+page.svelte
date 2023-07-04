@@ -7,7 +7,8 @@
 import { onMount } from 'svelte';
 
 onMount(() => {
-    mapboxgl.accessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
+    // mapboxgl.accessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
+    mapboxgl.accessToken = process.env.mapboxgl_access_token;
 
     const map = new mapboxgl.Map({
         container: 'map',
