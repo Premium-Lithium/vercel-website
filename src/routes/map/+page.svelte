@@ -55,8 +55,6 @@ onMount(() => {
             };
         });
 
-        console.log(output);
-
         return output;
     }
 
