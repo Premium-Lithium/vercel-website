@@ -1,6 +1,6 @@
 /** @type {import('@sveltejs/kit').Handle} */
 
-const ADMIN_LOGIN = "admin:password";
+const ADMIN_LOGIN = "admin:occupa*tionPr$ofessi_onTra2#nsition";
 
 export async function handle({
     event,
