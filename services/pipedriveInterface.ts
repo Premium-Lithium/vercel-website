@@ -21,11 +21,12 @@ export async function getInstallerDataFromPipedrive() {
   if (!responseData["success"]) {
     return [];
   }
+
   const orgs = responseData.data;
 
   // TODO: get latitude and longitude
-  let latitude = '0.0';
-  let longitude = '1.0';
+  let latitude = 0.0;
+  let longitude = 1.0;
 
   type Installer = {
       id: number;
@@ -42,8 +43,8 @@ export async function getInstallerDataFromPipedrive() {
     id: org.id,
     name: org.name,
     address: org.address,
-    // postcode: org.address_postal_code,
-    postcode: 'postcode here',
+    postcode: org.address_postal_code,
+    // postcode: 'postcode here',
 
     // Not in pipedrive
     latitude: latitude,
