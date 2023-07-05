@@ -11,6 +11,7 @@ datasource db {
 
 model Job {
   id           Int      @id @default(autoincrement())
+  name         String
   createdAt    DateTime @default(now())
   customerName String
   address      String
@@ -21,7 +22,9 @@ model Job {
 }
 
 model Installer {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
   isPartner Boolean
   address   String
   postcode  String
@@ -32,10 +35,13 @@ model Installer {
 
 model Deal {
   id          Int       @id
-  Job         Job       @relation(fields: [jobId], references: [id])
+  name        String
+  createdAt   DateTime  @default(now())
   jobId       Int
-  Installer   Installer @relation(fields: [installerId], references: [id])
   installerId Int
+  accepted    Boolean
+  Installer   Installer @relation(fields: [installerId], references: [id])
+  Job         Job       @relation(fields: [jobId], references: [id])
 }
 
 enum DealType {
