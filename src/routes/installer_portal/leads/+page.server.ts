@@ -1,9 +1,10 @@
 import prisma from '$lib/prisma';
 
 export const load = async () => {
+
     const response = await prisma.Job.findMany({
         select: {
-            Deal: {
+            Deals: {
                 select: {
                     id: true,
                     accepted: true,
@@ -12,7 +13,7 @@ export const load = async () => {
             address: true,
         },
         where: {
-            Deal: {
+            Deals: {
                 some: {
                     installerId: 1
                 },

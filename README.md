@@ -1,36 +1,35 @@
-# SvelteKit Demo app
+# Introduction
+The Vercel project that holds all of Premium lithium's code, including api functions, webpages, and database schemas.
 
-The official demo app for SvelteKit, hosted on Vercel.
+# Running
+With the Nix package manager installed on your device
 
-## Deploy Your Own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fvercel%2Ftree%2Fmain%2Fexamples%2Fsveltekit-1&project-name=sveltekit-vercel&repository-name=sveltekit-vercel&demo-title=SvelteKit%20%2B%20Vercel&demo-url=https%3A%2F%2Fsveltekit-template.vercel.app%2F)
-
-_Live Example: https://sveltekit-template.vercel.app_
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+Get all dependencies of the project
+```
+nix develop
 ```
 
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
+Install node package manager dependencies
+```
+pnpm install
 ```
 
-You can preview the production build with `npm run preview`.
+Link vercel cli with vercel account
+```
+pnpx vercel link
+```
 
-## Speed Insights
+Get the .env file on your local machine
+```
+pnpx vercel env pull .env
+```
 
-Once deployed on Vercel, you can benefit from [Speed Insights](https://vercel.com/docs/concepts/speed-insights) simply by navigating to Vercel's dashboard, clicking on the 'Speed Insights' tab, and enabling the product.
+## Using fake database
 
-You will get data once your application will be re-deployed and will receive visitors.
+If you are making changes to the database, you should use a fake local database rather than the production database. In order to do this, first start the local fake postgres database:
+```
+scripts/start_test_database.sh
+```
+
+Then change the environment variables to point to the fake database rather than the real one. To do this, replace 'POSTGRES\_PRISMA\_URL' and 'POSTGRES\_URL\_NON\_POOLING' with the versions that are prefixed 'DEV\_'
+

@@ -22,7 +22,7 @@ model Job {
 }
 
 model Installer {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
   createdAt DateTime @default(now())
   isPartner Boolean
@@ -36,12 +36,12 @@ model Installer {
 model Deal {
   id          Int       @id
   name        String
-  createdAt   DateTime @default(now())
-  Job         Job       @relation(fields: [jobId], references: [id])
+  createdAt   DateTime  @default(now())
   jobId       Int
-  Installer   Installer @relation(fields: [installerId], references: [id])
   installerId Int
   accepted    Boolean
+  Installer   Installer @relation(fields: [installerId], references: [id])
+  Job         Job       @relation(fields: [jobId], references: [id])
 }
 
 enum DealType {
