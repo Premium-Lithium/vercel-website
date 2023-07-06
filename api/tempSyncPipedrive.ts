@@ -2,7 +2,7 @@
 import { syncDatabaseWithPipedrive } from '../services/pipedriveInterface.js'
 
 export default async function (req, res) {
-  if (req.method === 'GET') {
+  if (req.method === 'POST') {
     try {
 
       await syncDatabaseWithPipedrive();

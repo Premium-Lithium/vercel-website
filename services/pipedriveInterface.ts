@@ -63,13 +63,15 @@ export async function getJobDataFromPipedrive() {
     const jobs: Job[] = jobData.map(job => ({
       id: job.id,
       // customerName: job.name,
-      customerName: "Joe Bloggs",
+      customerName: job.person_name,
       // address: job.address,
-      address: "some place",
+      address: job.f88008b8bc920032167c0bd9a0015fe280f062a6,
       postcode: job['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'],
       latitude: latitude,
       longitude: longitude
     }));
+
+    console.log(jobs);
 
     return jobs;
 
@@ -99,8 +101,14 @@ async function syncInstallers() {
 async function syncJobs() {
   const jobs = await getJobDataFromPipedrive();
 
+  if(jobs === undefined)
+    return;
+
   const operations = jobs.map((job) => {
+    console.log(job.customerName);
+
     job.postcode = job.postcode === null ? "NA" : job.postcode;
+    job.address = job.address === null ? "NA" : job.address;
 
     let { id, ...new_details } = job;
 
@@ -121,9 +129,10 @@ async function syncDeals() {
 export async function syncDatabaseWithPipedrive() {
   try {
     console.log("synchronising database with pipedrive...");
+
     // await syncInstallers();
     await syncJobs();
-    // syncDeals();
+    // await syncDeals();
 
   } catch (error) {
     console.error('Error fetching or storing data:', error);
