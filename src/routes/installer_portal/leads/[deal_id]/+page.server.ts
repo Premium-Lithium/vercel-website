@@ -9,6 +9,6 @@ export const load = async ({ params: { deal_id } }) => {
             Job: true,
         },
     })
-    return { data: response };
+    return { deal_id, data: response };
 }
 
