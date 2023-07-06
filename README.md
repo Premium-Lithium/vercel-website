@@ -33,3 +33,26 @@ scripts/start_test_database.sh
 
 Then change the environment variables to point to the fake database rather than the real one. To do this, replace 'POSTGRES\_PRISMA\_URL' and 'POSTGRES\_URL\_NON\_POOLING' with the versions that are prefixed 'DEV\_'
 
+The prisma client in sveltekit uses the environment variable 'POSTGRES\_URL', so this should also be changed to the 'DEV\_PRISMA\_URL'
+
+### Manually interacting with the fake database
+The fake database can be accessed with prisma studio using `pnpx prisma studio` or with the postgresql client using `psql postgresql://user:pass@localhost:5432/db`.
+The psql client will prompt for a password, which is 'pass'
+
+### Seeding the fake database
+To put data into the fake database, first ensure the database is clean, by running
+```
+psql -h localhost -p 5432 -U user -d db -c 'drop schema public cascade;'
+```
+
+Then push the database schema from `schema.prisma` using
+```
+pnpx prisma db push
+```
+
+Then run the seed script to populate the database
+```
+pnpx prisma db seed
+```
+
+You can change the data that is seeded in the prisma/seed.js file.
