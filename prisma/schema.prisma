@@ -11,35 +11,30 @@ datasource db {
 
 model Job {
   id           Int      @id @default(autoincrement())
-  name         String
   createdAt    DateTime @default(now())
   customerName String
   address      String
   postcode     String
-  latitude     Float
-  longitude    Float
+  latitude     String
+  longitude    String
   Deal         Deal[]
 }
 
 model Installer {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   name      String
-  createdAt DateTime @default(now())
   isPartner Boolean
   address   String
   postcode  String
-  latitude  Float
-  longitude Float
+  latitude  String
+  longitude String
   Deal      Deal[]
 }
 
 model Deal {
   id          Int       @id
-  name        String
-  createdAt   DateTime  @default(now())
   jobId       Int
   installerId Int
-  accepted    Boolean
   Installer   Installer @relation(fields: [installerId], references: [id])
   Job         Job       @relation(fields: [jobId], references: [id])
 }
