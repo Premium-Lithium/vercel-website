@@ -15,8 +15,8 @@ model Job {
   customerName String
   address      String
   postcode     String
-  latitude     String
-  longitude    String
+  latitude     Float
+  longitude    Float
   Deal         Deal[]
 }
 
@@ -26,8 +26,8 @@ model Installer {
   isPartner Boolean
   address   String
   postcode  String
-  latitude  String
-  longitude String
+  latitude  Float
+  longitude Float
   Deal      Deal[]
 }
 
@@ -37,9 +37,4 @@ model Deal {
   installerId Int
   Installer   Installer @relation(fields: [installerId], references: [id])
   Job         Job       @relation(fields: [jobId], references: [id])
-}
-
-enum DealType {
-  SOLICITATION
-  OFFER
 }
