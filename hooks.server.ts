@@ -1,13 +1,14 @@
-/** @type {import('@sveltejs/kit').Handle} */
-
-const ADMIN_LOGIN = "admin:occupa*tionPr$ofessi_onTra2#nsition";
+// hooks.ts
+import type { Handle } from "@sveltejs/kit";
+import { ADMIN_LOGIN } from "$env/static/private";
 
 export async function handle({
     event,
     resolve,
-}) {
+}: Parameters<Handle>[0]): Promise<ReturnType<Handle>> {
     const url = new URL(event.request.url);
 
+    console.log(url.pathname)
     if (url.pathname.startsWith("/map")) {
         const auth = event.request.headers.get("Authorization");
 
@@ -24,4 +25,3 @@ export async function handle({
 
     return resolve(event);
 }
-
