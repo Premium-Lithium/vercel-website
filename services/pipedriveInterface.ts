@@ -25,16 +25,16 @@ export async function getInstallerDataFromPipedrive() {
   const orgs = responseData.data;
 
   // TODO: get latitude and longitude
-  let latitude = 0.0;
-  let longitude = 1.0;
+  let latitude = 90.0;
+  let longitude = 100.0;
 
   type Installer = {
       id: number;
       name: string;
       address: string;
       postcode: string;
-      latitude: number;
-      longitude: number;
+      latitude: string;
+      longitude: string;
       isPartner: boolean;
   };
 
@@ -44,7 +44,6 @@ export async function getInstallerDataFromPipedrive() {
     name: org.name,
     address: org.address,
     postcode: org.address_postal_code,
-    // postcode: 'postcode here',
 
     // Not in pipedrive
     latitude: latitude,
@@ -59,15 +58,22 @@ export async function syncDatabaseWithPipedrive() {
   try {
     const installers = await getInstallerDataFromPipedrive();
 
-    const promises = installers.map((installer) =>
-        prisma.installer.upsert({
-            where: { id: installer.id },
-            update: installer,
-            create: installer,
-        }),
-    );
+    // const user = await prisma.installer.updateMany({
+    //   data: {
+    //     postcode: "NEW POSTCODE HERE"
+    //   }
+    // })
 
-    await Promise.all(promises);
+    const operations = installers.map((installer) =>
+      prisma.installer.updateMany({
+        where: { id: installer.id },
+        data: {
+          postcode: "bob"
+        }
+      })
+    );
+    await prisma.$transaction(operations);
+
   } catch (error) {
     console.error('Error fetching or storing data:', error);
   }
