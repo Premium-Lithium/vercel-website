@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 async function main() {
-    const jeff = await prisma.Installer.createMany({
+    const installers = await prisma.Installer.createMany({
         data: [
             {
-                id: 2,
+                id: 1,
                 name: 'test jeff',
                 isPartner: false,
                 address: "University of York",
@@ -13,7 +13,47 @@ async function main() {
                 longitude: "-1.0561402",
             },
         ]
-    })
+    });
+    const jobs = await prisma.Job.createMany({
+        data: [
+            {
+                id: 1,
+                name: 'test job 1',
+                customerName: "Wattkins",
+                address: "The Groves",
+                postcode: "yo26 5FB",
+                latitude: "53.9658984",
+                longitude: "-1.1247931",
+            },
+            {
+                id: 2,
+                name: 'test job 2',
+                customerName: "Bobo",
+                address: "Lloyd Land Rover",
+                postcode: "yo30 4XB",
+                latitude: "53.9901377",
+                longitude: "-1.0995922",
+            },
+        ]
+    });
+    const deals = await prisma.Deal.createMany({
+        data: [
+            {
+                id: 1,
+                name: 'test job 1 to jeff',
+                jobId: 1,
+                installerId: 1,
+                accepted: true,
+            },
+            {
+                id: 2,
+                name: 'test job 2 to jeff',
+                jobId: 2,
+                installerId: 1,
+                accepted: false,
+            },
+        ]
+    });
 };
 main()
   .then(async () => {
