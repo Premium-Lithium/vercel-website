@@ -5,11 +5,11 @@ import { Installer, Job, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const PIPEDRIVE_API_TOKEN ='77a5356773f422eb97c617fd7c37ee526da11851'
+// const PIPEDRIVE_API_TOKEN ='77a5356773f422eb97c617fd7c37ee526da11851'
 
 async function getInstallerDataFromPipedrive() {
   const response = await axios.get('https://api.pipedrive.com/api/v1/organizations', {
-      params: { api_token: PIPEDRIVE_API_TOKEN, filter_id: 115 },
+      params: { api_token: process.env.PIPEDRIVE_API_TOKEN, filter_id: 115 },
   });
 
   const responseData = response.data;
