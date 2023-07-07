@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, DealStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 async function main() {
     const installers = await prisma.Installer.createMany({
@@ -9,8 +9,8 @@ async function main() {
                 isPartner: false,
                 address: "University of York",
                 postcode: "yo10 5dd",
-                latitude: "53.9484132",
-                longitude: "-1.0561402",
+                latitude: 53.9484132,
+                longitude: -1.0561402,
             },
         ]
     });
@@ -22,8 +22,8 @@ async function main() {
                 customerName: "Wattkins",
                 address: "The Groves",
                 postcode: "yo26 5FB",
-                latitude: "53.9658984",
-                longitude: "-1.1247931",
+                latitude: 53.9658984,
+                longitude: -1.1247931,
             },
             {
                 id: 2,
@@ -31,8 +31,8 @@ async function main() {
                 customerName: "Bobo",
                 address: "Lloyd Land Rover",
                 postcode: "yo30 4XB",
-                latitude: "53.9901377",
-                longitude: "-1.0995922",
+                latitude: 53.9901377,
+                longitude: -1.0995922,
             },
         ]
     });
@@ -40,17 +40,15 @@ async function main() {
         data: [
             {
                 id: 1,
-                name: 'test job 1 to jeff',
                 jobId: 1,
                 installerId: 1,
-                accepted: true,
+                accepted: DealStatus.PENDING,
             },
             {
                 id: 2,
-                name: 'test job 2 to jeff',
                 jobId: 2,
                 installerId: 1,
-                accepted: false,
+                accepted: DealStatus.PENDING,
             },
         ]
     });
