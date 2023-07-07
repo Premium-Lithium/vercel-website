@@ -79,10 +79,7 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
 
   const response = await fetch(url, options);
   const responseData = await response.json();
-
   const results = responseData.result;
-
-
   const output: { [postcode: string]: Location } = {};
 
   for (const p of results) {
@@ -148,6 +145,7 @@ async function syncInstallers() {
   const installers = await getInstallerDataFromPipedrive();
 
   const operations = installers.map((installer) => {
+    installer.address = installer.address === null ? "NA" : installer.address;
     installer.postcode = installer.postcode === null ? "NA" : installer.postcode;
 
     let { id, ...installer_data } = installer;
