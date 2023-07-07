@@ -44,9 +44,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@prisma/client": "4.13.0",
+		"@prisma/client": "^4.13.0",
 		"@vercel/postgres": "^0.4.0",
-		"tsconfig-paths": "^4.2.0",
+		"axios": "^1.4.0",
 		"vercel": "^31.0.1"
 	}
 }
