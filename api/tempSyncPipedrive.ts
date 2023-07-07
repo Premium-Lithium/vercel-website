@@ -1,12 +1,13 @@
 // Temporary endpoint for manually triggering pipedrive fetch
-import { syncDatabaseWithPipedrive } from '../services/pipedriveInterface.js'
+import { syncDatabaseWithPipedrive } from '../services/pipedriveInterface.ts'
+
 
 export default async function (req, res) {
   if (req.method === 'POST') {
     try {
 
-      await syncDatabaseWithPipedrive();
-      res.status(200).json({ message: 'Pipedrive sync was fine.' });
+      const result = await syncDatabaseWithPipedrive();
+      res.status(200).json({ message: 'Pipedrive sync was fine.', body: result });
 
     } catch (error) {
       console.error('Error during Pipedrive sync:', error);
