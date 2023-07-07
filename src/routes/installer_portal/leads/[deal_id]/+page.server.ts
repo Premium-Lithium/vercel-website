@@ -1,23 +1,15 @@
 import prisma from '$lib/prisma';
 
 export const load = async ({ params: { deal_id } }) => {
-    const response = await prisma.Job.findMany({
-        select: {
-            Deal: {
-                select: {
-                    id: true,
-                },
-            },
-            address: true,
-        },
+    const dealInt = parseInt(deal_id)
+    const response = await prisma.Deal.findUnique({
         where: {
-            Deal: {
-                some: {
-                    installerId: 3
-                },
-            },
+            id: dealInt,
+        },
+        include: {
+            Job: true,
         },
     })
-    return { deal_id };
+    return { deal_id: dealInt, data: response };
 }
 
