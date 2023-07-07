@@ -2,24 +2,19 @@ import prisma from '$lib/prisma';
 
 export const load = async () => {
 
-    const response = await prisma.Job.findMany({
-        select: {
-            Deals: {
-                select: {
-                    id: true,
-                    accepted: true,
-                },
-            },
-            address: true,
-        },
+    const response = await prisma.Installer.findUnique({
         where: {
+            id: 1
+        },
+        include: {
             Deals: {
-                some: {
-                    installerId: 1
+                include: {
+                    Job: true,
                 },
             },
         },
-    })
-    return { jobs: response };
+    });
+
+    return {data:response};
 }
 

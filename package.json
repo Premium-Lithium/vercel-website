@@ -1,9 +1,9 @@
 {
 	"name": "sveltekit-2",
 	"version": "0.0.1",
-    "prisma": {
-        "seed": "node prisma/seed.js"
-    },
+	"prisma": {
+		"seed": "node prisma/seed.js"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -46,6 +46,7 @@
 	"dependencies": {
 		"@prisma/client": "4.13.0",
 		"@vercel/postgres": "^0.4.0",
+		"tsconfig-paths": "^4.2.0",
 		"vercel": "^31.0.1"
 	}
 }
