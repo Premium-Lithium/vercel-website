@@ -11,6 +11,7 @@ datasource db {
 
 model Job {
   id           Int      @id @default(autoincrement())
+  name         String
   createdAt    DateTime @default(now())
   customerName String
   address      String
@@ -34,7 +35,9 @@ model Installer {
 model Deal {
   id          Int       @id
   jobId       Int
+  createdAt   DateTime  @default(now())
   installerId Int
+  accepted    Boolean
   Installer   Installer @relation(fields: [installerId], references: [id])
   Job         Job       @relation(fields: [jobId], references: [id])
 }
