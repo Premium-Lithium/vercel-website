@@ -1,20 +1,19 @@
 // Responsible for updating the database given the state of pipedrive.
-import axios from 'axios';
 import { Installer, Job, PrismaClient } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
 
-// const PIPEDRIVE_API_TOKEN ='77a5356773f422eb97c617fd7c37ee526da11851'
 
 async function getInstallerDataFromPipedrive() {
-  const response = await axios.get('https://api.pipedrive.com/api/v1/organizations', {
-      params: { api_token: process.env.PIPEDRIVE_API_TOKEN, filter_id: 115 },
-  });
+  const apiToken = process.env.PIPEDRIVE_API_TOKEN;
+  const filterId = 115;
+  const url = `https://api.pipedrive.com/api/v1/organizations?api_token=${apiToken}&filter_id=${filterId}`;
 
-  const responseData = response.data;
+  const response = await fetch(url);
+  const responseData = await response.json();
 
-  if (!responseData["success"]) {
+  if (!responseData.success) {
     return [];
   }
 
@@ -74,8 +73,21 @@ interface Location {
 }
 
 async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [postcode: string]: Location }> {
-  const response = await axios.post('https://api.postcodes.io/postcodes', { postcodes });
-  const results = response.data.result;
+  const url = 'https://api.postcodes.io/postcodes';
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ postcodes }),
+  };
+
+  const response = await fetch(url, options);
+  const responseData = await response.json();
+
+  const results = responseData.result;
+
+
   const output: { [postcode: string]: Location } = {};
 
   for (const p of results) {
@@ -96,11 +108,12 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
 
 
 async function getJobDataFromPipedrive() {
-  const response = await axios.get('https://api.pipedrive.com/api/v1/pipelines/23/deals', {
-    params: { api_token: PIPEDRIVE_API_TOKEN }
-  });
+  const apiToken = process.env.PIPEDRIVE_API_TOKEN;
+  const pipelineId = 115;
+  const url = `https://api.pipedrive.com/api/v1/pipelines/${pipelineId}/deals?api_token=${apiToken}`;
 
-  const responseData = response.data;
+  const response = await fetch(url);
+  const responseData = await response.json();
 
   if (!responseData["success"]) {
     return [];
