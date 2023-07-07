@@ -175,16 +175,11 @@ async function syncJobs() {
   // await prisma.$transaction(operations);
 }
 
-async function syncDeals() {
-  // todo
-}
-
 export async function syncDatabaseWithPipedrive() {
   try {
 
     await syncInstallers();
     // await syncJobs();
-    // await syncDeals();
 
   } catch (error) {
     console.error('Error fetching or storing data:', error);
