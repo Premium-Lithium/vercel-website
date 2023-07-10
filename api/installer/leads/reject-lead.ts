@@ -13,7 +13,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
             status: DealStatus.PENDING,
         },
         data: {
-            status: DealStatus.ACCEPTED,
+            status: DealStatus.REJECTED,
         },
     })
 

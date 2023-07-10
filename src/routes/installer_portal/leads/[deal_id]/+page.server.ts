@@ -1,3 +1,4 @@
+import { DealStatus } from '@prisma/client';
 import prisma from '$lib/prisma';
 
 export const load = async ({ params: { deal_id } }) => {

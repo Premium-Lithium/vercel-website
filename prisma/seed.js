@@ -42,13 +42,13 @@ async function main() {
                 id: 1,
                 jobId: 1,
                 installerId: 1,
-                accepted: DealStatus.PENDING,
+                status: DealStatus.PENDING,
             },
             {
                 id: 2,
                 jobId: 2,
                 installerId: 1,
-                accepted: DealStatus.PENDING,
+                status: DealStatus.PENDING,
             },
         ]
     });

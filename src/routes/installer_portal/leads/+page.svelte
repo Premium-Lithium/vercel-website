@@ -1,10 +1,14 @@
 <script>
+    import { DealStatus } from '@prisma/client';
+
     export let data
     let installer_id = 1;
     console.log(data);
 
-    let acceptedDeals = data.data.Deals.filter((deal) => deal.accepted)
-    let pendingDeals = data.data.Deals.filter((deal) => !deal.accepted)
+    let acceptedDeals = data.data.Deals
+        .filter((deal) => deal.status == DealStatus.ACCEPTED)
+    let pendingDeals = data.data.Deals
+        .filter((deal) => deal.status == DealStatus.PENDING)
 </script>
 
 <div>Hello {data.data.name},</div>
