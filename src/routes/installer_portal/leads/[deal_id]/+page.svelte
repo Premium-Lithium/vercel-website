@@ -9,7 +9,6 @@
 
     async function acceptLead() {
         const acceptUrl = `${$page.url.origin}/api/installer/leads/accept-lead`
-        console.log(acceptUrl)
 
         const res = await fetch(acceptUrl, {
             method: 'POST',
@@ -17,22 +16,18 @@
                 "deal_id": dealId,
             }),
         })
-        const json = await res.json();
-        //result = JSON.stringify(json)
     }
 
     async function rejectLead() {
-        const acceptUrl = `${$page.url.origin}/api/installer/leads/reject-lead`
-        console.log(acceptUrl)
+        const rejectUrl = `${$page.url.origin}/api/installer/leads/reject-lead`
 
-        const res = await fetch(acceptUrl, {
+        console.log("Before the fetch")
+        const res = await fetch(rejectUrl, {
             method: 'POST',
             body: JSON.stringify({
                 "deal_id": dealId,
             }),
         })
-        const json = await res.json();
-        //result = JSON.stringify(json)
     }
 
 </script>
