@@ -33,7 +33,7 @@ async function getInstallerDataFromPipedrive() {
   const latLonData = await getBatchLatLonFromPostcodes(postcodes).catch(err => console.error(err));
 
   for(var i of installers) {
-    if(i.postcode in latLonData) {
+    if(latLonData && i.postcode in latLonData) {
       const loc = latLonData[i.postcode];
 
       i.latitude = loc.latitude;
@@ -85,9 +85,8 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
   for (const p of results) {
     const postcodeData = p.result;
 
-    if (postcodeData === null) {
+    if (postcodeData === null)
       continue;
-    }
 
     const latitude = postcodeData.latitude;
     const longitude = postcodeData.longitude;
@@ -130,7 +129,7 @@ async function getJobDataFromPipedrive() {
   const latLonData = await getBatchLatLonFromPostcodes(postcodes).catch(err => console.error(err));
 
   for(var j of jobs) {
-    if(j.postcode in latLonData) {
+    if(latLonData && j.postcode in latLonData) {
       const loc = latLonData[j.postcode];
 
       j.latitude = loc.latitude;
@@ -180,12 +179,15 @@ async function syncJobs() {
 }
 
 export async function syncDatabaseWithPipedrive() {
+  var success = true;
+
   try {
-
-    // await syncInstallers();
+    await syncInstallers();
     await syncJobs();
-
   } catch (error) {
     console.error('Error fetching or storing data:', error);
+    success = false;
   }
+
+  return success
 }
