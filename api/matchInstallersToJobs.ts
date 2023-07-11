@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { syncDatabaseWithPipedrive } from '../services/pipedriveInterface.js'
 import { PrismaClient, Installer, Job, DealStatus } from '@prisma/client';
 
 
@@ -12,11 +11,6 @@ const DEFAULT_NUM_INSTALLERS = 5;
 export default async function (request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
-
-  const updatedDb = await syncDatabaseWithPipedrive();
-
-  if(!updatedDb)
-    return response.status(500).json({ message: 'Failed to update database.' });
 
   const job = request.body.job;
 
