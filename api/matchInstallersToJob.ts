@@ -48,7 +48,7 @@ async function matchInstallersTo(job: Job, n: number) {
       create: {
         jobId: job.id,
         installerId: installer.id,
-        accepted: DealStatus.PENDING
+        status: DealStatus.PENDING
       }
     });
   });

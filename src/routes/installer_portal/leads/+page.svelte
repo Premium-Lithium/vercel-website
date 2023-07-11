@@ -1,4 +1,7 @@
 <script>
+    import { page } from "$app/stores";
+    import { invalidateAll } from "$app/navigation";
+
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
     import { DealStatus } from '@prisma/client';
@@ -8,10 +11,42 @@
     let installer_id = 1;
     console.log(data);
 
-    let acceptedDeals = data.data.Deals
+    let acceptedDeals;
+    let pendingDeals;
+
+    $: acceptedDeals = data.data.Deals
         .filter((deal) => deal.status == DealStatus.ACCEPTED)
-    let pendingDeals = data.data.Deals
+    $: pendingDeals = data.data.Deals
         .filter((deal) => deal.status == DealStatus.PENDING)
+
+    async function acceptLead(dealId) {
+        const acceptUrl = `${$page.url.origin}/api/installer/leads/accept-lead`
+
+        const res = await fetch(acceptUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+                "deal_id": dealId,
+            }),
+        })
+
+        invalidateAll();
+    }
+
+    async function rejectLead(dealId) {
+        const rejectUrl = `${$page.url.origin}/api/installer/leads/reject-lead`
+
+        console.log("Before the fetch")
+        const res = await fetch(rejectUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+                "deal_id": dealId,
+            }),
+        });
+
+        const data = await res.json();
+
+        invalidateAll();
+    }
 </script>
 
 <style>
@@ -86,8 +121,12 @@
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
-              <Close/>
-              <Check/>
+              <a href="" on:click={async () => await rejectLead(deal.id)}>
+                  <Close/>
+              </a>
+              <a href="" on:click={async () => await acceptLead(deal.id)}>
+                  <Check/>
+              </a>
           </div>
         </div>
     </div>
