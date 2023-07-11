@@ -1,13 +1,16 @@
 // Temporary endpoint for manually triggering pipedrive fetch
+import { Installer, Job, PrismaClient } from '@prisma/client';
 
 
-export default async function (req, res) {
+const prisma = new PrismaClient();
+
+
+export default async function(req, res) {
   if (req.method === 'POST') {
     try {
-
       const result = await syncDatabaseWithPipedrive();
-      res.status(200).json({ message: 'Pipedrive sync was fine.', body: result });
 
+      res.status(200).json({ message: 'Pipedrive sync was fine.', body: result });
     } catch (error) {
       console.error('Error during Pipedrive sync:', error);
       res.status(500).json({ message: 'An error occurred while fetching or storing data' });
@@ -17,11 +20,49 @@ export default async function (req, res) {
   }
 }
 
+async function syncDatabaseWithPipedrive() {
+  var success = true;
 
-import { Installer, Job, PrismaClient } from '@prisma/client';
+  try {
 
-const prisma = new PrismaClient();
+    console.log("Syncing installer data...")
+    await syncInstallers();
+    console.log("done.");
 
+    console.log("Syncing job data...")
+    await syncJobs();
+    console.log("done.");
+
+  } catch (error) {
+    console.error('Error fetching or storing data:', error);
+    success = false;
+  }
+
+  return success
+}
+
+async function syncInstallers() {
+  const installers = await getInstallerDataFromPipedrive();
+
+  installers.forEach((installer) => {
+    if (installer.latitude === null) console.log(installer.name);
+  });
+
+  const operations = installers.map((installer) => {
+    installer.address = installer.address === null ? "NA" : installer.address;
+    installer.postcode = installer.postcode === null ? "NA" : installer.postcode;
+
+    let { id, ...installer_data } = installer;
+
+    return prisma.installer.upsert({
+      where: { id: installer.id },
+      update: installer_data,
+      create: installer
+    });
+  });
+
+  await prisma.$transaction(operations);
+}
 
 async function getInstallerDataFromPipedrive() {
   const apiToken = process.env.PIPEDRIVE_API_TOKEN;
@@ -35,18 +76,13 @@ async function getInstallerDataFromPipedrive() {
     return [];
   }
 
-
   // TODO: inteligently loop depending on the amount of paginated data
   const response2 = await fetch(`${url}&start=500`)
   const responseData2 = await response2.json();
 
   const orgs = responseData.data.concat(responseData2.data);
-  //const orgs = responseData.data
 
-  orgs.forEach((org) => {
-      if (org.name === "TEST democompany") console.log(org);
-  })
-
+  orgs.forEach((org) => { if (org.name === "TEST democompany") console.log(org); })
 
   const installers: Installer[] = orgs.map(org => ({
     id: org.id,
@@ -62,7 +98,7 @@ async function getInstallerDataFromPipedrive() {
   const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
 
   for(var i of installers) {
-    if(latLonData && i.postcode in latLonData) {
+    if(latLonData && i.postcode in latLonData && latLonData[i.postcode] !== null) {
       const loc = latLonData[i.postcode];
 
       i.latitude = loc.latitude;
@@ -72,7 +108,6 @@ async function getInstallerDataFromPipedrive() {
 
   return installers;
 }
-
 
 function extractPostcodeFrom(address: string): string | null {
   if (address === null || address === undefined) {
@@ -90,10 +125,12 @@ function extractPostcodeFrom(address: string): string | null {
   }
 }
 
+async function getBatchLatLonFromPostcodesWrapper(postcodes: string[]) {
+  const postcodeChunks = chunkArray(postcodes, 100);
+  const latLons = await Promise.all(postcodeChunks.map(async (postcodeChunk) => await getBatchLatLonFromPostcodes(postcodeChunk)));
+  const allLatLons = Object.assign({}, ...latLons);
 
-interface Location {
-  latitude: number;
-  longitude: number;
+  return allLatLons;
 }
 
 function chunkArray<T>(myArray: T[], chunkSize: number): T[][] {
@@ -104,12 +141,9 @@ function chunkArray<T>(myArray: T[], chunkSize: number): T[][] {
     return result
 }
 
-async function getBatchLatLonFromPostcodesWrapper(postcodes: string[]) {
-  const postcodeChunks = chunkArray(postcodes, 100);
-  const latLons = await Promise.all(postcodeChunks.map(async (postcodeChunk) => await getBatchLatLonFromPostcodes(postcodeChunk)));
-  console.log("are the promises resolved?")
-  console.log(latLons)
-  return latLons.flat(1);
+interface Location {
+  latitude: number;
+  longitude: number;
 }
 
 async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [postcode: string]: Location }> {
@@ -122,8 +156,6 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
     body: JSON.stringify({ postcodes }),
   };
 
-  //console.log(`About to request ${postcodes.length} postcodes`)
-
   const response = await fetch(url, options);
   const responseData = await response.json();
   const results = responseData.result;
@@ -131,92 +163,20 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
 
   for (const p of results) {
     const postcodeData = p.result;
-    
-    //console.log(postcodeData)
+
     if (postcodeData === null)
       continue;
 
     const latitude = postcodeData.latitude;
     const longitude = postcodeData.longitude;
 
+    if(latitude === null || longitude === null)
+      continue;
+
     output[p.query] = { latitude, longitude };
   }
 
   return output;
-}
-
-
-async function getJobDataFromPipedrive() {
-  const apiToken = process.env.PIPEDRIVE_API_TOKEN;
-  const filterId = 127;
-  const url = `https://api.pipedrive.com/api/v1/persons?api_token=${apiToken}&filter_id=${filterId}&limit=500`;
-
-  const response = await fetch(url);
-  const responseData = await response.json();
-
-  if (!responseData["success"]) {
-    return [];
-  }
-
-  // TODO: inteligently loop depending on the amount of paginated data
-  const response2 = await fetch(`${url}&start=500`)
-  const responseData2 = await response2.json();
-
-  const jobData = responseData.data.concat(responseData2.data);
-
-  jobData.forEach((org) => {
-      if (org.name === "TEST spyperson") console.log(org);
-  })
-
-  //const jobData = responseData.data;
-
-  const jobs: Job[] = jobData.map(job => {
-    const addressData = job['b26fd49521a6b948ba52ffd45566f7a229b3c896'];
-
-    return {
-      id: job.id,
-      customerName: job.name,
-      address: addressData,
-      postcode: extractPostcodeFrom(addressData),
-      latitude: 0.0,
-      longitude: 0.0
-    };
-  });
-
-  const postcodes: string[] = jobs.map(customer => customer.postcode);
-  const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
-
-  console.log("latlondata");
-  console.log(latLonData);
-  for(var j of jobs) {
-    if(latLonData && j.postcode in latLonData) {
-      const loc = latLonData[j.postcode];
-
-      j.latitude = loc.latitude;
-      j.longitude = loc.longitude;
-    }
-  }
-
-  return jobs;
-}
-
-async function syncInstallers() {
-  const installers = await getInstallerDataFromPipedrive();
-
-  const operations = installers.map((installer) => {
-    installer.address = installer.address === null ? "NA" : installer.address;
-    installer.postcode = installer.postcode === null ? "NA" : installer.postcode;
-
-    let { id, ...installer_data } = installer;
-
-    return prisma.installer.upsert({
-      where: { id: installer.id },
-      update: installer_data,
-      create: installer
-    });
-  });
-
-  await prisma.$transaction(operations);
 }
 
 async function syncJobs() {
@@ -238,19 +198,50 @@ async function syncJobs() {
   await prisma.$transaction(operations);
 }
 
-async function syncDatabaseWithPipedrive() {
-  var success = true;
+async function getJobDataFromPipedrive() {
+  const apiToken = process.env.PIPEDRIVE_API_TOKEN;
+  const filterId = 127;
+  const url = `https://api.pipedrive.com/api/v1/persons?api_token=${apiToken}&filter_id=${filterId}&limit=500`;
 
-  try {
-    //await syncInstallers();
-    console.log("synced installers")
-    await syncJobs();
-    console.log("synced jobs")
-  } catch (error) {
-    console.error('Error fetching or storing data:', error);
-    success = false;
+  const response = await fetch(url);
+  const responseData = await response.json();
+
+  if (!responseData["success"]) {
+    return [];
   }
 
-  return success
-}
+  // TODO: inteligently loop depending on the amount of paginated data
+  const response2 = await fetch(`${url}&start=500`)
+  const responseData2 = await response2.json();
 
+  const jobData = responseData.data.concat(responseData2.data);
+
+  jobData.forEach((org) => { if (org.name === "TEST spyperson") console.log(org); })
+
+  const jobs: Job[] = jobData.map(job => {
+    const addressData = job['b26fd49521a6b948ba52ffd45566f7a229b3c896'];
+
+    return {
+      id: job.id,
+      customerName: job.name,
+      address: addressData,
+      postcode: extractPostcodeFrom(addressData),
+      latitude: 0.0,
+      longitude: 0.0
+    };
+  });
+
+  const postcodes: string[] = jobs.map(customer => customer.postcode);
+  const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
+
+  for(var j of jobs) {
+    if(latLonData && j.postcode in latLonData && latLonData[j.postcode] !== null) {
+      const loc = latLonData[j.postcode];
+
+      j.latitude = loc.latitude;
+      j.longitude = loc.longitude;
+    }
+  }
+
+  return jobs;
+}
