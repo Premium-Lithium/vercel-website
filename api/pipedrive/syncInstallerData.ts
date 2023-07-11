@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export default async function (request: VercelRequest, response: VercelResponse) {
   console.log("Syncing installer data...");
 
-  if (request.method !== 'POST')
+  if (request.method !== 'GET')
     return response.status(405).json({ message: 'Method not allowed' });
 
   console.log(request);
