@@ -16,7 +16,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
   const updatedDb = await syncDatabaseWithPipedrive();
 
   if(!updatedDb)
-    return response.status(500).json({ message: 'Failed to update database.' }); // Only allow POST requests
+    return response.status(500).json({ message: 'Failed to update database.' });
 
   const job = request.body.job;
 
