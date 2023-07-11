@@ -31,12 +31,14 @@ model Installer {
   Deal      Deal[]
 }
 
+// Deal with a unique constraint on jobId and installerId
 model Deal {
-  id          Int       @id
+  id          Int       @id @default(autoincrement())
   jobId       Int
   createdAt   DateTime  @default(now())
   installerId Int
   accepted    Boolean
   Installer   Installer @relation(fields: [installerId], references: [id])
   Job         Job       @relation(fields: [jobId], references: [id])
+  @@unique([jobId, installerId])
 }
