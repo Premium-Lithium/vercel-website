@@ -11,6 +11,9 @@ dependencies:
   '@vercel/postgres':
     specifier: ^0.4.0
     version: 0.4.0
+  svelte-material-icons:
+    specifier: ^3.0.5
+    version: 3.0.5(svelte@3.59.1)
   vercel:
     specifier: ^31.0.1
     version: 31.0.1(@types/node@20.4.0)(ts-node@10.9.1)
@@ -6602,6 +6605,14 @@ packages:
       svelte: 3.59.1
     dev: true
 
+  /svelte-material-icons@3.0.5(svelte@3.59.1):
+    resolution: {integrity: sha512-UbhAa+Btd5y6e6DMljVccP+cbJ8lvesltMippiCOvfIUtYe2TsQqM+P6osfrVsZHV47b1tY6AmqCuSpMKnwMOQ==}
+    peerDependencies:
+      svelte: ^3.0.0 || ^4.0.0
+    dependencies:
+      svelte: 3.59.1
+    dev: false
+
   /svelte-preprocess@5.0.3(@babel/core@7.22.6)(postcss@8.4.23)(svelte@3.59.1)(typescript@5.0.4):
     resolution: {integrity: sha512-GrHF1rusdJVbOZOwgPWtpqmaexkydznKzy5qIC2FabgpFyKN57bjMUUUqPRfbBXK5igiEWn1uO/DXsa2vJ5VHA==}
     engines: {node: '>= 14.10.0'}
@@ -6654,7 +6665,6 @@ packages:
   /svelte@3.59.1:
     resolution: {integrity: sha512-pKj8fEBmqf6mq3/NfrB9SLtcJcUvjYSWyePlfCqN9gujLB25RitWK8PvFzlwim6hD/We35KbPlRteuA6rnPGcQ==}
     engines: {node: '>= 8'}
-    dev: true
 
   /tar-fs@2.1.1:
     resolution: {integrity: sha512-V0r2Y9scmbDRLCNex/+hYzvp/zyYjvFbHPNgVTKfQvVrb6guiE/fxP+XblDNR011utopbkex2nM4dHNV6GDsng==}
@@ -7239,6 +7249,7 @@ packages:
   /vm2@3.9.19:
     resolution: {integrity: sha512-J637XF0DHDMV57R6JyVsTak7nIL8gy5KH4r1HiwWLf/4GBbb5MKL5y7LpmF4A8E2nR6XmzpmMFQ7V7ppPTmUQg==}
     engines: {node: '>=6.0'}
+    deprecated: The library contains critical security issues and should not be used for production! The maintenance of the project has been discontinued. Consider migrating your code to isolated-vm.
     hasBin: true
     dependencies:
       acorn: 8.10.0

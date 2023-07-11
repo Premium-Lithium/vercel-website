@@ -18,7 +18,6 @@ async function main() {
         data: [
             {
                 id: 1,
-                name: 'test job 1',
                 customerName: "Wattkins",
                 address: "The Groves",
                 postcode: "yo26 5FB",
@@ -27,7 +26,6 @@ async function main() {
             },
             {
                 id: 2,
-                name: 'test job 2',
                 customerName: "Bobo",
                 address: "Lloyd Land Rover",
                 postcode: "yo30 4XB",
