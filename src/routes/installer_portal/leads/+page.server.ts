@@ -7,7 +7,9 @@ function censorPostcode(postcode) {
 }
 
 function censorName(name) {
-    return name.split(" ")[0];
+    const firstName = name.split(" ")[0];
+    if (firstName === name) return undefined;
+    return firstName;
 }
 
 function censorSensitiveJobInfo(job) {
@@ -35,6 +37,8 @@ export const load = async () => {
             },
         },
     });
+
+    console.log(response.Deals)
 
 
     response.Deals.forEach((deal) => {

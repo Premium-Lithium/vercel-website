@@ -84,7 +84,7 @@
     {#each pendingDeals as deal}
     <div class="deal-container">
         <div class="deal-header">
-            <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
+            <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
               <Close/>
               <Check/>
@@ -97,7 +97,7 @@
     {#each acceptedDeals as deal}
     <div class="deal-container">
       <div class="deal-header">
-        <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName} at {deal.Job.postcode.toString().toUpperCase()}</a>
+        <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()}</a>
       </div>
       <hr class="divider">
       <div>
@@ -106,5 +106,4 @@
     </div>
     {/each}
 </div>
-
 
