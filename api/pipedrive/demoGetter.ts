@@ -44,10 +44,6 @@ async function syncDatabaseWithPipedrive() {
 async function syncInstallers() {
   const installers = await getInstallerDataFromPipedrive();
 
-  installers.forEach((installer) => {
-    if (installer.latitude === null) console.log(installer.name);
-  });
-
   const operations = installers.map((installer) => {
     installer.address = installer.address === null ? "NA" : installer.address;
     installer.postcode = installer.postcode === null ? "NA" : installer.postcode;
@@ -82,9 +78,7 @@ async function getInstallerDataFromPipedrive() {
 
   const orgs = responseData.data.concat(responseData2.data);
 
-  orgs.forEach((org) => { if (org.name === "TEST democompany") console.log(org); })
-
-  const installers: Installer[] = orgs.map(org => ({
+  var installers: Installer[] = orgs.map(org => ({
     id: org.id,
     name: org.name,
     address: org.address,
@@ -94,17 +88,9 @@ async function getInstallerDataFromPipedrive() {
     isPartner: false
   }));
 
-  const postcodes: string[] = installers.map(inst => inst.postcode);
-  const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
-
-  for(var i of installers) {
-    if(latLonData && i.postcode in latLonData && latLonData[i.postcode] !== null) {
-      const loc = latLonData[i.postcode];
-
-      i.latitude = loc.latitude;
-      i.longitude = loc.longitude;
-    }
-  }
+  console.log(installers.at(-1));
+  await assignLatLonPointsTo(installers);
+  console.log(installers.at(-1));
 
   return installers;
 }
@@ -122,6 +108,20 @@ function extractPostcodeFrom(address: string): string | null {
     return null;
   } else {
     return match[0];
+  }
+}
+
+async function assignLatLonPointsTo(entities: (Installer | Job)[]) {
+  const postcodes: string[] = entities.map(entity => entity.postcode);
+  const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
+
+  for(var e of entities) {
+    if(latLonData && e.postcode in latLonData && latLonData[e.postcode] !== null) {
+      const loc = latLonData[e.postcode];
+
+      e.latitude = loc.latitude;
+      e.longitude = loc.longitude;
+    }
   }
 }
 
@@ -231,17 +231,7 @@ async function getJobDataFromPipedrive() {
     };
   });
 
-  const postcodes: string[] = jobs.map(customer => customer.postcode);
-  const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
-
-  for(var j of jobs) {
-    if(latLonData && j.postcode in latLonData && latLonData[j.postcode] !== null) {
-      const loc = latLonData[j.postcode];
-
-      j.latitude = loc.latitude;
-      j.longitude = loc.longitude;
-    }
-  }
+  await assignLatLonPointsTo(jobs);
 
   return jobs;
 }
