@@ -17,6 +17,6 @@ export default async function (request: VercelRequest, response: VercelResponse)
         },
     })
 
-    return response.status(500)
+    return response.status(200).json({ message: 'Successfully updated installer data.' });
 }
 
