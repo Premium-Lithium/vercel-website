@@ -1,38 +1,31 @@
-// Temporary endpoint for manually triggering pipedrive fetch
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Installer, Job, PrismaClient } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
 
 
-export default async function(req, res) {
-  if (req.method === 'POST') {
-    try {
-      const result = await syncDatabaseWithPipedrive();
+export default async function (request: VercelRequest, response: VercelResponse) {
+  if (request.method !== 'POST')
+    return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
-      res.status(200).json({ message: 'Pipedrive sync was fine.', body: result });
-    } catch (error) {
-      console.error('Error during Pipedrive sync:', error);
-      res.status(500).json({ message: 'An error occurred while fetching or storing data' });
-    }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
-  }
+  const updatedDb = await syncDatabaseWithPipedrive();
+
+  if(!updatedDb)
+    return response.status(500).json({ message: 'Failed to update database.' }); // Only allow POST requests
+
+  return response.status(200).json({ message: 'Created new deals.' });
 }
 
 async function syncDatabaseWithPipedrive() {
   var success = true;
 
   try {
-
     console.log("Syncing installer data...")
     await syncInstallers();
-    console.log("done.");
 
     console.log("Syncing job data...")
     await syncJobs();
-    console.log("done.");
-
   } catch (error) {
     console.error('Error fetching or storing data:', error);
     success = false;
@@ -88,9 +81,7 @@ async function getInstallerDataFromPipedrive() {
     isPartner: false
   }));
 
-  console.log(installers.at(-1));
   await assignLatLonPointsTo(installers);
-  console.log(installers.at(-1));
 
   return installers;
 }
