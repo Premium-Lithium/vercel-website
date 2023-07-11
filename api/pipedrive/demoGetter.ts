@@ -106,7 +106,9 @@ function chunkArray<T>(myArray: T[], chunkSize: number): T[][] {
 
 async function getBatchLatLonFromPostcodesWrapper(postcodes: string[]) {
   const postcodeChunks = chunkArray(postcodes, 100);
-  const latLons = await postcodeChunks.map(async (postcodeChunk) => await getBatchLatLonFromPostcodes(postcodeChunk));
+  const latLons = await Promise.all(postcodeChunks.map(async (postcodeChunk) => await getBatchLatLonFromPostcodes(postcodeChunk)));
+  console.log("are the promises resolved?")
+  console.log(latLons)
   return latLons.flat(1);
 }
 
@@ -129,7 +131,8 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
 
   for (const p of results) {
     const postcodeData = p.result;
-
+    
+    //console.log(postcodeData)
     if (postcodeData === null)
       continue;
 
@@ -183,6 +186,8 @@ async function getJobDataFromPipedrive() {
   const postcodes: string[] = jobs.map(customer => customer.postcode);
   const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
 
+  console.log("latlondata");
+  console.log(latLonData);
   for(var j of jobs) {
     if(latLonData && j.postcode in latLonData) {
       const loc = latLonData[j.postcode];
@@ -237,7 +242,7 @@ async function syncDatabaseWithPipedrive() {
   var success = true;
 
   try {
-    await syncInstallers();
+    //await syncInstallers();
     console.log("synced installers")
     await syncJobs();
     console.log("synced jobs")
