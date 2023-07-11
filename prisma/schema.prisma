@@ -18,7 +18,7 @@ model Job {
   postcode     String
   latitude     Float
   longitude    Float
-  Deal         Deal[]
+  Deals        Deal[]
 }
 
 model Installer {
@@ -29,15 +29,21 @@ model Installer {
   postcode  String
   latitude  Float
   longitude Float
-  Deal      Deal[]
+  Deals     Deal[]
 }
 
 model Deal {
-  id          Int       @id
+  id          Int        @id
   jobId       Int
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime   @default(now())
   installerId Int
-  accepted    Boolean
-  Installer   Installer @relation(fields: [installerId], references: [id])
-  Job         Job       @relation(fields: [jobId], references: [id])
+  status      DealStatus @default(PENDING)
+  Installer   Installer  @relation(fields: [installerId], references: [id])
+  Job         Job        @relation(fields: [jobId], references: [id])
+}
+
+enum DealStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
