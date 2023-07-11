@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { syncDatabaseWithPipedrive } from '../services/pipedriveInterface.js'
-import { PrismaClient, Installer, Job, Deal } from '@prisma/client';
+import { PrismaClient, Installer, Job, DealStatus } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
@@ -42,7 +42,6 @@ async function matchInstallersTo(job: Job, n: number) {
   const bestScores = installerScores.slice(0, n);
   const bestInstallers = bestScores.map(item => item.installer);
 
-  // Add each installer <-> job pair to the database as a deal that uses the unique installer-job pair as the id
   const operations = bestInstallers.map(installer => {
     return prisma.deal.upsert({
       where: {
@@ -51,11 +50,11 @@ async function matchInstallersTo(job: Job, n: number) {
           installerId: installer.id,
         },
       },
-      update: {}, // provide fields to update if the record already exists
+      update: {},
       create: {
         jobId: job.id,
         installerId: installer.id,
-        accepted: false // or set some default/initial value
+        accepted: DealStatus.PENDING
       }
     });
   });
