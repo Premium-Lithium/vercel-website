@@ -6,6 +6,9 @@ import { PrismaClient, Installer, Job, Deal } from '@prisma/client';
 const prisma = new PrismaClient();
 
 
+const DEFAULT_NUM_INSTALLERS = 5;
+
+
 export default async function (request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
@@ -20,15 +23,17 @@ export default async function (request: VercelRequest, response: VercelResponse)
   if(!job)
     return response.status(500).json({ message: 'No job information supplied.' });
 
-  const newDeals = await matchInstallersTo(job, 5);
+  var numInstallers = request.body.numInstallers;
 
-  // 3. Add these new deals to the deals table
-  // addDealsToDB(newDeals);
+  if(!numInstallers)
+    numInstallers = DEFAULT_NUM_INSTALLERS;
+
+  await matchInstallersTo(job, numInstallers);
 
   return response.status(200).json({ message: 'Created new deals.' });
 }
 
-async function matchInstallersTo(job: Job, n: number) : Promise<Installer[]> {
+async function matchInstallersTo(job: Job, n: number) {
   const allInstallers = await prisma.installer.findMany();
   const installerScores = allInstallers.map(installer => ({installer, score: compatibility(installer, job)}));
 
@@ -37,7 +42,18 @@ async function matchInstallersTo(job: Job, n: number) : Promise<Installer[]> {
   const bestScores = installerScores.slice(0, n);
   const bestInstallers = bestScores.map(item => item.installer);
 
-  return bestInstallers;
+  // Add each installer <-> job pair to the database as a deal that uses the unique installer-job pair as the id
+  const operations = bestInstallers.map(installer => {
+    return prisma.deal.create({
+      data: {
+        jobId: job.id,
+        installerId: installer.id,
+        accepted: false // or set some default/initial value
+      }
+    });
+  });
+
+  await prisma.$transaction(operations);
 }
 
 
@@ -68,8 +84,4 @@ function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
 
 function deg2rad(deg) {
   return deg * (Math.PI/180)
-}
-
-async function addDealsToDB(newDeals) {
-
 }
