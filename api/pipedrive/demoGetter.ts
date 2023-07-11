@@ -146,7 +146,7 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
 async function getJobDataFromPipedrive() {
   const apiToken = process.env.PIPEDRIVE_API_TOKEN;
   const filterId = 127;
-  const url = `https://api.pipedrive.com/api/v1/persons?api_token=${apiToken}&filter_id=${filterId}`;
+  const url = `https://api.pipedrive.com/api/v1/persons?api_token=${apiToken}&filter_id=${filterId}&limit=500`;
 
   const response = await fetch(url);
   const responseData = await response.json();
@@ -155,7 +155,17 @@ async function getJobDataFromPipedrive() {
     return [];
   }
 
-  const jobData = responseData.data;
+  // TODO: inteligently loop depending on the amount of paginated data
+  const response2 = await fetch(`${url}&start=500`)
+  const responseData2 = await response2.json();
+
+  const jobData = responseData.data.concat(responseData2.data);
+
+  jobData.forEach((org) => {
+      if (org.name === "TEST spyperson") console.log(org);
+  })
+
+  //const jobData = responseData.data;
 
   const jobs: Job[] = jobData.map(job => {
     const addressData = job['b26fd49521a6b948ba52ffd45566f7a229b3c896'];
