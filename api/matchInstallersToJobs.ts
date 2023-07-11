@@ -44,8 +44,15 @@ async function matchInstallersTo(job: Job, n: number) {
 
   // Add each installer <-> job pair to the database as a deal that uses the unique installer-job pair as the id
   const operations = bestInstallers.map(installer => {
-    return prisma.deal.create({
-      data: {
+    return prisma.deal.upsert({
+      where: {
+        jobId_installerId: {
+          jobId: job.id,
+          installerId: installer.id,
+        },
+      },
+      update: {}, // provide fields to update if the record already exists
+      create: {
         jobId: job.id,
         installerId: installer.id,
         accepted: false // or set some default/initial value
