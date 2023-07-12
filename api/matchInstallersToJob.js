@@ -1,5 +1,5 @@
 import { PrismaClient, DealStatus } from '@prisma/client';
-import { syncDatabaseWithPipedrive } from './pipedrive/fullSync';
+import { syncDatabaseWithPipedrive } from './pipedrive/fullSync.js';
 
 
 const prisma = new PrismaClient();

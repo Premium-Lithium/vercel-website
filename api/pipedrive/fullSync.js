@@ -16,7 +16,7 @@ export default async function (request, response) {
   return response.status(200).json({ message: 'Created new deals.' });
 }
 
-async function syncDatabaseWithPipedrive() {
+export async function syncDatabaseWithPipedrive() {
   var success = true;
 
   try {
