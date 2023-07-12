@@ -1,4 +1,3 @@
-// import { DealStatus } from '@prisma/client';
 import prisma from '$lib/prisma';
 
 function censorPostcode(postcode) {

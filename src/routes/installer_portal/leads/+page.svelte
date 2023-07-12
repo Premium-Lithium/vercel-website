@@ -4,8 +4,7 @@
 
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
-    import { DealStatus } from '@prisma/client';
-    
+
 
     export let data
     let installer_id = 1;
@@ -15,9 +14,9 @@
     let pendingDeals;
 
     $: acceptedDeals = data.data.Deals
-        .filter((deal) => deal.status == DealStatus.ACCEPTED)
+        .filter((deal) => deal.status === 'ACCEPTED')
     $: pendingDeals = data.data.Deals
-        .filter((deal) => deal.status == DealStatus.PENDING)
+        .filter((deal) => deal.status === 'PENDING')
 
     async function acceptLead(dealId) {
         const acceptUrl = `${$page.url.origin}/api/installer/leads/accept-lead`
