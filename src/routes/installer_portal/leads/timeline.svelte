@@ -173,21 +173,6 @@
         content: counter(total);
     }
 
-    @media (max-width: 30em) {
-        .steps {
-            width: 0;
-            overflow: hidden;
-        }
-
-        .count {
-            display: block;
-        }
-
-        .intervals, .labels {
-            display: none;
-        }
-    }
-
   .speech {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     /* border:#aaaaaa solid 1px; */
