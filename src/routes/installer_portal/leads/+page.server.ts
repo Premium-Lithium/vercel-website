@@ -21,6 +21,7 @@ function censorSensitiveJobInfo(job) {
 }
 
 export const load = async () => {
+    console.log("Loading installer portal page...");
 
     const response = await prisma.installer.findUnique({
         where: {
