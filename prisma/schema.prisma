@@ -10,7 +10,7 @@ datasource db {
 }
 
 model Job {
-  id           Int      @id @default(autoincrement())
+  id           Int      @id @default(autoincrement()) @unique
   createdAt    DateTime @default(now())
   customerName String
   address      String
@@ -21,7 +21,7 @@ model Job {
 }
 
 model Installer {
-  id        Int     @id @default(autoincrement())
+  id        Int     @id @default(autoincrement()) @unique
   name      String
   isPartner Boolean
   address   String
@@ -32,7 +32,7 @@ model Installer {
 }
 
 model Deal {
-  id          Int       @id @default(autoincrement())
+  id          Int       @id @default(autoincrement()) @unique
   jobId       Int
   createdAt   DateTime   @default(now())
   installerId Int
