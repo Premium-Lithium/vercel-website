@@ -91,7 +91,6 @@
   }
   .deal-container {
     max-width: 400px;
-    margin: 10px;
     background-color: #fff;
     border-radius: 8px;
     padding: 20px;
