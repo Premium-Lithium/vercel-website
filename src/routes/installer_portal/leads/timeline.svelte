@@ -1,32 +1,38 @@
 <script>
 	import Chevron from "./chevron.svelte";
+    import { tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
+
+	const transformLocation = tweened(1, {
+		duration: 400,
+		easing: cubicOut,
+	});
 
   let showInfo = 'contact';
   let chevronParent;
-  let transformStyle = '';
 </script>
 
 <div class="labels">
 
   <div class='done label' on:click={() => {
     showInfo = 'contact';
-    transformStyle='translate(1%)';
+    transformLocation.set(1);
   }}
   >Contact</div>
 
   <div class='done label' on:click={() => {
     showInfo = 'quote';
-    transformStyle='translate(26%)';
+    transformLocation.set(26);
   }}>Quote</div>
 
   <div class='done label' on:click={() => {
     showInfo = 'schedule';
-    transformStyle='translate(51%)';
+    transformLocation.set(51);
   }}>Schedule</div>
 
   <div class='done label' on:click={() => {
     showInfo = 'done';
-    transformStyle='translate(77%)';
+    transformLocation.set(77);
   }}>Done</div>
 
 </div>
@@ -37,7 +43,7 @@
   <div class={showInfo === 'schedule' ? 'done active' : 'done'}></div>
 </div>
 
-<div on:bind={chevronParent} style="transform: {transformStyle};">
+<div on:bind={chevronParent} style="transform: translate({$transformLocation}%);">
   <Chevron />
 </div>
 
