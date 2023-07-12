@@ -207,8 +207,6 @@ async function getJobDataFromPipedrive() {
 
   const jobData = responseData.data.concat(responseData2.data);
 
-  jobData.forEach((org) => { if (org.name === "TEST spyperson") console.log(org); })
-
   const jobs: Job[] = jobData.map(job => {
     const addressData = job['b26fd49521a6b948ba52ffd45566f7a229b3c896'];
 

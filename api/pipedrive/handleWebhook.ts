@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Installer, Job, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
