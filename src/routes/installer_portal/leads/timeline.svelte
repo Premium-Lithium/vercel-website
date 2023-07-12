@@ -30,7 +30,7 @@
     transformLocation.set(51);
   }}>Schedule</div>
 
-  <div class='done label' on:click={() => {
+  <div class='label' on:click={() => {
     showInfo = 'done';
     transformLocation.set(77);
   }}>Done</div>
@@ -40,7 +40,7 @@
 <div class="steps">
   <div class={showInfo === 'contact' ? 'done active' : 'done'}></div>
   <div class={showInfo === 'quote' ? 'done active' : 'done'}></div>
-  <div class={showInfo === 'schedule' ? 'done active' : 'done'}></div>
+  <div class={showInfo === 'schedule' ? 'done' : 'label'}></div>
 </div>
 
 <div on:bind={chevronParent} style="transform: translate({$transformLocation}%);">
@@ -154,16 +154,21 @@
         table-layout: fixed;
         width: 100%;
         margin: auto;
+        color: lightgray;
     }
     .labels > * {
+        padding: 5px;
         display: table-cell;
         text-align: center;
+        transition: background-color 0.3s ease; /* Optional: animate the color change */
     }
     .labels > *.done {
         color: #28AAE2;
     }
-    .labels > .label {
-        padding-bottom: 0.5em;
+    .labels > .label:hover {
+        background-color: #efefef;
+        border-radius: 5px;
+        cursor: pointer;
     }
 
     .count {
@@ -181,7 +186,6 @@
 
   .speech {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* border:#aaaaaa solid 1px; */
     font-size: 1.1em;
     color: black;
     background: #efefef;
