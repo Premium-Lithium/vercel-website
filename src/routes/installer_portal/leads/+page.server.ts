@@ -1,4 +1,4 @@
-import { DealStatus } from '@prisma/client';
+// import { DealStatus } from '@prisma/client';
 import prisma from '$lib/prisma';
 
 function censorPostcode(postcode) {
@@ -21,8 +21,6 @@ function censorSensitiveJobInfo(job) {
 }
 
 export const load = async () => {
-    console.log("Loading installer portal page...");
-
     const response = await prisma.installer.findUnique({
         where: {
             id: 2766
@@ -30,7 +28,7 @@ export const load = async () => {
         include: {
             Deals: {
                 where: {
-                    status: { not: DealStatus.REJECTED },
+                    status: { not: 'REJECTED' },
                 },
                 include: {
                     Job: true,
@@ -41,11 +39,10 @@ export const load = async () => {
 
     console.log(response);
 
-    // console.log(response.Deals)
-
-
     response.Deals.forEach((deal) => {
-        if (deal.status === DealStatus.ACCEPTED) return;
+        if (deal.status === 'ACCEPTED')
+            return;
+
         deal.Job = censorSensitiveJobInfo(deal.Job)
     })
 
