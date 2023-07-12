@@ -22,9 +22,9 @@ function censorSensitiveJobInfo(job) {
 
 export const load = async () => {
 
-    const response = await prisma.Installer.findUnique({
+    const response = await prisma.installer.findUnique({
         where: {
-            id: 1
+            id: 7448
         },
         include: {
             Deals: {
@@ -38,7 +38,9 @@ export const load = async () => {
         },
     });
 
-    console.log(response.Deals)
+    console.log(response);
+
+    // console.log(response.Deals)
 
 
     response.Deals.forEach((deal) => {
