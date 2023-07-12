@@ -1,11 +1,10 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Installer, Job, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
 
 
-export default async function (request: VercelRequest, response: VercelResponse) {
+export default async function (request, response) {
   if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
@@ -71,7 +70,7 @@ async function getInstallerDataFromPipedrive() {
 
   const orgs = responseData.data.concat(responseData2.data);
 
-  var installers: Installer[] = orgs.map(org => ({
+  var installers = orgs.map(org => ({
     id: org.id,
     name: org.name,
     address: org.address,
@@ -86,7 +85,7 @@ async function getInstallerDataFromPipedrive() {
   return installers;
 }
 
-function extractPostcodeFrom(address: string): string | null {
+function extractPostcodeFrom(address) {
   if (address === null || address === undefined) {
     return null;
   }
@@ -102,8 +101,8 @@ function extractPostcodeFrom(address: string): string | null {
   }
 }
 
-async function assignLatLonPointsTo(entities: (Installer | Job)[]) {
-  const postcodes: string[] = entities.map(entity => entity.postcode);
+async function assignLatLonPointsTo(entities) {
+  const postcodes = entities.map(entity => entity.postcode);
   const latLonData = await getBatchLatLonFromPostcodesWrapper(postcodes).catch(err => console.error(err));
 
   for(var e of entities) {
@@ -116,7 +115,7 @@ async function assignLatLonPointsTo(entities: (Installer | Job)[]) {
   }
 }
 
-async function getBatchLatLonFromPostcodesWrapper(postcodes: string[]) {
+async function getBatchLatLonFromPostcodesWrapper(postcodes) {
   const postcodeChunks = chunkArray(postcodes, 100);
   const latLons = await Promise.all(postcodeChunks.map(async (postcodeChunk) => await getBatchLatLonFromPostcodes(postcodeChunk)));
   const allLatLons = Object.assign({}, ...latLons);
@@ -124,7 +123,7 @@ async function getBatchLatLonFromPostcodesWrapper(postcodes: string[]) {
   return allLatLons;
 }
 
-function chunkArray<T>(myArray: T[], chunkSize: number): T[][] {
+function chunkArray(myArray, chunkSize) {
     if (!myArray.length) {
         return [];
     }
@@ -132,12 +131,7 @@ function chunkArray<T>(myArray: T[], chunkSize: number): T[][] {
     return result
 }
 
-interface Location {
-  latitude: number;
-  longitude: number;
-}
-
-async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [postcode: string]: Location }> {
+async function getBatchLatLonFromPostcodes(postcodes) {
   const url = 'https://api.postcodes.io/postcodes';
   const options = {
     method: 'POST',
@@ -150,7 +144,7 @@ async function getBatchLatLonFromPostcodes(postcodes: string[]): Promise<{ [post
   const response = await fetch(url, options);
   const responseData = await response.json();
   const results = responseData.result;
-  const output: { [postcode: string]: Location } = {};
+  const output = {}
 
   for (const p of results) {
     const postcodeData = p.result;
@@ -207,7 +201,7 @@ async function getJobDataFromPipedrive() {
 
   const jobData = responseData.data.concat(responseData2.data);
 
-  const jobs: Job[] = jobData.map(job => {
+  const jobs = jobData.map(job => {
     const addressData = job['b26fd49521a6b948ba52ffd45566f7a229b3c896'];
 
     return {

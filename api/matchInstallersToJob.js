@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { PrismaClient, Installer, Job, DealStatus } from '@prisma/client';
 
 
@@ -8,7 +7,7 @@ const prisma = new PrismaClient();
 const DEFAULT_NUM_INSTALLERS = 5;
 
 
-export default async function (request: VercelRequest, response: VercelResponse) {
+export default async function (request, response) {
   if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
@@ -27,7 +26,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
   return response.status(200).json({ message: 'Created new deals.' });
 }
 
-async function matchInstallersTo(jobId: number, n: number) {
+async function matchInstallersTo(jobId, n) {
   const job = await prisma.job.findUnique({
     where: { id: jobId }
   });
@@ -64,7 +63,7 @@ async function matchInstallersTo(jobId: number, n: number) {
 }
 
 
-function compatibility(installer: Installer, job: Job): number {
+function compatibility(installer, job) {
   const lat1 = installer.latitude;
   const lon1 = installer.longitude;
   const lat2 = job.latitude;
