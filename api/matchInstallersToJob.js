@@ -1,4 +1,5 @@
 import { PrismaClient, DealStatus } from '@prisma/client';
+import { syncDatabaseWithPipedrive } from './pipedrive/fullSync';
 
 
 const prisma = new PrismaClient();
@@ -13,10 +14,11 @@ export default async function (request, response) {
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
   const job = request.body.job;
-  console.log("got job id in request", job.id);
 
   if(!job)
     return response.status(500).json({ message: 'No job information supplied.' });
+
+  await syncDatabaseWithPipedrive();
 
   var numInstallers = request.body.numInstallers;
 
@@ -68,7 +70,6 @@ async function matchInstallersTo(jobId, n) {
 
   console.log("Upserting deals...");
   await prisma.$transaction(operations);
-  console.log("done.");
 }
 
 
