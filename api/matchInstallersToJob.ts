@@ -22,12 +22,19 @@ export default async function (request: VercelRequest, response: VercelResponse)
   if(!numInstallers)
     numInstallers = DEFAULT_NUM_INSTALLERS;
 
-  await matchInstallersTo(job, numInstallers);
+  await matchInstallersTo(job.id, numInstallers);
 
   return response.status(200).json({ message: 'Created new deals.' });
 }
 
-async function matchInstallersTo(job: Job, n: number) {
+async function matchInstallersTo(jobId: number, n: number) {
+  const job = await prisma.job.findUnique({
+    where: { id: jobId }
+  });
+
+  if(job == null)
+    throw new Error(`Job with id ${jobId} not found.`);
+
   const allInstallers = await prisma.installer.findMany();
   const installerScores = allInstallers.map(installer => ({installer, score: compatibility(installer, job)}));
 
