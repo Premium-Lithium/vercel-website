@@ -25,10 +25,10 @@ export const load = async () => {
 
     const response = await prisma.installer.findUnique({
         where: {
-            id: 7448
+            id: 2766
         },
         include: {
-            deals: {
+            Deals: {
                 where: {
                     status: { not: DealStatus.REJECTED },
                 },
@@ -44,7 +44,7 @@ export const load = async () => {
     // console.log(response.Deals)
 
 
-    response.deals.forEach((deal) => {
+    response.Deals.forEach((deal) => {
         if (deal.status === DealStatus.ACCEPTED) return;
         deal.Job = censorSensitiveJobInfo(deal.Job)
     })
