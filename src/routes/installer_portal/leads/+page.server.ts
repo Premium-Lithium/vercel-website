@@ -28,7 +28,7 @@ export const load = async () => {
             id: 7448
         },
         include: {
-            Deals: {
+            deals: {
                 where: {
                     status: { not: DealStatus.REJECTED },
                 },
@@ -44,7 +44,7 @@ export const load = async () => {
     // console.log(response.Deals)
 
 
-    response.Deals.forEach((deal) => {
+    response.deals.forEach((deal) => {
         if (deal.status === DealStatus.ACCEPTED) return;
         deal.Job = censorSensitiveJobInfo(deal.Job)
     })
