@@ -4,6 +4,7 @@
 
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
+    import Timeline from "./timeline.svelte";
 
 
     export let data
@@ -139,7 +140,7 @@
       </div>
       <hr class="divider">
       <div>
-          Deal location
+        <Timeline/>
       </div>
     </div>
     {/each}
