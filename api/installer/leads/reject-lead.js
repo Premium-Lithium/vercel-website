@@ -1,9 +1,8 @@
 import { PrismaClient, DealStatus } from "@prisma/client"
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const prisma = new PrismaClient()
 
-export default async function (request: VercelRequest, response: VercelResponse) {
+export default async function (request, response) {
     const json = JSON.parse(request.body)
     const dealId = json.deal_id;
 
