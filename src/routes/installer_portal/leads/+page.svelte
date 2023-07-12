@@ -51,20 +51,20 @@
 
 <style>
   /* Global Styles */
-  body {
-    background-color: #fcfcfc;
-    padding: 20px;
-    font-weight: 200
+  .logo {
+    max-width: 400px;
+    display: flex;
+    margin: 0 auto;
+    align-self: center;
   }
 
   /* Container Styles */
   .container {
     max-width: 400px;
     margin: 0 auto;
-    background-color: #fcfcfc;
+    background-color: #E3F4FB;
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   /* Title Styles */
@@ -72,7 +72,7 @@
     font-family: 'Roboto', sans-serif;
     font-size: 24px;
     font-weight: 500;
-    color: #333333;
+    color: #1C2428;
     margin-bottom: 10px;
   }
 
@@ -93,8 +93,10 @@
     max-width: 400px;
     background-color: #fff;
     border-radius: 8px;
+    border: 1px solid #cccccc;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding-bottom: 0px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
 
   .deal-link {
@@ -103,14 +105,13 @@
   }
 
   .divider {
-    margin-left: -20px;
-    margin-right: -20px;
     margin-top: 15px;
     margin-bottom: 30px;
-    border: 2px solid #ededed;
+    border: 1px solid #ededed;
   }
 </style>
 
+<img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
 <div class="container">
   <div class="title">Hello {data.data.name},</div>
 
