@@ -5,6 +5,7 @@
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
     import Timeline from "./timeline.svelte";
+    import Accordian from "./Accordian.svelte";
 
 
     export let data
@@ -135,13 +136,17 @@
   <div class="title">Accepted Leads:</div>
     {#each acceptedDeals as deal}
     <div class="deal-container">
-      <div class="deal-header">
+      <Accordian>
+      <div class="deal-header" slot="head">
         <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()}</a>
       </div>
-      <hr class="divider">
-      <div>
-        <Timeline/>
+      <div slot="details">
+          <hr class="divider">
+          <div>
+            <Timeline/>
+          </div>
       </div>
+      </Accordian>
     </div>
     {/each}
 </div>
