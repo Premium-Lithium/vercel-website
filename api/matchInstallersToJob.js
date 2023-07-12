@@ -1,4 +1,4 @@
-import { PrismaClient, Installer, Job, DealStatus } from '@prisma/client';
+import { PrismaClient, DealStatus } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
