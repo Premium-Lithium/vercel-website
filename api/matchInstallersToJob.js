@@ -8,10 +8,12 @@ const DEFAULT_NUM_INSTALLERS = 5;
 
 
 export default async function (request, response) {
+  console.log("Running installer matching...")
   if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
   const job = request.body.job;
+  console.log("got job id in request", job.id);
 
   if(!job)
     return response.status(500).json({ message: 'No job information supplied.' });
@@ -20,6 +22,8 @@ export default async function (request, response) {
 
   if(!numInstallers)
     numInstallers = DEFAULT_NUM_INSTALLERS;
+
+  console.log("finding ", numInstallers, " installers");
 
   await matchInstallersTo(job.id, numInstallers);
 
@@ -33,8 +37,11 @@ async function matchInstallersTo(jobId, n) {
 
   if(job == null)
     throw new Error(`Job with id ${jobId} not found.`);
+    console.log("Failed to find job with id", jobId);
 
+  console.log("Fetching all installers...");
   const allInstallers = await prisma.installer.findMany();
+
   const installerScores = allInstallers.map(installer => ({installer, score: compatibility(installer, job)}));
 
   installerScores.sort((a, b) => b.score - a.score);
@@ -59,7 +66,9 @@ async function matchInstallersTo(jobId, n) {
     });
   });
 
+  console.log("Upserting deals...");
   await prisma.$transaction(operations);
+  console.log("done.");
 }
 
 
