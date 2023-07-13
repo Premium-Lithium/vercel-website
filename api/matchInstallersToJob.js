@@ -10,7 +10,7 @@ const DEFAULT_NUM_INSTALLERS = 5;
 
 export default async function (request, response) {
   console.log("Running installer matching...")
-  if (request.method !== 'POST')
+  if (request.method !== 'GET') // TODO: change to POST
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
   // const jobId = request.body.id;
