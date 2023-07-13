@@ -10,19 +10,17 @@ const DEFAULT_NUM_INSTALLERS = 5;
 
 export default async function (request, response) {
   console.log("Running installer matching...")
-  if (request.method !== 'GET') // TODO: change to POST
+  if (request.method !== 'POST') // TODO: change to POST
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
-  // const jobId = request.body.id;
-  const jobId = 7461;
+  const jobId = request.body.id;
 
   if(!jobId)
     return response.status(500).json({ message: 'No job id provided.' });
 
   await syncDatabaseWithPipedrive();
 
-  // var numInstallers = request.body.numInstallers;
-  var numInstallers = 5;
+  var numInstallers = request.body.numInstallers;
 
   if(!numInstallers)
     numInstallers = DEFAULT_NUM_INSTALLERS;
@@ -41,9 +39,10 @@ async function matchInstallersTo(jobId, n) {
 
   console.log("job", job);
 
-  if(job === null)
+  if(job === null) {
     throw new Error(`Job with id ${jobId} not found.`);
     console.log("Failed to find job with id", jobId);
+  }
 
   console.log("Fetching all installers...");
   const allInstallers = await prisma.installer.findMany();
