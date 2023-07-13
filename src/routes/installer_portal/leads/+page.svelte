@@ -15,10 +15,17 @@
     let acceptedDeals;
     let pendingDeals;
 
-    $: acceptedDeals = data.data.Deals
-        .filter((deal) => deal.status === 'ACCEPTED')
-    $: pendingDeals = data.data.Deals
-        .filter((deal) => deal.status === 'PENDING')
+    let failedLoad = (data.data === null);
+    if (failedLoad) {
+        console.log("failed to load")
+    } else {
+        $: acceptedDeals = data.data.Deals
+            .filter((deal) => deal.status === 'ACCEPTED')
+        $: pendingDeals = data.data.Deals
+            .filter((deal) => deal.status === 'PENDING')
+    }
+
+
 
     async function acceptLead(dealId) {
         const acceptUrl = `${$page.url.origin}/api/installer/leads/accept-lead`
@@ -113,9 +120,10 @@
 </style>
 
 <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
+{#if failedLoad}
+    Failed Load
+{:else}
 <div class="container">
-  <div class="title">Hello {data.data.name},</div>
-
   <div class="title">New Leads:</div>
     {#each pendingDeals as deal}
     <div class="deal-container">
@@ -150,4 +158,4 @@
     </div>
     {/each}
 </div>
-
+{/if}
