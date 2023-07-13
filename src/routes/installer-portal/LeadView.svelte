@@ -1,16 +1,10 @@
 <script>
     import { page } from "$app/stores";
-    import { invalidateAll } from "$app/navigation";
 
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
-
-
-    export let data
-    let installer_id = 1;
-    console.log(data);
 
     let acceptedDeals;
     let pendingDeals;
@@ -57,15 +51,47 @@
     }
 </script>
 
-<style>
-  /* Global Styles */
-  .logo {
-    max-width: 400px;
-    display: flex;
-    margin: 0 auto;
-    align-self: center;
-  }
+{#if failedLoad}
+    Failed Load
+{:else}
+<div class="container">
+  <div class="title">New Leads:</div>
+    {#each pendingDeals as deal}
+    <div class="deal-container">
+        <div class="deal-header">
+            <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
+          <div>
+              <a href="" on:click={async () => await rejectLead(deal.id)}>
+                  <Close/>
+              </a>
+              <a href="" on:click={async () => await acceptLead(deal.id)}>
+                  <Check/>
+              </a>
+          </div>
+        </div>
+    </div>
+    {/each}
 
+  <div class="title">Accepted Leads:</div>
+    {#each acceptedDeals as deal}
+    <div class="deal-container">
+      <Accordian>
+      <div class="deal-header" slot="head">
+        <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()}</a>
+      </div>
+      <div slot="details">
+          <hr class="divider">
+          <div>
+            <Timeline/>
+          </div>
+      </div>
+      </Accordian>
+    </div>
+    {/each}
+</div>
+{/if}
+
+<style>
   /* Container Styles */
   .container {
     max-width: 400px;
@@ -118,44 +144,3 @@
     border: 1px solid #ededed;
   }
 </style>
-
-<img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
-{#if failedLoad}
-    Failed Load
-{:else}
-<div class="container">
-  <div class="title">New Leads:</div>
-    {#each pendingDeals as deal}
-    <div class="deal-container">
-        <div class="deal-header">
-            <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
-          <div>
-              <a href="" on:click={async () => await rejectLead(deal.id)}>
-                  <Close/>
-              </a>
-              <a href="" on:click={async () => await acceptLead(deal.id)}>
-                  <Check/>
-              </a>
-          </div>
-        </div>
-    </div>
-    {/each}
-
-  <div class="title">Accepted Leads:</div>
-    {#each acceptedDeals as deal}
-    <div class="deal-container">
-      <Accordian>
-      <div class="deal-header" slot="head">
-        <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()}</a>
-      </div>
-      <div slot="details">
-          <hr class="divider">
-          <div>
-            <Timeline/>
-          </div>
-      </div>
-      </Accordian>
-    </div>
-    {/each}
-</div>
-{/if}
