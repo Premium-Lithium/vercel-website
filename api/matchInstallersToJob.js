@@ -39,7 +39,9 @@ async function matchInstallersTo(jobId, n) {
     where: { id: jobId }
   });
 
-  if(job == null)
+  console.log("job", job);
+
+  if(job === null)
     throw new Error(`Job with id ${jobId} not found.`);
     console.log("Failed to find job with id", jobId);
 
