@@ -13,10 +13,10 @@ export default async function (request, response) {
   if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
-  const job = request.body.job;
+  const jobId = request.body.id;
 
-  if(!job)
-    return response.status(500).json({ message: 'No job information supplied.' });
+  if(!jobId)
+    return response.status(500).json({ message: 'No job id provided.' });
 
   await syncDatabaseWithPipedrive();
 
@@ -27,7 +27,7 @@ export default async function (request, response) {
 
   console.log("finding ", numInstallers, " installers");
 
-  await matchInstallersTo(job.id, numInstallers);
+  await matchInstallersTo(jobId, numInstallers);
 
   return response.status(200).json({ message: 'Created new deals.' });
 }
