@@ -21,7 +21,8 @@ export default async function (request, response) {
 
   await syncDatabaseWithPipedrive();
 
-  var numInstallers = request.body.numInstallers;
+  // var numInstallers = request.body.numInstallers;
+  var numInstallers = 5;
 
   if(!numInstallers)
     numInstallers = DEFAULT_NUM_INSTALLERS;
