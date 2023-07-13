@@ -14,7 +14,7 @@ export default async function (request, response) {
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
   // const jobId = request.body.id;
-  const jobId = 2766;
+  const jobId = 7461;
 
   if(!jobId)
     return response.status(500).json({ message: 'No job id provided.' });
