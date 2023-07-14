@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@auth0/auth0-spa-js':
+    specifier: ^2.1.0
+    version: 2.1.0
   '@prisma/client':
     specifier: ^4.13.0
     version: 4.13.0(prisma@4.16.2)
@@ -91,6 +94,10 @@ packages:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.3
       '@jridgewell/trace-mapping': 0.3.18
+
+  /@auth0/auth0-spa-js@2.1.0:
+    resolution: {integrity: sha512-7cF2NxrslgjArIdBwpNg02atPldpHHOrXxDScL71cbxKuKny3eziZIpNHQAdsPFiLhjKQ+izWmLq2ZRFlYB/eQ==}
+    dev: false
 
   /@babel/code-frame@7.22.5:
     resolution: {integrity: sha512-Xmwn266vad+6DAqEB2A6V/CcZVp62BbwVmcOJc2RPuwih1kw02TjQvWVWlcKGbBPd+8/0V5DEkOcizRGYsspYQ==}
