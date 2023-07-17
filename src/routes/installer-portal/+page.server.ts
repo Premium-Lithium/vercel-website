@@ -51,7 +51,7 @@ export const load = async () => {
         })
         return {data: response};
     } catch(e) {
-        console.log("we avoided the error!\n", e);
+        console.log("We avoided the error!\n", e);
         return {
             data: null
         }
