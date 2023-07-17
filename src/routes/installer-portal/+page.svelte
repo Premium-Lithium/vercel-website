@@ -4,7 +4,7 @@
     import { isAuthenticated, user } from "$lib/installer-portal/sessionStore";
     import auth from "$lib/installer-portal/authService"
 
-    import LeadView from "./LeadView.svelte";
+    import LeadView from "$lib/components/LeadView.svelte";
 
 
     let auth0Client;
