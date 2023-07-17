@@ -1,5 +1,4 @@
 <script>
-    import { invalidateAll } from "$app/navigation";
     import { onMount } from 'svelte';
 
     import { isAuthenticated, user } from "$lib/installer-portal/sessionStore";
@@ -60,5 +59,5 @@
     <a href="" on:click={login}>get some fresh auth here</a>
 {:else}
     Authenticated
-    <LeadView/>
+    <LeadView {data}/>
 {/if}

@@ -1,10 +1,13 @@
 <script>
     import { page } from "$app/stores";
+    import { invalidateAll } from "$app/navigation";
 
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
+
+    export let data;
 
     let acceptedDeals;
     let pendingDeals;
