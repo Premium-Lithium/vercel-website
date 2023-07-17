@@ -51,6 +51,7 @@
     }
 </script>
 
+This is the lead view
 {#if failedLoad}
     Failed Load
 {:else}

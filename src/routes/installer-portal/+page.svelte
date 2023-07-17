@@ -32,6 +32,12 @@
     function logout() {
         auth.logout(auth0Client);
     }
+
+    let isAuthenticatedValue;
+    isAuthenticated.subscribe(value => {
+        isAuthenticatedValue = value;
+    });
+
 </script>
 
 <style>
@@ -46,9 +52,13 @@
 
 <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
 
-{#if !$isAuthenticated}
-    Yo ain't got auth
+<div>
+    {$isAuthenticated}
+</div>
+{#if !isAuthenticated}
+    Not authenticated
     <a href="" on:click={login}>get some fresh auth here</a>
 {:else}
+    Authenticated
     <LeadView/>
 {/if}
