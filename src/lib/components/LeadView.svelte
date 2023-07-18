@@ -4,17 +4,16 @@
 
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
-    import TimerSand from "svelte-material-icons/TimerSand.svelte";
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
+    import Filter from "./Filter.svelte";
+    import { currentFilters } from "$lib/installer-portal/sessionStore.js";
     import { slide } from "svelte/transition"; 
 
     export let data;
 
     let acceptedDeals;
     let pendingDeals;
-    let possibleFilters = ["ACCEPTED","REJECTED","PENDING"];
-    let filters = [...possibleFilters];
 
     let failedLoad = (data.data === null);
     if (failedLoad) {
@@ -63,30 +62,12 @@ This is the lead view
     Failed Load
 {:else}
 <div class="container">
-  <div class="filter-container">
-    {#each possibleFilters as filter}  
-    <div class="filter">
-      <label>
-        <input type="checkbox" bind:group={filters} name="filters" value={filter} checked="checked"/>
-        <span class="checkmark"></span>
-        <div class="filter-icons">
-          {#if filter === "ACCEPTED"}
-            <Check/>
-          {:else if filter === "REJECTED"}
-            <Close/>
-          {:else if filter === "PENDING"}
-            <TimerSand/>
-          {/if}
-        </div>
-      </label>
-    </div>
-    {/each}
-  </div>
+  <Filter/>
   
 
   <div class="title">New Leads:</div>
     {#each pendingDeals as deal}
-    {#if filters.includes(deal.status)}
+    {#if $currentFilters.includes(deal.status)}
     <div class="deal-container" transition:slide>
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
@@ -105,7 +86,7 @@ This is the lead view
 
   <div class="title">Accepted Leads:</div>
     {#each acceptedDeals as deal}
-    {#if filters.includes(deal.status)}
+    {#if $currentFilters.includes(deal.status)}
     <div class="deal-container" transition:slide>
       <Accordian>
       <div class="deal-header" slot="head">
@@ -177,62 +158,4 @@ This is the lead view
     border: 1px solid #ededed;
   }
 
-  /* Filter Styles */
-
-  .filter-container {
-    max-width: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .filter {
-    position: relative;
-    height: 25px;
-    width: 25px;
-    border-radius: 50%;
-    border: 1px solid #707070;
-    margin: 10px;
-    display: inline-block;
-    background-color: #248fbd;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-
-  .filter-icons {
-    position: relative;
-    height: 25px;
-    width: 25px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-  }
-  .filter input {
-    position: absolute;
-    height: 0;
-    width: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-
-  .checkmark {
-    position: absolute;
-    height: 25px;
-    width: 25px;
-    top: 0;
-    left: 0;
-    border-radius: 50%;
-    transition: background-color 0.3s ease-in-out;
-  }
-
-  .filter:hover {
-    border: 1px solid #000;
-  }
-
-  .filter input:checked ~ .checkmark {
-    background-color: #28AAE2;
-    border:#000;
-  }
-  
 </style>
