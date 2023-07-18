@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/installerMatchPulse",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
