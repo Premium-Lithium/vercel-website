@@ -3,23 +3,23 @@ import { getNBestInstallersForJob } from '../src/services/installerMatching.js'
 import prisma from '../src/lib/prisma.js'
 
 
-const NUM_OFFERS = 10;
+const NUM_OFFERS_PER_JOB = 10;
+const NUM_JOBS_MATCHED_PER_API_CALL = 50; // This is to avoid 60s timeout on Vercel pro plan
 
 
 export default async function (request, response) {
   console.log("Fetching all installers...");
   const installers = await prisma.installer.findMany();
 
-  console.log(installers[0].id);
-
   console.log("Finding all jobs without deals...");
   const notInDeals = await allJobsWithoutDeals();
+  const batch = notInDeals.slice(0, NUM_JOBS_MATCHED_PER_API_CALL);
 
   const operations = [];
 
   console.log("Iterating through each job and matching it to installers...");
-  for(const job of notInDeals) {
-    const bestInstallers = getNBestInstallersForJob(job, NUM_OFFERS, installers);
+  for(const job of batch) {
+    const bestInstallers = getNBestInstallersForJob(job, NUM_OFFERS_PER_JOB, installers);
 
     const upsertions = bestInstallers.map(installer => {
       return prisma.deal.upsert({
