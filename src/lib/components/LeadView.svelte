@@ -9,8 +9,10 @@
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
     import Filter from "./Filter.svelte";
-    
+
+        
     import { currentFilters } from "$lib/installer-portal/sessionStore.js";
+
     import { slide } from "svelte/transition"; 
 
     export let data;
@@ -65,19 +67,7 @@ This is the lead view
     Failed Load
 {:else}
 <div class="container">
-  <Accordian>
-    <div slot="open">
-      <FilterVariant size={30}/>
-    </div>
-    <div slot="close">
-      <FilterVariantRemove size={30}/>
-    </div>
-    <div slot="details">
-      <Filter/>
-    </div>
-  </Accordian>
-  
-  
+    <Filter/> 
 
   <div class="title">New Leads:</div>
     {#each pendingDeals as deal}
@@ -173,6 +163,10 @@ This is the lead view
     margin-top: 15px;
     margin-bottom: 30px;
     border: 1px solid #ededed;
+  }
+
+  .filter-container {
+    margin-top:-20px;
   }
 
 </style>
