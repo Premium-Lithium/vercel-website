@@ -13,7 +13,7 @@ export default async function (request, response) {
   console.log(installers[0].id);
 
   console.log("Finding all jobs without deals...");
-  const notInDeals = await allJobsNotInDeals();
+  const notInDeals = await allJobsWithoutDeals();
 
   const operations = [];
 
@@ -48,7 +48,7 @@ export default async function (request, response) {
 }
 
 
-async function allJobsNotInDeals() {
+async function allJobsWithoutDeals() {
   const jobs = await prisma.job.findMany({
     where: {
       Deals: {
