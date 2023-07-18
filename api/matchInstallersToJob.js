@@ -1,24 +1,19 @@
 import { PrismaClient, DealStatus } from '@prisma/client';
-import { syncDatabaseWithPipedrive } from './pipedrive/fullSync.js';
 
 
 const prisma = new PrismaClient();
-
-
 const DEFAULT_NUM_INSTALLERS = 5;
 
 
 export default async function (request, response) {
   console.log("Running installer matching...")
-  if (request.method !== 'POST') // TODO: change to POST
+  if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' }); // Only allow POST requests
 
   const jobId = request.body.id;
 
   if(!jobId)
     return response.status(500).json({ message: 'No job id provided.' });
-
-  await syncDatabaseWithPipedrive();
 
   var numInstallers = request.body.numInstallers;
 
