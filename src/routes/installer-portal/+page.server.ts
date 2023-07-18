@@ -20,12 +20,12 @@ function censorSensitiveJobInfo(job) {
 }
 
 export const load = async () => {
-    console.log("Trying to find installer with id 2766...");
+    console.log("Trying to find installer with id 1510...");
 
     try {
         const response = await prisma.installer.findUnique({
             where: {
-                id: 2766
+                id: 1510
             },
             include: {
                 Deals: {
@@ -51,7 +51,7 @@ export const load = async () => {
         })
         return {data: response};
     } catch(e) {
-        console.log("we avoided the error!")
+        console.log("We avoided the error!\n", e);
         return {
             data: null
         }
