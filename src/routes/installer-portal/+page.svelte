@@ -32,10 +32,6 @@
         auth.logout(auth0Client);
     }
 
-    let isAuthenticatedValue;
-    isAuthenticated.subscribe(value => {
-        isAuthenticatedValue = value;
-    });
 
 </script>
 
@@ -54,7 +50,7 @@
 <div>
     {$isAuthenticated}
 </div>
-{#if !isAuthenticated}
+{#if !$isAuthenticated}
     Not authenticated
     <a href="" on:click={login}>get some fresh auth here</a>
 {:else}
