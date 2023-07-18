@@ -17,11 +17,11 @@
         <span class="checkmark"></span>
         <div class="filter-icons">
           {#if filter === "ACCEPTED"}
-            <Check/>
+            <Check size={25}/>
           {:else if filter === "REJECTED"}
-            <Close/>
+            <Close size={25}/>
           {:else if filter === "PENDING"}
-            <TimerSand/>
+            <TimerSand size={25}/>
           {/if}
         </div>
       </label>
@@ -36,12 +36,15 @@
   max-width: 400px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  background: #efefef;
+  border: 1px solid #000;
+  border-radius: 5px;
+  justify-content: space-around;
 }
 .filter {
   position: relative;
-  height: 25px;
-  width: 25px;
+  height: 30px;
+  width: 30px;
   border-radius: 50%;
   border: 1px solid #707070;
   margin: 10px;
@@ -55,8 +58,8 @@
 
 .filter-icons {
   position: relative;
-  height: 25px;
-  width: 25px;
+  height: 30px;
+  width: 30px;
   align-items: center;
   justify-content: center;
   display: flex;
@@ -71,8 +74,8 @@
 
 .checkmark {
   position: absolute;
-  height: 25px;
-  width: 25px;
+  height: 30px;
+  width: 30px;
   top: 0;
   left: 0;
   border-radius: 50%;
