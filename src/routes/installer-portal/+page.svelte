@@ -24,8 +24,8 @@
 
     function login() {
         console.log("About to log in")
-        console.log(auth0Client)
         auth.loginWithPopup(auth0Client);
+        console.log(auth0Client)
     }
 
     function logout() {
