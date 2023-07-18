@@ -16,9 +16,9 @@
 		
 		<button on:click={handleClick} >
             {#if open}
-                -
+                <slot name="close"></slot>
             {:else}
-                +
+				<slot name="open"></slot>
             {/if}
 		</button>
 	</div>
