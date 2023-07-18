@@ -54,7 +54,7 @@
 <div>
     {$isAuthenticated}
 </div>
-{#if !isAuthenticated}
+{#if !isAuthenticatedValue}
     Not authenticated
     <a href="" on:click={login}>get some fresh auth here</a>
 {:else}

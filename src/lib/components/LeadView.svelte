@@ -6,11 +6,14 @@
     import Close from "svelte-material-icons/Close.svelte";
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
+    import { slide } from "svelte/transition"; 
 
     export let data;
 
     let acceptedDeals;
     let pendingDeals;
+    let possibleFilters = ["ACCEPTED","REJECTED","PENDING"];
+    let filters = [...possibleFilters];
 
     let failedLoad = (data.data === null);
     if (failedLoad) {
@@ -59,9 +62,22 @@ This is the lead view
     Failed Load
 {:else}
 <div class="container">
+  <div class="filter-container">
+    {#each possibleFilters as filter}
+    <div class="filter">
+      <label>
+        <input type="checkbox" bind:group={filters} name="filters" value={filter} checked="checked"/>
+        <span class="checkmark"></span>
+      </label>
+    </div>
+    {/each}
+  </div>
+  
+
   <div class="title">New Leads:</div>
     {#each pendingDeals as deal}
-    <div class="deal-container">
+    {#if filters.includes(deal.status)}
+    <div class="deal-container" transition:slide>
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
@@ -74,11 +90,13 @@ This is the lead view
           </div>
         </div>
     </div>
+    {/if}
     {/each}
 
   <div class="title">Accepted Leads:</div>
     {#each acceptedDeals as deal}
-    <div class="deal-container">
+    {#if filters.includes(deal.status)}
+    <div class="deal-container" transition:slide>
       <Accordian>
       <div class="deal-header" slot="head">
         <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()}</a>
@@ -91,6 +109,7 @@ This is the lead view
       </div>
       </Accordian>
     </div>
+    {/if}
     {/each}
 </div>
 {/if}
@@ -104,6 +123,47 @@ This is the lead view
     border-radius: 8px;
     padding: 20px;
   }
+
+  .filter {
+    display: block;
+    position: relative;
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    margin: 10px;
+    display: inline-block;
+    background-color: #28AAE2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  .filter input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+  }
+
+  .filter:hover input ~ .checkmark {
+     background-color: #248fbd;
+  }
+
+  .filter input:checked ~ .checkmark {
+    background-color: #248fbd
+  }
+  
 
   /* Title Styles */
   .title {
