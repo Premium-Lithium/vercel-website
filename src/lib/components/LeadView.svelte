@@ -4,11 +4,18 @@
 
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
+    
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
+    import Filter from "./Filter.svelte";
+    import { DealStatus } from "@prisma/client";
+
+    import { slide } from "svelte/transition"; 
 
     export let data;
 
+    let possibleFilters = Object.keys(DealStatus);
+    let currentFilters = [...possibleFilters];
     let acceptedDeals;
     let pendingDeals;
 
@@ -59,9 +66,12 @@ This is the lead view
     Failed Load
 {:else}
 <div class="container">
+    <Filter bind:currentFilters bind:possibleFilters/> 
+
   <div class="title">New Leads:</div>
     {#each pendingDeals as deal}
-    <div class="deal-container">
+    {#if currentFilters.includes(deal.status)}
+    <div class="deal-container" transition:slide>
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
@@ -74,11 +84,13 @@ This is the lead view
           </div>
         </div>
     </div>
+    {/if}
     {/each}
 
   <div class="title">Accepted Leads:</div>
     {#each acceptedDeals as deal}
-    <div class="deal-container">
+    {#if currentFilters.includes(deal.status)}
+    <div class="deal-container" transition:slide>
       <Accordian>
       <div class="deal-header" slot="head">
         <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()}</a>
@@ -89,8 +101,12 @@ This is the lead view
             <Timeline/>
           </div>
       </div>
+      <div slot="open">+</div>
+      <div slot="close">-</div>
+
       </Accordian>
     </div>
+    {/if}
     {/each}
 </div>
 {/if}
@@ -147,4 +163,9 @@ This is the lead view
     margin-bottom: 30px;
     border: 1px solid #ededed;
   }
+
+  .filter-container {
+    margin-top:-20px;
+  }
+
 </style>

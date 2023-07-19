@@ -35,7 +35,6 @@
         auth.logout(auth0Client);
     }
 
-
 </script>
 
 <style>
