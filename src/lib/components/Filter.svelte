@@ -8,9 +8,8 @@
 
     export let open = false;
     const handleClick = () => open = !open;
-
-    const possibleFilters = ["ACCEPTED","REJECTED","PENDING"];
-    export let currentFilters;
+    export let possibleFilters = [];
+    export let currentFilters = [];
 </script>
 <div class="container">
     <!-- TODO: add search bar to filtering system -->
