@@ -1,8 +1,9 @@
 import prisma from '$lib/prisma';
 
 function censorPostcode(postcode) {
-    return postcode
+    let censored = postcode
         .match(/^[A-Z][A-HJ-Y]?[0-9][A-Z0-9]?/i);
+    return censored ? censored : "null";
 }
 
 function censorName(name) {
@@ -20,12 +21,12 @@ function censorSensitiveJobInfo(job) {
 }
 
 export const load = async () => {
-    console.log("Trying to find installer with id 1510...");
+    console.log("Trying to find installer with id 2783...");
 
     try {
         const response = await prisma.installer.findUnique({
             where: {
-                id: 1510
+                id: 2783
             },
             include: {
                 Deals: {
