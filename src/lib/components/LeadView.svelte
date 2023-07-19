@@ -8,13 +8,14 @@
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
     import Filter from "./Filter.svelte";
-    import { DealStatus } from "@prisma/client";
+    //import { DealStatus } from "@prisma/client";
 
     import { slide } from "svelte/transition"; 
 
     export let data;
 
-    let possibleFilters = Object.keys(DealStatus);
+    let possibleFilters = ["REJECTED", "ACCEPTED", "PENDING"];
+    //let possibleFilters = Object.keys(DealStatus);
     let currentFilters = [...possibleFilters];
     let acceptedDeals;
     let pendingDeals;
