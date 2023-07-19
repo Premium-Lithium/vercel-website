@@ -20,10 +20,9 @@
     let acceptedDeals;
     let pendingDeals;
 
-    let showModal = false;
+    let rejectModal, acceptModal = false;
+    let currentDealId;
     let dialog;
-    let modalPromise;
-    let modalOutput = false;
 
     let failedLoad = (data.data === null);
     if (failedLoad) {
@@ -51,7 +50,6 @@
     }
 
     async function rejectLead(dealId) {
-      showModal = true;
         const rejectUrl = `${$page.url.origin}/api/installer/leads/reject-lead`
 
         console.log("Before the fetch")
@@ -65,20 +63,20 @@
         const data = await res.json();
 
         invalidateAll();
-    }
+      }
 </script>
 
 This is the lead view
 {#if failedLoad}
     Failed Load
 {:else}
-<Modal bind:showModal bind:dialog>
+<Modal bind:showModal={rejectModal} bind:dialog>
   <h2 slot="header" class="modal-header">
     Are you sure?
   </h2>
   <div class="modal-outer">
-    <button on:click={() => {dialog.close(); modalOutput=false}}>no</button>
-    <button on:click={() => {dialog.close(); modalOutput=true}}>yes</button>
+    <button on:click={() => {dialog.close()}}>no</button>
+    <button on:click={async () => {dialog.close(); await rejectLead(currentDealId)}}>yes</button>
   </div>
 </Modal>
 
@@ -92,10 +90,10 @@ This is the lead view
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
-              <a href="" on:click={async () => await rejectLead(deal.id)}>
+              <a href="" on:click={() => {rejectModal=true; currentDealId = deal.id}}>
                   <Close/>
               </a>
-              <a href="" on:click={async () => await acceptLead(deal.id)}>
+              <a href="" on:click={() => {acceptModal=true; currentDealId = deal.id}}>
                   <Check/>
               </a>
           </div>
