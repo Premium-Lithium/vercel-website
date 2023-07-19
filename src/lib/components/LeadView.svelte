@@ -8,16 +8,22 @@
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
     import Filter from "./Filter.svelte";
-    import { DealStatus } from "@prisma/client";
+    import Modal from "./Modal.svelte";
 
     import { slide } from "svelte/transition"; 
 
     export let data;
+    
 
-    let possibleFilters = Object.keys(DealStatus);
+    let possibleFilters = ["REJECTED", "ACCEPTED", "PENDING"];
     let currentFilters = [...possibleFilters];
     let acceptedDeals;
     let pendingDeals;
+
+    let showModal = false;
+    let dialog;
+    let modalPromise;
+    let modalOutput = false;
 
     let failedLoad = (data.data === null);
     if (failedLoad) {
@@ -44,7 +50,14 @@
         invalidateAll();
     }
 
+    async function confirmRejectLead(dealId) {
+      console.log("confirming...");
+      showModal = true;
+      if(modalOutput) await rejectLead(dealId); 
+    }
+
     async function rejectLead(dealId) {
+      console.log("confirmed");
         const rejectUrl = `${$page.url.origin}/api/installer/leads/reject-lead`
 
         console.log("Before the fetch")
@@ -65,6 +78,16 @@ This is the lead view
 {#if failedLoad}
     Failed Load
 {:else}
+<Modal bind:showModal bind:dialog>
+  <h2 slot="header" class="modal-header">
+    Are you sure?
+  </h2>
+  <div class="modal-outer">
+    <button on:click={() => {dialog.close(); modalOutput=false}}>no</button>
+    <button on:click={() => {dialog.close(); modalOutput=true}}>yes</button>
+  </div>
+</Modal>
+
 <div class="container">
     <Filter bind:currentFilters bind:possibleFilters/> 
 
@@ -75,7 +98,7 @@ This is the lead view
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
-              <a href="" on:click={async () => await rejectLead(deal.id)}>
+              <a href="" on:click={async () => await confirmRejectLead(deal.id)}>
                   <Close/>
               </a>
               <a href="" on:click={async () => await acceptLead(deal.id)}>
@@ -166,6 +189,22 @@ This is the lead view
 
   .filter-container {
     margin-top:-20px;
+  }
+
+  /* Modal Styles */
+
+  .modal-header {
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    color: #1C2428;
+    margin-bottom: 10px;
+  }
+
+  .modal-outer {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
   }
 
 </style>
