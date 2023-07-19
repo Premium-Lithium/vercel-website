@@ -11,6 +11,7 @@ datasource db {
 
 model Job {
   id           Int      @id @default(autoincrement()) @unique
+  numQuotes    Int      @default(5)
   createdAt    DateTime @default(now())
   customerName String
   address      String
