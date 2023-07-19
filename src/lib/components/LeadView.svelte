@@ -4,19 +4,17 @@
 
     import Check from "svelte-material-icons/Check.svelte";
     import Close from "svelte-material-icons/Close.svelte";
-    import FilterVariant from "svelte-material-icons/FilterVariant.svelte";
-    import FilterVariantRemove from "svelte-material-icons/FilterVariantRemove.svelte";
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
     import Filter from "./Filter.svelte";
 
-        
-    import { currentFilters } from "$lib/installer-portal/sessionStore.js";
 
     import { slide } from "svelte/transition"; 
 
     export let data;
 
+    let possibleFilters = ["ACCEPTED","REJECTED","PENDING"];
+    let currentFilters = [...possibleFilters];
     let acceptedDeals;
     let pendingDeals;
 
@@ -67,11 +65,11 @@ This is the lead view
     Failed Load
 {:else}
 <div class="container">
-    <Filter/> 
+    <Filter bind:currentFilters bind:possibleFilters/> 
 
   <div class="title">New Leads:</div>
     {#each pendingDeals as deal}
-    {#if $currentFilters.includes(deal.status)}
+    {#if currentFilters.includes(deal.status)}
     <div class="deal-container" transition:slide>
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
@@ -90,7 +88,7 @@ This is the lead view
 
   <div class="title">Accepted Leads:</div>
     {#each acceptedDeals as deal}
-    {#if $currentFilters.includes(deal.status)}
+    {#if currentFilters.includes(deal.status)}
     <div class="deal-container" transition:slide>
       <Accordian>
       <div class="deal-header" slot="head">

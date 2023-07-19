@@ -5,13 +5,12 @@
     import TimerSand from "svelte-material-icons/TimerSand.svelte";
     import FilterVariant from "svelte-material-icons/FilterVariant.svelte";
     import FilterVariantRemove from "svelte-material-icons/FilterVariantRemove.svelte";
-    import { currentFilters } from "$lib/installer-portal/sessionStore.js";
 
     export let open = false;
     const handleClick = () => open = !open;
 
     const possibleFilters = ["ACCEPTED","REJECTED","PENDING"];
-    $currentFilters = [...possibleFilters];
+    export let currentFilters;
 </script>
 <div class="container">
     <!-- TODO: add search bar to filtering system -->
@@ -20,7 +19,7 @@
         {#each possibleFilters as filter}  
         <div class="filter">
             <label>
-                <input type="checkbox" bind:group={$currentFilters} name="filters" value={filter} checked="checked"/>
+                <input type="checkbox" bind:group={currentFilters} name="filters" value={filter} checked="checked"/>
                 <span class="checkmark"></span>
                 <div class="filter-icons">
                     {#if filter === "ACCEPTED"}
