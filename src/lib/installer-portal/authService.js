@@ -7,7 +7,6 @@ async function createClient() {
     domain: config.domain,
     clientId: config.clientId,
   });
-  console.log(config.clientId)
 
   return auth0Client;
 }
@@ -24,6 +23,7 @@ async function loginWithPopup(client, options) {
     console.error(e);
   } finally {
     popupOpen.set(false);
+    return await client.getIdTokenClaims();
   }
 }
 
