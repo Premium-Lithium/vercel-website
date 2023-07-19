@@ -50,14 +50,8 @@
         invalidateAll();
     }
 
-    async function confirmRejectLead(dealId) {
-      console.log("confirming...");
-      showModal = true;
-      if(modalOutput) await rejectLead(dealId); 
-    }
-
     async function rejectLead(dealId) {
-      console.log("confirmed");
+      showModal = true;
         const rejectUrl = `${$page.url.origin}/api/installer/leads/reject-lead`
 
         console.log("Before the fetch")
@@ -98,7 +92,7 @@ This is the lead view
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
-              <a href="" on:click={async () => await confirmRejectLead(deal.id)}>
+              <a href="" on:click={async () => await rejectLead(deal.id)}>
                   <Close/>
               </a>
               <a href="" on:click={async () => await acceptLead(deal.id)}>
