@@ -4,7 +4,7 @@ import prisma from '../src/lib/prisma.js'
 
 
 const NUM_OFFERS_PER_JOB = 10;
-const NUM_JOBS_MATCHED_PER_API_CALL = 50; // This is to avoid 60s timeout on Vercel pro plan
+const NUM_JOBS_MATCHED_PER_API_CALL = 100; // This is to avoid 60s timeout on Vercel pro plan
 
 
 export default async function (request, response) {
