@@ -47,4 +47,5 @@ enum DealStatus {
   PENDING
   ACCEPTED
   REJECTED
+  EXPIRED
 }
