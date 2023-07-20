@@ -13,7 +13,8 @@
     import { slide } from "svelte/transition"; 
 
     export let data;
-    
+
+    // TODO: allow these to be stored in some external file, or from the schema
     let possibleFilters = ["REJECTED", "ACCEPTED", "PENDING"];
     let currentFilters = [...possibleFilters];
     let acceptedDeals;
