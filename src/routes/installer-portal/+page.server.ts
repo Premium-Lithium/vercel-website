@@ -21,42 +21,42 @@ function censorSensitiveJobInfo(job) {
 }
 
 export const load = async () => {
-    console.log("Trying to find installer with id 1510...");
-
-    try {
-        const response = await prisma.installer.findUnique({
-            where: {
-                id: 1510
-            },
-            include: {
-                Deals: {
-                    where: {
-                        status: { not: 'REJECTED' },
-                    },
-                    include: {
-                        Job: true,
-                    },
-                },
-            },
-        });
-        if (response === undefined) {
-            return {
-                data: null
-            }
-        }
-        response.Deals.forEach((deal) => {
-            if (deal.status === 'ACCEPTED')
-                return;
-        
-            deal.Job = censorSensitiveJobInfo(deal.Job)
-        })
-        return {data: response};
-    } catch(e) {
-        console.log("We avoided the error!\n", e);
-        return {
-            data: null
-        }
-    }
+//    console.log("Trying to find installer with id 1510...");
+//
+//    try {
+//        const response = await prisma.installer.findUnique({
+//            where: {
+//                id: 1510
+//            },
+//            include: {
+//                Deals: {
+//                    where: {
+//                        status: { not: 'REJECTED' },
+//                    },
+//                    include: {
+//                        Job: true,
+//                    },
+//                },
+//            },
+//        });
+//        if (response === undefined) {
+//            return {
+//                data: null
+//            }
+//        }
+//        response.Deals.forEach((deal) => {
+//            if (deal.status === 'ACCEPTED')
+//                return;
+//        
+//            deal.Job = censorSensitiveJobInfo(deal.Job)
+//        })
+//        return {data: response};
+//    } catch(e) {
+//        console.log("We avoided the error!\n", e);
+//        return {
+//            data: null
+//        }
+//    }
 
 
 }

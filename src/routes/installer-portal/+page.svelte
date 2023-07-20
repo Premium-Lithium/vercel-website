@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { page } from "$app/stores";
 
-    import { isAuthenticated, user } from "$lib/installer-portal/sessionStore";
+    import { isAuthenticated, user, accessToken } from "$lib/installer-portal/sessionStore";
     import auth from "$lib/installer-portal/authService"
 
     import LeadView from "$lib/components/LeadView.svelte";
@@ -19,20 +19,47 @@
     });
 
 
-    export let data
-    let installer_id = 1;
+    //export let data
+    let data = { data: undefined };
+    let installerData
     console.log(data);
 
 
     async function login() {
         console.log("About to log in")
         const userdata = await auth.loginWithPopup(auth0Client);
+        const newAccessToken = await auth0Client.getTokenSilently()
+        accessToken.set(newAccessToken)
+
+
         const userdataUrl = `${$page.url.origin}/userdata`;
         installerId = userdata[userdataUrl]["installerId"];
+
+        installerData = await fetchData(installerId);
+        console.log(installerData)
+
+
+
     }
 
     function logout() {
         auth.logout(auth0Client);
+    }
+
+    async function fetchData(id) {
+        const dataUrl = `${$page.url.origin}/api/installer/leads/data`;
+
+        const res = await fetch(dataUrl, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${$accessToken}`
+            },
+            body: JSON.stringify({
+                "installerId": id,
+            }),
+        })
+
+        return res
     }
 
 </script>
@@ -57,5 +84,5 @@
     <a href="" on:click={login}>get some fresh auth here</a>
 {:else}
     Authenticated
-    <LeadView {data}/>
+    <!--<LeadView {data}/>-->
 {/if}
