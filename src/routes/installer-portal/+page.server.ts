@@ -1,8 +1,9 @@
 import prisma from '$lib/prisma';
 
 function censorPostcode(postcode) {
-    return postcode
+    let censored = postcode
         .match(/^[A-Z][A-HJ-Y]?[0-9][A-Z0-9]?/i);
+    return censored ? censored : "null";
 }
 
 function censorName(name) {
