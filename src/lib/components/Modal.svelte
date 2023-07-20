@@ -21,7 +21,8 @@
 		max-width: 32em;
 		border-radius: 0.2em;
 		border: none;
-		padding: 0;
+		padding: 0px;
+		box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.5);
 	}
 	dialog::backdrop {
 		background: rgba(0, 0, 0, 0.3);
