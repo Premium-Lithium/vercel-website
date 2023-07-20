@@ -8,7 +8,7 @@
     import Timeline from "./timeline.svelte";
     import Accordian from "./Accordian.svelte";
     import Filter from "./Filter.svelte";
-    import Modal from "./Modal.svelte";
+    import ConfirmationModal from "./ConfirmationModal.svelte";
 
     import { slide } from "svelte/transition"; 
 
@@ -16,13 +16,11 @@
     
     let possibleFilters = ["REJECTED", "ACCEPTED", "PENDING"];
     let currentFilters = [...possibleFilters];
-    let acceptedDeals;
-    let pendingDeals;
+    let acceptedDeals, pendingDeals;
 
     let rejectModal = false;
     let acceptModal = false;
-    let rejectDialog = false;
-    let acceptDialog = false;
+    let rejectDialog, acceptDialog;
 
     let currentDealId = -1;
 
@@ -51,7 +49,7 @@
     async function acceptLead(dealId) {
       // Update the client-side acceptedDeals and pendingDeals list
       // while we wait for a response from server.
-      acceptedDeals = acceptedDeals.concat(pendingDeals.filter((deal) => deal.id === dealId));
+      acceptedDeals = pendingDeals.filter((deal) => deal.id === dealId).concat(acceptedDeals);
       pendingDeals = [...pendingDeals].filter((deal) => deal.id !== dealId);
       const acceptUrl = `${$page.url.origin}/api/installer/leads/accept-lead`
 
@@ -88,25 +86,27 @@ This is the lead view
     Failed Load
 {:else}
 
-<Modal bind:showModal={rejectModal} bind:dialog={rejectDialog}>
-  <h2 slot="header" class="modal-header">
+<ConfirmationModal
+  bind:showModal={rejectModal}
+  bind:dialog={rejectDialog}
+  yesFunc={async () => {rejectDialog.close(); await rejectLead(currentDealId)}}
+  noFunc={ () => {rejectDialog.close();}}
+  >
+  <h2 slot="header">
     Are you sure you want to reject this lead?
   </h2>
-  <div class="modal-outer">
-    <button on:click={() => {rejectDialog.close()}}>no</button>
-    <button on:click={async () => {rejectDialog.close(); await rejectLead(currentDealId)}}>yes</button>
-  </div>
-</Modal>
+</ConfirmationModal>
 
-<Modal bind:showModal={acceptModal} bind:dialog={acceptDialog}>
-  <h2 slot="header" class="modal-header">
+<ConfirmationModal
+  bind:showModal={acceptModal}
+  bind:dialog={acceptDialog}
+  yesFunc={async () => {acceptDialog.close(); await acceptLead(currentDealId)}}
+  noFunc={ () => {acceptDialog.close();}}
+  >
+  <h2 slot="header">
     Are you sure you want to accept this lead?
   </h2>
-  <div class="modal-outer">
-    <button on:click={() => {acceptDialog.close()}}>no</button>
-    <button on:click={async () => {acceptDialog.close(); await acceptLead(currentDealId)}}>yes</button>
-  </div>
-</Modal>
+</ConfirmationModal>
 
 <div class="container">
     <Filter bind:currentFilters bind:possibleFilters/> 
@@ -209,22 +209,6 @@ This is the lead view
 
   .filter-container {
     margin-top:-20px;
-  }
-
-  /* Modal Styles */
-
-  .modal-header {
-    font-family: 'Roboto', sans-serif;
-    font-size: 24px;
-    font-weight: 500;
-    color: #1C2428;
-    margin-bottom: 10px;
-  }
-
-  .modal-outer {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px;
   }
 
 </style>
