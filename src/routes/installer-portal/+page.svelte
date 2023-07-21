@@ -22,6 +22,7 @@
     //export let data
     let data = { data: undefined };
     let installerData
+    let dataIsReady = false;
     console.log(data);
 
 
@@ -36,30 +37,25 @@
         installerId = userdata[userdataUrl]["installerId"];
 
         installerData = await fetchData(installerId);
+        dataIsReady = true;
         console.log(installerData)
-
-
-
     }
 
     function logout() {
         auth.logout(auth0Client);
     }
 
-    async function fetchData(id) {
+    async function fetchData() {
         const dataUrl = `${$page.url.origin}/api/installer/leads/data`;
 
         const res = await fetch(dataUrl, {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 Authorization: `Bearer ${$accessToken}`
             },
-            body: JSON.stringify({
-                "installerId": id,
-            }),
         })
 
-        return res
+        return await res.json();
     }
 
 </script>
@@ -79,10 +75,10 @@
 <div>
     {$isAuthenticated} with installer id {installerId}
 </div>
-{#if !$isAuthenticated}
+{#if !$isAuthenticated || !dataIsReady}
     Not authenticated
     <a href="" on:click={login}>get some fresh auth here</a>
 {:else}
     Authenticated
-    <!--<LeadView {data}/>-->
+    <LeadView data={installerData}/>
 {/if}

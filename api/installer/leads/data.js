@@ -8,30 +8,32 @@ const jwksUri = "https://dev-a8lw8imwybb5wby4.uk.auth0.com/.well-known/jwks.json
 
 export default async function (request, response) {
     const accessToken = request?.headers?.authorization;
-
     if (accessToken === undefined) return;
 
-    const userinfoAuthUrl = "https://dev-a8lw8imwybb5wby4.uk.auth0.com/userinfo";
+    console.log(accessToken)
+    const tokenData = await getAccessTokenDataOrFalse(accessToken)
+    if (!tokenData) return reponse.status(400).json({error: "unauthorized"})
+    console.log("tokendata", tokenData)
 
+    const returnData = await load(tokenData['http://localhost:3000/userdata'].installerId)
+    console.log("about to return", returnData)
+    response.status(200).json(returnData)
+}
+
+async function getAccessTokenDataOrFalse(token) {
+    const userinfoAuthUrl = "https://dev-a8lw8imwybb5wby4.uk.auth0.com/userinfo";
     const res = await fetch(userinfoAuthUrl, {
         method: 'GET',
         headers: {
-            Authorization: accessToken,
+            Authorization: token,
         },
     })
 
     try {
-        const result = res.json()
-        const returnData = load(result['http://localhost:3000/userdata'].installerId)
-        response.status(200).json(returnData)
-
+        return await res.json()
     } catch (e) {
-        response.status(400).json({nope: "my dude"})
+        return false;
     }
-    console.log(await res.text())
-
-
-
 }
 
 async function load(id) {
@@ -64,14 +66,31 @@ async function load(id) {
         
             deal.Job = censorSensitiveJobInfo(deal.Job)
         })
-        return {data: response.json()};
+        return {data: response};
     } catch(e) {
         console.log("We avoided the error!\n", e);
         return {
             data: null
         }
     }
-
-
 }
 
+function censorPostcode(postcode) {
+    let censored = postcode
+        .match(/^[A-Z][A-HJ-Y]?[0-9][A-Z0-9]?/i);
+    return censored ? censored : "null";
+}
+
+function censorName(name) {
+    const firstName = name.split(" ")[0];
+    if (firstName === name) return undefined;
+    return firstName;
+}
+
+function censorSensitiveJobInfo(job) {
+    return {
+        id: job.id,
+        customerName: censorName(job.customerName),
+        postcode: censorPostcode(job.postcode),
+    }
+}
