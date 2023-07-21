@@ -1,26 +1,28 @@
 import { PrismaClient, DealStatus } from "@prisma/client";
 import util from "util";
 
+
 const prisma = new PrismaClient();
-const jwksUri = "https://dev-a8lw8imwybb5wby4.uk.auth0.com/.well-known/jwks.json";
+const authTenantUrl = process.env.AUTH0_TENANT_URL
 
 export default async function (request, response) {
-    console.log("Calling data api...")
+    console.log("fired")
     const accessToken = request?.headers?.authorization;
     if (accessToken === undefined) return;
 
-    console.log(accessToken)
+    const proto = request.headers['x-forwarded-proto'];
+    const host = request.headers['x-forwarded-host'];
     const tokenData = await getAccessTokenDataOrFalse(accessToken)
     if (!tokenData) return reponse.status(400).json({error: "unauthorized"})
-    console.log("tokendata", tokenData)
 
-    const returnData = await load(tokenData['http://localhost:3000/userdata'].installerId)
-    console.log("about to return", returnData)
-    response.status(200).json(returnData)
+    const returnData = await loadOrUndefined(tokenData[`${proto}://${host}/userdata`].installerId)
+    if (returnData === undefined) return response.status(500).json({error: "could not get data"});
+
+    return response.status(200).json(returnData);
 }
 
 async function getAccessTokenDataOrFalse(token) {
-    const userinfoAuthUrl = "https://dev-a8lw8imwybb5wby4.uk.auth0.com/userinfo";
+    const userinfoAuthUrl = `${authTenantUrl}/userinfo`;
     const res = await fetch(userinfoAuthUrl, {
         method: 'GET',
         headers: {
@@ -35,7 +37,7 @@ async function getAccessTokenDataOrFalse(token) {
     }
 }
 
-async function load(id) {
+async function loadOrUndefined(id) {
     console.log("Trying to find installer with id ", id);
 
     try {
@@ -54,23 +56,16 @@ async function load(id) {
                 },
             },
         });
-        if (response === undefined) {
-            return {
-                data: null
-            }
-        }
+        if (response === undefined) return undefined;
+
         response.Deals.forEach((deal) => {
             if (deal.status === 'ACCEPTED')
                 return;
-
             deal.Job = censorSensitiveJobInfo(deal.Job)
         })
         return {data: response};
     } catch(e) {
-        console.log("We avoided the error!\n", e);
-        return {
-            data: null
-        }
+        return undefined;
     }
 }
 
@@ -93,3 +88,4 @@ function censorSensitiveJobInfo(job) {
         postcode: censorPostcode(job.postcode),
     }
 }
+
