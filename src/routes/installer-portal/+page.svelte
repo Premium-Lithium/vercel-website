@@ -19,11 +19,8 @@
     });
 
 
-    //export let data
-    let data = { data: undefined };
     let installerData
     let dataIsReady = false;
-    console.log(data);
 
 
     async function login() {
