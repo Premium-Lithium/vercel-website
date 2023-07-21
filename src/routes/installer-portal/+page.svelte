@@ -27,16 +27,12 @@
         console.log("About to log in")
         const userdata = await auth.loginWithPopup(auth0Client);
 
-        console.log("Getting token silently...");
+        console.log("Getting TOKEN silently...");
         const newAccessToken = await auth0Client.getTokenSilently()
         accessToken.set(newAccessToken)
 
-
-        const userdataUrl = `${$page.url.origin}/userdata`;
-        installerId = userdata[userdataUrl]["installerId"];
-
         console.log("Fetching installer data...");
-        installerData = await fetchData(installerId);
+        installerData = await fetchData();
         dataIsReady = true;
         console.log(installerData)
     }
@@ -45,8 +41,7 @@
         auth.logout(auth0Client);
     }
 
-    async function fetchData(installerId) {
-        console.log("Fetching data for instller id: ", installerId)
+    async function fetchData() {
         const dataUrl = `${$page.url.origin}/api/installer/leads/data`;
 
         const res = await fetch(dataUrl, {
