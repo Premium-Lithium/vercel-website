@@ -1,15 +1,11 @@
-import { PrismaClient, DealStatus } from "@prisma/client"
-import { log } from "console";
-
-
-const prisma = new PrismaClient()
+import { DealStatus } from "@prisma/client"
+import prisma from '../../../src/lib/prisma.js'
 
 
 export default async function (request, response) {
   const json = JSON.parse(request.body)
   const dealId = json.deal_id;
 
-  console.log("Finding info on deal: ", dealId);
   const deal = await prisma.deal.findUnique({
     where: {
       id: dealId,
@@ -38,59 +34,67 @@ export default async function (request, response) {
   const otherDealsOnThisJob = deal.Job.Deals.filter(d => d.id !== deal.id);
   const numAcceptedDeals = otherDealsOnThisJob.filter(d => d.status === DealStatus.ACCEPTED).length;
 
-  console.log("numQuotesNeeded: ", numQuotesNeeded);
-  console.log("number of other deals on this job: ", otherDealsOnThisJob.length);
-  console.log("numAcceptedDeals: ", numAcceptedDeals);
-
-  // Rare edge case where someone has accepted this deal before we could update it
   if(numAcceptedDeals >= numQuotesNeeded)
     return response.status(400).json({ message: 'This job has already received enough quotes.' });
 
-  // Accept this deal
-  await acceptDeal(dealId);
+  if(!await acceptDeal(dealId))
+    return response.status(400).json({ message: 'Failed to accept deal.' });
 
-  // If the total number of accepted deals now we've accepted this one is sufficient, then we need to expire all other non-accepted deals
+  // If the total number of accepted deals now we've accepted this one is
+  // sufficient, then we need to expire all other non-accepted deals
   if(numAcceptedDeals + 1 >= numQuotesNeeded) {
-    console.log("We have enough quotes now. Expiring other deals.")
-    expirePending(otherDealsOnThisJob);
+    const dealsUpdated = await expirePending(otherDealsOnThisJob);
+
+    if(!dealsUpdated)
+      return response.status(500).json({ message: 'Failed to expire pending deals.' });
   }
 
-  return response.status(200).json({ message: 'Successfully updated installer data.' });
+  return response.status(200).json({ message: 'Successfully accepted deal.' });
 }
 
 
 async function acceptDeal(dealId) {
-  console.log("Accepting deal: ", dealId);
+  console.log("Accepting deal " + dealId);
 
-  const result = await prisma.deal.update({
-    where: {
-      id: dealId
-    },
-    data: {
-      status: DealStatus.ACCEPTED,
-    },
-  });
+  var success = true;
 
-  console.log("Successfully accepted deal: ", result);
+  try {
+    await prisma.deal.update({
+      where: {
+        id: dealId
+      },
+      data: {
+        status: DealStatus.ACCEPTED,
+      },
+    });
+  } catch (error) {
+    success = false;
+  }
 
-  // TODO: add return code here
+  return success;
 }
 
 
 async function expirePending(deals) {
   const pendingDealIds = deals.filter(d => d.status === DealStatus.PENDING).map(d => d.id);
-  console.log("Expiring deals: ", pendingDealIds);
+  console.log("Expiring pending deals:", pendingDealIds);
 
-  const result = await prisma.deal.updateMany({
-    where: {
-      id: {
-        in: pendingDealIds,
+  var success = true;
+
+  try {
+    await prisma.deal.updateMany({
+      where: {
+        id: {
+          in: pendingDealIds,
+        },
       },
-    },
-    data: {
-      status: DealStatus.EXPIRED,
-    },
-  });
+      data: {
+        status: DealStatus.EXPIRED,
+      },
+    });
+  } catch (error) {
+    success = false;
+  }
 
-  // TODO: add return code here
+  return success;
 }
