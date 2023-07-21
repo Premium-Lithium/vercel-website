@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { page } from "$app/stores";
 
-    import { isAuthenticated, user } from "$lib/installer-portal/sessionStore";
+    import { isAuthenticated, user, accessToken } from "$lib/installer-portal/sessionStore";
     import auth from "$lib/installer-portal/authService"
 
     import LeadView from "$lib/components/LeadView.svelte";
@@ -19,20 +19,40 @@
     });
 
 
-    export let data
-    let installer_id = 1;
-    console.log(data);
+    let installerData
+    let dataIsReady = false;
 
 
     async function login() {
         console.log("About to log in")
         const userdata = await auth.loginWithPopup(auth0Client);
+        const newAccessToken = await auth0Client.getTokenSilently()
+        accessToken.set(newAccessToken)
+
+
         const userdataUrl = `${$page.url.origin}/userdata`;
         installerId = userdata[userdataUrl]["installerId"];
+
+        installerData = await fetchData(installerId);
+        dataIsReady = true;
+        console.log(installerData)
     }
 
     function logout() {
         auth.logout(auth0Client);
+    }
+
+    async function fetchData() {
+        const dataUrl = `${$page.url.origin}/api/installer/leads/data`;
+
+        const res = await fetch(dataUrl, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${$accessToken}`
+            },
+        })
+
+        return await res.json();
     }
 
 </script>
@@ -52,10 +72,10 @@
 <div>
     {$isAuthenticated} with installer id {installerId}
 </div>
-{#if !$isAuthenticated}
+{#if !$isAuthenticated || !dataIsReady}
     Not authenticated
     <a href="" on:click={login}>get some fresh auth here</a>
 {:else}
     Authenticated
-    <LeadView {data}/>
+    <LeadView data={installerData}/>
 {/if}
