@@ -1,12 +1,11 @@
 import { PrismaClient, DealStatus } from "@prisma/client";
-import jwt from "jsonwebtoken";
-import jwksClient from "jwks-rsa";
 import util from "util";
 
 const prisma = new PrismaClient();
 const jwksUri = "https://dev-a8lw8imwybb5wby4.uk.auth0.com/.well-known/jwks.json";
 
 export default async function (request, response) {
+    console.log("Calling data api...")
     const accessToken = request?.headers?.authorization;
     if (accessToken === undefined) return;
 
@@ -63,7 +62,7 @@ async function load(id) {
         response.Deals.forEach((deal) => {
             if (deal.status === 'ACCEPTED')
                 return;
-        
+
             deal.Job = censorSensitiveJobInfo(deal.Job)
         })
         return {data: response};
