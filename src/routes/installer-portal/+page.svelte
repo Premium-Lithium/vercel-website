@@ -24,11 +24,9 @@
 
 
     async function login() {
-        console.log("About to log in")
         dataStatus = "loading";
         const userdata = await auth.loginWithPopup(auth0Client);
 
-        console.log("Getting TOKEN silently...");
         const newAccessToken = await auth0Client.getTokenSilently()
         accessToken.set(newAccessToken)
 
@@ -51,8 +49,6 @@
                 Authorization: `Bearer ${$accessToken}`
             },
         })
-
-        console.log("response: ", res);
 
         return await res.json();
     }
