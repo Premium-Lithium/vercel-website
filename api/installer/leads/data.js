@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 const authTenantUrl = process.env.AUTH0_TENANT_URL
 
 export default async function (request, response) {
+    console.log("fired")
     const accessToken = request?.headers?.authorization;
     if (accessToken === undefined) return;
 
@@ -15,8 +16,9 @@ export default async function (request, response) {
     if (!tokenData) return reponse.status(400).json({error: "unauthorized"})
 
     const returnData = await loadOrUndefined(tokenData[`${proto}://${host}/userdata`].installerId)
-    if returnData === undefined return response.status(500).json({error: "could not get data"})
-    response.status(200).json(returnData)
+    if (returnData === undefined) return response.status(500).json({error: "could not get data"});
+
+    return response.status(200).json(returnData);
 }
 
 async function getAccessTokenDataOrFalse(token) {
@@ -86,3 +88,4 @@ function censorSensitiveJobInfo(job) {
         postcode: censorPostcode(job.postcode),
     }
 }
+
