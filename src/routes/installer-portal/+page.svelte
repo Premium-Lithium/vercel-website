@@ -26,14 +26,13 @@
     async function login() {
         console.log("About to log in")
         const userdata = await auth.loginWithPopup(auth0Client);
+
+        console.log("Getting TOKEN silently...");
         const newAccessToken = await auth0Client.getTokenSilently()
         accessToken.set(newAccessToken)
 
-
-        const userdataUrl = `${$page.url.origin}/userdata`;
-        installerId = userdata[userdataUrl]["installerId"];
-
-        installerData = await fetchData(installerId);
+        console.log("Fetching installer data...");
+        installerData = await fetchData();
         dataIsReady = true;
         console.log(installerData)
     }
@@ -51,6 +50,8 @@
                 Authorization: `Bearer ${$accessToken}`
             },
         })
+
+        console.log("response: ", res);
 
         return await res.json();
     }
