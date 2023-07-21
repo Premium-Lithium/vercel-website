@@ -20,11 +20,12 @@
 
 
     let installerData
-    let dataIsReady = false;
+    let dataStatus = "waiting";
 
 
     async function login() {
         console.log("About to log in")
+        dataStatus = "loading";
         const userdata = await auth.loginWithPopup(auth0Client);
 
         console.log("Getting TOKEN silently...");
@@ -33,7 +34,7 @@
 
         console.log("Fetching installer data...");
         installerData = await fetchData();
-        dataIsReady = true;
+        dataStatus = "done";
         console.log(installerData)
     }
 
@@ -70,13 +71,10 @@
 
 <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
 
-<div>
-    {$isAuthenticated} with installer id {installerId}
-</div>
-{#if !$isAuthenticated || !dataIsReady}
-    Not authenticated
-    <a href="" on:click={login}>get some fresh auth here</a>
+{#if !$isAuthenticated || dataStatus === "waiting"}
+    <a href="" on:click={login}>Sign In</a>
+{:else if (dataStatus === "loading")}
+    Loading
 {:else}
-    Authenticated
     <LeadView data={installerData}/>
 {/if}
