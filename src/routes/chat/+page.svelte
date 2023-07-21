@@ -1,25 +1,29 @@
 <script>
-let text;
-let output;
-
-import { openai } from '$lib/chat/chat.js'
-    const completion = async () => { output = 
-        await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: [{role: "user", content: "What is the square root of 64?"}],
-            max_tokens: 1000,
-            temperature: 0.7
-        });
-    output = output.data.choices[0].text;
-    }
+    import { page } from '$app/stores';
+	import { stringify } from 'querystring';
+ export let data;
 </script>
 
-<input bind:value={text}/> <button on:click={completion}>Send</button>
-
-{#if text}
-    {text}
-{/if}
-<br/>
-{#if output}
-    {output}
-{/if}
+<div>
+    <h1>chat</h1>
+    <form>
+        <label>send a chat
+            <input 
+            type="text"
+            autocomplete="off"
+            on:keydown = {async (e) => {
+                if(e.key === 'Enter');
+                const input = e.currentTarget;
+                const description = input.value;
+                const chatRequestUrl = '${page.url.origin}/api/chat/chat';
+                const response = await fetch(chatRequestUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ description }),
+                });
+                const { id } = await response.json();
+                input.value = '';
+            }};
+            />
+        </label>
+    </form>
+</div>
