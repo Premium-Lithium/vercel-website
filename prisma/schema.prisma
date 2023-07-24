@@ -37,11 +37,6 @@ model Deal {
   createdAt   DateTime   @default(now())
   installerId Int
   status      DealStatus @default(PENDING)
-  ContactStage  ContactStage @relation(name: "ContactStageDeal", fields: [id], references: [dealId])
-  QuoteStage  QuoteStage  @relation(name: "QuoteStageDeal", fields: [id], references: [dealId])
-  DNOStage  DNOStage  @relation(name: "DNOStageDeal", fields: [id], references: [dealId])
-  ScheduleStage ScheduleStage @relation(name: "ScheduleStageDeal", fields: [id], references: [dealId])
-  DoneStage DoneStage @relation(name: "DoneStageDeal", fields: [id], references: [dealId])
   Installer   Installer  @relation(fields: [installerId], references: [id])
   Job         Job        @relation(fields: [jobId], references: [id])
   @@unique([jobId, installerId])
@@ -51,41 +46,4 @@ enum DealStatus {
   PENDING
   ACCEPTED
   REJECTED
-}
-
-model ContactStage {
-  id  Int @id @default(autoincrement()) @unique
-  dealId    Int @unique
-  Deal      Deal     @relation(fields: [id], references: [dealId])
-  createdAt DateTime @default(now())
-}
-
-model QuoteStage {
-  id  Int @id @default(autoincrement()) @unique
-  dealId      Int @unique
-  Deal        Deal     @relation(fields: [id], references: [dealId])
-  createdAt   DateTime @default(now())
-  quoteAmount Float
-}
-
-model DNOStage {
-  id  Int @id @default(autoincrement()) @unique
-  dealId      Int @unique
-  Deal      Deal     @relation(fields: [id], references: [dealId])
-  createdAt DateTime @default(now())
-}
-
-model ScheduleStage {
-  id  Int @id @default(autoincrement()) @unique
-  dealId      Int @unique
-  Deal        Deal     @relation(fields: [id], references: [dealId])
-  createdAt   DateTime @default(now())
-  scheduleDate DateTime
-}
-
-model DoneStage {
-  id  Int @id @default(autoincrement()) @unique
-  dealId      Int @unique
-  Deal      Deal     @relation(fields: [id], references: [dealId])
-  createdAt DateTime @default(now())
 }
