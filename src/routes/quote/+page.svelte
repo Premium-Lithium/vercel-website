@@ -78,7 +78,7 @@
                 }
             }
         }>
-        <label class="submit-label" for="submit-quote" style="color: rgb(214, 25, 25)">Invalid quote</label>
+        <label class="submit-label" for="submit-quote" style="color: rgb(214, 25, 25)">Quote must be a valid amount (e.g 459.99)</label>
         
 
     </div>
