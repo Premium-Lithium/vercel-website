@@ -51,8 +51,19 @@
     <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
     <div class="quote-input">
         <h2>Please enter your quote in GBP:</h2>
-        <input type="number" autofocus placeholder=required id="submit-quote" required min=0 max=999999999.99 on:blur={() => {if(quote) {quote = Math.max(0,quote.toFixed(2))}}} step="0.01" bind:value={quote}>
-        <input type='submit'  on:click={
+        <input type="number" 
+            autofocus
+            placeholder=required
+            id="submit-quote"
+            required
+            min=0
+            max=999999999.99
+            on:blur={() => {if(quote) {quote = Math.max(0,quote.toFixed(2))}}}
+            step="0.01"
+            bind:value={quote}
+        >
+
+        <input type='submit' value="Submit" on:click={
             () => {
                 if(quote){
                     console.log("Installer " + installerId + " has submitted quote " + quote);
@@ -60,6 +71,8 @@
                 }
             }
         }>
+        <label class="submit-label" for="submit-quote" style="color: rgb(214, 25, 25)">Invalid quote</label>
+        
 
     </div>
 </div>
@@ -94,6 +107,7 @@
         position: absolute;
         display: flex;
         flex-direction: column;
+        align-items: center;
         top: 30vh;   
     }
     
@@ -118,5 +132,23 @@
         padding: 10px 5px;
         margin-top: 10px;
         border-radius: 5px;
+    }
+
+    .quote-input > input ~ .submit-label {
+        top:0;
+        position:relative;
+        right: 0;
+        font-size: 1.5em;
+    }
+
+    .quote-input > input:valid ~ .submit-label {
+        opacity: 0;
+        transition: opacity 0.25s ease-in-out;
+
+    }
+
+    .quote-input > input:invalid:not(:placeholder-shown) ~ .submit-label {
+        opacity: 1;
+        transition: opacity 0.25s ease-in-out;
     }
 </style>
