@@ -15,7 +15,6 @@
             }, 
             });
             const response = await res.json();
-            {console.log("installer " + email + " has unsubscribed")}
             return response;
         
         })
