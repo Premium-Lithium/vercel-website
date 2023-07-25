@@ -11,6 +11,5 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 emailBlacklist.txt
-pnpm-lock.yaml
 .env*.local
 
