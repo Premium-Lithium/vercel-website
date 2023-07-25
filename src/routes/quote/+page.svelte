@@ -1,8 +1,10 @@
 <script>
     import { page } from '$app/stores'
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
     const installerId = $page.url.searchParams.get('installerId');
     const dealId = $page.url.searchParams.get('dealId');
-    let quote;
+    let quote, response;
+    let successfulQuote = false;
 
     async function postInstallerQuote(installerId, installerQuote, dealId) {
         let currTime = String(new Date());
@@ -33,14 +35,30 @@
     let submitDialog, submitModal;
 
     const openSubmitModal = (installerId, installerQuote, dealId) => {
-        
+
     }
 
 </script>
 
 <div class=body>        
     <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
+    {#if !successfulQuote}
     <div class="quote-input">
+
+        <ConfirmationModal
+            bind:showModal={submitModal}
+            bind:dialog={submitDialog}
+            yesFunc={
+                async () => {submitDialog.close();
+                response = await postInstallerQuote(installerId, quote, dealId);
+                successfulQuote = response.statusCode === 200? true : false}
+            }
+            noFunc={() => {submitDialog.close()}}>
+            <h2 slot="header">
+                Confirm quote of £{quote}?
+            </h2>
+        </ConfirmationModal>
+
         <h2>Please enter your quote in GBP:</h2>
         <input type="number" 
             autofocus
@@ -56,8 +74,7 @@
         <input type='submit' value="Submit" on:click={
             () => {
                 if(quote){
-                    console.log("Installer " + installerId + " has submitted quote " + quote);
-                    postInstallerQuote(installerId, quote, dealId);
+                    submitModal=true;
                 }
             }
         }>
@@ -65,6 +82,11 @@
         
 
     </div>
+    {:else} 
+    <div class="quote-gone-through">
+        <h2>Quote successful, you may now close this page!</h2>
+    </div>
+    {/if}
 </div>
 
 <style>
@@ -140,5 +162,11 @@
     .quote-input > input:invalid:not(:placeholder-shown) ~ .submit-label {
         opacity: 1;
         transition: opacity 0.25s ease-in-out;
+    }
+
+    .quote-gone-through > h2 {
+        font-size: 2em;
+        text-align: center;
+        font-family: 'Roboto', sans-serif;
     }
 </style>
