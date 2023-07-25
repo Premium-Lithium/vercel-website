@@ -26,7 +26,7 @@
 <div class=body>        
     <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
     <div class="unsub-text">
-        <h2>You have unsubscribed</h2>
+        <h1>You have unsubscribed</h1>
     </div>
     
 </div>
@@ -46,21 +46,11 @@
         font-size: 4em;
         text-align: center;
     }
-    .quote-input > h2 {
-        font-size: 2em;
-        text-align: center;
-        font-family: 'Roboto', sans-serif;
-    }
+  
     .logo{
         position: absolute;
         align-self: center;
         top: 0;
-    }
-    .quote-input {
-        margin: auto;
-        position: absolute;
-        display: block;
-        top: 30vh;   
     }
 
 </style>
