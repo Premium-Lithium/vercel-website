@@ -12,6 +12,7 @@ export default async function PUT(request, response) {
     })
 
     const blacklistPath = "emailBlacklist.txt";
+    console.log("adding email", email, "to blacklist");
     fs.appendFile(blacklistPath, `${email}\n`, (err) => {
         if (err) {
             console.error("couldn't append to emailBlacklist.txt");
