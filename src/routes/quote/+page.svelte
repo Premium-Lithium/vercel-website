@@ -59,21 +59,7 @@
             if(quote[prop]) totalQuote += parseFloat(quote[prop]);
         }
         totalQuote = totalQuote.toFixed(2);
-        };
-
-    // $: {
-    //         quoteIsValid = false
-    //         if(Object.values(quote).some((x) => {return x == null})) quoteIsValid = false;
-    //         else if(totalQuote < 0) quoteIsValid = false;
-    //         else quoteIsValid = true;
-    //     };
-    
-    // $: {
-    //     dateIsValid = false;
-    //     if(Date.parse(dateOfCompletion) >= Date.parse(currentDate)) dateIsValid = true;
-    // }
-
-    
+        };    
 
 </script>
 
