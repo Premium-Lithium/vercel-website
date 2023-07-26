@@ -15,6 +15,7 @@
     let dateIsValid = true;
     let dateOfCompletion;
     let currentDate;
+    let loading = false;
 
 
     onMount(async () => {
@@ -25,6 +26,7 @@
 
     async function postInstallerQuote(installerId, dealId) {
             let currTime = String(new Date());
+            loading = true;
             const response = await fetch('quote/', { 
                 method: "POST",
                 body: JSON.stringify({
@@ -36,6 +38,8 @@
                     'Content-Type': 'application/json'
                 }
             });
+            console.log("test");
+            loading = false;
             if (response.ok) {
                 return {
                     statusCode: 200
@@ -118,6 +122,7 @@
         {/if}
         <input type='submit' value="Submit" on:click={
             () => {
+                if(loading) return;
                 quoteIsValid = false
                 if(Object.values(quote).some((x) => {return x == null})) quoteIsValid = false;
                 else if(totalQuote < 0) quoteIsValid = false;
