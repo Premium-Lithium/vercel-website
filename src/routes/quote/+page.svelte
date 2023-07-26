@@ -102,7 +102,7 @@
         <QuoteInput bind:quote={quote.materials} placeholder={"Materials"}/>
         <QuoteInput bind:quote={quote.certification} placeholder={"Certifications"}/>
 
-        {#if !quoteIsValid}
+        {#if !quoteIsValid && Object.keys(quote).filter(key => quote[key] == null).length !== 0}
             <label class="error-label" 
             for="submit-quote" >
             {Object.keys(quote).filter(key => quote[key] == null).map((str) => " " + str[0].toUpperCase() + str.slice(1))} must be a valid amount (e.g 159.99)
