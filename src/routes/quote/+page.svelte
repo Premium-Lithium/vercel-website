@@ -102,8 +102,6 @@
         <QuoteInput bind:quote={quote.materials} placeholder={"Materials"}/>
         <QuoteInput bind:quote={quote.certification} placeholder={"Certifications"}/>
 
-        
-        
         {#if !quoteIsValid}
             <label class="error-label" 
             for="submit-quote" >
@@ -131,7 +129,7 @@
                 dateIsValid = false;
                 if(Date.parse(dateOfCompletion) >= Date.parse(currentDate)) dateIsValid = true;
                 
-                if(quoteIsValid){
+                if(quoteIsValid && dateIsValid){
                     submitModal=true;
                 }
             }
