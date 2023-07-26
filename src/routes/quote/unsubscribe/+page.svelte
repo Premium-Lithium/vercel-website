@@ -7,14 +7,16 @@
             const unsubscribeUrl = `${$page.url.origin}/api/blacklistEmail`;
             const res = await fetch(unsubscribeUrl, {
                 method: 'PUT',
-                body: JSON.stringify({
-                "email": email,
-                }),
                 headers: {
                    "Content-Type": "application/json"
-            }, 
+                }, 
+                body: JSON.stringify({
+                    "email": email,
+                }),
             });
+            console.log(email);
             const response = await res.json();
+            console.log(response);
             return response;
         
         })
