@@ -12,7 +12,7 @@
         required
         min=0
         max=999999999.99
-        on:blur={() => {if(quote) {quote = Math.max(0,quote.toFixed(2))}}}
+        on:blur={() => {if(quote) {quote = (Math.max(0.00,quote)).toFixed(2)}}}
         step="0.01"
         bind:value={quote}
     >
@@ -32,13 +32,13 @@
     }
 
     input:valid {
-        border: solid 2px black;
+        border: 2px solid #28AAE2;
         transition: border-color 0.6s ease-in-out;
 
     }
 
     input:invalid {
-        border: solid 2px red;
+        border: solid 2px black;
         transition: border-color 0.1s ease-in-out;
     }
 
