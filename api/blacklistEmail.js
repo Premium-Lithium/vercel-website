@@ -16,7 +16,7 @@ export default async function PUT(request, response) {
     fs.appendFile(blacklistPath, `${email}\n`, (err) => {
         if (err) {
             console.error("couldn't append to emailBlacklist.txt");
-            return response.status(500).json({message: "internal server error"});
+            return response.status(500).json({message: err});
         } else {
             return response.status(200).json({message: "done"});
         }
