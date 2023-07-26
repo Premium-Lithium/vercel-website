@@ -114,7 +114,7 @@
         <h3>Total quote: £{totalQuote}</h3>
         <h3>Date of soonest completion</h3>
         <input type='date' name='submit-date' bind:value={dateOfCompletion} required min="2023-07-26">
-        {#if !dateIsValid}
+        {#if !dateIsValid && dateOfCompletion == undefined}
             <label class="error-label"
             for='submit-date'>Provide a valid date</label>
         {/if}
