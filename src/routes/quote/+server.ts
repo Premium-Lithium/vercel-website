@@ -22,13 +22,14 @@ async function getNewApiToken() {
     });
 
     const data = await res.json();
+    console.log(data);
     const apiToken = data['access_token'];
+    console.log(apiToken);
     return apiToken;
 }
 
 export async function POST({ request }) {
     const apiToken = await getNewApiToken();
-    console.log(apiToken);
 
     const headers = {'Authorization': `Bearer ${apiToken}` };
     const apiURL = `https://graph.microsoft.com/v1.0/me/drive/root:/${FILE_PATH}:/workbook/worksheets/${WORKSHEET_NAME}/tables/QuotesTable/rows/add`;
@@ -48,6 +49,7 @@ export async function POST({ request }) {
         }),
         headers
     });
+    console.log(response);
     if(response.ok) {
         return json({ message: "Quote inserted into spreadsheet"}, {status: 200});
     } else {
