@@ -9,7 +9,6 @@ import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
 
 onMount(() => {
     mapboxgl.accessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
-    console.log(mapboxgl.accessToken);
 
     const map = new mapboxgl.Map({
         container: 'map',
@@ -60,13 +59,21 @@ onMount(() => {
         const filteredData = data.filter(item => item.address_postal_code !== null);
         const postcodes = filteredData.map(item => item.address_postal_code).slice(90)
         const locationData = await fetchLatlonFromPostcodesPostcodes(postcodes)
+
+        console.log("filteredData", filteredData)
         console.log("locationData", locationData)
 
-        return locationData.map((data) => { return {
-            latitude: data.result.latitude,
-            longitude: data.result.longitude,
-            name: data.query
-        }});
+
+        // Match installer data with postcode data
+
+        return locationData.map((data) => {
+            const postcode = data.query;
+            const correspondingDatum = filteredData.find((x) => x.address_postal_code === postcode);
+            return {
+                ...correspondingDatum,
+                ...data.result,
+            };
+        }) 
     }
 
 
