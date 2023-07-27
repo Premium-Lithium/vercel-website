@@ -38,7 +38,6 @@
                     'Content-Type': 'application/json'
                 }
             });
-            console.log("test");
             loading = false;
             if (response.ok) {
                 return {
