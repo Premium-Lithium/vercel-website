@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { page } from "$app/stores";
 
-    import { isAuthenticated, user } from "$lib/installer-portal/sessionStore";
+    import { isAuthenticated, user, accessToken } from "$lib/installer-portal/sessionStore";
     import auth from "$lib/installer-portal/authService"
 
     import LeadView from "$lib/components/LeadView.svelte";
@@ -19,20 +19,38 @@
     });
 
 
-    export let data
-    let installer_id = 1;
-    console.log(data);
+    let installerData
+    let dataStatus = "waiting";
 
 
     async function login() {
-        console.log("About to log in")
+        dataStatus = "loading";
         const userdata = await auth.loginWithPopup(auth0Client);
-        const userdataUrl = `${$page.url.origin}/userdata`;
-        installerId = userdata[userdataUrl]["installerId"];
+
+        const newAccessToken = await auth0Client.getTokenSilently()
+        accessToken.set(newAccessToken)
+
+        console.log("Fetching installer data...");
+        installerData = await fetchData();
+        dataStatus = "done";
+        console.log(installerData)
     }
 
     function logout() {
         auth.logout(auth0Client);
+    }
+
+    async function fetchData() {
+        const dataUrl = `${$page.url.origin}/api/installer/leads/data`;
+
+        const res = await fetch(dataUrl, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${$accessToken}`
+            },
+        })
+
+        return await res.json();
     }
 
 </script>
@@ -49,13 +67,10 @@
 
 <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
 
-<div>
-    {$isAuthenticated} with installer id {installerId}
-</div>
-{#if !$isAuthenticated}
-    Not authenticated
-    <a href="" on:click={login}>get some fresh auth here</a>
+{#if !$isAuthenticated || dataStatus === "waiting"}
+    <a href="" on:click={login}>Sign In</a>
+{:else if (dataStatus === "loading")}
+    Loading
 {:else}
-    Authenticated
-    <LeadView {data}/>
+    <LeadView data={installerData}/>
 {/if}
