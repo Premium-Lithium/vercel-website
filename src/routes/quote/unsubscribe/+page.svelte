@@ -1,22 +1,20 @@
 <script>
     import { page } from '$app/stores'
 	import { onMount } from 'svelte';
-    const email = $page.url.searchParams.get('email');
     
     onMount(async () => {
-            const unsubscribeUrl = `${$page.url.origin}/api/blacklistEmail`;
+        const email = $page.url.searchParams.get('email');
+            const unsubscribeUrl = `unsubscribe/`;
             const res = await fetch(unsubscribeUrl, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                    "Content-Type": "application/json"
                 }, 
                 body: JSON.stringify({
-                    "email": email,
+                    "values": [email, "noreason"],
                 }),
             });
-            console.log(email);
             const response = await res.json();
-            console.log(response);
             return response;
         
         })
@@ -27,7 +25,8 @@
 <div class=body>        
     <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
     <div class="unsub-text">
-        <h1>You have unsubscribed</h1>
+        <h1>It appears you want to be removed from our list of approved installers who are interested in growing their bussiness</h1>
+        <h1>Can you please tell us why this may be?</h1>
     </div>
     
 </div>
