@@ -47,7 +47,7 @@ onMount(() => {
         return locationChunks.reduce((x, y) => x.concat(y));
     }
 
-    async function fetchLocationData() {
+    async function fetchInstallerData() {
         const data = await fetchAllPaginated({
             url: 'https://api.pipedrive.com/api/v1/organizations',
             queryParams: ['filter_id=115', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
@@ -72,18 +72,57 @@ onMount(() => {
             return {
                 ...correspondingDatum,
                 ...data.result,
+                type: "installer",
             };
         }) 
+    }
+
+    async function fetchJobData() {
+        const data = await fetchAllPaginated({
+            url: 'https://api.pipedrive.com/api/v1/deals',
+            queryParams: ['filter_id=55', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
+        })
+
+        const filteredData = data.filter(item => item['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'] !== null);
+        const postcodes = filteredData.map(item => item['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']).slice(90)
+        const locationData = await fetchLatlonFromPostcodesPostcodes(postcodes)
+
+        console.log("filteredData", filteredData)
+        console.log("locationData", locationData)
+
+
+        // Match job data with postcode data
+
+        return locationData.map((data) => {
+            const postcode = data.query;
+            const correspondingDatum = filteredData.find((x) => x['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'] === postcode);
+            return {
+                ...correspondingDatum,
+                ...data.result,
+                name: correspondingDatum.title,
+                type: "job",
+            };
+        }) 
+
+        console.log(data)
     }
 
 
     // Colors for the markers
     const colors = ["white", "gray", "green"];
+    const colouringFunction = (data) => {
+        console.log(data)
+        if (data.type === "job") return "blue";
+        if (data.type === "installer") return "green";
+        return "red";
+    }
 
     map.on('load', async () => {
-        const data = await fetchLocationData()
+        const installerData = await fetchInstallerData()
+        const jobData = await fetchJobData()
+        const data = jobData.concat(installerData)
         for(let postcode in data) {
-            const marker = new mapboxgl.Marker({ color: colors[Math.floor(Math.random() * colors.length)] })
+            const marker = new mapboxgl.Marker({ color: colouringFunction(data[postcode]) })
                 .setLngLat([data[postcode].longitude, data[postcode].latitude])
                 .addTo(map);
 
