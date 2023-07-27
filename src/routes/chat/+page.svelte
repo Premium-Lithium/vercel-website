@@ -1,16 +1,41 @@
 <script>
-    import { page } from '$app/stores';
-	import { each } from 'svelte/internal';
-    export let data;
+    import { fly } from 'svelte/transition';
+    let awaitingMessage = false;
     let previousMessages = [{"role": "system", "content": 
     "You are a friendly, helpful chatbot named Evie"}];
+
+    function typewriter(node, { speed = 1 }) {
+		const valid = node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE;
+
+		if (!valid) {
+			throw new Error(`This transition only works on elements with a single text node child`);
+		}
+
+		const text = node.textContent;
+		const duration = text.length / (speed * 0.15);
+
+		return {
+			duration,
+			tick: (t) => {
+				const i = Math.trunc(text.length * t);
+				node.textContent = text.slice(0, i);
+			}
+		};
+	}
 </script>
 
 <div class="wrapper">
     <div class="messages">
     {#each previousMessages.slice(1) as message}
-        <h2 class="message-{message.role}">{message.content}</h2>
+        {#if message.role==="user"}
+            <h2 in:fly={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
+        {:else}
+            <h2 in:typewriter class="message-{message.role}">{message.content}</h2>
+        {/if}
     {/each}
+    {#if awaitingMessage}
+        <h2 in:fly={{x:-1000, duration:1000}} class="message-assistant">...</h2>
+    {/if}
     </div>
     <form>
         <input 
@@ -19,6 +44,7 @@
         autocomplete="off"
         on:keydown = {async (e) => {
             if(e.key === 'Enter') {
+                awaitingMessage = true;
                 const input = e.currentTarget;
                 const prompt = input.value;
                 previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
@@ -32,6 +58,7 @@
                         'Content-Type': 'application/json'
                     }
                 });
+                awaitingMessage = false;
                 const { message } = await response.json();
                 previousMessages = [...previousMessages, {"role": "assistant", "content": message.content}];
                 console.log(message.content);
@@ -60,6 +87,7 @@
         border: 3px solid #177ba7;
         background-color:#28AAE2;    
         color: #FFF;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.5);
     }
 
     .message-system, .message-assistant {
