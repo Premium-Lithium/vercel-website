@@ -77,14 +77,15 @@ onMount(() => {
         }) 
     }
 
+    const postcodeIndex = '80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code';
     async function fetchJobData() {
         const data = await fetchAllPaginated({
             url: 'https://api.pipedrive.com/api/v1/deals',
             queryParams: ['filter_id=55', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
         })
 
-        const filteredData = data.filter(item => item['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'] !== null);
-        const postcodes = filteredData.map(item => item['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']).slice(90)
+        const filteredData = data.filter(item => item[postcodeIndex] !== null);
+        const postcodes = filteredData.map(item => item[postcodeIndex]).slice(90)
         const locationData = await fetchLatlonFromPostcodesPostcodes(postcodes)
 
         console.log("filteredData", filteredData)
@@ -95,7 +96,7 @@ onMount(() => {
 
         return locationData.map((data) => {
             const postcode = data.query;
-            const correspondingDatum = filteredData.find((x) => x['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'] === postcode);
+            const correspondingDatum = filteredData.find((x) => x[postcodeIndex] === postcode);
             return {
                 ...correspondingDatum,
                 ...data.result,
