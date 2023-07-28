@@ -25,6 +25,7 @@
     });
 
     async function postInstallerQuote(installerId, dealId) {
+        console.log("posting installer quote")
             let currTime = String(new Date());
             loading = true;
             const response = await fetch('quote/', { 
