@@ -21,6 +21,7 @@ export async function POST({ request }) {
     ] = values;
     
 
+    console.log("about to create")
     const newQuote = await prisma.quote.create({
       data: {
         installerId: 1, // Replace with the actual installerId value
