@@ -3,6 +3,7 @@
     import { onMount } from 'svelte'
 	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
     import QuoteInput from './QuoteInput.svelte';
+	import { json } from '@sveltejs/kit';
 
     const installerId = $page.url.searchParams.get('installerId');
     const dealId = $page.url.searchParams.get('dealId');
@@ -21,18 +22,18 @@
     onMount(async () => {
         // Get current date in datetime format for min datepicker value
         const date = new Date();   
-        currentDate = date.toDateString();
+        currentDate = date.toISOString().split('T')[0];
     });
 
     async function postInstallerQuote(installerId, dealId) {
         console.log("posting installer quote")
-            let currTime = String(new Date());
+            let currTime = new Date();
             loading = true;
             const response = await fetch('quote/', { 
                 method: "POST",
                 body: JSON.stringify({
                     "values": [
-                        [installerId, dealId, totalQuote, quote.labour, quote.scaffolding, quote.materials, quote.certification, dateOfCompletion, currTime]
+                        [installerId, dealId, totalQuote, quote.labour, quote.scaffolding, quote.materials, quote.certification, new Date(dateOfCompletion), new Date(currTime)]
                     ]
                 }),
                 headers: {
@@ -99,7 +100,7 @@
 
         <h3>Total quote: £{totalQuote}</h3>
         <h3>Date of soonest completion</h3>
-        <input type='date' name='submit-date' bind:value={dateOfCompletion} required min="2023-07-26">
+        <input type='date' name='submit-date' bind:value={dateOfCompletion} required min={currentDate}>
         {#if !dateIsValid && dateOfCompletion == undefined}
             <label class="error-label"
             for='submit-date'>Provide a valid date</label>
@@ -120,7 +121,9 @@
                 }
             }
         }>
-        
+        {#if loading}
+            <h2>Sending quote...</h2>
+        {/if}
         
 
     </div>
