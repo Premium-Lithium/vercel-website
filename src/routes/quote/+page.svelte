@@ -83,10 +83,24 @@
         </ConfirmationModal>
 
         <h2>Please enter your quote in GBP:</h2>
-        <QuoteInput bind:quote={quote.labour} autofocus={true} placeholder={"Labour"}/>
-        <QuoteInput bind:quote={quote.scaffolding} placeholder={"Scaffolding"}/>
-        <QuoteInput bind:quote={quote.materials} placeholder={"Materials"}/>
-        <QuoteInput bind:quote={quote.certification} placeholder={"Certifications"}/>
+        <div class="inputs">
+        <div class="block">
+            <label>Labour:</label>
+            <QuoteInput bind:quote={quote.labour} autofocus={true} placeholder={"0.00"}/>
+        </div>
+        <div class="block">
+            <label>Scaffolding:</label>
+            <QuoteInput bind:quote={quote.scaffolding} placeholder={"0.00"}/>
+        </div>
+        <div class="block">
+            <label>Materials:</label>
+            <QuoteInput bind:quote={quote.materials} placeholder={"0.00"}/>
+        </div>
+        <div class="block">
+            <label>Certifications:</label>
+            <QuoteInput bind:quote={quote.certification} placeholder={"0.00"}/>
+        </div>
+        </div>
 
         {#if !quoteIsValid && Object.keys(quote).filter(key => quote[key] == null).length !== 0}
             <label class="error-label" 
@@ -151,11 +165,21 @@
         text-align: center;
         font-family: 'Roboto', sans-serif;
     }
+    
+    label{
+        font-size: 1.5em; 
+        width: 180px;
+        margin: 5px;
+        text-align: right;
+        display: inline-block;
+      }
+
     .logo{
         position: absolute;
         align-self: center;
         top: 0;
     }
+
     .quote-input {
         margin: auto;
         position: absolute;
