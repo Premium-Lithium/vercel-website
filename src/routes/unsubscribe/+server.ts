@@ -2,11 +2,9 @@ import { MICROSOFT_GRAPHS_API_TOKEN } from "$env/static/private";
 import { json } from '@sveltejs/kit';
 import prisma from '$lib/prisma.js';
 
-const FILE_PATH = 'all_installers.xlsx';
-const WORKSHEET_NAME = 'UnsubscribedEmails';
-
 export async function POST({ request }) {
         const { email, reason } = await request.json();
+        console.log("this is prisma -->",prisma);
 
         const unsubscribedEmail = await prisma.UnsubscribedEmails.create({
             data: {
