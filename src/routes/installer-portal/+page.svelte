@@ -49,7 +49,6 @@
                 Authorization: `Bearer ${$accessToken}`
             },
         })
-
         return await res.json();
     }
 

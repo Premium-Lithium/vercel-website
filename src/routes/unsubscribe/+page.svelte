@@ -13,7 +13,8 @@
                    "Content-Type": "application/json"
                 }, 
                 body: JSON.stringify({
-                    "values": [email, reason],
+                    "email": email,
+                    "reason": reason,
                 }),
             });
             sent = true;

@@ -1,30 +1,41 @@
-import { MICROSOFT_GRAPHS_API_TOKEN } from "$env/static/private";
 import { json } from '@sveltejs/kit';
+import prisma from '$lib/prisma.js';
 
 const FILE_PATH = 'all_installers.xlsx';
 const WORKSHEET_NAME = 'Quotes';
 
 export async function POST({ request }) {
-    const headers = { Authorization: `Bearer ${MICROSOFT_GRAPHS_API_TOKEN}` };
-    const apiURL = `https://graph.microsoft.com/v1.0/me/drive/root:/${FILE_PATH}:/workbook/worksheets/${WORKSHEET_NAME}/tables/QuotesTable/rows/add`;
-    
+
     const { values } = await request.json();
-    if(values[0].some((x) => {return x === null})){
-        return json({message: "Not enough values to send request "}, {status: 400})
-    }
-    const response = await fetch(apiURL, { 
-        method: "POST",
-        body: JSON.stringify({
-            "index": null,
-            "values": [
-                values[0]
-            ]
-        }),
-        headers
+    const [
+        installerId,
+        dealId,
+        totalQuote,
+        quoteLabour,
+        quoteScaffolding,
+        quoteMaterials,
+        quoteCertification,
+        dateOfCompletion,
+        currTime,
+    ] = values;
+    
+
+    const newQuote = await prisma.quote.create({
+      data: {
+        installerId: 1, // Replace with the actual installerId value
+        dealId: 1, // Replace with the actual dealId value
+        totalQuote: 1000.0, // Replace with the actual totalQuote value
+        quoteLabour: 500.0, // Replace with the actual quoteLabour value
+        quoteScaffolding: 200.0, // Replace with the actual quoteScaffolding value
+        quoteMaterials: 250.0, // Replace with the actual quoteMaterials value
+        quoteCertification: 50.0, // Replace with the actual quoteCertification value
+        dateOfCompletion: new Date('2023-07-28T00:00:00'), // Replace with the actual dateOfCompletion value
+        currTime: new Date(), // Replace with the actual currTime value (current date/time)
+      },
     });
-    if(response.ok) {
-        return json({ message: "Quote inserted into spreadsheet"}, {status: 200});
-    } else {
-        return json({statusText: response.statusText}, {status: response.status})
-    }
+
+    if (newQuote === undefined) return json({}, {status:500})
+
+    return json({}, {status: 200})
+
 }
