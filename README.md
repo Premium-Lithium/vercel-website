@@ -56,3 +56,11 @@ pnpx prisma db seed
 ```
 
 You can change the data that is seeded in the prisma/seed.js file.
+
+## Backing Up the Database
+to generate a local backup of the database, run the command:
+```
+pg_dump postgres://default:s7ogIvaKHLm6@ep-divine-union-019154-pooler.us-east-1.postgres.vercel-storage.com/verceldb > backup
+```
+Changing the name of 'backup' to whatever you want to name your backup file.
+
