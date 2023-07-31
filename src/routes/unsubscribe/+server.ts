@@ -8,12 +8,14 @@ const WORKSHEET_NAME = 'UnsubscribedEmails';
 export async function POST({ request }) {
         const { email, reason } = await request.json();
 
-        await prisma.UnsubscribedEmails.create({
+        const unsubscribedEmail = await prisma.UnsubscribedEmails.create({
             data: {
                 email: email,
                 reason: reason,
             }
         });
+
+        if (unsubscribedEmail === undefined) return json({}, {status:500})
 
         return json({}, { status: 200 })
 }

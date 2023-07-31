@@ -1,4 +1,3 @@
-import { MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET } from "$env/static/private";
 import { json } from '@sveltejs/kit';
 import prisma from '$lib/prisma.js';
 
@@ -21,7 +20,6 @@ export async function POST({ request }) {
     ] = values;
     
 
-    console.log("about to create")
     const newQuote = await prisma.quote.create({
       data: {
         installerId: 1, // Replace with the actual installerId value
@@ -36,6 +34,7 @@ export async function POST({ request }) {
       },
     });
 
+    if (newQuote === undefined) return json({}, {status:500})
 
     return json({}, {status: 200})
 
