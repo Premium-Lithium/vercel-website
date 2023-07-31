@@ -20,7 +20,7 @@
 
     <style>
         input[type="number"] {
-        width: 100%;
+        width: 70%;
         margin: 15px;
         border: 1px solid #000;
         height: 60px;
