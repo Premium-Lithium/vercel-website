@@ -3,6 +3,7 @@
     import { onMount } from 'svelte'
 	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
     import QuoteInput from './QuoteInput.svelte';
+	import { json } from '@sveltejs/kit';
 
     const installerId = $page.url.searchParams.get('installerId');
     const dealId = $page.url.searchParams.get('dealId');
@@ -26,13 +27,13 @@
 
     async function postInstallerQuote(installerId, dealId) {
         console.log("posting installer quote")
-            let currTime = String(new Date());
+            let currTime = new Date();
             loading = true;
             const response = await fetch('quote/', { 
                 method: "POST",
                 body: JSON.stringify({
                     "values": [
-                        [installerId, dealId, totalQuote, quote.labour, quote.scaffolding, quote.materials, quote.certification, dateOfCompletion, currTime]
+                        [installerId, dealId, totalQuote, quote.labour, quote.scaffolding, quote.materials, quote.certification, new Date(dateOfCompletion), new Date(currTime)]
                     ]
                 }),
                 headers: {
@@ -73,7 +74,6 @@
             bind:dialog={submitDialog}
             yesFunc={
                 async () => {submitDialog.close();
-                console.log(dateOfCompletion);
                 response = await postInstallerQuote(installerId, dealId);
                 successfulQuote = response.statusCode === 200? true : false}
             }
@@ -121,7 +121,9 @@
                 }
             }
         }>
-        
+        {#if loading}
+            <h2>Sending quote...</h2>
+        {/if}
         
 
     </div>
