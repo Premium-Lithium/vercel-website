@@ -4,24 +4,6 @@
     let previousMessages = [{"role": "system", "content": 
     "You are a friendly, helpful chatbot named Evie"}];
 
-    function typewriter(node, { speed = 1 }) {
-		const valid = node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE;
-
-		if (!valid) {
-			throw new Error(`This transition only works on elements with a single text node child`);
-		}
-
-		const text = node.textContent;
-		const duration = text.length / (speed * 0.15);
-
-		return {
-			duration,
-			tick: (t) => {
-				const i = Math.trunc(text.length * t);
-				node.textContent = text.slice(0, i);
-			}
-		};
-	}
 </script>
 
 <div class="wrapper">
@@ -30,7 +12,7 @@
         {#if message.role==="user"}
             <h2 in:fly={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
         {:else}
-            <h2 in:typewriter class="message-{message.role}">{message.content}</h2>
+            <h2 class="message-{message.role}">{message.content}</h2>
         {/if}
     {/each}
     {#if awaitingMessage}
@@ -75,8 +57,14 @@
         flex-direction: column;
         width: 90vw;
         position: absolute;
-        left: 5vw;
-
+        left: 3vw;
+        border: 2px solid black; 
+        padding: 1vh 2vw 1vh 2vw;  
+        height: 80vh;
+        top: 3vh;
+        border-radius: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     [class^="message-"]{ 
@@ -100,10 +88,6 @@
         align-self: end;
         border-radius: 30px 30px 5px 30px;
     }
-    .wrapper {
-        justify-items: center;
-        align-items: center;
-    }
 
     .chat-input {
         position: absolute;
@@ -112,6 +96,7 @@
         height: auto;
         font-size: 2em;
         left: 10vw;
+        border-radius: 5px;
     }
 
 </style>
