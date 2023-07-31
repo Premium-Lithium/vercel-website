@@ -21,7 +21,7 @@
     onMount(async () => {
         // Get current date in datetime format for min datepicker value
         const date = new Date();   
-        currentDate = date.toDateString();
+        currentDate = date.toISOString().split('T')[0];
     });
 
     async function postInstallerQuote(installerId, dealId) {
@@ -73,6 +73,7 @@
             bind:dialog={submitDialog}
             yesFunc={
                 async () => {submitDialog.close();
+                console.log(dateOfCompletion);
                 response = await postInstallerQuote(installerId, dealId);
                 successfulQuote = response.statusCode === 200? true : false}
             }
@@ -99,7 +100,7 @@
 
         <h3>Total quote: £{totalQuote}</h3>
         <h3>Date of soonest completion</h3>
-        <input type='date' name='submit-date' bind:value={dateOfCompletion} required min="2023-07-26">
+        <input type='date' name='submit-date' bind:value={dateOfCompletion} required min={currentDate}>
         {#if !dateIsValid && dateOfCompletion == undefined}
             <label class="error-label"
             for='submit-date'>Provide a valid date</label>
