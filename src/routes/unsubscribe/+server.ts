@@ -4,7 +4,6 @@ import prisma from '$lib/prisma.js';
 
 export async function POST({ request }) {
         const { email, reason } = await request.json();
-        console.log("this is prisma -->",prisma);
 
         const unsubscribedEmail = await prisma.UnsubscribedEmails.create({
             data: {
