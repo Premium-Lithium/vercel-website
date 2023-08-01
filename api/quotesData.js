@@ -15,14 +15,8 @@ export default async function GET(request, response) {
     const quoteData = `${columns.join(',')}\n${quotes
       .map((row) => columns.map((col) => row[col]).join(','))
       .join('\n')}`;
-    console.log(quoteData);
-    const unsubed = await prisma.unsubscribedEmails.findMany();
-    const unsubcolumns = ['email', 'reason']
-    const unsubedData = `${unsubcolumns.join(',')}\n${unsubed
-        .map((row) => unsubcolumns.map((col) => row[col]).join(','))
-        .join('\n')}`;
-    console.log(unsubedData);
     response.writeHead(200, { 'Content-Type': 'apllication/json' });
     response.end(quoteData);
+    console.log(quoteData);
     return response;
 }
