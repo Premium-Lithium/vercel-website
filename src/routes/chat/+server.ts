@@ -4,22 +4,15 @@ import { json } from '@sveltejs/kit';
 import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { RedisVectorStore } from "langchain/vectorstores/redis";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { RetrievalQAChain } from "langchain/chains";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { onMount } from 'svelte';
-import { kv } from '@vercel/kv';
-import { createClient, createCluster } from "redis";
 import { Document } from 'langchain/document';
 
 let chain;
 let model;
 let vectorStore;
-const client = createClient({
-    legacyMode: true,
-    url: KV_URL ?? "redis://localhost:6379",
-});
-await client.connect();
 if(true){
     // const loader = new CheerioWebBaseLoader("https://premiumlithium.com/products/powerpod?_pos=1&_fid=0a2ecd092&_ss=c");
     // const data = await loader.load();
@@ -29,9 +22,6 @@ if(true){
     // })
 
     // const splitDocs = await textSplitter.splitDocuments(data);
-
-
-    await client.connect();
 
     const docs = [
     new Document({
@@ -52,35 +42,17 @@ if(true){
     }),
     ];
 
-    vectorStore = await RedisVectorStore.fromDocuments(
+    vectorStore = await MemoryVectorStore.fromDocuments(
         docs,
         new OpenAIEmbeddings(),
-        {
-            redisClient: client,
-            indexName: "docs",
-        }
     );
-
-    await client.disconnect();
     // // We will want to store this embedding somewhere, and load it instead of creating it each time it's needed.
-    // const embeddings = new OpenAIEmbeddings();
-    // RedisVectorStore.fromDocuments(
-    //     splitDocs, 
-    //     embeddings, 
-    //     {
-    //         redisClient: client,
-    //         indexName: "docs",
-    //     }
-    // );
-    
+
     model = new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
-    chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever(1));
-    await client.disconnect();
+    chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
 }
 
 export async function POST({ request }) {
-    await client.connect();
-    console.log(client);
     try {
         const { prompt } = await request.json();
         console.log(prompt[prompt.length-1]['content']);
@@ -88,7 +60,6 @@ export async function POST({ request }) {
             query: prompt[prompt.length-1]['content']
         });
         console.log(response);
-        await client.disconnect();
         return json({message: response}, {status: 200});
     } catch (error)
     {
