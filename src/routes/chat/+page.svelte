@@ -1,15 +1,40 @@
 <script>
     import { fly } from 'svelte/transition';
     import { tick } from 'svelte';
+    import { onMount } from 'svelte';
     let awaitingMessage = false;
-    let previousMessages = [{"role": "system", "content": 
-    "You are a friendly, helpful chatbot named Evie"}];
+    let previousMessages = [];
+    const initialMessage = "You are a helpful, friendly, upbeat customer assistant named Evie for one of the fastest growing\
+            green energy companies in the UK: Premium Lithium, who provide integrated solutions\
+            enabling energy dependence, from design, manufacturing and installation of\
+            Smart Home Batteries, Solar Panels, EV Chargers, and UPS. Do your best to answer the above query, and then provide\
+            3 follow up questions which the user may ask.\
+            The customer will ask you questions, and your only goal is to provide them with the necessary\
+            information and ask them any essential follow up questions in order for them to choose which system\
+            to purchase. After each answer you should provide 3 follow up questions which the user may want to ask, based on their query.\n\
+            Here's an example of an initial prompt you should send:\
+            Hello, how can I assist you today?\
+            [I'd like to know about your solar panels,\
+            I'd like to know about your EV chargers,\
+            How much power would I get from solar panels on my roof?]";
 
+    onMount(async () => {
+        const response = await fetch('chat/', {
+            method: 'POST',
+            body: JSON.stringify({ "prompt" : [{"role": "assistant", "content": initialMessage}] }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        awaitingMessage = false;
+        const { message } = await response.json();
+        previousMessages = [{"role": "assistant", "content": message.text}];
+    });
 </script>
 
 <div class="wrapper">
     <div class="messages">
-    {#each previousMessages.slice(1) as message}
+    {#each previousMessages as message}
         {#if message.role==="user"}
             <h2 in:fly={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
         {:else}
@@ -26,7 +51,6 @@
         type="text"
         autocomplete="off"
         on:keydown = {async (e) => {
-            await tick();
             if(e.key === 'Enter'){
                 awaitingMessage = true;
                 const input = e.currentTarget;
@@ -44,8 +68,8 @@
                 });
                 awaitingMessage = false;
                 const { message } = await response.json();
-                await tick();
-                previousMessages = [...previousMessages, {"role": "assistant", "content": message.text}];
+                console.log(message);
+                previousMessages = [...previousMessages, {"role": "assistant", "content": message.text.split('|')}];
                 console.log(message.content);
             }
         }}
