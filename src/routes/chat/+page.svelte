@@ -1,5 +1,6 @@
 <script>
     import { fly } from 'svelte/transition';
+    import { tick } from 'svelte';
     let awaitingMessage = false;
     let previousMessages = [{"role": "system", "content": 
     "You are a friendly, helpful chatbot named Evie"}];
@@ -25,7 +26,8 @@
         type="text"
         autocomplete="off"
         on:keydown = {async (e) => {
-            if(e.key === 'Enter') {
+            await tick();
+            if(e.key === 'Enter'){
                 awaitingMessage = true;
                 const input = e.currentTarget;
                 const prompt = input.value;
@@ -42,7 +44,8 @@
                 });
                 awaitingMessage = false;
                 const { message } = await response.json();
-                previousMessages = [...previousMessages, {"role": "assistant", "content": message.content}];
+                await tick();
+                previousMessages = [...previousMessages, {"role": "assistant", "content": message.text}];
                 console.log(message.content);
             }
         }}
@@ -65,6 +68,7 @@
         border-radius: 20px;
         overflow-y: auto;
         overflow-x: hidden;
+        scroll-behavior: smooth;
     }
 
     [class^="message-"]{ 
