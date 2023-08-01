@@ -50,7 +50,6 @@
 		"cheerio": "1.0.0-rc.12",
 		"langchain": "^0.0.120",
 		"openai": "^3.3.0",
-		"redis": "^4.6.7",
 		"svelte-material-icons": "^3.0.5",
 		"vercel": "^31.0.1"
 	}
