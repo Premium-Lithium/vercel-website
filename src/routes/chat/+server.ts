@@ -26,7 +26,8 @@ const vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, embeddings)
 // const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
 // const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
 
-var jsonVectorStore = JSON.stringify(vectorStore.toJSON());
+const documentEmbeddings = await embeddings.embedDocuments(splitDocs)
+var embedded = JSON.stringify(vectorStore.toJSON());
 writeFile("embeddings.txt", jsonVectorStore, function(err) {
     if(err) console.log(err);
 });
