@@ -3,7 +3,7 @@
     import { onMount } from 'svelte'
 	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
     import QuoteInput from './QuoteInput.svelte';
-	import { json } from '@sveltejs/kit';
+    import { fade } from 'svelte/transition';
 
     const installerId = $page.url.searchParams.get('installerId');
     const dealId = $page.url.searchParams.get('dealId');
@@ -17,6 +17,7 @@
     let dateOfCompletion;
     let currentDate;
     let loading = false;
+    let showMaterialBreakdown = false;
 
 
     onMount(async () => {
@@ -85,22 +86,43 @@
 
         <h2>Please enter your quote in GBP:</h2>
         <div class="inputs">
-        <div class="block">
-            <label>Labour:</label>
-            <QuoteInput bind:quote={quote.labour} autofocus={true} placeholder={"0.00"}/>
-        </div>
-        <div class="block">
-            <label>Scaffolding:</label>
-            <QuoteInput bind:quote={quote.scaffolding} placeholder={"0.00"}/>
-        </div>
-        <div class="block">
-            <label>Materials:</label>
-            <QuoteInput bind:quote={quote.materials} placeholder={"0.00"}/>
-        </div>
-        <div class="block">
-            <label>Certifications:</label>
-            <QuoteInput bind:quote={quote.certification} placeholder={"0.00"}/>
-        </div>
+            <div class="block">
+                <label>Labour:</label>
+                <QuoteInput bind:quote={quote.labour} autofocus={true} placeholder={"0.00"}/>
+            </div>
+            <div class="block">
+                <label>Scaffolding:</label>
+                <QuoteInput bind:quote={quote.scaffolding} placeholder={"0.00"}/>
+            </div>
+            <div class="block">
+                <label on:mouseenter={() => {showMaterialBreakdown=true;}} on:mouseleave={() => {showMaterialBreakdown = false;}}>Materials 
+                    <div style="color: blue;" class="tooltip" >(?)
+                        <span class="tooltiptext">
+                            <h3>How much will additional materials cost? Please note that we provide the following:</h3>
+                            <h3>For battery only jobs:</h3>
+                            <ul>
+                               <li>Batteries</li> 
+                               <li>Inverters</li>
+                               <li>Isolators</li>
+                               <li>DC Isolator</li>
+                               <li>AC Isolator</li>
+                               <li>Fuses</li>
+                               <li>DC cables</li>
+                               <li>Communication cables</li>
+                            </ul>
+                            <h3>For solar jobs:</h3>
+                            <ul>
+                               <li>Solar panels</li>
+                            </ul>
+                            <p>If the job incldes Immersion Controllers or EV Chargers, these will be provided by us.</p>
+                        </span>
+                    </div>:</label>
+                <QuoteInput bind:quote={quote.materials} placeholder={"0.00"}/>
+            </div>
+            <div class="block">
+                <label>Certifications:</label>
+                <QuoteInput bind:quote={quote.certification} placeholder={"0.00"}/>
+            </div>
         </div>
 
         {#if !quoteIsValid && Object.keys(quote).filter(key => quote[key] == null).length !== 0}
@@ -138,8 +160,6 @@
         {#if loading}
             <h2>Sending quote...</h2>
         {/if}
-        
-
     </div>
     {:else} 
     <div class="quote-gone-through">
@@ -150,12 +170,13 @@
 
 <style>
     .body {
-        margin: auto;
+        margin: 0px;
         width: 100vw;
         height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
+        
     }
     .quote-input > h2 {
         font-size: 2em;
@@ -171,16 +192,50 @@
     
     label{
         font-size: 1.5em; 
-        width: 180px;
+        min-width: 150px;
         margin: 5px;
-        text-align: right;
+        text-align: left;
         display: inline-block;
+        font-family: 'Roboto', sans-serif;
       }
+
+    .block {
+        align-items: center;
+    }
 
     .logo{
         position: absolute;
         align-self: center;
         top: 0;
+    }
+
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+        background-color: white;
+        color: #000;
+        text-align: center;
+        padding: 10px 30px;
+        border: 3px solid var(--plblue); 
+        border-radius: 6px;
+        visibility: hidden;
+        position: absolute;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
+        z-index: 1;
+        width: 40vw;
+        top: 100%;
+        left: 50%;
+        margin-left: -20vw;
+    }
+
+    .tooltip:hover .tooltiptext {
+        opacity: 1;
+        transition: opacity 0.4s ease-in-out, visibility 0s linear 0s;
+        visibility: visible;
     }
 
     .quote-input {
@@ -189,8 +244,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        top: 15vh;   
-        
+        top: 15%;    
     }
 
     .quote-input > input[type="submit"] {
@@ -201,7 +255,7 @@
         width: 200px;
         align-self: center;
         padding: 10px 5px;
-        margin-top: 30px;
+        margin: 30px;
         border-radius: 5px;
     }
 
@@ -234,6 +288,20 @@
         color: rgb(214, 25, 25);
         font-family: 'Roboto', sans-serif;
         font-size: 0.85em;
+    }
+    li{
+        text-align: left;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    p {
+        text-align: left;
+        font-family: 'Roboto', sans-serif;   
+    }
+
+    .tooltiptext > h3 {
+        text-align: left;
+        font-family: 'Roboto', sans-serif;  
     }
 
 </style>
