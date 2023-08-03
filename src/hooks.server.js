@@ -1,6 +1,6 @@
 /** @type {import('@sveltejs/kit').Handle} */
 
-const ADMIN_LOGIN = "admin:occupa*tionPr$ofessi_onTra2#nsition";
+import { ADMIN_LOGIN, ACADEMY_LOGIN } from '$env/static/private';
 
 export async function handle({
     event,
@@ -8,10 +8,12 @@ export async function handle({
 }) {
     const url = new URL(event.request.url);
 
-    if (url.pathname.startsWith("/map")) {
+    const urlsRequiringAuth = ['/map','/brochure'];
+    if (urlsRequiringAuth.some(x => url.pathname.startsWith(x))) {
         const auth = event.request.headers.get("Authorization");
 
-        if (auth !== `Basic ${btoa(ADMIN_LOGIN)}`) {
+        if ((url.pathname.startsWith('/map') && auth !== `Basic ${btoa(ADMIN_LOGIN)}`) ||
+            (url.pathname.startsWith('/brochure') && auth !== `Basic ${btoa(ACADEMY_LOGIN)}`)) {
             return new Response("Not authorized", {
                 status: 401,
                 headers: {
