@@ -3,8 +3,6 @@
     export let autofocus = false;
     export let placeholder;
 </script>
-
-
 <input name="quote-input" type="number" 
         autofocus = {autofocus}
         placeholder={placeholder}
@@ -16,8 +14,7 @@
         step="0.01"
         bind:value={quote}
     >
-
-
+    
     <style>
         input[type="number"] {
             min-width:60%;
@@ -28,8 +25,6 @@
             font-size: 2.5em;   
             font-family: 'Roboto', sans-serif;
             border-radius: 3px;
-            display:inline-block;
-            right: 0;
         }
 
         input:valid {
