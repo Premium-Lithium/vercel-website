@@ -18,5 +18,12 @@ export async function GET( response ){
       .map((row) => columns.map((col) => row[col]).join(','))
       .join('\n')}`;
     
-    return json({data: quoteData}, { status: 200 })
+      return json({
+        status: 200,
+        headers: {
+            "Content-Type": "application/csv",
+            "Content-Disposition": `attatchment; filename*=quotes.csv`
+        },
+        body: quoteData
+    })
 }
