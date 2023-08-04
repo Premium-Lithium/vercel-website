@@ -1,13 +1,13 @@
 import { DealStatus } from '@prisma/client';
-import { getNBestInstallersForJob } from '../src/services/installerMatching.js'
-import prisma from '../src/lib/prisma.js'
+import { getNBestInstallersForJob } from '../../../services/installerMatching.js'
+import prisma from '../../../lib/prisma.js'
 
 
 const NUM_OFFERS_PER_JOB = 10;
 const NUM_JOBS_MATCHED_PER_API_CALL = 100; // This is to avoid 60s timeout on Vercel pro plan
 
 
-export default async function (request, response) {
+export async function GET(request, response) {
   console.log("Fetching all installers...");
   const installers = await prisma.installer.findMany();
 
