@@ -14,6 +14,5 @@ export async function GET( response ) {
             "Content-Type": "application/csv",
             "Content-Disposition": `attatchment; filename*=unsubed.csv`
         },
-        body: unsubedData
-    })
+        body: unsubed
 }

@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 const prisma = new PrismaClient();
 const authTenantUrl = process.env.AUTH0_TENANT_URL
 
-export async function GET(request, response) {
+export default async function (request, response) {
     console.log("fired")
     const accessToken = request?.headers?.authorization;
     if (accessToken === undefined) return;

@@ -2,7 +2,7 @@ import { DealStatus } from "@prisma/client"
 import prisma from '../../../../../lib/prisma.js'
 
 
-export async function GET(request, response) {
+export default async function (request, response) {
   const json = JSON.parse(request.body)
   const dealId = json.deal_id;
 

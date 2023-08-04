@@ -24,6 +24,6 @@ export async function GET( response ){
             "Content-Type": "application/csv",
             "Content-Disposition": `attatchment; filename*=quotes.csv`
         },
-        body: quoteData
+        body: quotes
     })
 }

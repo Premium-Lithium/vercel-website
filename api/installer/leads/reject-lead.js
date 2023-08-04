@@ -2,7 +2,7 @@ import { PrismaClient, DealStatus } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-export async function PUT(request, response) {
+export default async function (request, response) {
     const json = JSON.parse(request.body)
     const dealId = json.deal_id;
 
@@ -18,4 +18,3 @@ export async function PUT(request, response) {
 
     return response.status(200).json({ message: 'Successfully updated installer data.' });
 }
-
