@@ -14,6 +14,14 @@
     let system_summary = "here is some additional information about the system";
     let components = [];
 
+    let roof_type = "insert roof type here"
+    let solar_mount_type = "insert solar mount type here"
+    let num_storeys = "insert num storeys here"
+    let num_electricity_phases = "insert num electricity phases here"
+    let consumption = "insert consumption here"
+    let nmi = "insert nmi here"
+    let wind_region = "insert wind region here"
+
     onMount(async () => {
         const apiToken = "c19abdf00c87d5688f061474b3d0e215332dd618"; // todo: get this from env
         const url = `https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${apiToken}`;
@@ -29,6 +37,59 @@
         install_end_date = deal_info["9ff7b589a0c2b843924928cfc1af79dadf22f563_until"]
 
         postcode = getPostcodeFrom(deal_info, preview);
+
+
+// ## Customer Information
+// |||
+// |---|---|
+// {% if address -%}
+// |**Address**| {{ address }} |
+// {% endif -%}
+// {% if contact -%}
+// |**Contact**| {{ contact }} |
+// {% endif -%}
+// {% if phone -%}
+// |**Phone**| {{ phone }} |
+// {% endif -%}
+// {% if email -%}
+// |**Email**| {{ email }} |
+// {% endif -%}
+// {% if install_date -%}
+// |**Installation Date**| {{ install_date }} |
+// {% endif -%}
+// {% if summary -%}
+// |**System Summary**| {{ summary }} |
+// {% endif -%}
+// {% if notes -%}
+// |**Sales and Service Notes**| {{ notes }} |
+// {% endif -%}
+
+// {% if site_information -%}
+// ## Site Information
+// |||
+// |---|---|
+// {% if site_information.roof_type -%}
+// |**Roof Type**| {{ site_information.roof_type }} |
+// {% endif -%}
+// {% if site_information.solar_mount_type -%}
+// |**Solar Mount Type**| {{ site_information.solar_mount_type }} |
+// {% endif -%}
+// {% if site_information.num_storeys -%}
+// |**Storeys**| {{ site_information.num_storeys }} |
+// {% endif -%}
+// {% if site_information.num_electricity_phases -%}
+// |**Electricity Phases**| {{ site_information.num_electricity_phases }} |
+// {% endif -%}
+// {% if site_information.consumption -%}
+// |**Consumption**| {{ site_information.consumption }} |
+// {% endif -%}
+// {% if site_information.nmi -%}
+// |**NMI**| {{ site_information.nmi }} |
+// {% endif -%}
+// {% if site_information.wind_region -%}
+// |**Wind Region**| {{ site_information.wind_region }} |
+// {% endif -%}
+// {% endif -%}
 
         components = [
             {
@@ -46,8 +107,32 @@
                 specification: "5 kW Hybrid",
                 quantity: 1,
                 warranties: []
+            },
+            {
+                product: "Inverter",
+                sku: "SYNK-5K-SG04LP1",
+                manufacturer: "Sunsynk",
+                specification: "5 kW Hybrid",
+                quantity: 1,
+                warranties: []
+            },
+            {
+                product: "Inverter",
+                sku: "SYNK-5K-SG04LP1",
+                manufacturer: "Sunsynk",
+                specification: "5 kW Hybrid",
+                quantity: 1,
+                warranties: []
             }
         ]
+
+        roof_type = "insert roof type here"
+        solar_mount_type = "insert solar mount type here"
+        num_storeys = "insert num storeys here"
+        num_electricity_phases = "insert num electricity phases here"
+        consumption = "insert consumption here"
+        nmi = "insert nmi here"
+        wind_region = "insert wind region here"
     });
 
     function getPostcodeFrom(deal_info, obfuscate) {
@@ -56,7 +141,7 @@
         let postcode_string = deal_info[postcode_key];
 
         if(postcode_string == null) {
-            const address_key = "80ebeccb5c4130caa1da17c6304ab63858b912a1";
+            const address_key = "80ebeccb5c4130caa1da17c6304ab63858b912a1"; // todo: get this from env variables
             const address_str = deal_info[address_key];
 
             postcode_string = extractPostcodeFromAddress(address_str);
