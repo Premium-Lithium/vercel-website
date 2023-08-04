@@ -1,11 +1,26 @@
-// hooks.ts
 import type { Handle } from "@sveltejs/kit";
 import { ADMIN_LOGIN } from "$env/static/private";
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
+import { createSupabaseServerClient } from "@supabase/auth-helpers/sveltekit"
 
 export async function handle({
     event,
     resolve,
 }: Parameters<Handle>[0]): Promise<ReturnType<Handle>> {
+    event.locals.supabase = createSupabaseServerClient({
+        supabaseUrl: PUBLIC_SUPABASE_URL,
+        supabaseKey: PUBLIC_SUPABASE_ANON_KEY,
+        event,
+    });
+
+    event.locals.getSession = async () => {
+        const {
+            data: { session },
+        } = await event.locals.supabase.auth.getSession()
+        return session;
+    }
+
+
     const url = new URL(event.request.url);
 
     console.log(url.pathname)
@@ -23,5 +38,9 @@ export async function handle({
         }
     }
 
-    return resolve(event);
+    return resolve(event, {
+        filterSerializedReponseHeaders(name) {
+            return name === "content-range";
+        },
+    });
 }

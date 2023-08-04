@@ -14,7 +14,7 @@
           nodePackages.pnpm
           nodejs-slim
           postgresql
-          podman
+          docker
         ];
         shellHook = with pkgs; ''
           export PRISMA_MIGRATION_ENGINE_BINARY="${prisma-engines}/bin/migration-engine"
