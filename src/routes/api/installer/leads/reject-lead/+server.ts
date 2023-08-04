@@ -2,7 +2,7 @@ import { PrismaClient, DealStatus } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-export default async function (request, response) {
+export async function PUT(request, response) {
     const json = JSON.parse(request.body)
     const dealId = json.deal_id;
 

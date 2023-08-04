@@ -3,7 +3,7 @@ import { getNBestInstallersForJob } from '../../../services/installerMatching.js
 
 const prisma = new PrismaClient();
 
-export default async function (request, response) {
+export async function GET(request, response) {
     const installers = await prisma.installer.findMany();
 
     const jobPostcode = request.body.postcode;

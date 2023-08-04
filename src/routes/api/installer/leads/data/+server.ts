@@ -1,9 +1,9 @@
 import { PrismaClient, DealStatus } from "@prisma/client";
-
+import { json } from '@sveltejs/kit';
 const prisma = new PrismaClient();
 const authTenantUrl = process.env.AUTH0_TENANT_URL
 
-export default async function (request, response) {
+export async function GET(request, response) {
     console.log("fired")
     const accessToken = request?.headers?.authorization;
     if (accessToken === undefined) return;
@@ -11,12 +11,20 @@ export default async function (request, response) {
     const proto = request.headers['x-forwarded-proto'];
     const host = request.headers['x-forwarded-host'];
     const tokenData = await getAccessTokenDataOrFalse(accessToken)
-    if (!tokenData) return reponse.status(400).json({error: "unauthorized"})
+    if (!tokenData) return json({status:400, error:"unauthorized"})
 
     const returnData = await loadOrUndefined(tokenData[`${proto}://${host}/userdata`].installerId)
-    if (returnData === undefined) return response.status(500).json({error: "could not get data"});
+    if (returnData === undefined) return json({status:500, error: "could not get data"});
 
-    return response.status(200).json(returnData);
+    return json({
+        status: 200,
+        headers: {
+            "Content-Type": "application/csv",
+            "Content-Disposition": `attatchment; filename*=unsubed.csv`
+        },
+        body: returnData
+    });
+    // return response.status(200).json(returnData);
 }
 
 async function getAccessTokenDataOrFalse(token) {
