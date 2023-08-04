@@ -1,6 +1,4 @@
 import { PrismaClient, DealStatus } from "@prisma/client";
-import util from "util";
-
 
 const prisma = new PrismaClient();
 const authTenantUrl = process.env.AUTH0_TENANT_URL

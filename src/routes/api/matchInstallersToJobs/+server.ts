@@ -1,4 +1,4 @@
-import { matchInstallersTo } from '../src/services/installerMatching.js'
+import { matchInstallersTo } from '../../../services/installerMatching.js'
 
 
 const DEFAULT_NUM_INSTALLERS = 5;

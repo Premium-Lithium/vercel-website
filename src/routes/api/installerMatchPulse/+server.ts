@@ -1,6 +1,6 @@
 import { DealStatus } from '@prisma/client';
-import { getNBestInstallersForJob } from '../src/services/installerMatching.js'
-import prisma from '../src/lib/prisma.js'
+import { getNBestInstallersForJob } from '../../../services/installerMatching.js'
+import prisma from '../../../lib/prisma.js'
 
 
 const NUM_OFFERS_PER_JOB = 10;
