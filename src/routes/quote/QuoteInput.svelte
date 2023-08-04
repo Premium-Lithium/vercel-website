@@ -17,7 +17,7 @@
     
     <style>
         input[type="number"] {
-            min-width:60%;
+            width:40vw;
             margin: 15px;
             border: 1px solid #000;
             height: 60px;
