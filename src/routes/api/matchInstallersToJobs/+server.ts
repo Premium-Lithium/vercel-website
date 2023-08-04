@@ -1,10 +1,10 @@
-import { matchInstallersTo } from '../src/services/installerMatching.js'
+import { matchInstallersTo } from '../../../services/installerMatching.js'
 
 
 const DEFAULT_NUM_INSTALLERS = 5;
 
 
-export default async function (request, response) {
+export async function POST(request, response) {
   console.log("Running installer matching...")
   if (request.method !== 'POST')
     return response.status(405).json({ message: 'Method not allowed' });

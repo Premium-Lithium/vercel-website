@@ -1,5 +1,5 @@
 import { DealStatus } from "@prisma/client"
-import prisma from '../../../src/lib/prisma.js'
+import prisma from '../../../../../lib/prisma.js'
 
 
 export default async function (request, response) {

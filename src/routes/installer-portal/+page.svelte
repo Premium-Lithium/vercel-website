@@ -41,7 +41,7 @@
     }
 
     async function fetchData() {
-        const dataUrl = `${$page.url.origin}/api/installer/leads/data`;
+        const dataUrl = `${$page.url.origin}/installer-portal`;
 
         const res = await fetch(dataUrl, {
             method: 'GET',

@@ -210,8 +210,3 @@ async function getJobDataFromPipedrive() {
       longitude: 0.0
     };
   });
-
-  await assignLatLonPointsTo(jobs);
-
-  return jobs;
-}

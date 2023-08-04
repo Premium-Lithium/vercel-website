@@ -1,14 +1,18 @@
 import { PrismaClient } from "@prisma/client";
+import { json } from '@sveltejs/kit';
 const prisma = new PrismaClient();
 
-export default async function GET(request, response) {
+export async function GET( response ) {
     const unsubed = await prisma.unsubscribedEmails.findMany();
     const unsubcolumns = ['email', 'reason']
     const unsubedData = `${unsubcolumns.join(',')}\n${unsubed
         .map((row) => unsubcolumns.map((col) => row[col]).join(','))
         .join('\n')}`;
-    console.log(unsubedData);
-    response.writeHead(200, { 'Content-Type': 'apllication/json' });
-    response.end(unsubedData);
-    return response;
+    return json({
+        status: 200,
+        headers: {
+            "Content-Type": "application/csv",
+            "Content-Disposition": `attatchment; filename*=unsubed.csv`
+        },
+        body: unsubed
 }
