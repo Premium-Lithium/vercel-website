@@ -3,7 +3,7 @@
     import { onMount } from 'svelte'
 	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
     import QuoteInput from './QuoteInput.svelte';
-	import { json } from '@sveltejs/kit';
+    import { fade } from 'svelte/transition';
 
     const installerId = $page.url.searchParams.get('installerId');
     const dealId = $page.url.searchParams.get('dealId');
@@ -17,6 +17,7 @@
     let dateOfCompletion;
     let currentDate;
     let loading = false;
+    let showMaterialBreakdown = false;
 
 
     onMount(async () => {
@@ -85,22 +86,43 @@
 
         <h2>Please enter your quote in GBP:</h2>
         <div class="inputs">
-        <div class="block">
-            <label>Labour:</label>
-            <QuoteInput bind:quote={quote.labour} autofocus={true} placeholder={"0.00"}/>
-        </div>
-        <div class="block">
-            <label>Scaffolding:</label>
-            <QuoteInput bind:quote={quote.scaffolding} placeholder={"0.00"}/>
-        </div>
-        <div class="block">
-            <label>Materials:</label>
-            <QuoteInput bind:quote={quote.materials} placeholder={"0.00"}/>
-        </div>
-        <div class="block">
-            <label>Certifications:</label>
-            <QuoteInput bind:quote={quote.certification} placeholder={"0.00"}/>
-        </div>
+            <div class="block">
+                <details><summary>Labour:</summary>
+                    <h3>How much will <span style="color: var(--plblue);">labour</span> <br>for this job cost you?</h3></details>
+                <QuoteInput bind:quote={quote.labour} autofocus={true} placeholder={"0"}/>
+            </div>
+            <div class="block">
+                <details><summary>Scaffolding:</summary><h3>How much will <span style="color: var(--plblue);">scaffolding</span> <br>for this job cost you?</h3></details>
+                <QuoteInput bind:quote={quote.scaffolding} placeholder={"0"}/>
+            </div>
+            <div class="block">
+                <details open><summary>Materials:</summary>
+                    <span class="material-text">
+                        <h3>How much will additional materials cost you?<br>Please note that <span style="color: var(--plblue);">we provide the following</span>:</h3>
+                        <h3>For <span style="color: var(--plblue);">battery</span> only jobs:</h3>
+                        <ul>
+                           <li>Batteries</li> 
+                           <li>Inverters</li>
+                           <li>Isolators</li>
+                           <li>DC Isolator</li>
+                           <li>AC Isolator</li>
+                           <li>Fuses</li>
+                           <li>DC cables</li>
+                           <li>Communication cables</li>
+                        </ul>
+                        <h3>For <span style="color: var(--plblue);">solar</span>  jobs:</h3>
+                        <ul>
+                           <li>Solar panels</li>
+                        </ul>
+                        <p>If the job incldes <span style="color: var(--plblue);">Immersion Controllers</span> or <span style="color: var(--plblue);">EV Chargers</span>,<br>these will be provided by us.</p>
+                    </span>
+                </details>
+                <QuoteInput bind:quote={quote.materials} placeholder={"0"}/>
+            </div>
+            <div class="block">
+                <details><summary>Certifications:</summary><h3>How much will any<br>required <span style="color: var(--plblue);">certifications</span> for this job cost you?</h3></details>
+                <QuoteInput bind:quote={quote.certification} placeholder={"0"}/>
+            </div>
         </div>
 
         {#if !quoteIsValid && Object.keys(quote).filter(key => quote[key] == null).length !== 0}
@@ -139,7 +161,6 @@
             <h2>Sending quote...</h2>
         {/if}
         
-
     </div>
     {:else} 
     <div class="quote-gone-through">
@@ -150,12 +171,13 @@
 
 <style>
     .body {
-        margin: auto;
+        margin: 0px;
         width: 100vw;
         height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
+        
     }
     .quote-input > h2 {
         font-size: 2em;
@@ -171,16 +193,29 @@
     
     label{
         font-size: 1.5em; 
-        width: 180px;
+        min-width: 150px;
         margin: 5px;
-        text-align: right;
+        text-align: left;
         display: inline-block;
+        font-family: 'Roboto', sans-serif;
       }
+
+    .block {
+        align-items: center;
+    }
 
     .logo{
         position: absolute;
         align-self: center;
         top: 0;
+    }
+
+    .material-text {
+        color: #000;
+        text-align: center;
+        padding: 10px 10px;
+        z-index: 1;
+        font-family: 'Roboto', sans-serif;
     }
 
     .quote-input {
@@ -189,8 +224,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        top: 15vh;   
-        
+        top: 10%;    
     }
 
     .quote-input > input[type="submit"] {
@@ -201,7 +235,7 @@
         width: 200px;
         align-self: center;
         padding: 10px 5px;
-        margin-top: 30px;
+        margin: 30px;
         border-radius: 5px;
     }
 
@@ -227,13 +261,66 @@
     }
 
     .quote-input > input[type="date"]:invalid {
-        border: solid 2px black;
+        border: solid 1px black;
         transition: border-color 0.1s ease-in-out;
     }
     .error-label {
         color: rgb(214, 25, 25);
         font-family: 'Roboto', sans-serif;
         font-size: 0.85em;
+    }
+    li{
+        text-align: left;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    p {
+        text-align: left;
+        font-family: 'Roboto', sans-serif;   
+    }
+
+    .block > * > h3 {
+        text-align: left;
+        font-family: 'Roboto', sans-serif;  
+    }
+
+    :root {
+        --padding: 16px;
+    }
+
+    details {
+        padding: 0 var(--padding);
+        border-radius: 4px;
+        border: 1px solid black;
+        width: 40vw;
+    }
+
+    details > summary {
+        display: flex;
+        padding: var(--padding);
+        margin: 0 calc(var(--padding) * -1);
+        font-size: 1.2em;
+        cursor: pointer;
+        justify-content: space-between;
+        list-style: none;
+        width: 40vw;
+    }
+    details[open] > summary {
+        border-bottom: 1px solid black;
+    }
+    details > summary::after {
+        content: "+";
+    }
+    details[open] > summary::after {
+        content: "-";
+    }
+    details > summary::-webkit-details-marker {
+        display: none;  
+    }
+
+    summary {
+        font-family: 'Roboto', sans-serif; 
+        font-weight: bolder;
     }
 
 </style>
