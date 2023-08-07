@@ -5,13 +5,13 @@
     import { onMount } from 'svelte'
 
     const dealId = $page.url.searchParams.get('dealId');
-    const preview = $page.url.searchParams.get('preview');
+    const isPreview = $page.url.searchParams.get('preview');
 
     let postcode = "";
-    let install_start_date = "Aug 1 2023";
-    let install_end_date = "Aug 31 2023";
-    let customer_first_name = "";
-    let system_summary = "here is some additional information about the system";
+    let installStartDate = "";
+    let installEndDate = "";
+    let customerName = "";
+    let additionalNotes = "";
     let components = [];
 
     let roof_type = "insert roof type here"
@@ -28,103 +28,16 @@
 
         const response = await fetch(url);
         const responseData = await response.json();
-        const deal_info = responseData.data;
-        console.log(deal_info);
+        const dealInfo = responseData.data;
 
-        customer_first_name = deal_info.person_name;
+        customerName = getCustomerName(dealInfo, preview);
 
-        install_start_date = deal_info["9ff7b589a0c2b843924928cfc1af79dadf22f563"]
-        install_end_date = deal_info["9ff7b589a0c2b843924928cfc1af79dadf22f563_until"]
+        installStartDate = dealInfo["9ff7b589a0c2b843924928cfc1af79dadf22f563"];
+        installEndDate = dealInfo["9ff7b589a0c2b843924928cfc1af79dadf22f563_until"];
+        additionalNotes = dealInfo["a81171c91ae962e635bc81522c807c67d52739de"];
 
-        postcode = getPostcodeFrom(deal_info, preview);
-
-
-// ## Customer Information
-// |||
-// |---|---|
-// {% if address -%}
-// |**Address**| {{ address }} |
-// {% endif -%}
-// {% if contact -%}
-// |**Contact**| {{ contact }} |
-// {% endif -%}
-// {% if phone -%}
-// |**Phone**| {{ phone }} |
-// {% endif -%}
-// {% if email -%}
-// |**Email**| {{ email }} |
-// {% endif -%}
-// {% if install_date -%}
-// |**Installation Date**| {{ install_date }} |
-// {% endif -%}
-// {% if summary -%}
-// |**System Summary**| {{ summary }} |
-// {% endif -%}
-// {% if notes -%}
-// |**Sales and Service Notes**| {{ notes }} |
-// {% endif -%}
-
-// {% if site_information -%}
-// ## Site Information
-// |||
-// |---|---|
-// {% if site_information.roof_type -%}
-// |**Roof Type**| {{ site_information.roof_type }} |
-// {% endif -%}
-// {% if site_information.solar_mount_type -%}
-// |**Solar Mount Type**| {{ site_information.solar_mount_type }} |
-// {% endif -%}
-// {% if site_information.num_storeys -%}
-// |**Storeys**| {{ site_information.num_storeys }} |
-// {% endif -%}
-// {% if site_information.num_electricity_phases -%}
-// |**Electricity Phases**| {{ site_information.num_electricity_phases }} |
-// {% endif -%}
-// {% if site_information.consumption -%}
-// |**Consumption**| {{ site_information.consumption }} |
-// {% endif -%}
-// {% if site_information.nmi -%}
-// |**NMI**| {{ site_information.nmi }} |
-// {% endif -%}
-// {% if site_information.wind_region -%}
-// |**Wind Region**| {{ site_information.wind_region }} |
-// {% endif -%}
-// {% endif -%}
-
-        components = [
-            {
-                product: "Battery",
-                sku: "Power Pod",
-                manufacturer: "Premium Lithium Ltd",
-                specification: "10 kWh",
-                quantity: 1,
-                warranties: [ "one", "two", "three" ]
-            },
-            {
-                product: "Inverter",
-                sku: "SYNK-5K-SG04LP1",
-                manufacturer: "Sunsynk",
-                specification: "5 kW Hybrid",
-                quantity: 1,
-                warranties: []
-            },
-            {
-                product: "Inverter",
-                sku: "SYNK-5K-SG04LP1",
-                manufacturer: "Sunsynk",
-                specification: "5 kW Hybrid",
-                quantity: 1,
-                warranties: []
-            },
-            {
-                product: "Inverter",
-                sku: "SYNK-5K-SG04LP1",
-                manufacturer: "Sunsynk",
-                specification: "5 kW Hybrid",
-                quantity: 1,
-                warranties: []
-            }
-        ]
+        postcode = getPostcodeFrom(dealInfo, preview);
+        components = getComponentsList();
 
         roof_type = "insert roof type here"
         solar_mount_type = "insert solar mount type here"
@@ -134,6 +47,15 @@
         nmi = "insert nmi here"
         wind_region = "insert wind region here"
     });
+
+    function getCustomerName(dealInfo, preview) {
+        let name = dealInfo.person_name;
+
+        if(preview)
+            name = name.split(' ')[0];
+
+        return name
+    }
 
     function getPostcodeFrom(deal_info, obfuscate) {
         const postcode_key = "80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code";
@@ -170,6 +92,29 @@
             return match[0];
         }
     }
+
+    function getComponentsList() {
+        components = [
+            {
+                product: "Battery",
+                sku: "Power Pod",
+                manufacturer: "Premium Lithium Ltd",
+                specification: "10 kWh",
+                quantity: 1,
+                warranties: [ "one", "two", "three" ]
+            },
+            {
+                product: "Inverter",
+                sku: "SYNK-5K-SG04LP1",
+                manufacturer: "Sunsynk",
+                specification: "5 kW Hybrid",
+                quantity: 1,
+                warranties: []
+            }
+        ]
+
+        return components;
+    }
 </script>
 
 <div class="markdown-body" style="width: 800px;">
@@ -193,15 +138,15 @@
             </tr>
             <tr class="even">
                 <td><strong>Contact</strong></td>
-                <td>{customer_first_name}</td>
+                <td>{customerName}</td>
             </tr>
             <tr class="odd">
                 <td><strong>Installation Date</strong></td>
-                <td>{install_start_date} - {install_end_date}</td>
+                <td>{installStartDate} - {installEndDate}</td>
             </tr>
             <tr class="even">
                 <td><strong>System Summary</strong></td>
-                <td>{system_summary}</td>
+                <td>{additionalNotes}</td>
             </tr>
         </tbody>
     </table>
@@ -229,7 +174,7 @@
             </tr>
         </thead>
         <tbody>
-            {#each components as {product, sku, manufacturer, specification, quantity, warranties}, i}
+            {#each components as {product, sku, manufacturer, specification, quantity, warranties}}
                 <tr class="odd">
                     <td>{product}</td>
                     <td>{sku}</td>
