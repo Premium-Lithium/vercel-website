@@ -157,7 +157,7 @@
     </div>
     {:else} 
     <div class="quote-gone-through">
-        <h2>Quote successful, you may now close this page!</h2>
+        <h2>Quote successful!<br>You may now close this page!</h2>
     </div>
     {/if}
 </div>
@@ -234,6 +234,13 @@
     .quote-input > h2, .quote-gone-through > h2, input[type="submit"] {
             font-size: 2em; 
             text-align:center
+    }
+
+    .quote-gone-through {
+        display: flex;
+        flex-direction: row;
+        text-align: center;
+        align-self: center;
     }
 
     input[type="submit"] {
