@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-
-const prisma = new PrismaClient();
+import prisma from '../../src/lib/prisma.js'
 
 
 export default async function (request, response) {
@@ -213,8 +210,3 @@ async function getJobDataFromPipedrive() {
       longitude: 0.0
     };
   });
-
-  await assignLatLonPointsTo(jobs);
-
-  return jobs;
-}

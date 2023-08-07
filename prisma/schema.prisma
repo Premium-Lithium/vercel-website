@@ -3,25 +3,24 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("POSTGRES_PRISMA_URL")
-  directUrl         = env("POSTGRES_URL_NON_POOLING")
-  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING")
+  provider = "postgresql"
+  url = env("DATABASE_URL")
 }
 
 model Job {
-  id           Int      @id @default(autoincrement()) @unique
+  id           Int      @id @unique @default(autoincrement())
   createdAt    DateTime @default(now())
   customerName String
   address      String
   postcode     String
   latitude     Float
   longitude    Float
+  numQuotes    Int      @default(5)
   Deals        Deal[]
 }
 
 model Installer {
-  id        Int     @id @default(autoincrement()) @unique
+  id        Int     @id @unique @default(autoincrement())
   name      String
   isPartner Boolean
   address   String
@@ -32,13 +31,14 @@ model Installer {
 }
 
 model Deal {
-  id          Int       @id @default(autoincrement()) @unique
+  id          Int        @id @unique @default(autoincrement())
   jobId       Int
   createdAt   DateTime   @default(now())
   installerId Int
   status      DealStatus @default(PENDING)
   Installer   Installer  @relation(fields: [installerId], references: [id])
   Job         Job        @relation(fields: [jobId], references: [id])
+
   @@unique([jobId, installerId])
 }
 
@@ -46,4 +46,24 @@ enum DealStatus {
   PENDING
   ACCEPTED
   REJECTED
+  EXPIRED
+}
+
+model Quote {
+  installerId Int
+  dealId  Int
+  totalQuote  Float
+  quoteLabour Float
+  quoteScaffolding  Float
+  quoteMaterials  Float
+  quoteCertification  Float
+  dateOfCompletion  DateTime
+  currTime  DateTime @default(now())
+  @@id([installerId, dealId])
+  @@unique([installerId, dealId])
+}
+
+model UnsubscribedEmails {
+  email String @id @unique
+  reason String
 }

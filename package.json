@@ -13,7 +13,8 @@
 		"test": "playwright test",
 		"test:unit": "vitest",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"format": "prettier --plugin-search-dir . --write ."
+		"format": "prettier --plugin-search-dir . --write .",
+        "postinstall": "prisma generate"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
@@ -47,9 +48,6 @@
 		"@prisma/client": "^4.13.0",
 		"@vercel/kv": "^0.2.2",
 		"@vercel/postgres": "^0.4.0",
-		"cheerio": "1.0.0-rc.12",
-		"langchain": "^0.0.120",
-		"openai": "^3.3.0",
 		"svelte-material-icons": "^3.0.5",
 		"vercel": "^31.0.1"
 	}
