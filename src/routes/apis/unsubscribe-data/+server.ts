@@ -15,4 +15,5 @@ export async function GET( response ) {
             "Content-Disposition": `attatchment; filename*=unsubed.csv`
         },
         body: unsubed
+    });
 }
