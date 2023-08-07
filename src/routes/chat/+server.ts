@@ -5,12 +5,15 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
+import { createStructuredOutputChainFromZod } from "langchain/chains/openai_functions";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { BufferMemory } from 'langchain/memory';
+import  { z } from 'zod';
 
-const CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT = `Given the following conversation and a follow up question,\
-return the conversation history excerpt that includes any relevant context to the question if it exists\
+const CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT = `Given the following conversation and a follow up question,
+return the conversation history excerpt that includes any relevant context to the question if it exists
 and rephrase the follow up question to be a standalone question.
+If the conversation history is empty, greet the customer with a friendly emoji.
 Chat History:
 {chat_history}
 Follow Up Input: {question}
@@ -23,6 +26,14 @@ If you don't know the answer, just say that you don't know, don't try to make up
 Standalone question: <Rephrased question here>
 \`\`\`
 Your answer:`;
+
+const zodSchema = z.object({
+    answer: z.string().describe("The answer to the user's query"),
+    suggestions: z.array(
+        z.object( {
+        text: z.string().describe("A suggested follow-up question."),
+    })).describe("An array of suggested follow-up questions."),
+})
 
 let chain;
 let model;
@@ -119,7 +130,7 @@ if(true){
         new OpenAIEmbeddings(),
     );
 
-    model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0.2, maxTokens: 250 });
+    model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 250 });
 
 
     // let parser = new CustomListOutputParser({length: 3, separator: "|"});
@@ -144,7 +155,7 @@ if(true){
     //     },
     // });    
     
-    chain = ConversationalRetrievalQAChain.fromLLM(
+    let conversationChain = ConversationalRetrievalQAChain.fromLLM(
         model, 
         vectorStore.asRetriever(),
         {
@@ -157,6 +168,12 @@ if(true){
         }
         },   
     );
+
+    let outputChain = createStructuredOutputChainFromZod(zodSchema, {
+        
+        chatHistory: myChatHistory,
+        question: myQuestion,
+    })
 }
 
 export async function POST({ request }) {
@@ -166,6 +183,7 @@ export async function POST({ request }) {
         const response = await chain.call({
             question: prompt[prompt.length-1]['content']
         });
+        console.log(response);
         return json({message: response}, {status: 200});
     } catch (error)
     {

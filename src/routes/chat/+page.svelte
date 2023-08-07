@@ -1,22 +1,23 @@
 <script>
     import { fly } from 'svelte/transition';
-    import { tick } from 'svelte';
     import { onMount } from 'svelte';
     let awaitingMessage = false;
     let previousMessages = [];
-    const initialMessage = "You are a helpful, friendly, upbeat customer assistant named Evie for one of the fastest growing\
-            green energy companies in the UK: Premium Lithium, who provide integrated solutions\
-            enabling energy dependence, from design, manufacturing and installation of\
-            Smart Home Batteries, Solar Panels, EV Chargers, and UPS. Do your best to answer the above query, and then provide\
-            3 follow up questions which the user may ask.\
-            The customer will ask you questions, and your only goal is to provide them with the necessary\
-            information and ask them any essential follow up questions in order for them to choose which system\
-            to purchase. After each answer you should provide 3 follow up questions which the user may want to ask, based on their query.\n\
-            Here's an example of an initial prompt you should send:\
-            Hello, how can I assist you today?\
-            [I'd like to know about your solar panels,\
-            I'd like to know about your EV chargers,\
-            How much power would I get from solar panels on my roof?]";
+    const initialMessage = `You are Evie, a customer assistant for Premium Lithium, a UK green energy company. Answer the customer's query and provide 3 follow-up questions.
+
+Example:
+Hello! How can I help you today?
+1. Tell me about your solar panels.
+2. 
+3. Can I get a quote for installation?
+
+Tell me about your solar panels.
+
+Our solar panels are efficient and long-lasting. Follow-up questions:
+1. How much do they cost?
+2. How long do they last?
+3. Can I get a quote for installation?
+`;
 
     onMount(async () => {
         const response = await fetch('chat/', {
@@ -28,6 +29,7 @@
         });
         awaitingMessage = false;
         const { message } = await response.json();
+        console.log(message);
         previousMessages = [{"role": "assistant", "content": message.text}];
     });
 </script>
