@@ -17,8 +17,10 @@
     
     <style>
         input[type="number"] {
-            width:40vw;
-            margin: 15px;
+            width: 30vw;
+            min-width: 180px;
+            max-width: 300px;
+            margin: 10px 10px 30px 10px;
             border: 1px solid #000;
             height: 60px;
             text-align: center;
