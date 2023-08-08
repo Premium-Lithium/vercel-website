@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 
 
 export async function POST({ request }) {
-    const { subject, recipients, body, sender } = await request.json();
+    const { subject, recipients, body } = await request.json();
 
     const messagePayload = {
         message: {
@@ -11,17 +11,9 @@ export async function POST({ request }) {
                 contentType: "HTML",
                 content: body
             },
-            toRecipients: []
+            toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
         }
     };
-
-    recipients.forEach(email => {
-        messagePayload.message.toRecipients.push({
-            emailAddress: {
-                address: email
-            }
-        });
-    });
 
     const apiToken = await getNewAPIToken();
 
