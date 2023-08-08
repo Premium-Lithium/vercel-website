@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+<<<<<<< HEAD:src/routes/api/getNBestInstallers/+server.ts
 import { getNBestInstallersForJob } from '../../../lib/services/installerMatching.js'
+=======
+import { getNBestInstallersForJob } from '../../services/installerMatching.js'
+>>>>>>> b3367500cf3048961562b4c9d90480bcc0ef7cf4:src/routes/getNBestInstallers/+server.ts
 
 const prisma = new PrismaClient();
 

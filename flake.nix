@@ -13,7 +13,7 @@
           nodePackages.prisma
           nodePackages.pnpm
           nodejs-slim
-          postgresql
+          postgresql_15
           podman
         ];
         shellHook = with pkgs; ''
