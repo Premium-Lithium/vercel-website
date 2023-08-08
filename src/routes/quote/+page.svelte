@@ -4,6 +4,7 @@
 	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
     import QuoteInput from './QuoteInput.svelte';
     import { fade } from 'svelte/transition';
+    import { supabase } from '$lib/supabase.ts'
 
     const installerId = $page.url.searchParams.get('installerId');
     const dealId = $page.url.searchParams.get('dealId');
@@ -25,33 +26,20 @@
     });
 
     async function postInstallerQuote(installerId, dealId) {
+        console.log(supabase)
+
+        const { error } = await supabase
+            .from('quotes')
+            .insert({
+                installerId: installerId,
+                dealId: dealId,
+                quoteValue: totalQuote, 
+                dateOfCompletion: new Date(dateOfCompletion),
+                currTime: new Date(currentDate), 
+            })
         console.log("posting installer quote")
-            let currTime = new Date();
-            loading = true;
-            const response = await fetch('quote/', { 
-                method: "POST",
-                body: JSON.stringify({
-                    "values": [
-                        [installerId, dealId, totalQuote, quote.labour, quote.scaffolding, quote.materials, quote.certification, new Date(dateOfCompletion), new Date(currTime)]
-                    ]
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            loading = false;
-            if (response.ok) {
-                return {
-                    statusCode: 200
-                };
-            } else {
-                console.log(`API request failed with status ${response.status} ${response.statusText}`);
-                return {
-                    statusCode: response.status,
-                    body: response.statusText,
-                };
-            }
-        }
+        console.log(error)
+    }
 
     $: {
         totalQuote = 0;
@@ -100,9 +88,10 @@
                 bind:dialog={submitDialog}
                 yesFunc={
                     async () => {submitDialog.close();
-                    response = await postInstallerQuote(installerId, dealId);
-                    successfulQuote = response.statusCode === 200? true : false}
-                }
+                    await postInstallerQuote(installerId, dealId);
+                    successfulQuote = true;
+
+                }}
                 noFunc={() => {submitDialog.close()}}>
                 <h2 slot="header">
                     Confirm quote of £{totalQuote}?
