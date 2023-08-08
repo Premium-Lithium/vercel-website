@@ -29,8 +29,20 @@ export async function POST({ request }) {
     }
 
     // Then work out who we'd like to send emails to
-    let targetInstallers = requestData.to_installers;
-    // todo: search for nearest installers here
+    let targetInstallers = [];
+
+    if('to' in requestData) {
+        console.log(`sending quote request to ${requestData.to}`);
+        // todo:
+        targetInstallers = requestData.to;
+    }
+    else if('to_nearest' in requestData) {
+        console.log(`finding nearest ${requestData.to_nearest} installers to deal ${requestData.for_deal}`);
+
+        // todo: search for nearest installers here
+
+        targetInstallers = [];
+    }
 
     // Remove any installers from the list who've already responded (either by quote, or asking to unsubscribe)
     let installers = await removeAlreadyResponded(targetInstallers, requestData.for_deal);
