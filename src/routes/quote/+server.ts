@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
-import prisma from '$lib/prisma.js';
+//import prisma from '$lib/prisma.js';
+import { supabase } from '$lib/supabase.js'
 import { getNewQuotes } from '$lib/services/quoteBot.js';
 
 export async function POST({ request }) {
@@ -17,23 +18,11 @@ export async function POST({ request }) {
         currTime,
     ]] = values;
 
-    try {
-      newQuote = await prisma.Quote.create({
-      data: {
-        installerId: parseInt(installerId),
-        dealId: parseInt(dealId),
-        totalQuote: parseFloat(totalQuote), 
-        quoteLabour: parseFloat(quoteLabour),
-        quoteScaffolding: parseFloat(quoteScaffolding),
-        quoteMaterials: parseFloat(quoteMaterials),
-        quoteCertification: parseFloat(quoteCertification),
-        dateOfCompletion: dateOfCompletion,
-        currTime: currTime, 
-      },
-    });
-    } catch (e) {
-      newQuote = await prisma.Quote.update({
-        data: {
+    console.log("hi")
+
+    const { error } = await supabase
+      .from('Quote')
+      .upsert({
           installerId: parseInt(installerId),
           dealId: parseInt(dealId),
           totalQuote: parseFloat(totalQuote), 
@@ -43,14 +32,7 @@ export async function POST({ request }) {
           quoteCertification: parseFloat(quoteCertification),
           dateOfCompletion: dateOfCompletion,
           currTime: currTime, 
-        },
-      where:{
-        installerId_dealId: {
-          installerId: parseInt(installerId),
-          dealId: parseInt(dealId),
-        }
-    }});
-    }
+      })
 
     if (newQuote === undefined) return json({}, {status:500})
     getNewQuotes(values);
