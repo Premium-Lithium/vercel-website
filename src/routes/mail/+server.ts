@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
 import addFormats from "ajv-formats";
+import querystring from 'querystring';
+
 import Ajv from 'ajv';
 
 import emailSchema from './schema.js';
@@ -15,11 +17,13 @@ export async function POST({ request }) {
     const requestData = await request.json();
     const validationErrors = validate(requestData);
 
+    // Check that the request body obeys the schema
     if(validationErrors.length) {
-        const message = validationErrors.join(" ");
+        const message = validationErrors.join(", ");
         return json({ message: `${message}` }, { status: 400 })
     }
 
+    // Build the email
     const messagePayload = {
         message: {
             subject: requestData.subject,
@@ -31,6 +35,7 @@ export async function POST({ request }) {
         }
     };
 
+    // Send the email
     const apiToken = await getNewAPIToken();
 
     const headers = {
@@ -49,9 +54,7 @@ export async function POST({ request }) {
     fetch(`https://graph.microsoft.com${apiUrl}`, options)
         .then(res => {
             if (res.status === 202) {
-                return {
-                    statusCode: 202
-                };
+                return { statusCode: 202 };
             } else {
                 console.log(`API request failed with status ${res.status} ${res.statusText}`);
                 return {
@@ -61,10 +64,10 @@ export async function POST({ request }) {
             }
         })
         .catch(error => {
-            console.error(`Fetch error: ${error.message}`);
+            return json({ message: `Failed to send email: ${error.message}`}, { status: 500 })
         });
 
-    return json({}, { status: 200 })
+    return json({ message: `Email sent successfully from ${requestData.sender}`}, { status: 200 })
 }
 
 
@@ -74,28 +77,35 @@ function validate(requestData) {
 
     let requestErrors = [];
 
-    if (!valid)
+    if(!valid) {
         requestErrors = validate.errors.map(error => error.message);
+        return requestErrors;
+    }
 
     const sender = requestData.sender;
     if(!sender.endsWith("@premiumlithium.com"))
         requestErrors.push("Sender must be a Premium Lithium email address. ");
 
     return requestErrors;
-    // return json({ mesage: `${requestErrors}` }, { status: 400 })
 }
 
 async function getNewAPIToken() {
     const mailClientID = process.env.MICROSOFT_CLIENT_ID;
     const mailClientSecret = process.env.MICROSOFT_CLIENT_SECRET;
 
-    const payload = `grant_type=client_credentials&client_id=${encodeURIComponent(mailClientID)}&client_secret=${encodeURIComponent(mailClientSecret)}&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default`;
+    const data = {
+        grant_type: "client_credentials",
+        client_id: mailClientID,
+        client_secret: mailClientSecret,
+        scope: "https://graph.microsoft.com/.default"
+    };
+    const payload = querystring.stringify(data);
 
     const headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     };
 
-    const apiUrl = "/ec4a16f7-9397-4fb3-9bb0-392911e75904/oauth2/v2.0/token";
+    const apiUrl = `/${process.env.AUTH0_TENANT_ID}/oauth2/v2.0/token`;
 
     const options = {
         method: 'POST',
