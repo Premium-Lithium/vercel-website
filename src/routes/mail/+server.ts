@@ -2,13 +2,13 @@ import { json } from '@sveltejs/kit';
 
 
 export async function POST({ request }) {
-    const { subject, recipients, body } = await request.json();
+    const { subject, recipients, body, content_type } = await request.json();
 
     const messagePayload = {
         message: {
             subject: subject,
             body: {
-                contentType: "HTML",
+                contentType: content_type,
                 content: body
             },
             toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
