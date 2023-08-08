@@ -1,0 +1,428 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 15.3
+-- Dumped by pg_dump version 15.3
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: default
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+ALTER SCHEMA public OWNER TO "default";
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: default
+--
+
+COMMENT ON SCHEMA public IS '';
+
+
+--
+-- Name: DealStatus; Type: TYPE; Schema: public; Owner: default
+--
+
+CREATE TYPE public."DealStatus" AS ENUM (
+    'PENDING',
+    'ACCEPTED',
+    'REJECTED',
+    'EXPIRED'
+);
+
+
+ALTER TYPE public."DealStatus" OWNER TO "default";
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: Deal; Type: TABLE; Schema: public; Owner: default
+--
+
+CREATE TABLE public."Deal" (
+    id integer NOT NULL,
+    "jobId" integer NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "installerId" integer NOT NULL,
+    status public."DealStatus" DEFAULT 'PENDING'::public."DealStatus" NOT NULL
+);
+
+
+ALTER TABLE public."Deal" OWNER TO "default";
+
+--
+-- Name: Deal_id_seq; Type: SEQUENCE; Schema: public; Owner: default
+--
+
+CREATE SEQUENCE public."Deal_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Deal_id_seq" OWNER TO "default";
+
+--
+-- Name: Deal_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: default
+--
+
+ALTER SEQUENCE public."Deal_id_seq" OWNED BY public."Deal".id;
+
+
+--
+-- Name: Installer; Type: TABLE; Schema: public; Owner: default
+--
+
+CREATE TABLE public."Installer" (
+    id integer NOT NULL,
+    name text NOT NULL,
+    "isPartner" boolean NOT NULL,
+    address text NOT NULL,
+    postcode text NOT NULL,
+    latitude double precision NOT NULL,
+    longitude double precision NOT NULL
+);
+
+
+ALTER TABLE public."Installer" OWNER TO "default";
+
+--
+-- Name: Installer_id_seq; Type: SEQUENCE; Schema: public; Owner: default
+--
+
+CREATE SEQUENCE public."Installer_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Installer_id_seq" OWNER TO "default";
+
+--
+-- Name: Installer_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: default
+--
+
+ALTER SEQUENCE public."Installer_id_seq" OWNED BY public."Installer".id;
+
+
+--
+-- Name: Job; Type: TABLE; Schema: public; Owner: default
+--
+
+CREATE TABLE public."Job" (
+    id integer NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "customerName" text NOT NULL,
+    address text NOT NULL,
+    postcode text NOT NULL,
+    latitude double precision NOT NULL,
+    longitude double precision NOT NULL,
+    "numQuotes" integer DEFAULT 5 NOT NULL
+);
+
+
+ALTER TABLE public."Job" OWNER TO "default";
+
+--
+-- Name: Job_id_seq; Type: SEQUENCE; Schema: public; Owner: default
+--
+
+CREATE SEQUENCE public."Job_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Job_id_seq" OWNER TO "default";
+
+--
+-- Name: Job_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: default
+--
+
+ALTER SEQUENCE public."Job_id_seq" OWNED BY public."Job".id;
+
+
+--
+-- Name: Quote; Type: TABLE; Schema: public; Owner: default
+--
+
+CREATE TABLE public."Quote" (
+    "installerId" integer NOT NULL,
+    "dealId" integer NOT NULL,
+    "totalQuote" double precision NOT NULL,
+    "quoteLabour" double precision NOT NULL,
+    "quoteScaffolding" double precision NOT NULL,
+    "quoteMaterials" double precision NOT NULL,
+    "quoteCertification" double precision NOT NULL,
+    "dateOfCompletion" timestamp(3) without time zone NOT NULL,
+    "currTime" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public."Quote" OWNER TO "default";
+
+--
+-- Name: UnsubscribedEmails; Type: TABLE; Schema: public; Owner: default
+--
+
+CREATE TABLE public."UnsubscribedEmails" (
+    email text NOT NULL,
+    reason text NOT NULL
+);
+
+
+ALTER TABLE public."UnsubscribedEmails" OWNER TO "default";
+
+--
+-- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: default
+--
+
+CREATE TABLE public._prisma_migrations (
+    id character varying(36) NOT NULL,
+    checksum character varying(64) NOT NULL,
+    finished_at timestamp with time zone,
+    migration_name character varying(255) NOT NULL,
+    logs text,
+    rolled_back_at timestamp with time zone,
+    started_at timestamp with time zone DEFAULT now() NOT NULL,
+    applied_steps_count integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public._prisma_migrations OWNER TO "default";
+
+--
+-- Name: Deal id; Type: DEFAULT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Deal" ALTER COLUMN id SET DEFAULT nextval('public."Deal_id_seq"'::regclass);
+
+
+--
+-- Name: Installer id; Type: DEFAULT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Installer" ALTER COLUMN id SET DEFAULT nextval('public."Installer_id_seq"'::regclass);
+
+
+--
+-- Name: Job id; Type: DEFAULT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Job" ALTER COLUMN id SET DEFAULT nextval('public."Job_id_seq"'::regclass);
+
+
+--
+-- Data for Name: Deal; Type: TABLE DATA; Schema: public; Owner: default
+--
+
+COPY public."Deal" (id, "jobId", "createdAt", "installerId", status) FROM stdin;
+\.
+
+
+--
+-- Data for Name: Installer; Type: TABLE DATA; Schema: public; Owner: default
+--
+
+COPY public."Installer" (id, name, "isPartner", address, postcode, latitude, longitude) FROM stdin;
+\.
+
+
+--
+-- Data for Name: Job; Type: TABLE DATA; Schema: public; Owner: default
+--
+
+COPY public."Job" (id, "createdAt", "customerName", address, postcode, latitude, longitude, "numQuotes") FROM stdin;
+\.
+
+
+--
+-- Data for Name: Quote; Type: TABLE DATA; Schema: public; Owner: default
+--
+
+COPY public."Quote" ("installerId", "dealId", "totalQuote", "quoteLabour", "quoteScaffolding", "quoteMaterials", "quoteCertification", "dateOfCompletion", "currTime") FROM stdin;
+1	1	1000	500	200	250	50	2023-07-28 00:00:00	2023-07-28 16:22:22.38
+\.
+
+
+--
+-- Data for Name: UnsubscribedEmails; Type: TABLE DATA; Schema: public; Owner: default
+--
+
+COPY public."UnsubscribedEmails" (email, reason) FROM stdin;
+test@gmail.com	Like to speak before accepting a job
+test@email.com	none
+\.
+
+
+--
+-- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: default
+--
+
+COPY public._prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) FROM stdin;
+154c43bf-c48c-4bfa-8d0f-7a77c11d6980	d8af9d140e5e9467bd141874697639ee50435b614271778b054b2d849e561f28	2023-07-28 15:53:24.920441+00	20230728155323_init	\N	\N	2023-07-28 15:53:24.449547+00	1
+\.
+
+
+--
+-- Name: Deal_id_seq; Type: SEQUENCE SET; Schema: public; Owner: default
+--
+
+SELECT pg_catalog.setval('public."Deal_id_seq"', 1, false);
+
+
+--
+-- Name: Installer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: default
+--
+
+SELECT pg_catalog.setval('public."Installer_id_seq"', 1, false);
+
+
+--
+-- Name: Job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: default
+--
+
+SELECT pg_catalog.setval('public."Job_id_seq"', 1, false);
+
+
+--
+-- Name: Deal Deal_pkey; Type: CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Deal"
+    ADD CONSTRAINT "Deal_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Installer Installer_pkey; Type: CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Installer"
+    ADD CONSTRAINT "Installer_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Job Job_pkey; Type: CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Job"
+    ADD CONSTRAINT "Job_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Quote Quote_pkey; Type: CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Quote"
+    ADD CONSTRAINT "Quote_pkey" PRIMARY KEY ("installerId", "dealId");
+
+
+--
+-- Name: UnsubscribedEmails UnsubscribedEmails_pkey; Type: CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."UnsubscribedEmails"
+    ADD CONSTRAINT "UnsubscribedEmails_pkey" PRIMARY KEY (email);
+
+
+--
+-- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public._prisma_migrations
+    ADD CONSTRAINT _prisma_migrations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: Deal_id_key; Type: INDEX; Schema: public; Owner: default
+--
+
+CREATE UNIQUE INDEX "Deal_id_key" ON public."Deal" USING btree (id);
+
+
+--
+-- Name: Deal_jobId_installerId_key; Type: INDEX; Schema: public; Owner: default
+--
+
+CREATE UNIQUE INDEX "Deal_jobId_installerId_key" ON public."Deal" USING btree ("jobId", "installerId");
+
+
+--
+-- Name: Installer_id_key; Type: INDEX; Schema: public; Owner: default
+--
+
+CREATE UNIQUE INDEX "Installer_id_key" ON public."Installer" USING btree (id);
+
+
+--
+-- Name: Job_id_key; Type: INDEX; Schema: public; Owner: default
+--
+
+CREATE UNIQUE INDEX "Job_id_key" ON public."Job" USING btree (id);
+
+
+--
+-- Name: Quote_installerId_dealId_key; Type: INDEX; Schema: public; Owner: default
+--
+
+CREATE UNIQUE INDEX "Quote_installerId_dealId_key" ON public."Quote" USING btree ("installerId", "dealId");
+
+
+--
+-- Name: UnsubscribedEmails_email_key; Type: INDEX; Schema: public; Owner: default
+--
+
+CREATE UNIQUE INDEX "UnsubscribedEmails_email_key" ON public."UnsubscribedEmails" USING btree (email);
+
+
+--
+-- Name: Deal Deal_installerId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Deal"
+    ADD CONSTRAINT "Deal_installerId_fkey" FOREIGN KEY ("installerId") REFERENCES public."Installer"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: Deal Deal_jobId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: default
+--
+
+ALTER TABLE ONLY public."Deal"
+    ADD CONSTRAINT "Deal_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES public."Job"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: default
+--
+
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
