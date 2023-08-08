@@ -23,11 +23,11 @@ export async function POST({ request }) {
         });
     });
 
-    const api_token = await getNewAPIToken();
+    const apiToken = await getNewAPIToken();
 
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + api_token
+        'Authorization': 'Bearer ' + apiToken
     };
 
     const options = {
@@ -61,8 +61,8 @@ export async function POST({ request }) {
 
 
 async function getNewAPIToken() {
-    const mailClientID = "997bbe8e-997a-4fbb-94b7-19a04c35a646";
-    const mailClientSecret = "Qv28Q~fSvYfE7ShDxJXwoyguHfPYzBTui570Odgi";
+    const mailClientID = process.env.MICROSOFT_CLIENT_ID;
+    const mailClientSecret = process.env.MICROSOFT_CLIENT_SECRET;
 
     const payload = `grant_type=client_credentials&client_id=${encodeURIComponent(mailClientID)}&client_secret=${encodeURIComponent(mailClientSecret)}&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default`;
 
@@ -94,4 +94,3 @@ async function getNewAPIToken() {
         return null;
     }
 }
-
