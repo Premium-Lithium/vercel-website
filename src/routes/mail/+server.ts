@@ -1,11 +1,10 @@
 import { json } from '@sveltejs/kit';
 import addFormats from "ajv-formats";
+import Ajv from 'ajv';
+import AjvErrors from 'ajv-errors';
 import querystring from 'querystring';
 
-import Ajv from 'ajv';
-
 import emailSchema from './schema.js';
-import AjvErrors from 'ajv-errors';
 
 
 const ajv = new Ajv({ allErrors: true });
@@ -88,6 +87,7 @@ function validate(requestData) {
 
     return requestErrors;
 }
+
 
 async function getNewAPIToken() {
     const mailClientID = process.env.MICROSOFT_CLIENT_ID;
