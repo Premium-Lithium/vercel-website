@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { getNBestInstallersForJob } from '../../../services/installerMatching.js'
+import { getNBestInstallersForJob } from '$lib/services/installerMatching.js'
 
 const prisma = new PrismaClient();
 

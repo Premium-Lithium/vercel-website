@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import prisma from '$lib/prisma.js';
-import { getNewQuotes } from '../../services/quoteBot.js';
+import { getNewQuotes } from '$lib/services/quoteBot.js';
 
 export async function POST({ request }) {
     let newQuote = undefined;
