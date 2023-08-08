@@ -1,4 +1,3 @@
-import { MICROSOFT_GRAPHS_API_TOKEN } from "$env/static/private";
 import { json } from '@sveltejs/kit';
 import prisma from '$lib/prisma.js';
 
