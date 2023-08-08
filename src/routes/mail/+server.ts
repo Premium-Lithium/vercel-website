@@ -1,17 +1,33 @@
 import { json } from '@sveltejs/kit';
+import addFormats from "ajv-formats";
+import Ajv from 'ajv';
+
+import emailSchema from './schema.js';
+import AjvErrors from 'ajv-errors';
+
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+AjvErrors(ajv);
 
 
 export async function POST({ request }) {
-    const { subject, recipients, body, content_type } = await request.json();
+    const requestData = await request.json();
+    const validationErrors = validate(requestData);
+
+    if(validationErrors.length) {
+        const message = validationErrors.join(" ");
+        return json({ message: `${message}` }, { status: 400 })
+    }
 
     const messagePayload = {
         message: {
-            subject: subject,
+            subject: requestData.subject,
             body: {
-                contentType: content_type,
-                content: body
+                contentType: requestData.content_type,
+                content: requestData.mail_body
             },
-            toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
+            toRecipients: requestData.recipients.map(email => ({ emailAddress: { address: email } }))
         }
     };
 
@@ -28,7 +44,7 @@ export async function POST({ request }) {
         body: JSON.stringify(messagePayload)
     };
 
-    const apiUrl = "/v1.0/users/noreply@premiumlithium.com/sendMail";
+    const apiUrl = `/v1.0/users/${requestData.sender}/sendMail`;
 
     fetch(`https://graph.microsoft.com${apiUrl}`, options)
         .then(res => {
@@ -51,6 +67,23 @@ export async function POST({ request }) {
     return json({}, { status: 200 })
 }
 
+
+function validate(requestData) {
+    const validate = ajv.compile(emailSchema);
+    const valid = validate(requestData);
+
+    let requestErrors = [];
+
+    if (!valid)
+        requestErrors = validate.errors.map(error => error.message);
+
+    const sender = requestData.sender;
+    if(!sender.endsWith("@premiumlithium.com"))
+        requestErrors.push("Sender must be a Premium Lithium email address. ");
+
+    return requestErrors;
+    // return json({ mesage: `${requestErrors}` }, { status: 400 })
+}
 
 async function getNewAPIToken() {
     const mailClientID = process.env.MICROSOFT_CLIENT_ID;
