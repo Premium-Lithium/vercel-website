@@ -6,9 +6,13 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
 import { createStructuredOutputChainFromZod } from "langchain/chains/openai_functions";
+import { ChatPromptTemplate, 
+        SystemMessagePromptTemplate,
+        HumanMessagePromptTemplate} from 'langchain/prompts';
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { BufferMemory } from 'langchain/memory';
 import  { z } from 'zod';
+import { SimpleSequentialChain } from 'langchain/chains';
 
 const CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT = `Given the following conversation and a follow up question,
 return the conversation history excerpt that includes any relevant context to the question if it exists
@@ -132,28 +136,15 @@ if(true){
 
     model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 250 });
 
-
-    // let parser = new CustomListOutputParser({length: 3, separator: "|"});
-    // const prompt = new ChatPromptTemplate({
-    //     promptMessages: [ 
-    //         SystemMessagePromptTemplate.fromTemplate("You are a helpful, friendly, upbeat customer assistant named Evie for one of the fastest growing\
-    //         green energy companies in the UK: Premium Lithium, who provide integrated solutions\
-    //         enabling energy dependence, from design, manufacturing and installation of\
-    //         Smart Home Batteries, Solar Panels, EV Chargers, and UPS. Do your best to answer the above query, and then provide\
-    //         3 follow up questions which the user may ask. {formatInstructions}"),
-    //         // The customer will ask you questions, and your only goal is to provide them with the necessary\
-    //         // information and ask them any essential follow up questions in order for them to choose which system\
-    //         // to purchase. {formatInstructions} After each answer you should provide 3 follow up questions which the user may want to ask, based on their query.\n\
-    //         // Here's an example of an initial prompt you should send:\
-    //         // Hello, how can I assist you today?|I'd like to know about your solar panels|\
-    //         // I'd like to know about your EV chargers|How much power would I get from solar panels on my roof?\n
-    //         HumanMessagePromptTemplate.fromTemplate("{inputText}"),
-    //     ],
-    //     inputVariables: ["inputText"],
-    //     partialVariables: {
-    //         formatInstructions: parser.getFormatInstructions(),
-    //     },
-    // });    
+    const prompt = new ChatPromptTemplate({
+        promptMessages: [
+            SystemMessagePromptTemplate.fromTemplate(
+                "Answer the customery query and output the answer, along with 3 recommended follow-up questions."
+            ),
+            HumanMessagePromptTemplate.fromTemplate("{inputText}"),
+        ],
+        inputVariables: ["inputText"],
+    });
     
     let conversationChain = ConversationalRetrievalQAChain.fromLLM(
         model, 
@@ -168,12 +159,16 @@ if(true){
         }
         },   
     );
-
+    
     let outputChain = createStructuredOutputChainFromZod(zodSchema, {
-        
-        chatHistory: myChatHistory,
-        question: myQuestion,
+        prompt: prompt,
+        llm: model
     })
+
+    chain = new SimpleSequentialChain({
+        chains: [conversationChain, outputChain],
+        verbose: true,
+    });
 }
 
 export async function POST({ request }) {
