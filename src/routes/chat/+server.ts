@@ -3,7 +3,8 @@ import { Configuration, OpenAIApi } from "openai";
 import { json } from '@sveltejs/kit';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
+import { createClient } from "@supabase/supabase-js";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
 import { createStructuredOutputChainFromZod } from "langchain/chains/openai_functions";
 import { ChatPromptTemplate, 
