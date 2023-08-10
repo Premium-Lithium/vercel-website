@@ -1,28 +1,15 @@
 <mjml>
   <mj-body background-color="#ffffff" font-size="13px">
-    <!-- <mj-section background-url="https://premiumlithium.com/cdn/shop/files/Powerpod_5_7f294842-1bb2-44af-8923-6e1041c9e0ee.jpg?v=1687873741&height=2000" vertical-align="middle" background-size="cover" full-width="full-width" background-repeat="no-repeat">
-        <mj-text align="center" font-size="14px" color="#45474e" padding-bottom="10px" padding-top="45px"><span style="font-size: 30px; line-height: 30px;"><span style="color: #e85034"></mj-text>
-    </mj-section> -->
     <mj-section align="center" background-color="#ffffff" padding-bottom="0px" padding-top="0">
         <mj-column width="70%">
             <mj-image padding="0" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196">
         </mj-column>
       <mj-divider border-width="1px">
-      <mj-spacer>
     </mj-section>
     <mj-section background-color="white" padding-bottom="0px" padding-top="0">
       <mj-column width="100%">
         <mj-text align="left" line-height="normal" font-size="13px" color="black" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="10px" padding-top="10">
-            Hi {{customer name}},
-            <br><br>
-            It was great to speak to you {{ call_time }}, thanks for booking a consultation.
-
-            Your quote breakdown is shown below:
-
-            I've set up our price calculator with the options that we discussed - feel free to explore different options <a href="{{price_calculator_url}}">here</a>.
-            <br><br>
-            All the best,<br>
-            {{ bdm_name }}
+            you ordered {{ product_name }}, which costs {{ price }}
         </mj-text>
       </mj-column>
     </mj-section>
