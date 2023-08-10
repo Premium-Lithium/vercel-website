@@ -17,6 +17,12 @@ dependencies:
   ajv:
     specifier: ^8.12.0
     version: 8.12.0
+  ajv-errors:
+    specifier: ^3.0.0
+    version: 3.0.0(ajv@8.12.0)
+  ajv-formats:
+    specifier: ^2.1.1
+    version: 2.1.1(ajv@8.12.0)
   svelte-material-icons:
     specifier: ^3.0.5
     version: 3.0.5(svelte@3.59.1)
@@ -31,9 +37,6 @@ devDependencies:
   '@neoconfetti/svelte':
     specifier: ^1.0.0
     version: 1.0.0
-  '@playwright/test':
-    specifier: ^1.28.1
-    version: 1.34.0
   '@sveltejs/adapter-vercel':
     specifier: ^3.0.0
     version: 3.0.0(@sveltejs/kit@1.18.0)
@@ -1934,17 +1937,6 @@ packages:
       json-parse-even-better-errors: 2.3.1
     dev: false
 
-  /@playwright/test@1.34.0:
-    resolution: {integrity: sha512-GIALJVODOIrMflLV54H3Cow635OfrTwOu24ZTDyKC66uchtFX2NcCRq83cLdakMjZKYK78lODNLQSYBj2OgaTw==}
-    engines: {node: '>=14'}
-    hasBin: true
-    dependencies:
-      '@types/node': 18.16.19
-      playwright-core: 1.34.0
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: true
-
   /@polka/url@1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
@@ -2614,6 +2606,25 @@ packages:
 
   /ahocorasick@1.0.2:
     resolution: {integrity: sha512-hCOfMzbFx5IDutmWLAt6MZwOUjIfSM9G9FyVxytmE4Rs/5YDPWQrD/+IR1w+FweD9H2oOZEnv36TmkjhNURBVA==}
+    dev: false
+
+  /ajv-errors@3.0.0(ajv@8.12.0):
+    resolution: {integrity: sha512-V3wD15YHfHz6y0KdhYFjyy9vWtEVALT9UrxfN3zqlI6dMioHnJrqOYfyPKol3oqrnCM9uwkcdCwkJ0WUcbLMTQ==}
+    peerDependencies:
+      ajv: ^8.0.1
+    dependencies:
+      ajv: 8.12.0
+    dev: false
+
+  /ajv-formats@2.1.1(ajv@8.12.0):
+    resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+    dependencies:
+      ajv: 8.12.0
     dev: false
 
   /ajv@6.12.6:
@@ -5725,11 +5736,6 @@ packages:
       mlly: 1.4.0
       pathe: 1.1.1
     dev: false
-
-  /playwright-core@1.34.0:
-    resolution: {integrity: sha512-fMUY1+iR6kYbJF/EsOOqzBA99ZHXbw9sYPNjwA4X/oV0hVF/1aGlWYBGPVUEqxBkGANDKMziYoOdKGU5DIP5Gg==}
-    engines: {node: '>=14'}
-    dev: true
 
   /postcss-discard-duplicates@5.1.0(postcss@8.4.23):
     resolution: {integrity: sha512-zmX3IoSI2aoenxHV6C7plngHWWhUOV3sP1T8y2ifzxzbtnuhk1EdPwm0S1bIUNaJ2eNbWeGLEwzw8huPD67aQw==}
