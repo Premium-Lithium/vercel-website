@@ -14,3 +14,4 @@ CREATE UNIQUE INDEX quotes_pkey ON public.quotes USING btree ("installerId", "de
 alter table "public"."quotes" add constraint "quotes_pkey" PRIMARY KEY using index "quotes_pkey";
 
 
+
