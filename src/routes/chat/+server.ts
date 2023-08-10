@@ -5,7 +5,8 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 import { createClient } from "@supabase/supabase-js";
-import { ConversationalRetrievalQAChain } from "langchain/chains";
+import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { createStructuredOutputChainFromZod } from "langchain/chains/openai_functions";
 import { ChatPromptTemplate, 
         SystemMessagePromptTemplate,
@@ -13,7 +14,10 @@ import { ChatPromptTemplate,
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { BufferMemory } from 'langchain/memory';
 import  { z } from 'zod';
-import { SimpleSequentialChain } from 'langchain/chains';
+import { SimpleSequentialChain,ConversationalRetrievalQAChain } from 'langchain/chains';
+
+const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+
 
 const CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT = `Given the following conversation and a follow up question,
 return the conversation history excerpt that includes any relevant context to the question if it exists
