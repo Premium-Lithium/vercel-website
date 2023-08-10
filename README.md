@@ -24,6 +24,66 @@ Get the .env file on your local machine
 pnpx vercel env pull .env
 ```
 
+## Using local database
+In a new terminal, outside of the Nix environment, but inside the project directory, you will need to set up a local Supabase database if you want to make changes to the schema or do any testing.
+### Dependencies
+You need docker, if on Ubuntu run the following
+```
+sudo snap install docker
+```
+
+Install the supabase package and save to dev dependencies
+```
+npm i supabase --save-dev
+```
+
+As we installed using npm, we will need to prefix any supabase command with `npx`, and likely also `sudo` depending on the permission setup on your system.
+### Running Supabase locally
+Initialise supabase if it hasn't been initialised in your branch
+```
+sudo npx supabase init
+```
+
+Login to Supabase CLI
+```
+sudo npx supabase login
+```
+
+Start the local Supabase instance
+```
+sudo npx supabase start
+```
+
+This may take a while as it needs to download the docker image.
+### Manually interacting with the local DB
+The local db can be access by visiting `http://localhost:54323/`
+
+## Updating the DB schema
+To copy the schema on production, we'll need to link the local instance with the remote
+```
+sudo npx supabase link --project-ref $PROJECT_ID
+```
+$PROJECT_ID can be found by going to `https://supabase.com/dashboard/projects`, clicking the project (pl-web), and then the url contains `https://supabase.com/dashboard/project/$PROJECT_ID`.
+
+Copy the schema from the remote
+```
+sudo npx supabase db remote commit
+```
+
+Apply the local migrations
+```
+supabase db reset
+```
+
+You can now make changes to the local instance either through creating a new migration using `sudo npx supabase migration new $migration_name` and modifying the generated SQL script at `supabase/migrations/<timestamp>_$migration_name.sql`, or by modifying the local schema on the Supabase Studio, and running `sudo npx supabase db diff -f $migration_name`.
+
+Push the DB schema to production **Should be implemented using GitHub actions once we've commited to Supabase**
+```
+supabase db push
+```
+---
+## Deprecated 
+---
 ## Using fake database
 
 If you are making changes to the database, you should use a fake local database rather than the production database. In order to do this, first start the local fake postgres database:
