@@ -29,11 +29,11 @@
         console.log(supabase)
 
         const { error } = await supabase
-            .from('quotes')
+            .from('quote')
             .insert({
                 installerId: installerId,
                 dealId: dealId,
-                quoteValue: totalQuote, 
+                totalQuote: totalQuote, 
                 dateOfCompletion: new Date(dateOfCompletion),
                 currTime: new Date(currentDate), 
             })
