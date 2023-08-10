@@ -10,6 +10,8 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
+
 CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
 
 CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
@@ -55,11 +57,7 @@ CREATE TABLE "public"."quote" (
     "dealId" bigint NOT NULL,
     "dateOfCompletion" timestamp without time zone,
     "currTime" timestamp with time zone DEFAULT "now"(),
-    "totalQuote" bigint DEFAULT '0'::bigint,
-    "quoteLabour" bigint DEFAULT '0'::bigint,
-    "quoteScaffolding" bigint,
-    "quoteMaterials" bigint,
-    "quoteCertification" bigint
+    "totalQuote" bigint DEFAULT '0'::bigint
 );
 
 ALTER TABLE "public"."quote" OWNER TO "postgres";
