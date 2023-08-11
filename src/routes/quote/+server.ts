@@ -10,13 +10,10 @@ export async function POST({ request }) {
         installerId,
         dealId,
         totalQuote,
-        quoteLabour,
-        quoteScaffolding,
-        quoteMaterials,
-        quoteCertification,
         dateOfCompletion,
         currTime,
     ]] = values;
+    console.log("posting", values);
     const { error } = await supabase
             .from('quote')
             .upsert({

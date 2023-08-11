@@ -12,7 +12,7 @@ export async function postToChannel(channel, payload) {
   const channelId = await channelNameToId(channel)
   const message = {
     channel: channelId,
-    text: `new quote: \n <https://premiumlithium.pipedrive.com/deal/${payload[0][1]}|Deal>: <https://premiumlithium.pipedrive.com/organization/${payload[0][0]}|installer> quoted £${payload[0][2]} by ${payload[0][7]}`
+    text: `new quote: \n <https://premiumlithium.pipedrive.com/deal/${payload[0][1]}|Deal>: <https://premiumlithium.pipedrive.com/organization/${payload[0][0]}|installer> quoted £${payload[0][2]} by ${payload[0][3]}`
   }
 
   try {
