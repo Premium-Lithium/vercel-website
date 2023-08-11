@@ -13,7 +13,6 @@ export async function POST({ request }) {
         dateOfCompletion,
         currTime,
     ]] = values;
-    console.log("posting", values);
     const { error } = await supabase
             .from('quote')
             .upsert({
