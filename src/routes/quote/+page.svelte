@@ -26,16 +26,33 @@
     });
 
     async function postInstallerQuote(installerId, dealId) {
-        const { error } = await supabase
-            .from('quote')
-            .upsert({
-                installerId: installerId,
-                dealId: dealId,
-                totalQuote: totalQuote, 
-                dateOfCompletion: new Date(dateOfCompletion),
-                currTime: new Date(currentDate), 
-            })
-    }
+        console.log("posting installer quote")
+            let currTime = new Date();
+            loading = true;
+            const response = await fetch('quote/', { 
+                method: "POST",
+                body: JSON.stringify({
+                    "values": [
+                        [installerId, dealId, totalQuote, new Date(dateOfCompletion), new Date(currTime)]
+                    ]
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            loading = false;
+            if (response.ok) {
+                return {
+                    statusCode: 200
+                };
+            } else {
+                console.log(`API request failed with status ${response.status} ${response.statusText}`);
+                return {
+                    statusCode: response.status,
+                    body: response.statusText,
+                };
+            }
+        }
 
     $: {
         totalQuote = 0;
