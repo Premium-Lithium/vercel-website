@@ -14,7 +14,6 @@
           nodePackages.pnpm
           nodejs-slim
           postgresql_15
-          docker
           supabase-cli
         ];
         shellHook = with pkgs; ''
