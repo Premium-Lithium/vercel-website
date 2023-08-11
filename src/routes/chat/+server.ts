@@ -47,7 +47,7 @@ const zodSchema = z.object({
 let chain;
 let model;
 let vectorStore;
-if(true){
+if(false){
     // do embedding, we will want to store this at some point.
     const text = `SAVE UP TO 55% WITH A PRE-ORDER ON ALL PRODUCTS
     Choose your delivery date:
@@ -134,48 +134,77 @@ if(true){
 
     const splitDocs = await textSplitter.splitDocuments(docs);
 
-    vectorStore = await MemoryVectorStore.fromDocuments(
+    vectorStore = await SupabaseVectorStore.fromDocuments(
         splitDocs,
         new OpenAIEmbeddings(),
-    );
-
-    model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 250 });
-
-    const prompt = new ChatPromptTemplate({
-        promptMessages: [
-            SystemMessagePromptTemplate.fromTemplate(
-                "Answer the customery query and output the answer, along with 3 recommended follow-up questions."
-            ),
-            HumanMessagePromptTemplate.fromTemplate("{inputText}"),
-        ],
-        inputVariables: ["inputText"],
-    });
-    
-    let conversationChain = ConversationalRetrievalQAChain.fromLLM(
-        model, 
-        vectorStore.asRetriever(),
         {
-        memory: new BufferMemory({
-            memoryKey: "chat_history",
-            returnMessages: true,
-        }),
-        questionGeneratorChainOptions: {
-            template: CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT,
-        }
-        },   
+            client: supabase,
+            tableName: "documents",
+            queryName: "match_documents",
+        },
     );
+
     
-    let outputChain = createStructuredOutputChainFromZod(zodSchema, {
-        prompt: prompt,
-        llm: model
-    })
 
-    chain = new SimpleSequentialChain({
-        chains: [conversationChain, outputChain],
-        verbose: true,
-    });
-}
+    
+}    
 
+model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 250 });
+
+const prompt = new ChatPromptTemplate({
+    promptMessages: [
+        SystemMessagePromptTemplate.fromTemplate(
+            "Answer the customery query and output the answer, along with 3 recommended follow-up questions."
+        ),
+        HumanMessagePromptTemplate.fromTemplate("{inputText}"),
+    ],
+    inputVariables: ["inputText"],
+});
+vectorStore = await new SupabaseVectorStore(
+    new OpenAIEmbeddings(),
+    {
+        client: supabase,
+        tableName: "documents",
+        queryName: "match_documents",
+    },
+);
+
+model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 250 });
+
+const prompt = new ChatPromptTemplate({
+    promptMessages: [
+        SystemMessagePromptTemplate.fromTemplate(
+            "Answer the customery query and output the answer, along with 3 recommended follow-up questions."
+        ),
+        HumanMessagePromptTemplate.fromTemplate("{inputText}"),
+    ],
+    inputVariables: ["inputText"],
+});
+
+let conversationChain = ConversationalRetrievalQAChain.fromLLM(
+    model, 
+    vectorStore.asRetriever(),
+    {
+    memory: new BufferMemory({
+        memoryKey: "chat_history",
+        returnMessages: true,
+    }),
+    questionGeneratorChainOptions: {
+        template: CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT,
+    }
+    },   
+);
+
+let outputChain = createStructuredOutputChainFromZod(zodSchema, {
+    prompt: prompt,
+    llm: model
+})
+
+// chain = new SimpleSequentialChain({
+//     chains: [conversationChain, outputChain],
+//     verbose: true,
+// });
+chain = conversationChain;
 export async function POST({ request }) {
     try {
         const { prompt } = await request.json();
