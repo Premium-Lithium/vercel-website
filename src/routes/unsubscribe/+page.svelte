@@ -7,16 +7,12 @@
     let sent = false; 
 
     async function sendReason(email, reason){
-        console.log(supabase)
-
         const { error } = await supabase
             .from('unsubscribed')
             .insert({
                 email: email,
                 reason: reason,
             })
-        console.log("unsubscribing ");
-        console.log(error)
     }
 
 </script>
