@@ -51,6 +51,7 @@
 		"ajv-errors": "^3.0.0",
 		"ajv-formats": "^2.1.1",
 		"nunjucks": "^3.2.4",
+		"pipedrive": "^21.1.0",
 		"svelte-material-icons": "^3.0.5",
 		"vercel": "^31.0.1"
 	}
