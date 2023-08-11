@@ -591,7 +591,7 @@
 
   .table {
       display: flex;
-      justify-content: space-around;
+      overflow-x: scroll;
   }
 
   .other-products-and-services > p,.faq > p{  
