@@ -5,14 +5,15 @@ export default function priceOf(customerSolution) {
 
     let totalPrice;
 
+    // todo: load pricing model parameters from spreadsheet/settings/elsewhere
     switch(customerSolution.batterySize_kWh) {
-        case "5":
+        case 5:
             totalPrice = 2698;
             break;
-        case "10":
+        case 10:
             totalPrice = 4498;
             break;
-        case "20":
+        case 20:
             totalPrice = 8093;
             break;
         default:

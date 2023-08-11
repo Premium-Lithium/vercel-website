@@ -10,8 +10,8 @@
     function fetchPrice() {
         // todo: build complete description of customer solution using form input
         const customerSolution = {
-            batterySize_kWh,
-            evCharger
+            batterySize_kWh: parseInt(batterySize_kWh, 10),
+            evCharger: evCharger
         };
 
         price = `$${priceOf(customerSolution)}`;
