@@ -5,7 +5,9 @@
     // todo: add default options here if they're not provided in query params
     let batterySize_kWh = `${$page.url.searchParams.get('battSize_kWh')}`;
     let evCharger = `${$page.url.searchParams.get('evCharger')}` == "1";
-    let price = "Calculating...";
+    let priceText = "Calculating..."
+
+    // todo: handle invalid input in the url e.g battery size that doesn't exist? init with nearest?
 
     function fetchPrice() {
         // todo: build complete description of customer solution using form input
@@ -14,13 +16,14 @@
             evCharger: evCharger
         };
 
-        price = `$${priceOf(customerSolution)}`;
+        priceText = `$${priceOf(customerSolution).total}`;
     }
 
     $: fetchPrice();
 </script>
 
 <div>
+    <!-- todo: build form options from product database -->
     <form on:change={fetchPrice}>
         <select bind:value={batterySize_kWh}>
             <option value="5">5 kWh</option>
@@ -31,7 +34,7 @@
         <input type="checkbox" bind:checked={evCharger}> Add EV charger
     </form>
 
-    <p>Total price: {price}</p>
+    <p>Total price: {priceText}</p>
 </div>
 
 <style>
