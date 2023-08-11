@@ -1,11 +1,23 @@
 import { json } from '@sveltejs/kit';
 import priceOf from '../price-calculator/price-model';
+import pipedrive from 'pipedrive';
+
+
+// todo: move this into a separate file, initialise once there and import here
+const pd = new pipedrive.ApiClient();
+let apiToken = pd.authentications.api_key;
+apiToken.apiKey = process.env.PIPEDRIVE_API_TOKEN;
 
 
 export async function POST({ request }) {
     const data = await request.json();
 
-    const dealId = 0; // todo: get this from the request
+    // todo: validate request body
+
+    const dealId = data.deal_id; // todo: get this from the request
+
+    const dealInfo = await getDealInfo(dealId);
+    const customerName = dealInfo.data.person_name;
 
     // 1. todo: build description of customer solution from pipedrive given dealId above
     const customerSolution = {
@@ -33,4 +45,11 @@ export async function POST({ request }) {
     // 5. send email
 
     return json({}, {status: 200})
+}
+
+async function getDealInfo(dealId) {
+    const pdApi = new pipedrive.DealsApi(pd)
+    const dealInfo = await pdApi.getDeal(dealId);
+
+    return dealInfo;
 }
