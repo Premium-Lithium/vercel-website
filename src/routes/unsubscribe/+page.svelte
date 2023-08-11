@@ -1,25 +1,18 @@
 <script>
     import { page } from '$app/stores'
+    import { supabase } from '$lib/supabase.ts'
 
     let selected;
     let otherReason;
     let sent = false; 
 
     async function sendReason(email, reason){
-        const unsubscribeUrl = `unsubscribe/`;
-        const res = await fetch(unsubscribeUrl, {
-            method: 'POST',
-                headers: {
-                   "Content-Type": "application/json"
-                }, 
-                body: JSON.stringify({
-                    "email": email,
-                    "reason": reason,
-                }),
-            });
-            sent = true;
-            const response = await res.json();
-            return response;
+        const { error } = await supabase
+            .from('unsubscribed')
+            .insert({
+                email: email,
+                reason: reason,
+            })
     }
 
 </script>
