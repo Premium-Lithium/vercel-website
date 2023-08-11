@@ -7,8 +7,7 @@ export async function GET( response ) {
     return json({
         status: 200,
         headers: {
-            "Content-Type": "application/csv",
-            "Content-Disposition": `attatchment; filename*=unsubed.csv`
+            "Content-Type": "application/json",
         },
         body: unsubed
     });
