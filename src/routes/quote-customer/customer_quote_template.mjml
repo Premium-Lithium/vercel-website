@@ -9,15 +9,17 @@
     <mj-section background-color="white" padding-bottom="0px" padding-top="0">
       <mj-column width="100%">
         <mj-text align="left" line-height="normal" font-size="13px" color="black" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="10px" padding-top="10">
+          hi {{ customer_name }}
+          <br>
           components list:
 
           <ul>
-            {% for item in components %}
-              <li>{{ item.quantity }} x {{ item.productName }}</li>
+            {% for product in products %}
+              <li>{{ product.quantity }} x {{ product.name }}</li>
             {% endfor %}
           </ul>
 
-          total price: £{{ totalPrice }}
+          total price: £{{ total_price }}
         </mj-text>
       </mj-column>
     </mj-section>
