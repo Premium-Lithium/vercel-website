@@ -37,7 +37,7 @@ supabase start
 
 This may take a while as it needs to download the docker image.
 ### Manually interacting with the local DB
-The local db can be access by visiting `http://localhost:54323/`
+The local db can be accessed by visiting `http://localhost:54323/`
 
 ## Updating the DB schema
 
@@ -50,6 +50,11 @@ $PROJECT_ID can be found by going to `https://supabase.com/dashboard/projects`, 
 Make a change to the local db via the Supabase Studio, and generate a new migration which will be the difference between production and local.
 ```
 supabase db diff -f $migration_name
+```
+
+Check that the new migration works as intended on local
+```
+supabase db reset
 ```
 
 Push the DB schema to production **Should be implemented using GitHub actions once we've commited to Supabase**
