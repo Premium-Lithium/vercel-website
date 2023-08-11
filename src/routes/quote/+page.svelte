@@ -26,19 +26,15 @@
     });
 
     async function postInstallerQuote(installerId, dealId) {
-        console.log(supabase)
-
         const { error } = await supabase
             .from('quote')
-            .insert({
+            .upsert({
                 installerId: installerId,
                 dealId: dealId,
                 totalQuote: totalQuote, 
                 dateOfCompletion: new Date(dateOfCompletion),
                 currTime: new Date(currentDate), 
             })
-        console.log("posting installer quote")
-        console.log(error)
     }
 
     $: {
@@ -154,6 +150,7 @@
 <style>
     :root {
         --padding: 16px;
+        overflow: unset;
     }
 
     .body {
@@ -163,8 +160,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        overflow: auto; 
-        overflow-x: hidden;       
+        overflow: hidden;  
     }
 
     .split-screen {
@@ -227,9 +223,9 @@
 
     .quote-gone-through {
         display: flex;
-        flex-direction: row;
-        text-align: center;
-        align-self: center;
+        flex-direction: column;
+        justify-content: center;
+        height: 100vh;
     }
 
     input[type="submit"] {
