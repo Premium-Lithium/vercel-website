@@ -3,7 +3,7 @@
     import priceOf from './price-model';
 
     // todo: add default options here if they're not provided in query params
-    let batterySize_kWh = `${$page.url.searchParams.get('battSize_kWh')}`;
+    let batterySize_kWh = `${$page.url.searchParams.get('batterySize_kWh')}`;
     let evCharger = `${$page.url.searchParams.get('evCharger')}` == "1";
     let priceText = "Calculating..."
 

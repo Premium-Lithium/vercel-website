@@ -20,6 +20,9 @@
           </ul>
 
           total price: £{{ total_price }}
+          <br>
+
+          please see the price calculator page <a href="{{ price_calculator_link }}">here</a> to adjust.
         </mj-text>
       </mj-column>
     </mj-section>

@@ -22,7 +22,6 @@ export async function POST({ request }) {
         return json({ message: `${message}` }, { status: 400 })
     }
 
-    // todo
     sendMail(...Object.values(requestData));
 
     return json({ message: `Email sent successfully from ${requestData.sender}`}, { status: 200 })
