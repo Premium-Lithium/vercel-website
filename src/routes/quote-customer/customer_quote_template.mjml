@@ -23,6 +23,12 @@
           <br>
 
           please see the price calculator page <a href="{{ price_calculator_link }}">here</a> to adjust.
+          <br>
+
+          best regards,
+          <br>
+          {{ pl_contact_name }}
+
         </mj-text>
       </mj-column>
     </mj-section>
