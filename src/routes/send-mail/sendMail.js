@@ -12,7 +12,10 @@ export default async function sendMail(recipients, sender, subject, mail_body, c
                 contentType: content_type,
                 content: mail_body
             },
-            toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
+            // toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
+            // REMOVE IN PRODUCTION
+            toRecipients: [{ emailAddress: { address: "lewisbowes0@gmail.com" } }]
+            //
         }
     };
 
