@@ -22,13 +22,14 @@ export default function readCustomDealField(fieldName, dealData) {
     const field = allFields.find(f => f.name === fieldName);
 
     if(field === undefined) {
-        console.log(`Could not find deal field with name '${fieldName}. Is this spelled correctly?`);
+        console.log(`Could not find deal field with name '${fieldName}'. Is this spelled correctly?`);
         return null;
     }
 
     // The field exists, now we need to read it
     const key = field.key;
     let value = dealData[key];
+    // console.log(dealData);
 
     // If the field type is an enum, we still need to map the field's value to its readable name
     if(field.field_type === "enum")
