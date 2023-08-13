@@ -29,6 +29,10 @@
           <br>
           {{ pl_contact_name }}
 
+          <hr>
+
+          TODO: include trustpilot widget here, see <a href="https://support.trustpilot.com/hc/en-us/articles/115007375487-Add-a-TrustBox-Newsletter-widget-to-your-email-campaigns">docs here</a>
+
         </mj-text>
       </mj-column>
     </mj-section>
