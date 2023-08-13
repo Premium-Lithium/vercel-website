@@ -5,15 +5,15 @@
     import { earliestInstallMonth, quoteFor } from './price-model';
 
     let earliestInstall = earliestInstallMonth();
-    let customerSolution = loadSolution();
-    let installDateStr = customerSolution.installMonth.toISOString().slice(0, 7);
-    let quote = quoteFor(customerSolution);
+    let plOffering = loadOffering();
+    let installDateStr = plOffering.installMonth.toISOString().slice(0, 7);
+    let quote = quoteFor(plOffering);
     let discountStr = "Calculating discount...";
 
 
     function updateQuote() {
-        customerSolution.installMonth = new Date(installDateStr);
-        quote = quoteFor(customerSolution); // Move this line below the above line.
+        plOffering.installMonth = new Date(installDateStr);
+        quote = quoteFor(plOffering); // Move this line below the above line.
         discountStr = (Number(quote.discount.multiplier) * 100).toFixed(0)
     }
 
@@ -21,48 +21,53 @@
 
     onMount(() => {
         earliestInstall = earliestInstallMonth();
-        customerSolution = loadSolution();
-        installDateStr = customerSolution.installMonth.toISOString().slice(0, 7);
+        plOffering = loadOffering();
+        installDateStr = plOffering.installMonth.toISOString().slice(0, 7);
 
         updateQuote();
     });
 
 
-    function loadSolution() {
+    function loadOffering() {
         // Load price calculator settings, using url param options where available
-        let solution = defaultSolution();
+        let offering = defaultOffering();
 
         // If any url params are set, override the default settings
         const battSizeOption = `${$page.url.searchParams.get('batterySize_kWh')}`;
-        if(battSizeOption)
-            solution.batterySize_kWh = parseInt(battSizeOption, 10);
+        if(battSizeOption) {
+            const requestedCapacity = parseInt(battSizeOption, 10)
+
+            // todo: handle case where requested battery size is, for now just get nearest
+
+            offering.batterySize_kWh = requestedCapacity;
+        }
 
         const evChargerOption = `${$page.url.searchParams.get('evCharger')}`;
         if(evChargerOption)
-            solution.evCharger.included = evChargerOption === '1' ? true : false;
+            offering.evCharger.included = evChargerOption === '1' ? true : false;
 
         const chargerCapacityOption = `${$page.url.searchParams.get('evChargerCapacity_kW')}`;
         if(chargerCapacityOption)
-            solution.evCharger.capacity_kwh = parseInt(chargerCapacityOption, 10);
+            offering.evCharger.capacity_kwh = parseInt(chargerCapacityOption, 10);
 
         const installMonthOption = $page.url.searchParams.get('installMonth');
         if(installMonthOption) {
             const targetInstallMonth = new Date(installMonthOption);
 
             if (targetInstallMonth >= earliestInstall)
-                solution.installMonth = targetInstallMonth;
+                offering.installMonth = targetInstallMonth;
         }
 
-        return solution;
+        return offering;
     }
 
 
-    function defaultSolution() {
+    function defaultOffering() {
         // todo: this should ideally be calculated to be set to a configuration that the majority of customers will prefer
         // heuristic calculation might be possible using sales history?
         // If we can initialise this such that customers can get a price **without having to change anything**, we should do this.
 
-        const defaultSolution = {
+        const defaultOffering = {
             batterySize_kWh: 5,
             evCharger: {
                 included: true,
@@ -71,7 +76,12 @@
             installMonth: earliestInstall
         }
 
-        return defaultSolution;
+        return defaultOffering;
+    }
+
+
+    function priceStr(priceValueFloat) {
+        return priceValueFloat.toFixed(2);
     }
 </script>
 
@@ -80,7 +90,7 @@
     <form on:change={updateQuote}>
         Battery capacity:
 
-        <select bind:value={customerSolution.batterySize_kWh}>
+        <select bind:value={plOffering.batterySize_kWh}>
             <option value={5}>5 kWh</option>
             <option value={10}>10 kWh</option>
             <option value={20}>20 kWh</option>
@@ -88,22 +98,26 @@
 
         <br>
 
-        Add EV charger <input type="checkbox" bind:checked={customerSolution.evCharger.included}>
+        Add EV charger <input type="checkbox" bind:checked={plOffering.evCharger.included}>
 
         <br>
 
-        <label for="install-month">Preferred Installation Date:</label>
+        <label for="install-month">Installation Date:</label>
         <input bind:value={installDateStr} type="month" id="install-month" name="install-month" min={earliestInstall.toISOString().slice(0, 7)}>
         <br>
         <br>
     </form>
 
-    {#if quote.discount.value > 0}
+    {#if quote.discount.value}
         Preorder discount: {discountStr}% off
-        <br>
-        -£{quote.discount.value.toFixed(2)}
     {/if}
-    <p>Total price: £{quote.price.total.toFixed(2)}</p>
+    <p>Total price: £
+
+    {#if quote.discount.value}
+        <s>{priceStr(quote.price.earliestInstall)}</s>
+    {/if}
+
+    {priceStr(quote.price.total)}</p>
 </div>
 
 <style>
