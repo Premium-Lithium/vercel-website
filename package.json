@@ -45,6 +45,7 @@
 	"type": "module",
 	"dependencies": {
 		"@auth0/auth0-spa-js": "^2.1.0",
+		"@pipedrive/app-extensions-sdk": "^0.9.0",
 		"@prisma/client": "^4.13.0",
 		"@vercel/postgres": "^0.4.0",
 		"ajv": "^8.12.0",
