@@ -1,17 +1,20 @@
 <script>
-    import { page } from '$app/stores'
     import { onMount } from 'svelte';
+    import { page } from '$app/stores'
 
     import { earliestInstallMonth, quoteFor } from './price-model';
 
-    const thisMonth = new Date();
+    let earliestInstall = earliestInstallMonth();
+
     let customerSolution = loadSolution();
+    let installDateStr = customerSolution.installMonth.toISOString().slice(0, 7);
     let quote = quoteFor(customerSolution);
     let discountStr = "Calculating discount...";
 
 
     function updateQuote() {
         quote = quoteFor(customerSolution);
+        customerSolution.installMonth = new Date(installDateStr);
         discountStr = (Number(quote.discount.multiplier) * 100).toFixed(0)
 
         // todo: construct table of components here
@@ -20,27 +23,10 @@
     $: updateQuote();
 
     onMount(() => {
-        limitInstallDateRange();
+        earliestInstall = earliestInstallMonth();
+        customerSolution = loadSolution();
     });
 
-
-    function limitInstallDateRange() {
-        const date = new Date();
-        let year = date.getFullYear();
-        let month = date.getMonth() + 2; // +1 to get next month, +1 because JS months are 0-indexed
-
-        if (month > 12) {
-            month = 1; // Reset to January
-            year++;    // Move to the next year
-        }
-
-        const nextMonth = month.toString().padStart(2, '0');
-
-        // Set the min attribute of the month input
-        document.getElementById('install-month').setAttribute('min', `${year}-${nextMonth}`);
-
-        // todo: handle case where user has selected a month that is now out of range
-    }
 
     function loadSolution() {
         // Load price calculator settings, using url param options where available
@@ -59,13 +45,20 @@
         if(chargerCapacityOption)
             solution.evCharger.capacity_kwh = parseInt(chargerCapacityOption, 10);
 
+        const installMonthOption = `${$page.url.searchParams.get('installMonth')}`;
+        if(installMonthOption)
+            solution.installMonth = new Date(installMonthOption);
+
         return solution;
     }
+
 
     function defaultSolution() {
         // todo: this should ideally be calculated to be set to a configuration that the majority of customers will prefer
         // heuristic calculation might be possible using sales history?
         // If we can initialise this such that customers can get a price **without having to change anything**, we should do this.
+
+        console.log(`earliestInstall: ${earliestInstall}`);
 
         const defaultSolution = {
             batterySize_kWh: 5,
@@ -73,7 +66,7 @@
                 included: true,
                 capacity_kwh: 7
             },
-            installMonth: earliestInstallMonth()
+            installMonth: earliestInstall
         }
 
         return defaultSolution;
@@ -98,13 +91,17 @@
         <br>
 
         <label for="install-month">Preferred Installation Date:</label>
-        <input bind:value={customerSolution.installMonth} type="month" id="install-month" name="install-month">
+        <input bind:value={installDateStr} type="month" id="install-month" name="install-month" min={earliestInstall.toISOString().slice(0, 7)}>
         <br>
         <br>
     </form>
 
-    Preorder discount: {discountStr}% off - £{quote.discount.value.toFixed(2)}
-    <p>Total price: {quote.price.total}</p>
+    {#if quote.discount.value > 0}
+        Preorder discount: {discountStr}% off
+        <br>
+        -£{quote.discount.value.toFixed(2)}
+    {/if}
+    <p>Total price: £{quote.price.total.toFixed(2)}</p>
 </div>
 
 <style>
