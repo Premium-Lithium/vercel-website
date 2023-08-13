@@ -5,7 +5,6 @@
     import { earliestInstallMonth, quoteFor } from './price-model';
 
     let earliestInstall = earliestInstallMonth();
-
     let customerSolution = loadSolution();
     let installDateStr = customerSolution.installMonth.toISOString().slice(0, 7);
     let quote = quoteFor(customerSolution);
@@ -13,11 +12,9 @@
 
 
     function updateQuote() {
-        quote = quoteFor(customerSolution);
         customerSolution.installMonth = new Date(installDateStr);
+        quote = quoteFor(customerSolution); // Move this line below the above line.
         discountStr = (Number(quote.discount.multiplier) * 100).toFixed(0)
-
-        // todo: construct table of components here
     }
 
     $: updateQuote();
@@ -25,6 +22,9 @@
     onMount(() => {
         earliestInstall = earliestInstallMonth();
         customerSolution = loadSolution();
+        installDateStr = customerSolution.installMonth.toISOString().slice(0, 7);
+
+        updateQuote();
     });
 
 
@@ -45,9 +45,13 @@
         if(chargerCapacityOption)
             solution.evCharger.capacity_kwh = parseInt(chargerCapacityOption, 10);
 
-        const installMonthOption = `${$page.url.searchParams.get('installMonth')}`;
-        if(installMonthOption)
-            solution.installMonth = new Date(installMonthOption);
+        const installMonthOption = $page.url.searchParams.get('installMonth');
+        if(installMonthOption) {
+            const targetInstallMonth = new Date(installMonthOption);
+
+            if (targetInstallMonth >= earliestInstall)
+                solution.installMonth = targetInstallMonth;
+        }
 
         return solution;
     }
@@ -57,8 +61,6 @@
         // todo: this should ideally be calculated to be set to a configuration that the majority of customers will prefer
         // heuristic calculation might be possible using sales history?
         // If we can initialise this such that customers can get a price **without having to change anything**, we should do this.
-
-        console.log(`earliestInstall: ${earliestInstall}`);
 
         const defaultSolution = {
             batterySize_kWh: 5,
