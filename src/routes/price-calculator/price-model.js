@@ -43,7 +43,6 @@ function quoteFor(customerSolution) {
     const discountMultiplier = calculateDiscountFrom(installMonth);
 
     quote.discount.multiplier = discountMultiplier;
-    console.log(1.0 - discountMultiplier);
     quote.discount.value = quote.price.total * discountMultiplier;
     quote.price.total -= quote.discount.value;
 
@@ -65,9 +64,8 @@ function calculateDiscountFrom(installMonth) {
     const DISCOUNT_PER_MONTH = 0.05;
 
     const earliest = earliestInstallMonth();
-    const monthsInFuture = monthsBetween(earliest, installMonth);
-
-    const discountMultiplier = Math.min(monthsInFuture, 11) * DISCOUNT_PER_MONTH;
+    const monthsAhead = monthsAheadOf(earliest, installMonth);
+    const discountMultiplier = Math.min(monthsAhead, 11) * DISCOUNT_PER_MONTH;
 
     return discountMultiplier;
 }
@@ -75,15 +73,19 @@ function calculateDiscountFrom(installMonth) {
 
 function earliestInstallMonth() {
   const now = new Date();
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 2);
   return nextMonth;
 }
 
 
-function monthsBetween(date1, date2) {
-  const months = (date2.getFullYear() - date1.getFullYear()) * 12 + (date2.getMonth() - date1.getMonth());
-  return Math.abs(months);
+function monthsAheadOf(earliest, target) {
+  const monthsDifference = (target.getFullYear() - earliest.getFullYear()) * 12 + (target.getMonth() - earliest.getMonth());
+  if (monthsDifference <= 0)
+    return 0;
+
+  return monthsDifference;
 }
+
 
 
 export { quoteFor, earliestInstallMonth };
