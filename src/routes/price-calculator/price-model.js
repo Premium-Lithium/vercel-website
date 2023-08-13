@@ -1,12 +1,13 @@
 // Calculate all the information that would be included in a customer quote,
 // given their chosen solution
-function quoteFor(customerSolution) {
+function quoteFor(plOffering) {
     // todo: validate customer solution object passed in (ajv here or before call?)
 
     // todo: define this as typescript interface?
     let quote = {
         price: {
             total: 0,
+            earliestInstall: 0,
             breakdown: []
         },
         discount: {
@@ -16,7 +17,7 @@ function quoteFor(customerSolution) {
     };
 
     // todo: load pricing model parameters from spreadsheet/settings/elsewhere
-    switch(customerSolution.batterySize_kWh) {
+    switch(plOffering.batterySize_kWh) {
         case 5:
             quote.price.total = 2698;
             break;
@@ -31,15 +32,17 @@ function quoteFor(customerSolution) {
     }
 
     // todo: complete pricing model
-    if (customerSolution.evCharger.included) {
-        const chargerPrice = getEVChargerPrice(customerSolution.evCharger);
+    if (plOffering.evCharger.included) {
+        const chargerPrice = getEVChargerPrice(plOffering.evCharger);
         quote.price.total += chargerPrice;
 
         // todo: add ev charger to component list
     }
 
+    quote.price.earliestInstall = quote.price.total;
+
     // Apply pre-order discount
-    const installMonth = new Date(customerSolution.installMonth);
+    const installMonth = new Date(plOffering.installMonth);
     const discountMultiplier = calculateDiscountFrom(installMonth);
 
     quote.discount.multiplier = discountMultiplier;
@@ -85,7 +88,6 @@ function monthsAheadOf(earliest, target) {
 
   return monthsDifference;
 }
-
 
 
 export { quoteFor, earliestInstallMonth };
