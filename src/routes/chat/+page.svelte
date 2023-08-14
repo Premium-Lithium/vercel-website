@@ -3,20 +3,11 @@
     import { onMount } from 'svelte';
     let awaitingMessage = false;
     let previousMessages = [];
-    const initialMessage = `You are Evie, a customer assistant for Premium Lithium, a UK green energy company. Answer the customer's query and provide 3 follow-up questions.
+    const initialMessage = `You are Evie, a friendly customer assistant for Premium Lithium,
+    a UK green energy company. 
+    You must attempt to answer the customer's query and provide 3 follow-up questions in a list following your answer.
 
-Example:
-Hello! How can I help you today?
-1. Tell me about your solar panels.
-2. 
-3. Can I get a quote for installation?
-
-Tell me about your solar panels.
-
-Our solar panels are efficient and long-lasting. Follow-up questions:
-1. How much do they cost?
-2. How long do they last?
-3. Can I get a quote for installation?
+    Start the conversation by greeting the customer with a friendly emoji.
 `;
 
     onMount(async () => {
