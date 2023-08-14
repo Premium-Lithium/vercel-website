@@ -107,11 +107,17 @@ function inMonths(numberOfMonthsWait) {
 
 
 function monthsAheadOf(earliest, target) {
-  const monthsDifference = (target.getFullYear() - earliest.getFullYear()) * 12 + (target.getMonth() - earliest.getMonth());
-  if (monthsDifference <= 0)
-    return 0;
+    if(earliest === null || earliest === undefined)
+        throw new Error("earliest date is not defined");
 
-  return monthsDifference;
+    if(target === null || target === undefined)
+        throw new Error("target date is not defined");
+
+    const monthsDifference = (target.getFullYear() - earliest.getFullYear()) * 12 + (target.getMonth() - earliest.getMonth());
+    if (monthsDifference <= 0)
+        return 0;
+
+    return monthsDifference;
 }
 
 
