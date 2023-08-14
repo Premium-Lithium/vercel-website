@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import { promises as fs } from 'fs';
 import { join, dirname as pathDirname } from 'path';  // Rename dirname to pathDirname to avoid naming conflicts
 import { fileURLToPath } from 'url';
-import priceOf from '../price-calculator/price-model';
+import { inMonths, quoteToInstall } from '../price-calculator/price-model';
 import pipedrive from 'pipedrive';
 import nunjucks from 'nunjucks';
 import sendMail from '../send-mail/sendMail.js';
@@ -30,18 +30,30 @@ export async function POST({ request }) {
     if(customer === null)
         return json({}, {status: 400});
 
-    const price = priceOf(customer.solution);
-    const priceCalcLink = buildPriceCalcLinkFrom(customer.solution);
+    // todo: where should these come from?
+    const installMonths = [ 0, 6, 12 ];
 
+    // Calculate the price of installation at these different dates
+    const installVariants = installMonths.map(afterEarliest => {
+        const installMonth = inMonths(afterEarliest);
+
+        return {
+            month: installMonth,
+            price: quoteToInstall(customer.offering, installMonth)
+        };
+    });
+
+    const priceCalcLink = buildPriceCalcLinkFrom(customer.offering);
+
+    // const productsList = priceBreakdown(customer.offering);
     const customerData = {
         pl_contact_name: customer.pl_contact.name,
         price_calculator_link: priceCalcLink,
         customer_name: customer.name,
-        products: [
-            { quantity: 1, name: "10 kWh PowerPod" },
-            { quantity: 1, name: "EV Charger" }
-        ],
-        total_price: price.total
+        // products: productsList,
+        installVariants: installVariants,
+        // total_price: quote.price.total
+        total_price: 1234
     };
 
     // 5. send email
@@ -68,28 +80,25 @@ async function getCustomerInfo(dealId) {
         return null;
     }
 
+    // This is the complete set of data for the deal provided by Pipedrive's API
     const customerData = request.data;
 
-    const name = customerData.person_name;
-    const email = extractEmailFrom(customerData);
-    const solution = extractSolutionFrom(customerData);
-    const plContactPerson = extractPLContactFrom(customerData);
-
+    // We want to strip this down to only the data we care about when sending a quote email
     const customer = {
-        name: name,
-        email: email,
-        solution: solution,
-        pl_contact: plContactPerson
+        name: customerData.person_name,
+        email: extractEmailFrom(customerData),
+        offering: buildOfferingFrom(customerData),
+        pl_contact: extractPLContactFrom(customerData)
     }
 
     return customer;
 }
 
 
-function buildPriceCalcLinkFrom(customerSolution) {
+function buildPriceCalcLinkFrom(customerOffering) {
     const params = {
-        batterySize_kWh: customerSolution.batterySize_kWh.toString(),
-        evCharger: customerSolution.evCharger ? "1" : "0",
+        batterySize_kWh: customerOffering.batterySize_kWh.toString(),
+        evCharger: customerOffering.evCharger.included ? "1" : "0"
     };
 
     const searchParams = new URLSearchParams(params);
@@ -111,7 +120,7 @@ function extractEmailFrom(customerData) {
     if(homeEmail !== undefined)
         return homeEmail.value;
 
-    // Fall back to work email if this isn't found
+    // Fall back to work email if home email isn't found
     console.log("No home email found, searching for work email...");
     const workEmail = emails.find(email => email.label === 'work');
     if(workEmail !== undefined)
@@ -130,14 +139,21 @@ function extractEmailFrom(customerData) {
 }
 
 
-function extractSolutionFrom(customerData) {
-    const solution = {
+function buildOfferingFrom(customerData) {
+    const offering = {
         batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
-        evCharger: readCustomDealField("EV Charger?", customerData) == "Yes"
-        // todo: Build a complete description of the solution Premium Lithium will provide
+        evCharger: {
+            included: readCustomDealField("EV Charger?", customerData) == "Yes",
+            type: "todo: some charger type"
+        },
+        // todo: Build a complete description of the offering Premium Lithium will provide
     };
 
-    return solution;
+    // todo: check whether the customer deal includes information on when they'd like the installation to take place
+    // const requestedInstallDate = readCustomDealField("Installation Date", customerData);
+    // console.log(`Requested install date: ${requestedInstallDate}`);
+
+    return offering;
 }
 
 
