@@ -1,21 +1,38 @@
 <script>
     import { onMount } from 'svelte';
     import { page } from '$app/stores'
+    import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 
-    let userId;
+    let sdk;
+    let customerName;
 
-    onMount(() => {
-        // Get the code from the url query params
-        userId = `${$page.url.searchParams.get('userId')}`;
-        console.log(`userId: ${userId}`);
+    onMount(async () => {
+        const dealId = $page.url.searchParams.get('selectedIds');
+        customerName = "todo: load name using dealId";
 
-        // Use this code to get an auth token by making request to pipedrive
+        sdk = await new AppExtensionsSDK().initialize();
     });
+
+    async function sendQuoteEmail() {
+        const dealId = 6193;
+        // const dealId = $page.url.searchParams.get('selectedIds');
+
+        await fetch('/quote-customer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                deal_id: dealId
+            })
+        });
+    }
 </script>
 
 <div>
     custom deal panel here
-    userId: {$userId}
+    <br>
+    customer name: {customerName}
+    <br>
+    <button on:click={sendQuoteEmail}>Send Quote</button>
 </div>
 
 <style>
