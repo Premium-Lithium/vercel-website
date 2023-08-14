@@ -9,9 +9,10 @@
     <mj-section background-color="white" padding-bottom="0px" padding-top="0">
       <mj-column width="100%">
         <mj-text align="left" line-height="normal" font-size="13px" color="black" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="10px" padding-top="10">
-          hi {{ customer_name }}
+          Hi {{ customer_name }},
           <br>
-          components list:
+          <br>
+          Thanks for your call earlier. Here's a summary of your renewable energy solution:
 
           <ul>
             {% for product in products %}
@@ -19,13 +20,19 @@
             {% endfor %}
           </ul>
 
-          total price: £{{ total_price }}
+          The pricing table below outlines how our pricing changes with install date:
+
+          <ul>
+            {% for install_variant in install_variants %}
+              <li>{{ install_variant.month }} - {{ install_variant.price }}</li>
+            {% endfor %}
+          </ul>
+
+          If you'd like to explore other pricing options, feel free to use <a href="{{ price_calculator_link }}">our calculator</a>.
+          <br>
           <br>
 
-          please see the price calculator page <a href="{{ price_calculator_link }}">here</a> to adjust.
-          <br>
-
-          best regards,
+          Best regards,
           <br>
           {{ pl_contact_name }}
 
