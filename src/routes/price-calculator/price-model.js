@@ -1,13 +1,14 @@
 // Calculate all the information that would be included in a customer quote,
+
 // given their chosen solution
-function quoteFor(plOffering) {
+function quoteToInstall(plOffering, installMonth) {
     // todo: validate customer solution object passed in (ajv here or before call?)
 
     // todo: define this as typescript interface?
     let quote = {
         price: {
             total: 0,
-            earliestInstall: 0,
+            total_after_discount: 0,
             breakdown: []
         },
         discount: {
@@ -16,20 +17,28 @@ function quoteFor(plOffering) {
         }
     };
 
+    let battery = {
+        name: "",
+        quantity: 0,
+        price: 0
+    };
+
     // todo: load pricing model parameters from spreadsheet/settings/elsewhere
     switch(plOffering.batterySize_kWh) {
         case 5:
-            quote.price.total = 2698;
+            battery.price = 2698;
             break;
         case 10:
-            quote.price.total = 4498;
+            battery.price = 4498;
             break;
         case 20:
-            quote.price.total = 8093;
+            battery.price = 8093;
             break;
-        default:
-            quote.price.total = 0;
     }
+
+    battery.name = `${plOffering.batterySize_kWh} kWh Battery`;
+    battery.quantity = 1;
+    quote.price.breakdown.push(battery)
 
     // todo: complete pricing model
     if (plOffering.evCharger.included) {
@@ -37,17 +46,27 @@ function quoteFor(plOffering) {
         quote.price.total += chargerPrice;
 
         // todo: add ev charger to component list
+        const charger = {
+            name: "EV Charger",
+            quantity: 1,
+            price: chargerPrice,
+        };
+        quote.price.breakdown.push(charger);
     }
 
-    quote.price.earliestInstall = quote.price.total;
+    // Calculate total of components
+    quote.price.breakdown.forEach(component => {
+        quote.price.total += component.price;
+    });
+
+    quote.price.total_after_discount = quote.price.total;
 
     // Apply pre-order discount
-    const installMonth = new Date(plOffering.installMonth);
     const discountMultiplier = calculateDiscountFrom(installMonth);
 
     quote.discount.multiplier = discountMultiplier;
     quote.discount.value = quote.price.total * discountMultiplier;
-    quote.price.total -= quote.discount.value;
+    quote.price.total_after_discount -= quote.discount.value;
 
     // todo: break down the price into its components (so these can be tabulated in an email)
 
@@ -81,6 +100,12 @@ function earliestInstallMonth() {
 }
 
 
+function inMonths(numberOfMonthsWait) {
+    // todo: return a date object for the first of the month, numberOfMonthsWait months from now
+
+}
+
+
 function monthsAheadOf(earliest, target) {
   const monthsDifference = (target.getFullYear() - earliest.getFullYear()) * 12 + (target.getMonth() - earliest.getMonth());
   if (monthsDifference <= 0)
@@ -90,4 +115,4 @@ function monthsAheadOf(earliest, target) {
 }
 
 
-export { quoteFor, earliestInstallMonth };
+export { quoteToInstall, inMonths };
