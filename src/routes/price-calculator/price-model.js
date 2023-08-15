@@ -1,6 +1,8 @@
-// Calculate all the information that would be included in a customer quote,
+// Given a:
+// * description of the system that premium lithium will provide
+// * the month that the customer wants the system installed
+// generate a quote
 
-// given their chosen solution
 function quoteToInstall(plOffering, installMonth) {
     // todo: validate customer solution object passed in (ajv here or before call?)
 
@@ -62,6 +64,7 @@ function quoteToInstall(plOffering, installMonth) {
     quote.price.total_after_discount = quote.price.total;
 
     // Apply pre-order discount
+    console.log(`about to calcalate discount from install month ${installMonth}`);
     const discountMultiplier = calculateDiscountFrom(installMonth);
 
     quote.discount.multiplier = discountMultiplier;
@@ -85,9 +88,9 @@ function getEVChargerPrice(evCharger) {
 function calculateDiscountFrom(installMonth) {
     const DISCOUNT_PER_MONTH = 0.05;
 
-    const earliest = earliestInstallMonth();
-    const monthsAhead = monthsAheadOf(earliest, installMonth);
-    const discountMultiplier = Math.min(monthsAhead, 11) * DISCOUNT_PER_MONTH;
+    // const earliest = earliestInstallMonth();
+    const monthsInFuture = monthsUntil(installMonth);
+    const discountMultiplier = Math.min(monthsInFuture, 11) * DISCOUNT_PER_MONTH;
 
     return discountMultiplier;
 }
@@ -100,18 +103,20 @@ function earliestInstallMonth() {
 }
 
 
+// Function to return a Date object `numberOfMonthsWait` months after the earliest install date
 function inMonths(numberOfMonthsWait) {
-    // todo: return a date object for the first of the month, numberOfMonthsWait months from now
-
+    const earliest = earliestInstallMonth();
+    const target = new Date(earliest.getFullYear(), earliest.getMonth() + numberOfMonthsWait, 2);
+    return target;
 }
 
 
-function monthsAheadOf(earliest, target) {
+function monthsUntil(earliest, target) {
     if(earliest === null || earliest === undefined)
         throw new Error("earliest date is not defined");
 
     if(target === null || target === undefined)
-        throw new Error("target date is not defined");
+        throw new Error("target date is null or undefined");
 
     const monthsDifference = (target.getFullYear() - earliest.getFullYear()) * 12 + (target.getMonth() - earliest.getMonth());
     if (monthsDifference <= 0)
