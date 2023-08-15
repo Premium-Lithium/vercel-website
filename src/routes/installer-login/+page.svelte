@@ -4,6 +4,8 @@
     let username = "";
     let password = "";
     let loggedIn = false;
+    let name = "";
+    let privateData = "NOT AUTHORISED TO VIEW THIS";
   
     async function handleLogin(){
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -14,14 +16,26 @@
          console.log()
      } else{
         loggedIn = true;
+        getUserData();
      }
+     }
+
+     async function getUserData(){
+        const { data, error } = await supabase
+        .from('user_info')
+        .select()
+        console.log(data);
+        console.log(error);
+        name = data[0].name;
+        privateData = data[0].private;
      }
   </script>
   
   <main>
     <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
     {#if loggedIn}
-      <h1>Welcome, {username}!</h1>
+      <h1>Welcome, {name}!</h1>
+      <h2> Your private information: {privateData}</h2>
     {:else}
       <h1>Login</h1>
       <form on:submit|preventDefault={handleLogin}>
