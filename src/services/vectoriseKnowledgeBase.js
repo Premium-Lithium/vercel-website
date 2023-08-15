@@ -1,3 +1,12 @@
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
+import { createClient } from "@supabase/supabase-js";
+import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+
+const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+
+const text = `
 SAVE UP TO 55% WITH A PRE-ORDER ON ALL PRODUCTS
 5% DISCOUNT PER MONTH FROM NOW, CAPPED AT 55% WHEN INSTALLING IN 12 MONTHS TIME.
 ---
@@ -90,3 +99,23 @@ Regular price £39,965 (ex. VAT)
 Product power: 50kWh
 Nominal voltage: 51.2V
 Nominal capacity: 1000Ah
+`
+const textSplitter = new RecursiveCharacterTextSplitter( {
+    chunkSize: 500,
+    chunkOverlap: 0,
+})
+
+const docs = await textSplitter.createDocuments([text]);
+
+const splitDocs = await textSplitter.splitDocuments(docs);
+
+await SupabaseVectorStore.fromDocuments(
+    splitDocs,
+    new OpenAIEmbeddings(),
+    {
+        client: supabase,
+        tableName: "documents",
+        queryName: "match_documents",
+    },
+);
+   
