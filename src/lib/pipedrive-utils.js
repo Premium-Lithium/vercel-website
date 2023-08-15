@@ -1,14 +1,13 @@
 import pipedrive from 'pipedrive';
 
 
-// todo: move this into a separate file, initialise once there and import here
 const pd = new pipedrive.ApiClient();
 let apiToken = pd.authentications.api_key;
 apiToken.apiKey = process.env.PIPEDRIVE_API_TOKEN;
 
 // todo: this request comes with pagination options. check that all results are returned
-const pdApi = new pipedrive.DealFieldsApi(pd);
-const dealFieldsRequest = await pdApi.getDealFields();
+const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
+const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
 
 
 export default function readCustomDealField(fieldName, dealData) {
@@ -37,3 +36,5 @@ export default function readCustomDealField(fieldName, dealData) {
 
     return value;
 }
+
+export { pd, readCustomDealField };
