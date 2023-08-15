@@ -12,29 +12,18 @@
           Hi {{ customer_name }},
           <br>
           <br>
-          Thanks for your call earlier. Here's a summary of your renewable energy solution:
+          Thank-you for your call earlier.
+          <br>
+          <br>
+          I've set up our <a href="{{ price_calculator_link }}">our price calculator</a> for you based on what we discussed.
 
-          <ul>
-            {% for product in products %}
-              <li>{{ product.quantity }} x {{ product.name }}</li>
-            {% endfor %}
-          </ul>
-
-          The pricing table below outlines how our pricing changes with install date:
-
-          <ul>
-            {% for install_variant in install_variants %}
-              <li>{{ install_variant.month }} - {{ install_variant.price }}</li>
-            {% endfor %}
-          </ul>
-
-          If you'd like to explore other pricing options, feel free to use <a href="{{ price_calculator_link }}">our calculator</a>.
+          Please feel free to adjust this to fit your needs.
           <br>
           <br>
 
           Best regards,
           <br>
-          {{ pl_contact_name }}
+          {{ pl_bdm_contact_name }}
 
           <hr>
 
