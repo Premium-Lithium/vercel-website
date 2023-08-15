@@ -1,13 +1,5 @@
 <script>
-    import { createAuth } from '$lib/supabase.ts'
-  
-    const supabaseUrl = 'https://your-supabase-url.com'
-    const supabaseAnonKey = 'your-supabase-anon-key'
-  
-    const supabase = createAuth({
-      supabaseUrl,
-      supabaseKey: supabaseAnonKey,
-    })
+    import { supabase } from '$lib/supabase.ts'
   
     // Handle the callback
     supabase.auth
