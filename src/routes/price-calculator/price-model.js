@@ -3,7 +3,7 @@
 // * the month that the customer wants the system installed
 // generate a quote
 
-function quoteToInstall(plOffering, installMonth) {
+function quoteToInstall(solution, installMonth) {
     // todo: validate customer solution object passed in (ajv here or before call?)
 
     // todo: define this as typescript interface?
@@ -26,7 +26,7 @@ function quoteToInstall(plOffering, installMonth) {
     };
 
     // todo: load pricing model parameters from spreadsheet/settings/elsewhere
-    switch(plOffering.batterySize_kWh) {
+    switch(solution.batterySize_kWh) {
         case 5:
             battery.price = 2698;
             break;
@@ -38,13 +38,13 @@ function quoteToInstall(plOffering, installMonth) {
             break;
     }
 
-    battery.name = `${plOffering.batterySize_kWh} kWh Battery`;
+    battery.name = `${solution.batterySize_kWh} kWh Battery`;
     battery.quantity = 1;
     quote.price.breakdown.push(battery)
 
     // todo: complete pricing model
-    if (plOffering.evCharger.included) {
-        const chargerPrice = getEVChargerPrice(plOffering.evCharger);
+    if (solution.evCharger.included) {
+        const chargerPrice = getEVChargerPrice(solution.evCharger);
         quote.price.total += chargerPrice;
 
         // todo: add ev charger to component list
@@ -64,7 +64,6 @@ function quoteToInstall(plOffering, installMonth) {
     quote.price.total_after_discount = quote.price.total;
 
     // Apply pre-order discount
-    console.log(`about to calcalate discount from install month ${installMonth}`);
     const discountMultiplier = calculateDiscountFrom(installMonth);
 
     quote.discount.multiplier = discountMultiplier;
@@ -88,8 +87,8 @@ function getEVChargerPrice(evCharger) {
 function calculateDiscountFrom(installMonth) {
     const DISCOUNT_PER_MONTH = 0.05;
 
-    // const earliest = earliestInstallMonth();
-    const monthsInFuture = monthsUntil(installMonth);
+    const earliest = earliestInstallMonth();
+    const monthsInFuture = monthsUntil(installMonth, earliest);
     const discountMultiplier = Math.min(monthsInFuture, 11) * DISCOUNT_PER_MONTH;
 
     return discountMultiplier;
@@ -111,7 +110,7 @@ function inMonths(numberOfMonthsWait) {
 }
 
 
-function monthsUntil(earliest, target) {
+function monthsUntil(target, earliest) {
     if(earliest === null || earliest === undefined)
         throw new Error("earliest date is not defined");
 
@@ -126,4 +125,4 @@ function monthsUntil(earliest, target) {
 }
 
 
-export { quoteToInstall, inMonths };
+export { earliestInstallMonth, quoteToInstall, inMonths };
