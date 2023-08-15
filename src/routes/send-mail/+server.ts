@@ -1,20 +1,31 @@
 import { json } from '@sveltejs/kit';
-import addFormats from "ajv-formats";
-import Ajv from 'ajv';
-import AjvErrors from 'ajv-errors';
-
-import emailSchema from './schema.js';
+import validate from '../../lib/validation-utils.js';
 import sendMail from './sendMail.js';
 
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-AjvErrors(ajv);
-
+const schema = {
+    type: "object",
+    required: [ "recipients", "sender", "subject", "mail_body", "content_type" ],
+    properties: {
+        recipients: {
+            type: "array",
+            items: { "type": "string", "format": "email" },
+            errorMessage: "Recipients should be an array of valid email addresses"
+        },
+        sender: { "type": "string", "format": "email", "errorMessage": "Invalid sender email format" },
+        subject: { "type": "string", "errorMessage": "Subject should be a string" },
+        body: { "type": "string", "errorMessage": "mail_body should be a string" },
+        content_type: {
+            type: "string",
+            enum: [ "HTML", "TEXT" ],
+            errorMessage: "Content type should be either 'HTML' or 'TEXT'"
+        }
+    }
+}
 
 export async function POST({ request }) {
     const requestData = await request.json();
-    const validationErrors = validate(requestData);
+    const validationErrors = validate(requestData, schema);
 
     // Check that the request body obeys the schema
     if(validationErrors.length) {
@@ -22,26 +33,12 @@ export async function POST({ request }) {
         return json({ message: `${message}` }, { status: 400 })
     }
 
+    // Make sure we're sending from a Premium Lithium email address
+    const sender = requestData.sender;
+    if(!sender.endsWith("@premiumlithium.com"))
+        return json({ message: "Sender must be a Premium Lithium email address." }, { status: 400 })
+
     sendMail(...Object.values(requestData));
 
     return json({ message: `Email sent successfully from ${requestData.sender}`}, { status: 200 })
-}
-
-
-function validate(requestData) {
-    const validate = ajv.compile(emailSchema);
-    const valid = validate(requestData);
-
-    let requestErrors = [];
-
-    if(!valid) {
-        requestErrors = validate.errors.map(error => error.message);
-        return requestErrors;
-    }
-
-    const sender = requestData.sender;
-    if(!sender.endsWith("@premiumlithium.com"))
-        requestErrors.push("Sender must be a Premium Lithium email address. ");
-
-    return requestErrors;
 }
