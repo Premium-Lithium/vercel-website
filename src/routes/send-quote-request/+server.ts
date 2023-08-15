@@ -1,34 +1,59 @@
 import { json } from '@sveltejs/kit';
 import prisma from '../../lib/prisma.js';
-import addFormats from "ajv-formats";
-import Ajv from 'ajv';
-import AjvErrors from 'ajv-errors';
 import pipedrive from 'pipedrive';
-
-import quoteRequestSchema from './schema.js';
-
-
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-AjvErrors(ajv);
+import validate from '../../lib/validation-utils.js'
 
 const pd = new pipedrive.ApiClient();
 let apiToken = pd.authentications.api_key;
 apiToken.apiKey = process.env.PIPEDRIVE_API_TOKEN;
 
 
+const schema = {
+    "type": "object",
+    "properties": {
+        "for_deal": {
+            "type": "integer",
+            "minimum": 0,
+            "errorMessage": "for_deal should be a deal id (as found on Pipedrive)"
+        },
+        "to": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "email"
+            },
+            "errorMessage": "'to' should be an array of valid email addresses"
+        },
+        "to_nearest": {
+            "type": "integer",
+            "minimum": 0,
+            "errorMessage": "to_nearest should be a positive integer indicating the number of nearest installers"
+        }
+    },
+    "required": ["for_deal"],
+    "oneOf": [
+        { "required": ["to"] },
+        { "required": ["to_nearest"] }
+    ],
+    "errorMessage": {
+        "oneOf": "The request should contain either 'to_nearest' or 'to' (not both)"
+    }
+}
+
+
 export async function POST({ request }) {
     const requestData = await request.json();
-
-    // First check that the request body obeys the schema
-    const validationErrors = validate(requestData);
+    const validationErrors = validate(requestData, schema);
 
     if(validationErrors.length) {
         const errors = validationErrors.join(", ");
         return json({ message: `${errors}` }, { status: 400 })
     }
 
-    // Then work out who we'd like to send emails to
+    if(!requestData.sender.endsWith("@premiumlithium.com"))
+        return json({ message: "Sender must be a Premium Lithium email address." }, { status: 400 })
+
+    // Work out who we'd like to send emails to
     let targetInstallers = [];
 
     if('to' in requestData) {
@@ -60,19 +85,6 @@ export async function POST({ request }) {
     });
 
     return json({ message: "Quote request sent" }, { status: 200 })
-}
-
-
-function validate(requestData) {
-    const validate = ajv.compile(quoteRequestSchema);
-    const valid = validate(requestData);
-
-    let requestErrors = [];
-
-    if(!valid)
-        requestErrors = validate.errors.map(error => error.message);
-
-    return requestErrors;
 }
 
 
