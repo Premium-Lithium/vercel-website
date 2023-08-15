@@ -15,6 +15,8 @@
 
     async function sendQuoteEmail() {
         const dealId = 6193;
+
+        // todo: uncomment this and make sure to gracefully handle case where deal is not found
         // const dealId = $page.url.searchParams.get('selectedIds');
 
         await fetch('/quote-customer', {
