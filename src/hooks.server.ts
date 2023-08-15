@@ -1,6 +1,6 @@
 /** @type {import('@sveltejs/kit').Handle} */
 
-import { ADMIN_LOGIN, ACADEMY_LOGIN } from '$env/static/private';
+import { ADMIN_LOGIN} from '$env/static/private';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { createSupabaseServerClient } from '@supabase/auth-helpers-sveltekit';
 import { Handle } from '@sveltejs/kit';
@@ -26,12 +26,10 @@ export const handle: Handle = async ({
 
     const url = new URL(event.request.url);
 
-    const urlsRequiringAuth = ['/map','/brochure'];
+    const urlsRequiringAuth = ['/map'];
     if (urlsRequiringAuth.some(x => url.pathname.startsWith(x))) {
         const auth = event.request.headers.get("Authorization");
-
-        if ((url.pathname.startsWith('/map') && auth !== `Basic ${btoa(ADMIN_LOGIN)}`) ||
-            (url.pathname.startsWith('/brochure') && auth !== `Basic ${btoa(ACADEMY_LOGIN)}`)) {
+        if ((url.pathname.startsWith('/map') && auth !== `Basic ${btoa(ADMIN_LOGIN)}`)) {
             return new Response("Not authorized", {
                 status: 401,
                 headers: {
