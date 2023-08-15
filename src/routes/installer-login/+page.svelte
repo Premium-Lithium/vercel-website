@@ -19,11 +19,10 @@
   </script>
   
   <main>
-    {#if loggedIn}
     <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
+    {#if loggedIn}
       <h1>Welcome, {username}!</h1>
     {:else}
-    <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
       <h1>Login</h1>
       <form on:submit|preventDefault={handleLogin}>
         <label for="username">Username:</label>
