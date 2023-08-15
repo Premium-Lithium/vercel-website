@@ -4,6 +4,7 @@
     let username = "";
     let password = "";
     let loggedIn = false;
+    let passwordCorrect = true;
     let name = "";
     let privateData = "NOT AUTHORISED TO VIEW THIS";
   
@@ -13,7 +14,7 @@
         password: password,
         })
         if (error){
-         console.log()
+          passwordCorrect = false;
      } else{
         loggedIn = true;
         getUserData();
@@ -24,8 +25,6 @@
         const { data, error } = await supabase
         .from('user_info')
         .select()
-        console.log(data);
-        console.log(error);
         name = data[0].name;
         privateData = data[0].private;
      }
@@ -47,6 +46,9 @@
   
     <button type="submit" on:click={handleLogin}>                   Log In</button>
       </form>
+      {#if passwordCorrect == false}
+        <h2> incorrect username or password!</h2>
+      {/if}
     {/if}
   </main>
   
