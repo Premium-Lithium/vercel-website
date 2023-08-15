@@ -8,16 +8,16 @@ addFormats(ajv);
 AjvErrors(ajv);
 
 
-export default function validate(jsonData, schemaPath) {
+export default function validate(jsonData, schema) {
     // Check that parameters are valid
     if(jsonData === undefined || jsonData === null)
         throw new Error("jsonData is undefined or null");
 
-    if(schemaPath === undefined || schemaPath === null)
-        throw new Error("relativePathToSchema is undefined or null");
+    if(schema === undefined || schema === null)
+        throw new Error("schema is undefined or null");
 
-    // Load schema from file
-    const schema = loadSchemaFrom(schemaPath);
+    if(schema.type !== "object")
+        throw new Error("schema is not a json object");
 
     // Validate schema
     const validationFunction = ajv.compile(schema);
