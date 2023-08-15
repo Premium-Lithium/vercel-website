@@ -3,17 +3,12 @@
     import { onMount } from 'svelte';
     let awaitingMessage = false;
     let previousMessages = [];
-    const initialMessage = `You are Evie, a friendly customer assistant for Premium Lithium,
-    a UK green energy company. 
-    You must attempt to answer the customer's query and provide 3 follow-up questions in a list following your answer.
-
-    Start the conversation by greeting the customer with a friendly emoji.
-`;
+    const initialMessage = `Greet me with a friendly emoji`;
 
     onMount(async () => {
         const response = await fetch('chat/', {
             method: 'POST',
-            body: JSON.stringify({ "prompt" : [{"role": "assistant", "content": initialMessage}] }),
+            body: JSON.stringify({ "prompt" : [{"role": "user", "content": initialMessage}] }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -62,7 +57,7 @@
                 awaitingMessage = false;
                 const { message } = await response.json();
                 console.log(message);
-                previousMessages = [...previousMessages, {"role": "assistant", "content": message.text.split('|')}];
+                previousMessages = [...previousMessages, {"role": "assistant", "content": message.output}];
                 console.log(message.content);
             }
         }}
