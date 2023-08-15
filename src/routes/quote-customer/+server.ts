@@ -1,16 +1,11 @@
 import { json } from '@sveltejs/kit';
 import { promises as fs } from 'fs';
-import { join, dirname as pathDirname } from 'path';  // Rename dirname to pathDirname to avoid naming conflicts
-import { fileURLToPath } from 'url';
 import { inMonths, quoteToInstall } from '../price-calculator/price-model';
 import pipedrive from 'pipedrive';
 import nunjucks from 'nunjucks';
+import validate from '../../lib/validation-utils.js';
 import sendMail from '../send-mail/sendMail.js';
 import readCustomDealField from '../../lib/pipedrive-utils.js'
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = pathDirname(__filename);
 
 
 // todo: move this into a separate file, initialise once there and import here
@@ -19,10 +14,38 @@ let apiToken = pd.authentications.api_key;
 apiToken.apiKey = process.env.PIPEDRIVE_API_TOKEN;
 
 
-export async function POST({ request }) {
-    const data = await request.json();
+const schema = {
+    type: "object",
+    required: [ "recipients", "sender", "subject", "mail_body", "content_type" ],
+    properties: {
+        recipients: {
+            type: "array",
+            items: { "type": "string", "format": "email" },
+            errorMessage: "Recipients should be an array of valid email addresses"
+        },
+        sender: { "type": "string", "format": "email", "errorMessage": "Invalid sender email format" },
+        subject: { "type": "string", "errorMessage": "Subject should be a string" },
+        body: { "type": "string", "errorMessage": "mail_body should be a string" },
+        content_type: {
+            type: "string",
+            enum: [ "HTML", "TEXT" ],
+            errorMessage: "Content type should be either 'HTML' or 'TEXT'"
+        }
+    }
+}
 
-    // todo: validate request body
+
+export async function POST({ request }) {
+    const requestData = await request.json();
+    const validationErrors = validate(requestData, schema);
+
+    if(validationErrors.length) {
+        const errors = validationErrors.join(", ");
+        return json({ message: `${errors}` }, { status: 400 })
+    }
+
+    // todo: put this into separate function
+    quoteCustomer(dealId, afterMonths);
 
     const dealId = data.deal_id;
     const customer = await getCustomerInfo(dealId);
@@ -36,6 +59,8 @@ export async function POST({ request }) {
     // Calculate the price of installation at these different dates
     const installVariants = installMonths.map(afterEarliest => {
         const installMonth = inMonths(afterEarliest);
+
+        console.log(`calling quoteToInstall with ${installMonth}`);
 
         return {
             month: installMonth,
@@ -187,4 +212,9 @@ async function loadQuoteEmailWith(customerData) {
         console.error(message, err);
         return message;
     }
+}
+
+
+function quoteCustomer() {
+    console.log("Creating quote for customer...");
 }
