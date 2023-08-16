@@ -9,15 +9,30 @@
     <mj-section background-color="white" padding-bottom="0px" padding-top="0">
       <mj-column width="100%">
         <mj-text align="left" line-height="normal" font-size="13px" color="black" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="10px" padding-top="10">
-          Hi {{ customer_name }},
+          Dear {{ customer_name }},
           <br>
           <br>
-          Thank-you for your call earlier.
-          <br>
-          <br>
-          I've set up our <a href="{{ price_calculator_link }}">our price calculator</a> for you based on what we discussed.
 
-          Please feel free to adjust this to fit your needs.
+          <h4>Thank You for Your Time</h4>
+          I just wanted to extend my gratitude for taking the time to speak with me on the phone CALL_TIME. It was great discussing your solar and storage options.
+          <br><br>
+
+          <h4>Your Customised Quotes</h4>
+          As per our discussion, I have attached three quotes based on the different installation dates available, along with their corresponding terms:
+
+          <br><br>
+          I've set up our <a href="{{ price_calculator_link }}">our price calculator</a> for you based on what we discussed. Please feel free to use this to explore other configurations.
+
+          <h4>Attachments Included</h4>
+          For your convenience, the detailed quotes and data sheets are attached to this email.
+
+          <h4>Next Steps</h4>
+          If you would like to book a follow-up conversation with me to go through these options in more detail, you can do so using the following link: Schedule Follow-Up Conversation.
+
+          <br><br>
+          Alternatively, I am also highly responsive by email, so feel free to put your thoughts in a reply to this message if that suits you better.
+
+          Thank you again for considering us for your solar and storage needs, Robert. I am here to help you every step of the way.
           <br>
           <br>
 
