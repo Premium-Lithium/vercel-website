@@ -3,7 +3,7 @@ import sendMail from '../send-mail/logic.js';
 import nunjucks from 'nunjucks';
 import pipedrive from 'pipedrive';
 import fs from 'fs/promises';
-import { pd, readCustomDealField } from '../../lib/pipedrive-utils.js'
+import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -35,6 +35,9 @@ export default async function quoteCustomer(dealId) {
         emailContent,
         "HTML"
     );
+
+    if(!markAsQuoteIssued(dealId))
+        console.log(`Failed to update deal ${dealId} as QuoteIssued`);
 }
 
 
@@ -151,4 +154,39 @@ async function loadQuoteEmailWith(customerData) {
         console.error(message, err);
         return message;
     }
+}
+
+
+async function markAsQuoteIssued(dealId) {
+    console.log(`marking deal ${dealId} as QuoteIssued...`);
+
+    // Update the `Quote Issued` field on pipedrive with todays date
+    // todo: this assumes the dealFieldsRequest was successful
+    const dealFields = dealFieldsRequest.data;
+    const field = dealFields.find(f => f.name === "Quote issued");
+
+    if(field === undefined) {
+        console.log(`Could not find the "Quote issued" field on pipedrive`);
+        return false;
+    }
+
+    const dealsApi = new pipedrive.DealsApi(pd);
+    const updatedDeal = await dealsApi.updateDeal(dealId, {
+        [field.key]: today()
+    });
+
+    // Move the deal to the quote issued stage
+
+
+    return true;
+}
+
+
+function today() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so we add 1.
+    const day = String(today.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 }

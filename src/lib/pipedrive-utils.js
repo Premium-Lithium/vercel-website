@@ -28,7 +28,6 @@ export default function readCustomDealField(fieldName, dealData) {
     // The field exists, now we need to read it
     const key = field.key;
     let value = dealData[key];
-    // console.log(dealData);
 
     // If the field type is an enum, we still need to map the field's value to its readable name
     if(field.field_type === "enum")
@@ -37,4 +36,4 @@ export default function readCustomDealField(fieldName, dealData) {
     return value;
 }
 
-export { pd, readCustomDealField };
+export { pd, readCustomDealField, dealFieldsRequest };
