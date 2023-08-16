@@ -34,6 +34,10 @@ function initAPIClient({ accessToken = '', refreshToken = '' }) {
 };
 
 
+// todo: include register account credentials in database and use them to get
+// access token The following example code came from a github repo I found, but
+// I've lost the link - Lewis
+
 // const handler = async (req, res) => {
 //   try {
 //     const { code } = req.query;
