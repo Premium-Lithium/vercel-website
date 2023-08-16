@@ -133,7 +133,7 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 
     const searchParams = new URLSearchParams(params);
 
-    const priceCalculatorURL = "http://localhost:3000/price-calculator"; // let priceCalculatorURL = "https://vercel-website-liart.vercel.app/price-calculator";
+    const priceCalculatorURL = "https://vercel-website-liart.vercel.app/price-calculator";
     const priceCalcLink = priceCalculatorURL + '?' + searchParams.toString();
 
     return priceCalcLink;
