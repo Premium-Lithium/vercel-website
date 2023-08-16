@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export async function GET( response ){
     const quotes = await prisma.quote.findMany();
-      return json({
+    return json({
         status: 200,
         headers: {
             "Content-Type": "application/json",
