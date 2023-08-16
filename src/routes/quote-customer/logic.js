@@ -28,7 +28,10 @@ export default async function quoteCustomer(dealId) {
     const emailContent = await loadQuoteEmailWith(customerData);
 
     sendMail(
-        [ customer.email ],
+        // [ customer.email ],
+        // REMOVE IN PRODUCTION
+        [ "lewisbowes0@gmail.com" ],
+        // REMOVE IN PRODUCTION
         customer.pl_contact.email,
         "Your Solar PV and BESS Quotes - Options and Next Steps",
         emailContent,
@@ -158,8 +161,6 @@ async function loadQuoteEmailWith(customerData) {
 
 
 async function markAsQuoteIssued(dealId) {
-    console.log(`marking deal ${dealId} as QuoteIssued...`);
-
     // Update the `Quote Issued` field on pipedrive with todays date
     // todo: this assumes the dealFieldsRequest was successful
     const dealFields = dealFieldsRequest.data;
@@ -172,10 +173,9 @@ async function markAsQuoteIssued(dealId) {
         return false;
     }
 
-    const updatedDeal = await dealsApi.updateDeal(dealId, {
+    await dealsApi.updateDeal(dealId, {
         [quoteIssuedField.key]: today()
     });
-    console.log(updatedDeal);
 
     // Move the deal to the quote issued stage
     const stagesApi = new pipedrive.StagesApi(pd);
@@ -189,7 +189,7 @@ async function markAsQuoteIssued(dealId) {
 
     const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
 
-    const updated = await dealsApi.updateDeal(dealId, {
+    await dealsApi.updateDeal(dealId, {
         stage_id: quoteIssuedStage.id
     });
 
