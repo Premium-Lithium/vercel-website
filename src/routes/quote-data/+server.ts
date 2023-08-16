@@ -7,8 +7,7 @@ export async function GET( response ){
       return json({
         status: 200,
         headers: {
-            "Content-Type": "application/csv",
-            "Content-Disposition": `attatchment; filename*=quotes.csv`
+            "Content-Type": "application/json",
         },
         body: quotes
     })

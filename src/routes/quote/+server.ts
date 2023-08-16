@@ -1,58 +1,43 @@
 import { json } from '@sveltejs/kit';
-import prisma from '$lib/prisma.js';
 import { getNewQuotes } from '$lib/services/quoteBot.js';
+import { supabase } from '$lib/supabase.ts'
 
 export async function POST({ request }) {
-    let newQuote = undefined;
     const { values } = await request.json();
     const [[
         installerId,
         dealId,
         totalQuote,
-        quoteLabour,
-        quoteScaffolding,
-        quoteMaterials,
-        quoteCertification,
         dateOfCompletion,
         currTime,
     ]] = values;
+    const { error } = async () => {
+        try{ return await supabase
+            .from('quote')
+            .insert({
+                installerId: installerId,
+                dealId: dealId,
+                totalQuote: totalQuote, 
+                dateOfCompletion: dateOfCompletion,
+                currTime: currTime, 
+            }, {returning: "minimal"})
+        } catch (error) {
+            try {
+                return await supabase
+                .from('quote')
+                .update({
+                    installerId: installerId,
+                    dealId: dealId,
+                    totalQuote: totalQuote, 
+                    dateOfCompletion: dateOfCompletion,
+                    currTime: currTime, 
+                }, {returning: "minimal"})
+            } catch (error){
+                console.log(error);
+            }        
+        }}
 
-    try {
-      newQuote = await prisma.Quote.create({
-      data: {
-        installerId: parseInt(installerId),
-        dealId: parseInt(dealId),
-        totalQuote: parseFloat(totalQuote), 
-        quoteLabour: parseFloat(quoteLabour),
-        quoteScaffolding: parseFloat(quoteScaffolding),
-        quoteMaterials: parseFloat(quoteMaterials),
-        quoteCertification: parseFloat(quoteCertification),
-        dateOfCompletion: dateOfCompletion,
-        currTime: currTime, 
-      },
-    });
-    } catch (e) {
-      newQuote = await prisma.Quote.update({
-        data: {
-          installerId: parseInt(installerId),
-          dealId: parseInt(dealId),
-          totalQuote: parseFloat(totalQuote), 
-          quoteLabour: parseFloat(quoteLabour),
-          quoteScaffolding: parseFloat(quoteScaffolding),
-          quoteMaterials: parseFloat(quoteMaterials),
-          quoteCertification: parseFloat(quoteCertification),
-          dateOfCompletion: dateOfCompletion,
-          currTime: currTime, 
-        },
-      where:{
-        installerId_dealId: {
-          installerId: parseInt(installerId),
-          dealId: parseInt(dealId),
-        }
-    }});
-    }
-
-    if (newQuote === undefined) return json({}, {status:500})
+    if (error) return json({}, {status:500})
     getNewQuotes(values);
     return json({}, {status: 200})
 

@@ -4,6 +4,7 @@
 	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
     import QuoteInput from './QuoteInput.svelte';
     import { fade } from 'svelte/transition';
+    import { supabase } from '$lib/supabase.ts'
 
     const installerId = $page.url.searchParams.get('installerId');
     const dealId = $page.url.searchParams.get('dealId');
@@ -25,14 +26,13 @@
     });
 
     async function postInstallerQuote(installerId, dealId) {
-        console.log("posting installer quote")
             let currTime = new Date();
             loading = true;
             const response = await fetch('quote/', { 
                 method: "POST",
                 body: JSON.stringify({
                     "values": [
-                        [installerId, dealId, totalQuote, quote.labour, quote.scaffolding, quote.materials, quote.certification, new Date(dateOfCompletion), new Date(currTime)]
+                        [installerId, dealId, totalQuote, new Date(dateOfCompletion), new Date(currTime)]
                     ]
                 }),
                 headers: {
@@ -100,9 +100,10 @@
                 bind:dialog={submitDialog}
                 yesFunc={
                     async () => {submitDialog.close();
-                    response = await postInstallerQuote(installerId, dealId);
-                    successfulQuote = response.statusCode === 200? true : false}
-                }
+                    await postInstallerQuote(installerId, dealId);
+                    successfulQuote = true;
+
+                }}
                 noFunc={() => {submitDialog.close()}}>
                 <h2 slot="header">
                     Confirm quote of £{totalQuote}?
@@ -165,6 +166,7 @@
 <style>
     :root {
         --padding: 16px;
+        overflow: unset;
     }
 
     .body {
@@ -174,8 +176,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        overflow: auto; 
-        overflow-x: hidden;       
+        overflow: hidden;  
     }
 
     .split-screen {
@@ -238,9 +239,9 @@
 
     .quote-gone-through {
         display: flex;
-        flex-direction: row;
-        text-align: center;
-        align-self: center;
+        flex-direction: column;
+        justify-content: center;
+        height: 100vh;
     }
 
     input[type="submit"] {
