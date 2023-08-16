@@ -80,18 +80,34 @@
         return priceValueFloat.toFixed(2);
     }
 
-    function submit() {
-        console.log(`${dealId} submitted confirmation`);
+    async function submit() {
+        markDealAsWon(dealId);
+    }
 
-        // todo: call custom api here for customer to accept quote
+    async function markDealAsWon(dealId) {
+        // todo: move this into an 'update-deal'
+        const PIPEDRIVE_API_TOKEN = "77a5356773f422eb97c617fd7c37ee526da11851";
+        const PIPEDRIVE_API_URL = 'https://api.pipedrive.com/v1';
+        const endpoint = `${PIPEDRIVE_API_URL}/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`;
 
-        // await fetch('/api/quote', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(quote)
-        // });
+        try {
+            const response = await fetch(endpoint, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                // todo: update any details of the deal that the user has changed
+                body: JSON.stringify({ status: 'won' })
+            });
+
+            const data = await response.json();
+
+            if (data && data.success) {
+                console.log(`Deal ${dealId} marked as won successfully!`);
+            } else {
+                console.error('Failed to mark deal as won:', data);
+            }
+        } catch (error) {
+            console.error('Error marking deal as won:', error.message);
+        }
     }
 </script>
 
@@ -129,7 +145,7 @@
 
     {priceStr(quote.price.total_after_discount)}</p>
 
-    <button on:click="{submit}">Preorder</button>
+    <button on:click="{submit}">Order</button>
 </div>
 
 <style>
