@@ -3,7 +3,6 @@ import { getNewQuotes } from '$lib/services/quoteBot.js';
 import { supabase } from '$lib/supabase.ts'
 
 export async function POST({ request }) {
-    let newQuote = undefined;
     const { values } = await request.json();
     const [[
         installerId,
