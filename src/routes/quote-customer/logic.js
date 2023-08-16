@@ -163,20 +163,35 @@ async function markAsQuoteIssued(dealId) {
     // Update the `Quote Issued` field on pipedrive with todays date
     // todo: this assumes the dealFieldsRequest was successful
     const dealFields = dealFieldsRequest.data;
-    const field = dealFields.find(f => f.name === "Quote issued");
+    const dealsApi = new pipedrive.DealsApi(pd);
 
-    if(field === undefined) {
+    const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
+
+    if(quoteIssuedField === undefined) {
         console.log(`Could not find the "Quote issued" field on pipedrive`);
         return false;
     }
 
-    const dealsApi = new pipedrive.DealsApi(pd);
     const updatedDeal = await dealsApi.updateDeal(dealId, {
-        [field.key]: today()
+        [quoteIssuedField.key]: today()
     });
+    console.log(updatedDeal);
 
     // Move the deal to the quote issued stage
+    const stagesApi = new pipedrive.StagesApi(pd);
+    const B2C_PIPELINE_ID = 23;
+    let opts = {
+        'pipelineId': B2C_PIPELINE_ID,
+        'start': 0,
+        'limit': 56
+    };
+    const stages = await stagesApi.getStages(opts);
 
+    const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
+
+    const updated = await dealsApi.updateDeal(dealId, {
+        stage_id: quoteIssuedStage.id
+    });
 
     return true;
 }
