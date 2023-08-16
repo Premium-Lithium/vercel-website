@@ -9,7 +9,7 @@
       method: "POST",
       body: formData,
     });
-    console.log(result.text);
+    console.log(result);
   }
 </script>
 
