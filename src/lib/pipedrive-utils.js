@@ -10,7 +10,7 @@ const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
 const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
 
 
-export default function readCustomDealField(fieldName, dealData) {
+function readCustomDealField(fieldName, dealData) {
     if(dealFieldsRequest.success === false) {
         console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
         return null;
@@ -35,5 +35,6 @@ export default function readCustomDealField(fieldName, dealData) {
 
     return value;
 }
+
 
 export { pd, readCustomDealField, dealFieldsRequest };
