@@ -1,40 +1,47 @@
 <script>
-	import { supabase } from '$lib/supabase.ts';
+    import { supabase } from '$lib/supabase.ts';
 
     let username = "";
     let password = "";
     let loggedIn = false;
     let passwordCorrect = true;
     let name = "";
-    let privateData = "NOT AUTHORISED TO VIEW THIS";
   
     async function handleLogin(){
         const { data, error } = await supabase.auth.signInWithPassword({
         email: username,
         password: password,
         })
+
         if (error){
-          passwordCorrect = false;
-     } else{
-        loggedIn = true;
-        getUserData();
-     }
+            passwordCorrect = false;
+        } else {
+            loggedIn = true;
+        }
      }
 
-     async function getUserData(){
+    async function getUserData(){
+        const { data: { user } } = await supabase.auth.getUser()
+
         const { data, error } = await supabase
-        .from('user_info')
-        .select()
-        name = data[0].name;
-        privateData = data[0].private;
-     }
+            .from('user_data')
+            .select()
+            .eq('id', user.id)
+
+        console.log(data)
+        return data
+    }
   </script>
   
   <main>
     <img class="logo" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500">
     {#if loggedIn}
-      <h1>Welcome, {name}!</h1>
-      <h2> Your private information: {privateData}</h2>
+      <h1>Welcome!</h1>
+      {#await getUserData()}
+          <h2>Loading</h2>
+      {:then userData}
+          <h2> {userData[0].data}</h2>
+      {/await}
     {:else}
       <h1>Login</h1>
       <form on:submit|preventDefault={handleLogin}>
