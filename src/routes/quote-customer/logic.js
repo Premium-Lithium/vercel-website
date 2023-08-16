@@ -11,14 +11,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
 export default async function quoteCustomer(dealId) {
     const customer = await getCustomerInfo(dealId);
 
     if(customer === null)
         return json({}, { status: 400 });
 
-    const priceCalcLink = buildPriceCalcLinkFrom(customer.solution);
+    const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
 
     const customerData = {
         pl_bdm_contact_name: customer.pl_contact.name,
@@ -31,7 +30,7 @@ export default async function quoteCustomer(dealId) {
     sendMail(
         [ customer.email ],
         customer.pl_contact.email,
-        "Your quote",
+        "Your Solar PV and BESS Quotes - Options and Next Steps",
         emailContent,
         "HTML"
     );
@@ -122,10 +121,11 @@ function extractPLContactFrom(customerData) {
 }
 
 
-function buildPriceCalcLinkFrom(solution) {
+function buildPriceCalcLinkFrom(solution, dealId) {
     const params = {
         batterySize_kWh: solution.batterySize_kWh.toString(),
-        evCharger: solution.evCharger.included ? "1" : "0"
+        evCharger: solution.evCharger.included ? "1" : "0",
+        dealId: dealId
     };
 
     const searchParams = new URLSearchParams(params);
