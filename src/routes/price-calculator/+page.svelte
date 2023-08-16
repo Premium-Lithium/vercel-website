@@ -3,6 +3,8 @@
     import { page } from '$app/stores'
     import { earliestInstallMonth, quoteToInstall } from './price-model';
 
+
+    const dealId = `${$page.url.searchParams.get('dealId')}`;
     let earliestInstall = earliestInstallMonth();
     let solution = loadSolution();
     let installDateStr = solution.installMonth.toISOString().slice(0, 7);
@@ -77,6 +79,20 @@
     function priceStr(priceValueFloat) {
         return priceValueFloat.toFixed(2);
     }
+
+    function submit() {
+        console.log(`${dealId} submitted confirmation`);
+
+        // todo: call custom api here for customer to accept quote
+
+        // await fetch('/api/quote', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify(quote)
+        // });
+    }
 </script>
 
 <div>
@@ -112,6 +128,8 @@
     {/if}
 
     {priceStr(quote.price.total_after_discount)}</p>
+
+    <button on:click="{submit}">Preorder</button>
 </div>
 
 <style>
