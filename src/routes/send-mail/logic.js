@@ -1,40 +1,21 @@
 import { json } from '@sveltejs/kit';
-import addFormats from "ajv-formats";
-import Ajv from 'ajv';
-import AjvErrors from 'ajv-errors';
 import querystring from 'querystring';
 
-import emailSchema from './schema.js';
 
+export default async function sendMail(recipients, sender, subject, mail_body, content_type) {
+    console.log(`Sending email from ${sender} to ${recipients}...`);
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-AjvErrors(ajv);
-
-
-export async function POST({ request }) {
-    const requestData = await request.json();
-    const validationErrors = validate(requestData);
-
-    // Check that the request body obeys the schema
-    if(validationErrors.length) {
-        const message = validationErrors.join(", ");
-        return json({ message: `${message}` }, { status: 400 })
-    }
-
-    // Build the email
     const messagePayload = {
         message: {
-            subject: requestData.subject,
+            subject: subject,
             body: {
-                contentType: requestData.content_type,
-                content: requestData.mail_body
+                contentType: content_type,
+                content: mail_body
             },
-            toRecipients: requestData.recipients.map(email => ({ emailAddress: { address: email } }))
+            toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
         }
     };
 
-    // Send the email
     const apiToken = await getNewAPIToken();
 
     const headers = {
@@ -48,7 +29,7 @@ export async function POST({ request }) {
         body: JSON.stringify(messagePayload)
     };
 
-    const apiUrl = `/v1.0/users/${requestData.sender}/sendMail`;
+    const apiUrl = `/v1.0/users/${sender}/sendMail`;
 
     fetch(`https://graph.microsoft.com${apiUrl}`, options)
         .then(res => {
@@ -65,27 +46,6 @@ export async function POST({ request }) {
         .catch(error => {
             return json({ message: `Failed to send email: ${error.message}`}, { status: 500 })
         });
-
-    return json({ message: `Email sent successfully from ${requestData.sender}`}, { status: 200 })
-}
-
-
-function validate(requestData) {
-    const validate = ajv.compile(emailSchema);
-    const valid = validate(requestData);
-
-    let requestErrors = [];
-
-    if(!valid) {
-        requestErrors = validate.errors.map(error => error.message);
-        return requestErrors;
-    }
-
-    const sender = requestData.sender;
-    if(!sender.endsWith("@premiumlithium.com"))
-        requestErrors.push("Sender must be a Premium Lithium email address. ");
-
-    return requestErrors;
 }
 
 

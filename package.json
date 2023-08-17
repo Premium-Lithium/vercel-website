@@ -43,6 +43,7 @@
 	"type": "module",
 	"dependencies": {
 		"@auth0/auth0-spa-js": "^2.1.0",
+		"@pipedrive/app-extensions-sdk": "^0.9.0",
 		"@prisma/client": "^4.13.0",
 		"@supabase/auth-helpers-sveltekit": "^0.10.2",
 		"@supabase/supabase-js": "^2.31.0",
@@ -51,6 +52,8 @@
 		"ajv-errors": "^3.0.0",
 		"ajv-formats": "^2.1.1",
 		"openai": "4.0.0-beta.12",
+		"nunjucks": "^3.2.4",
+		"pipedrive": "^21.1.0",
 		"svelte-material-icons": "^3.0.5",
 		"vercel": "^31.0.1"
 	}

@@ -42,28 +42,29 @@ model Deal {
   @@unique([jobId, installerId])
 }
 
-enum DealStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  EXPIRED
-}
-
 model Quote {
-  installerId Int
-  dealId  Int
-  totalQuote  Float
-  quoteLabour Float
-  quoteScaffolding  Float
-  quoteMaterials  Float
-  quoteCertification  Float
-  dateOfCompletion  DateTime
-  currTime  DateTime @default(now())
+  installerId        Int
+  dealId             Int
+  totalQuote         Float
+  quoteLabour        Float
+  quoteScaffolding   Float
+  quoteMaterials     Float
+  quoteCertification Float
+  dateOfCompletion   DateTime
+  currTime           DateTime @default(now())
+
   @@id([installerId, dealId])
   @@unique([installerId, dealId])
 }
 
 model UnsubscribedEmails {
-  email String @id @unique
+  email  String @id @unique
   reason String
+}
+
+enum DealStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
 }
