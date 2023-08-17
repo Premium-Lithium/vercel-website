@@ -15,7 +15,6 @@
     });
     transcribedText = (await result.json()).message;
     transcribing = false;
-    console.log();
   }
 </script>
 
