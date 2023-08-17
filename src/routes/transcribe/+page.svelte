@@ -19,55 +19,100 @@
   }
 </script>
 
-<input type="file" bind:files={files} />
-{#if !transcribing}
-<button on:click={handleUpload}>Upload</button>
-{/if}
-{#if transcribedText != ""}
-<div>
-  {transcribedText}
-</div>
-{/if}
-
-
 <style>
   body {
-    font-family: 'Arial', sans-serif;
     background-color: #f7f7f9;
-    padding: 40px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 90%;
+    max-height: 90%;
+    max-width: 600px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.15);
   }
 
   input[type="file"] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    cursor: pointer;
     display: block;
-    margin-bottom: 20px;
-    background-color: #fff;
-    width: 100%;
-    box-sizing: border-box;
+    width: 95%;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 1rem;
   }
 
   button {
-    background-color: #007BFF;
-    color: #ffffff;
-    padding: 10px 20px;
+    display: block;
+    width: 100%;
+    padding: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
+    background-color: var(--plblue);
+    color: white;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease-in-out;
   }
 
   button:hover {
     background-color: #0056b3;
   }
 
-  div {
+  .result {
+
     margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fff;
+    padding: 10px;
+    border-top: 1px solid #e0e0e0;
+    overflow-y: auto;
+    word-wrap: break-word;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid var(--plblue);
+    animation: spin 1s linear infinite;
+  }
+  .transcribing-text {
+    margin-top: 15px;
+    font-style: italic;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>
+
+<body>
+  <div class="container">
+    <input type="file" bind:files={files} />
+    {#if !transcribing}
+      <button on:click={handleUpload}>{transcribedText == "" ? "Transcribe" : "Transcribe another file"}</button>
+    {:else}
+      <div class="spinner"></div>
+      <div class="transcribing-text">Transcribing...</div>
+    {/if}
+    {#if transcribedText != ""}
+      <div class="result">
+        {transcribedText}
+      </div>
+    {/if}
+  </div>
+</body>
