@@ -1,10 +1,21 @@
 import { PIPEDRIVE_API_TOKEN } from "$env/static/private"
 import fetchAllPaginated from "$lib/pipedrive/fetchAllPaginated"
-import supabase from "$lib/supabase"
+import { supabase } from "$lib/supabase"
+import { extractPostcodeFromAddress } from "$lib/services/postcodeUtilities"
 
 export async function sync() {
     console.log("syncing")
-    const installerData = getInstallerDataFromPipedrive()
+    const installerData = await getInstallerDataFromPipedrive()
+    installerData.forEach(async (installer) => {
+        const { data, error } = await supabase
+            .from("installers")
+            .upsert({
+                id: installer.id,
+                name: installer.name,
+                address: installer.address,
+                postcode: extractPostcodeFrom(address),
+            })
+    })
     
 
     // Fill empty postcodes
@@ -19,7 +30,7 @@ async function getInstallerDataFromPipedrive() {
         ]
     });
 
-    console.log(installerData)
+    return installerData
 }
 
 
