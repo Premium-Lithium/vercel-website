@@ -1,7 +1,6 @@
 import { OPENAI_API_KEY, OPENAI_ORG_ID } from "$env/static/private";
 import OpenAI from "openai";
 import {json} from '@sveltejs/kit';
-import validate from '$lib/validation-utils.js';
 
 const openai = new OpenAI({
     organization: OPENAI_ORG_ID,
