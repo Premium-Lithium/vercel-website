@@ -42,3 +42,19 @@ async function fetchBatchLatLonFromPostcodes(postcodes) {
 
   return output;
 }
+
+export function extractPostcodeFrom(address) {
+  if (address === null || address === undefined) {
+    return null;
+  }
+
+  const postcodePattern = /[A-Z][A-HJ-Y]?\d[A-Z\d]? ?\d[A-Z]{2}|GIR ?0A{2}/i;
+  const postcodeRe = new RegExp(postcodePattern);
+  const match = address.match(postcodeRe);
+
+  if (match === null) {
+    return null;
+  } else {
+    return match[0];
+  }
+}

@@ -5,10 +5,7 @@ create table "public"."installers" (
     "postcode" text,
     "latitude" double precision,
     "longitude" double precision,
-    "user_id" uuid
+    "name" text
 );
-alter table "public"."installers" enable row level security;
 CREATE UNIQUE INDEX installers_pkey ON public.installers USING btree (id);
 alter table "public"."installers" add constraint "installers_pkey" PRIMARY KEY using index "installers_pkey";
-alter table "public"."installers" add constraint "installers_user_id_fkey" FOREIGN KEY (user_id) REFERENCES auth.users(id) not valid;
-alter table "public"."installers" validate constraint "installers_user_id_fkey";
