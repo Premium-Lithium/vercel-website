@@ -42,7 +42,9 @@
 
           <hr>
 
-          TODO: include trustpilot widget here, see <a href="https://support.trustpilot.com/hc/en-us/articles/115007375487-Add-a-TrustBox-Newsletter-widget-to-your-email-campaigns">docs here</a>
+          <mj-raw>
+            <p style="text-align: center;"><a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/text1@2x.png" border="0" height="18" alt="Human score" style="max-height: 18px;"></a> &nbsp;&nbsp; <a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/stars@2x.png" border="0" height="20" alt="Trustpilot Stars" style="max-height: 20px;"></a> &nbsp;&nbsp; <span style="display: inline-block;"><a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/text2@2x.png" border="0" height="18" alt="number of reviews" style="max-height: 18px;"></a> &nbsp;&nbsp; <a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/brand/n/1/logo.png" border="0" height="20" alt="Trustpilot Logo" style="max-height: 20px; display: inline-block;"></a></span></p>
+          </mj-raw>
 
         </mj-text>
       </mj-column>

@@ -26,7 +26,7 @@
 
     function loadSolution() {
         // Load price calculator settings, using url param options where available
-        let solution = defaultSolution();
+        let solution = getDefaultSolution();
 
         // If any url params are set, override the default settings
         const battSizeOption = `${$page.url.searchParams.get('batterySize_kWh')}`;
@@ -58,7 +58,7 @@
     }
 
 
-    function defaultSolution() {
+    function getDefaultSolution() {
         // todo: this should ideally be calculated to be set to a configuration that the majority of customers will prefer
         // heuristic calculation might be possible using sales history?
         // If we can initialise this such that customers can get a price **without having to change anything**, we should do this.

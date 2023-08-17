@@ -87,9 +87,8 @@ function getEVChargerPrice(evCharger) {
 function calculateDiscountFrom(installMonth) {
     const DISCOUNT_PER_MONTH = 0.05;
 
-    const earliest = earliestInstallMonth();
-    const monthsInFuture = monthsUntil(installMonth, earliest);
-    const discountMultiplier = Math.min(monthsInFuture, 11) * DISCOUNT_PER_MONTH;
+    const numMonthsInFuture = monthsFromNowUntil(installMonth);
+    const discountMultiplier = Math.min(numMonthsInFuture, 11) * DISCOUNT_PER_MONTH;
 
     return discountMultiplier;
 }
@@ -102,27 +101,18 @@ function earliestInstallMonth() {
 }
 
 
-// Function to return a Date object `numberOfMonthsWait` months after the earliest install date
-function inMonths(numberOfMonthsWait) {
+function monthsFromNowUntil(installMonth) {
     const earliest = earliestInstallMonth();
-    const target = new Date(earliest.getFullYear(), earliest.getMonth() + numberOfMonthsWait, 2);
-    return target;
-}
 
+    if(installMonth === null || installMonth === undefined)
+        throw new Error("installMonth month is null or undefined");
 
-function monthsUntil(target, earliest) {
-    if(earliest === null || earliest === undefined)
-        throw new Error("earliest date is not defined");
-
-    if(target === null || target === undefined)
-        throw new Error("target date is null or undefined");
-
-    const monthsDifference = (target.getFullYear() - earliest.getFullYear()) * 12 + (target.getMonth() - earliest.getMonth());
-    if (monthsDifference <= 0)
+    const numMonths = (installMonth.getFullYear() - earliest.getFullYear()) * 12 + (installMonth.getMonth() - earliest.getMonth());
+    if (numMonths <= 0)
         return 0;
 
-    return monthsDifference;
+    return numMonths;
 }
 
 
-export { earliestInstallMonth, quoteToInstall, inMonths };
+export { earliestInstallMonth, quoteToInstall };
