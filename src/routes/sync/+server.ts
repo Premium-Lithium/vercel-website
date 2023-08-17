@@ -1,7 +1,7 @@
-import { sync } from "$lib/pipedrive/sync"
+import { syncAll } from "$lib/pipedrive/syncAll"
 import { json } from '@sveltejs/kit';
 
 export async function POST(response) {
-    await sync();
+    await syncAll();
     return json({ status: 200 });
 }
