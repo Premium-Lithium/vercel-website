@@ -8,6 +8,9 @@ dependencies:
   '@auth0/auth0-spa-js':
     specifier: ^2.1.0
     version: 2.1.0
+  '@mapbox/mapbox-gl-draw':
+    specifier: ^1.4.2
+    version: 1.4.2
   '@pipedrive/app-extensions-sdk':
     specifier: ^0.9.0
     version: 0.9.0
@@ -20,6 +23,12 @@ dependencies:
   '@supabase/supabase-js':
     specifier: ^2.31.0
     version: 2.31.0
+  '@turf/helpers':
+    specifier: ^6.5.0
+    version: 6.5.0
+  '@turf/points-within-polygon':
+    specifier: ^6.5.0
+    version: 6.5.0
   '@vercel/postgres':
     specifier: ^0.4.0
     version: 0.4.0
@@ -32,12 +41,12 @@ dependencies:
   ajv-formats:
     specifier: ^2.1.1
     version: 2.1.1(ajv@8.12.0)
-  openai:
-    specifier: 4.0.0-beta.12
-    version: 4.0.0-beta.12
   nunjucks:
     specifier: ^3.2.4
     version: 3.2.4
+  openai:
+    specifier: 4.0.0-beta.12
+    version: 4.0.0-beta.12
   pipedrive:
     specifier: ^21.1.0
     version: 21.1.0
@@ -1883,6 +1892,50 @@ packages:
     resolution: {integrity: sha512-Lg3PnLp0QXpxwLIAuuJboLeRaIhrgJjeuh797QADg3xz8wGLugQOS5DpsE8A6i6Adgzf+bacllkKZG3J0tGfDw==}
     dev: false
 
+  /@mapbox/extent@0.4.0:
+    resolution: {integrity: sha512-MSoKw3qPceGuupn04sdaJrFeLKvcSETVLZCGS8JA9x6zXQL3FWiKaIXYIZEDXd5jpXpWlRxinCZIN49yRy0C9A==}
+    dev: false
+
+  /@mapbox/geojson-area@0.2.2:
+    resolution: {integrity: sha512-bBqqFn1kIbLBfn7Yq1PzzwVkPYQr9lVUeT8Dhd0NL5n76PBuXzOcuLV7GOSbEB1ia8qWxH4COCvFpziEu/yReA==}
+    dependencies:
+      wgs84: 0.0.0
+    dev: false
+
+  /@mapbox/geojson-coords@0.0.2:
+    resolution: {integrity: sha512-YuVzpseee/P1T5BWyeVVPppyfmuXYHFwZHmybkqaMfu4BWlOf2cmMGKj2Rr92MwfSTOCSUA0PAsVGRG8akY0rg==}
+    dependencies:
+      '@mapbox/geojson-normalize': 0.0.1
+      geojson-flatten: 1.1.1
+    dev: false
+
+  /@mapbox/geojson-extent@1.0.1:
+    resolution: {integrity: sha512-hh8LEO3djT4fqfr8sSC6wKt+p0TMiu+KOLMBUiFOyj+zGq7+IXwQGl0ppCVDkyzCewyd9LoGe9zAvDxXrLfhLw==}
+    hasBin: true
+    dependencies:
+      '@mapbox/extent': 0.4.0
+      '@mapbox/geojson-coords': 0.0.2
+      rw: 0.1.4
+      traverse: 0.6.7
+    dev: false
+
+  /@mapbox/geojson-normalize@0.0.1:
+    resolution: {integrity: sha512-82V7YHcle8lhgIGqEWwtXYN5cy0QM/OHq3ypGhQTbvHR57DF0vMHMjjVSQKFfVXBe/yWCBZTyOuzvK7DFFnx5Q==}
+    hasBin: true
+    dev: false
+
+  /@mapbox/mapbox-gl-draw@1.4.2:
+    resolution: {integrity: sha512-Zvl5YN+tIuYZlzPmuzOgkoJsZX6sHMQsnFI+O3ox8EwYkpLO2w0U2FvVhQuVnq1Yys12x6UnF+0IPoEdBy2UfA==}
+    dependencies:
+      '@mapbox/geojson-area': 0.2.2
+      '@mapbox/geojson-extent': 1.0.1
+      '@mapbox/geojson-normalize': 0.0.1
+      '@mapbox/point-geometry': 0.1.0
+      hat: 0.0.3
+      lodash.isequal: 4.5.0
+      xtend: 4.0.2
+    dev: false
+
   /@mapbox/node-pre-gyp@1.0.10:
     resolution: {integrity: sha512-4ySo4CjzStuprMwk35H5pPbkymjv1SF3jGLj6rAHp/xT/RF7TL7bd9CTm1xDY49K2qF7jmR/g7k+SkLETP6opA==}
     hasBin: true
@@ -1899,6 +1952,10 @@ packages:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  /@mapbox/point-geometry@0.1.0:
+    resolution: {integrity: sha512-6j56HdLTwWGO0fJPlrZtdU/B13q8Uwmo18Ck2GnGgN9PCFyKTZ3UbXeEdRFh18i9XQ92eH2VdtpJHpBD3aripQ==}
+    dev: false
 
   /@neoconfetti/svelte@1.0.0:
     resolution: {integrity: sha512-SmksyaJAdSlMa9cTidVSIqYo1qti+WTsviNDwgjNVm+KQ3DRP2Df9umDIzC4vCcpEYY+chQe0i2IKnLw03AT8Q==}
@@ -2182,6 +2239,37 @@ packages:
 
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+
+  /@turf/boolean-point-in-polygon@6.5.0:
+    resolution: {integrity: sha512-DtSuVFB26SI+hj0SjrvXowGTUCHlgevPAIsukssW6BG5MlNSBQAo70wpICBNJL6RjukXg8d2eXaAWuD/CqL00A==}
+    dependencies:
+      '@turf/helpers': 6.5.0
+      '@turf/invariant': 6.5.0
+    dev: false
+
+  /@turf/helpers@6.5.0:
+    resolution: {integrity: sha512-VbI1dV5bLFzohYYdgqwikdMVpe7pJ9X3E+dlr425wa2/sMJqYDhTO++ec38/pcPvPE6oD9WEEeU3Xu3gza+VPw==}
+    dev: false
+
+  /@turf/invariant@6.5.0:
+    resolution: {integrity: sha512-Wv8PRNCtPD31UVbdJE/KVAWKe7l6US+lJItRR/HOEW3eh+U/JwRCSUl/KZ7bmjM/C+zLNoreM2TU6OoLACs4eg==}
+    dependencies:
+      '@turf/helpers': 6.5.0
+    dev: false
+
+  /@turf/meta@6.5.0:
+    resolution: {integrity: sha512-RrArvtsV0vdsCBegoBtOalgdSOfkBrTJ07VkpiCnq/491W67hnMWmDu7e6Ztw0C3WldRYTXkg3SumfdzZxLBHA==}
+    dependencies:
+      '@turf/helpers': 6.5.0
+    dev: false
+
+  /@turf/points-within-polygon@6.5.0:
+    resolution: {integrity: sha512-YyuheKqjliDsBDt3Ho73QVZk1VXX1+zIA2gwWvuz8bR1HXOkcuwk/1J76HuFMOQI3WK78wyAi+xbkx268PkQzQ==}
+    dependencies:
+      '@turf/boolean-point-in-polygon': 6.5.0
+      '@turf/helpers': 6.5.0
+      '@turf/meta': 6.5.0
+    dev: false
 
   /@types/acorn@4.0.6:
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
@@ -4308,6 +4396,8 @@ packages:
     dependencies:
       node-domexception: 1.0.0
       web-streams-polyfill: 4.0.0-beta.3
+    dev: false
+
   /formidable@2.1.2:
     resolution: {integrity: sha512-CM3GuJ57US06mlpQ47YcunuUZ9jpm8Vx+P2CGt2j7HpgkKZO/DJYQ0Bobim8G6PFQmK5lOqOOdUXboU+h73A4g==}
     dependencies:
@@ -4409,6 +4499,10 @@ packages:
   /gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
+
+  /geojson-flatten@1.1.1:
+    resolution: {integrity: sha512-k/6BCd0qAt7vdqdM1LkLfAy72EsLDy0laNwX0x2h49vfYCiQkRc4PSra8DNEdJ10EKRpwEvDXMb0dBknTJuWpQ==}
+    dev: false
 
   /get-func-name@2.0.0:
     resolution: {integrity: sha512-Hm0ixYtaSZ/V7C8FJrtZIuBBI+iSgL+1Aq82zSu8VQNB4S3Gk8e7Qs3VwBDJAhmRZcFqkl3tQu36g/Foh5I5ig==}
@@ -4600,6 +4694,10 @@ packages:
 
   /hast-util-whitespace@2.0.1:
     resolution: {integrity: sha512-nAxA0v8+vXSBDt3AnRUNjyRIQ0rD+ntpbAp4LnPkumc5M9yUbSMa4XDU9Q6etY4f1Wp4bNgvc1yjiZtsTTrSng==}
+    dev: false
+
+  /hat@0.0.3:
+    resolution: {integrity: sha512-zpImx2GoKXy42fVDSEad2BPKuSQdLcqsCYa48K3zHSzM/ugWuYjLDr8IXxpVuL7uCLHw56eaiLxCRthhOzf5ug==}
     dev: false
 
   /hexoid@1.0.0:
@@ -5020,6 +5118,10 @@ packages:
 
   /lodash.debounce@4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
+    dev: false
+
+  /lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
     dev: false
 
   /lodash.merge@4.6.2:
@@ -5704,6 +5806,7 @@ packages:
 
   /node-addon-api@1.7.2:
     resolution: {integrity: sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -6601,6 +6704,10 @@ packages:
     dependencies:
       queue-microtask: 1.2.3
 
+  /rw@0.1.4:
+    resolution: {integrity: sha512-vSj3D96kMcjNyqPcp65wBRIDImGSrUuMxngNNxvw8MQaO+aQ6llzRPH7XcJy5zrpb3wU++045+Uz/IDIM684iw==}
+    dev: false
+
   /rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
     dependencies:
@@ -7158,6 +7265,10 @@ packages:
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
 
+  /traverse@0.6.7:
+    resolution: {integrity: sha512-/y956gpUo9ZNCb99YjxG7OaslxZWHfCHAUUfshwqOXmxUIvqLjVO581BT+gM59+QV9tFe6/CGG53tsA1Y7RSdg==}
+    dev: false
+
   /trough@2.1.0:
     resolution: {integrity: sha512-AqTiAOLcj85xS7vQ8QkAV41hPDIJ71XJB4RCUrzo/1GM2CQwhkJGaf9Hgr7BOugMRpgGUrqRg/DrBDl4H40+8g==}
     dev: false
@@ -7695,6 +7806,10 @@ packages:
       yaeti: 0.0.6
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /wgs84@0.0.0:
+    resolution: {integrity: sha512-ANHlY4Rb5kHw40D0NJ6moaVfOCMrp9Gpd1R/AIQYg2ko4/jzcJ+TVXYYF6kXJqQwITvEZP4yEthjM7U6rYlljQ==}
     dev: false
 
   /whatwg-url@5.0.0:
