@@ -6,11 +6,10 @@
     import 'toastr/build/toastr.min.css';
 
     let sdk;
-    let customerName;
+    let dealId;
 
     onMount(async () => {
-        const dealId = $page.url.searchParams.get('selectedIds');
-        customerName = `${dealId}`;
+        dealId = $page.url.searchParams.get('selectedIds');
 
         sdk = await new AppExtensionsSDK().initialize();
         await sdk.execute('resize', { height: 100 });
@@ -18,7 +17,7 @@
 
     async function sendQuoteEmail() {
         // REMOVE IN PRODUCTION
-        const dealId = 6193;
+        dealId = 6193;
         // REMOVE IN PRODUCTION
 
         // todo: uncomment this and make sure to gracefully handle case where deal is not found
@@ -62,6 +61,6 @@
     }
 
     .quote-button:hover {
-    background-color: #1c8cb9;
+        background-color: #1c8cb9;
     }
 </style>
