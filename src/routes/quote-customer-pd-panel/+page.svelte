@@ -2,6 +2,8 @@
     import { onMount } from 'svelte';
     import { page } from '$app/stores'
     import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
+    import toastr from 'toastr';
+    import 'toastr/build/toastr.min.css';
 
     let sdk;
     let customerName;
@@ -11,6 +13,7 @@
         customerName = `${dealId}`;
 
         sdk = await new AppExtensionsSDK().initialize();
+        await sdk.execute('resize', { height: 100 });
     });
 
     async function sendQuoteEmail() {
@@ -28,15 +31,16 @@
                 deal_id: dealId
             })
         });
+
+        toastr.success('Quote sent successfully!', '', {
+            "positionClass": "toast-bottom-center",
+            "timeOut": "2500",
+        });
     }
 </script>
 
-<div>
-    custom deal panel here
-    <br>
-    customer name: {customerName}
-    <br>
-    <button on:click={sendQuoteEmail} class="quote-button"><b>Send Quote</b></button>
+<div style="padding: 0px 15px;">
+    <button on:click={sendQuoteEmail} class="quote-button"><b>Send Quote Email</b></button>
 </div>
 
 <style>
@@ -54,7 +58,7 @@
         font-size: 16px;
         margin: 4px 2px;
         cursor: pointer;
-        transition: background-color 0.2s ease-in-out;
+        transition: background-color 0.1s ease-in-out;
     }
 
     .quote-button:hover {
