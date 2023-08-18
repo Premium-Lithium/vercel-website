@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+
 export default async function quoteCustomer(dealId) {
     const customer = await getCustomerInfo(dealId);
 
@@ -27,15 +28,31 @@ export default async function quoteCustomer(dealId) {
 
     const emailContent = await loadQuoteEmailWith(customerData);
 
+    const emailData = {
+        recipients: [ "lewisbowes0@gmail.com" ],
+        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+        mail_body: emailContent,
+        content_type: "HTML"
+    };
+
+    // Create a draft email in the BDM's outlook
+    // createQuoteDraftFor(
+    //     customer.pl_contact,
+    //     ...Object.values(emailData)
+    // )
+
+    // sendMail(
+    //     // [ customer.email ],
+    //     [ "lewis.bowes@premiumlithium.com" ], // todo: REMOVE IN PRODUCTION
+    //     customer.pl_contact.email,
+    //     "Your Solar PV and BESS Quotes - Options and Next Steps",
+    //     emailContent,
+    //     "HTML"
+    // );
+
     sendMail(
-        // [ customer.email ],
-        // REMOVE IN PRODUCTION
-        [ "lewisbowes0@gmail.com" ],
-        // REMOVE IN PRODUCTION
         customer.pl_contact.email,
-        "Your Solar PV and BESS Quotes - Options and Next Steps",
-        emailContent,
-        "HTML"
+        ...Object.values(emailData)
     );
 
     if(!markAsQuoteIssued(dealId))
@@ -113,7 +130,7 @@ function extractPLContactFrom(customerData) {
     const bdm = customerData.user_id;
 
     const plContactPerson = {
-        name: bdm.name,
+        name: bdm.name.split(" ")[0],
         email: bdm.email
     };
 

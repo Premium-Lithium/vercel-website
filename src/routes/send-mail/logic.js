@@ -1,8 +1,7 @@
-import { json } from '@sveltejs/kit';
 import querystring from 'querystring';
 
 
-export default async function sendMail(recipients, sender, subject, mail_body, content_type) {
+export default async function sendMail(sender, recipients, subject, mail_body, content_type) {
     let mailAttempt = {
         "success": true,
         "message": `Email sent successfully from ${sender} to ${recipients}`
