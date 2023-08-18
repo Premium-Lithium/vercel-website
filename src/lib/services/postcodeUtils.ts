@@ -4,6 +4,7 @@ export async function getBatchLatLonFromPostcodesWrapper(postcodes) {
   const postcodeChunks = chunkArray(postcodes, 100);
   const latLons = await Promise.all(postcodeChunks.map(async (postcodeChunk) => await fetchBatchLatLonFromPostcodes(postcodeChunk)));
   const allLatLons = Object.assign({}, ...latLons);
+  console.log(postcodes)
 
   return allLatLons;
 }
