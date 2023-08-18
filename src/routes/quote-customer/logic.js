@@ -109,15 +109,12 @@ function extractSolutionFrom(customerData) {
 
 
 function extractPLContactFrom(customerData) {
-    // todo: get PL contact email from pipedrive
-
-    // Fetch the pipedrive call logs and get the name of the most recent person who called the customer.
-
     // todo: Could there ever be a case where the deal isn't actually linked to someone from premium lithium?
+    const bdm = customerData.user_id;
 
     const plContactPerson = {
-        name: "Lewis Bowes",
-        email: "lewis.bowes@premiumlithium.com"
+        name: bdm.name,
+        email: bdm.email
     };
 
     return plContactPerson;
