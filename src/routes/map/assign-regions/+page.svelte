@@ -18,6 +18,7 @@ const DB_NAME = "installation-manager-regions";
 let markerIdList = [];
 let polygons = [];
 let installationManagerDetails = [];
+let jobsToBeAssigned = [];
 let draw;
 
 const loadPolygonsFromDatabase = async (map) => {
@@ -193,6 +194,7 @@ onMount(async () => {
         addHomeButton(map);
         map.addControl(draw, 'top-left');
         addSaveButton(map);
+        addSyncButton(map);
         map.on('draw.update', updatePolygonCoordinates);
         map.on('draw.create', updatePolygonCoordinates);
         map.on('draw.delete', updatePolygonCoordinates);
@@ -200,6 +202,7 @@ onMount(async () => {
         draw.add(polygons[0]);        
     });
     const updatePolygonCoordinates = () => {
+        jobsToBeAssigned = [];
         polygons = draw.getAll().features;
         let pointMarkerList = markerIdList.map(m => { return {"marker": m.marker, "point": point(m.marker.getLngLat().toArray())}});
         let points = featureCollection(pointMarkerList.map(obj => obj.point));
@@ -209,10 +212,10 @@ onMount(async () => {
             pointsInside.forEach(point => {
                 let p = pointMarkerList.find(obj => obj.point.geometry.coordinates[0] === point.geometry.coordinates[0] && obj.point.geometry.coordinates[1] === point.geometry.coordinates[1]).marker;
                 let dealId = markerIdList.find(obj => obj.marker === p).id;
+                jobsToBeAssigned.push({"dealId": dealId, "installerManagerUserID": installationManagerDetails[index].id});
             });
         });
         let serial = serializeCoordinates(polygons[0].geometry.coordinates[0]);
-        console.log(serial);
     }   
     const homePosition = {
         center: [-1.0824345406845737,53.957031087688534],
@@ -257,6 +260,28 @@ onMount(async () => {
         map.addControl(saveButton, "top-left");
     }
 
+    function addSyncButton(map) {
+        class SyncButton {
+            onAdd(map) {
+                const div = document.createElement("div");
+                div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
+                div.innerHTML = `
+                    <button>
+                        <svg focusable="false" height="38" width="38" viewBox="-3 -3 29 29" aria-hidden="true" style="font-size: 20px;">
+                            <title>Reassign deals to Installation Managers</title>
+                            <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                            <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+                        </svg>
+                    </button>`;
+                div.addEventListener("contextmenu", (e) => e.preventDefault());
+                div.addEventListener("click", async () => await syncJobOwnersToPipedrive());
+                return div;
+            }
+        }
+        const syncButton = new SyncButton();
+        map.addControl(syncButton, "top-left");
+    }
+
     async function saveRegionsToDB() {
         for(let i = 0; i < polygons.length; i++) {
             await supabase
@@ -270,8 +295,21 @@ onMount(async () => {
         }
     }
 
-    async function reassignJobsToManagers() {
-        
+    async function syncJobOwnersToPipedrive() {
+        // This needs to be ran at time of close, so possibly set up an endpoint with a webhook for this.
+        // on deal.update.. if deal.status open -> won.. update owner in pipedrive. 
+        updatePolygonCoordinates();
+        saveRegionsToDB();
+        jobsToBeAssigned.forEach(async x => {
+            console.log(`Deal ID: ${x.dealId}, Manager User ID: ${x.installerManagerUserID}`);
+            await fetch(`https://api.pipedrive.com/api/v1/deals/${x.dealId}?api_token=77a5356773f422eb97c617fd7c37ee526da11851`, {
+                method: 'PUT',
+                body: JSON.stringify({'user_id': x.installerManagerUserID}),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+        })
     }
 });
 
