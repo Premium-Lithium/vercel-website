@@ -25,10 +25,8 @@ export default function validate(jsonData, schema) {
 
     let requestErrors = [];
 
-    if(!valid) {
+    if(!valid)
         requestErrors = validationFunction.errors.map(error => error.message);
-        return requestErrors;
-    }
 
     return requestErrors;
 }
