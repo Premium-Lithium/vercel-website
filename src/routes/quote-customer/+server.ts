@@ -29,5 +29,5 @@ export async function POST({ request }) {
 
     quoteCustomer(requestData.deal_id);
 
-    return json({ message: "Successfully quoted customer."}, {status: 200})
+    return json({ message: "Successfully quoted customer." }, { status: 200 })
 }
