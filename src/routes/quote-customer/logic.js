@@ -27,7 +27,7 @@ export default async function quoteCustomer(dealId) {
     const customerData = {
         pl_bdm_contact_name: customer.pl_contact.name,
         price_calculator_link: priceCalcLink,
-        customer_name: customer.name
+        customer_name: customer.name.split(" ")[0]
     };
 
     const emailContent = await loadQuoteEmailWith(customerData);
@@ -228,7 +228,6 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
     }
     */
 
-    // At this point we know the folder exists
     const messagePayload = {
         subject: subject,
         body: {
