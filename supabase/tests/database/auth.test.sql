@@ -9,4 +9,4 @@ SELECT has_column(
 );
 
 select * from finish();
-rollback;
+rollback
