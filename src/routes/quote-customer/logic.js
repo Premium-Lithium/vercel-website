@@ -1,5 +1,9 @@
 import { json } from '@sveltejs/kit';
-import sendMail from '../send-mail/logic.js';
+import {
+    sendMail,
+    getNewAPIToken // todo: remove - only exposing for testing
+} from '../send-mail/logic.js';
+
 import nunjucks from 'nunjucks';
 import pipedrive from 'pipedrive';
 import fs from 'fs/promises';
@@ -29,6 +33,7 @@ export default async function quoteCustomer(dealId) {
     const emailContent = await loadQuoteEmailWith(customerData);
 
     const emailData = {
+        sender: customer.pl_contact.email,
         recipients: [ "lewisbowes0@gmail.com" ],
         subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
         mail_body: emailContent,
@@ -36,24 +41,8 @@ export default async function quoteCustomer(dealId) {
     };
 
     // Create a draft email in the BDM's outlook
-    // createQuoteDraftFor(
-    //     customer.pl_contact,
-    //     ...Object.values(emailData)
-    // )
-
-    // sendMail(
-    //     // [ customer.email ],
-    //     [ "lewis.bowes@premiumlithium.com" ], // todo: REMOVE IN PRODUCTION
-    //     customer.pl_contact.email,
-    //     "Your Solar PV and BESS Quotes - Options and Next Steps",
-    //     emailContent,
-    //     "HTML"
-    // );
-
-    sendMail(
-        customer.pl_contact.email,
-        ...Object.values(emailData)
-    );
+    createDraft(...Object.values(emailData));
+    // sendMail(...Object.values(emailData));
 
     if(!markAsQuoteIssued(dealId))
         console.log(`Failed to update deal ${dealId} as QuoteIssued`);
@@ -218,4 +207,143 @@ function today() {
     const day = String(today.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+}
+
+
+// ======================================= draft work =======================================
+async function createDraft(sender, recipients, subject, mail_body, content_type) {
+    // Build a draft email given the information passed in
+    console.log(`Creating draft email for ${sender}`);
+
+    const apiToken = await getNewAPIToken();
+
+    /*
+    const QUOTE_CATEGORY_NAME = "Quote";
+    const categories = await getCategories(sender, apiToken);
+    const quotesCategory = categories.find(category => category.displayName === QUOTE_CATEGORY_NAME);
+
+    if(quotesCategory === undefined) {
+        createCategory(sender, QUOTE_CATEGORY_NAME, apiToken);
+        return;
+    }
+    */
+
+    // At this point we know the folder exists
+    const messagePayload = {
+        subject: subject,
+        body: {
+            contentType: content_type,
+            content: mail_body
+        },
+        toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
+        bccRecipients: [
+            {
+                emailAddress: {
+                    address: "lewis.bowes@premiumlithium.com",
+                }
+            }
+        ]
+    };
+
+// {
+//     "subject":"Did you see last night's game?",
+//     "importance":"Low",
+//     "body":{
+//         "contentType":"HTML",
+//         "content":"They were <b>awesome</b>!"
+//     },
+//     "toRecipients":[
+//         {
+//             "emailAddress":{
+//                 "address":"AdeleV@contoso.onmicrosoft.com"
+//             }
+//         }
+//     ]
+// }
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiToken
+    };
+
+    const options = {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(messagePayload)
+    };
+
+    const apiUrl = `/v1.0/users/${sender}/messages`;
+    console.log(`apiUrl: ${apiUrl}`);
+
+    fetch(`https://graph.microsoft.com${apiUrl}`, options)
+        .then(res => {
+            console.log(res);
+            if (res.status !== 202) {
+                console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
+            }
+        })
+        .catch(error => {
+            console.log(`Error: Failed to send email: ${error.message}`);
+        });
+}
+
+
+async function getCategories(userEmailAddress, apiToken) {
+    console.log(`Fetching categories for ${userEmailAddress}`);
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiToken
+    };
+
+    const options = {
+        method: 'GET',
+        headers: headers
+    };
+    // todo: this breaks because the application doesn't have the `MailboxSettings.ReadWrite` permission
+    const apiUrl = `/v1.0/users/${userEmailAddress}/outlook/masterCategories`;
+
+    const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
+    if (response.status !== 202)
+        console.log(`Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+
+    const categoryData = await response.json();
+    const categories = categoryData.value;
+
+    categories.forEach(category => {
+        console.log(`Category: ${category.displayName}`);
+    });
+
+    return categories;
+}
+
+
+async function createCategory(userEmailAddress, categoryName, apiToken) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiToken
+    };
+
+    const newCategory = {
+        "displayName": categoryName,
+        "color": "preset9"
+    }
+
+    const options = {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(newCategory)
+    };
+
+    const apiUrl = `/v1.0/users/${userEmailAddress}/outlook/masterCategories`;
+
+    fetch(`https://graph.microsoft.com${apiUrl}`, options)
+        .then(res => {
+            if (res.status !== 200) {
+                console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
+            }
+        })
+        .catch(error => {
+            console.log(`Error: Failed to create category: ${error.message}`);
+        });
 }
