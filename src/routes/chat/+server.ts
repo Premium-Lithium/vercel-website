@@ -4,17 +4,12 @@ import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { createStructuredOutputChainFromZod } from "langchain/chains/openai_functions";
-import { ChatPromptTemplate, 
-        SystemMessagePromptTemplate,
-        HumanMessagePromptTemplate,
-        BaseChatPromptTemplate,
+import {BaseChatPromptTemplate,
         renderTemplate,
         type SerializedBasePromptTemplate} from 'langchain/prompts';
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { BufferWindowMemory, ConversationSummaryBufferMemory } from 'langchain/memory';
+import { BufferWindowMemory } from 'langchain/memory';
 import { LLMChain, VectorDBQAChain } from 'langchain/chains';
-
 import { AgentActionOutputParser,
          AgentExecutor,
          LLMSingleActionAgent,} from "langchain/agents";
@@ -27,15 +22,14 @@ import { HumanMessage,
          type PartialValues } from 'langchain/schema';
 import type { Tool } from 'langchain/dist/tools/base';
 import { Calculator } from 'langchain/tools/calculator';
-import { ChainTool } from 'langchain/tools'
+import { ChainTool } from 'langchain/tools';
 
 const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 // BOILERPLATE 
 
 const PREFIX = `You are Evie, a friendly customer assistant for Premium Lithium, a UK green energy company. 
-You must attempt to answer the customer's query while also trying to progress the conversation,
-with the view to eventually recommend a product to the customer given their specific situation.
+You must attempt to answer the customer's query while also trying to progress the conversation, with the view to eventually recommend a product to the customer given their specific situation.
 Answer the following questions as best you can. You have access to the following tools:`;
 const formatInstructions = (
   toolNames: string
@@ -43,12 +37,11 @@ const formatInstructions = (
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take, should be one of [${toolNames}]
-Action Input: the input to the action
+Action: the action to take, should be one of [${toolNames}, None] ** If None, you must provide a Final Answer **
+Input: the input to the action
 Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question`;
+... (this Thought/Action/Input/Observation can repeat N times.)
+Final Answer: the output to the customer`;
 const SUFFIX = `Begin!
 
 Previous conversation history:
@@ -112,7 +105,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
         return { log: text, returnValues: finalAnswers };
       }
   
-      const match = /Action: (.*)\nAction Input: (.*)/s.exec(text);
+      const match = /Action: (.*)\nInput: (.*)/s.exec(text);
       if (!match) {
         throw new Error(`Could not parse LLM output: ${text}`);
       }
@@ -138,11 +131,6 @@ let vectorStore;
 
 model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 500 });
 
-const prompt = new CustomPromptTemplate({
-    tools: [new Calculator()],
-    inputVariables: ["input", "intermediate_steps", "history"],
-});
-
 vectorStore = await new SupabaseVectorStore(
     new OpenAIEmbeddings(),
     {
@@ -150,13 +138,6 @@ vectorStore = await new SupabaseVectorStore(
         tableName: "documents",
         queryName: "match_documents",
     },
-);
-
-let conversationChain = new LLMChain(
-    {
-        llm: model,
-        prompt: prompt,
-    }
 );
 
 let vectorStoreChain = VectorDBQAChain.fromLLM(model, vectorStore);
@@ -171,7 +152,17 @@ const tools = [
     new Calculator(),
     qaTool,
 ];
+const prompt = new CustomPromptTemplate({
+    tools: tools,
+    inputVariables: ["input", "intermediate_steps", "history"],
+});
 
+let conversationChain = new LLMChain(
+    {
+        llm: model,
+        prompt: prompt,
+    }
+);
 
 const outputParser = new CustomOutputParser();
 
@@ -184,29 +175,25 @@ const agent = new LLMSingleActionAgent(
 )
 
 const conversationMemory = new BufferWindowMemory({
-    k: 2
+    k: 3
 });
 
 const agentExecutor = AgentExecutor.fromAgentAndTools(
     {
-        agent,
-        tools,
-        verbose: true,
-        memory: conversationMemory
+      agent,
+      tools,
+      verbose: true,
+      memory: conversationMemory,
+      maxIterations: 6,
     }
 );
-
-
-
 
 export async function POST({ request }) {
     try {
         const { prompt } = await request.json();
-        console.log(prompt[prompt.length-1]['content']);
         const response = await agentExecutor.call({
             input: prompt[prompt.length-1]['content']
     });
-        console.log(response);
         return json({message: response}, {status: 200});
     } catch (error)
     {

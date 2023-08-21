@@ -16,7 +16,7 @@
         awaitingMessage = false;
         const { message } = await response.json();
         console.log(message);
-        previousMessages = [{"role": "assistant", "content": message.text}];
+        previousMessages = [{"role": "assistant", "content": message.output}];
     });
 </script>
 
@@ -58,7 +58,6 @@
                 const { message } = await response.json();
                 console.log(message);
                 previousMessages = [...previousMessages, {"role": "assistant", "content": message.output}];
-                console.log(message.content);
             }
         }}
         />
@@ -97,6 +96,7 @@
     .message-system, .message-assistant {
         align-self: start;
         border-radius: 30px 30px 30px 1px;
+        background-color: #61b7dc;
     }
     
     
