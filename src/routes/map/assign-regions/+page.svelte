@@ -13,6 +13,7 @@ import '@turf/points-within-polygon';
 import { featureCollection, point, polygon } from '@turf/helpers';
 import pointsWithinPolygon from '@turf/points-within-polygon';
 import { supabase } from '$lib/supabase';
+import { serializeCoordinates, deserializeCoordinates } from '$lib/mapUtils';
 
 const DB_NAME = "installation-manager-regions";
 let markerIdList = [];
@@ -20,6 +21,7 @@ let polygons = [];
 let installationManagerDetails = [];
 let jobsToBeAssigned = [];
 let draw;
+let swatches;
 
 const loadPolygonsFromDatabase = async (map) => {
     let {data, error} = await supabase.from(DB_NAME).select('*');
@@ -42,24 +44,21 @@ const loadPolygonsFromDatabase = async (map) => {
     });
 }
 
-const serializeCoordinates = (coords) => {
-    return coords.reduce(
-        (acc, cv, ci, arr) => {
-            return `${acc}${ci === 0 ? '' : ','}${cv[0].toString()},${cv[1].toString()}`;
-        }, ""
-    )
-}
-
-const deserializeCoordinates = (coordString) => {
-    let coordSplit = coordString.split(',').map(x => parseFloat(x));
-    let coords = [];
-    for(let i = 0; i < coordSplit.length; i+=2) {
-        coords.push([coordSplit[i], coordSplit[i+1]]);
-    }
-    return coords;
-}
 
 onMount(async () => {
+    var swatch_colors = [
+        '#ffffcc',
+        '#a1dab4',
+        '#41b6c4',
+        '#2c7fb8',
+        '#253494',
+        '#fed976',
+        '#feb24c',
+        '#fd8d3c',
+        '#f03b20',
+        '#bd0026'
+    ];
+
     mapboxgl.accessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
     const map = new mapboxgl.Map({
@@ -133,7 +132,7 @@ onMount(async () => {
             //queryParams: ['filter_id=55', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
             queryParams: ['filter_id=142', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
         })
-
+        console.log(data);
 
         const filteredData = data.filter(item => item[postcodeIndex] !== null);
         const postcodes = filteredData.map(item => item[postcodeIndex]).slice(0)
@@ -184,12 +183,15 @@ onMount(async () => {
             marker.getElement().addEventListener('mouseleave', () => marker.togglePopup());
         }
         await loadPolygonsFromDatabase(map);
+        
         draw = new MapboxDraw({
             displayControlsDefault: false,
             controls: {
                 polygon: true,
                 trash: true,
             },
+            styles: drawStyles,
+            userProperties: true
         });
         addHomeButton(map);
         map.addControl(draw, 'top-left');
@@ -199,14 +201,17 @@ onMount(async () => {
         map.on('draw.create', updatePolygonCoordinates);
         map.on('draw.delete', updatePolygonCoordinates);
         
-        draw.add(polygons[0]);        
+        polygons.forEach( x => {draw.add(x);});        
     });
-    const updatePolygonCoordinates = () => {
+    const updatePolygonCoordinates = (e) => {
         jobsToBeAssigned = [];
         polygons = draw.getAll().features;
         let pointMarkerList = markerIdList.map(m => { return {"marker": m.marker, "point": point(m.marker.getLngLat().toArray())}});
         let points = featureCollection(pointMarkerList.map(obj => obj.point));
         polygons.forEach((currentElement, index, arr) => {
+            if (e && e.features && e.features.length === 1) {
+                draw.setFeatureProperty(e.features[0].id, 'myFillColorProperty', '#660066');
+            }
             const poly = currentElement;
             const pointsInside = pointsWithinPolygon(points,poly).features;
             pointsInside.forEach(point => {
@@ -294,25 +299,241 @@ onMount(async () => {
             console.log(`Saved region for ${installationManagerDetails[i].id}`);
         }
     }
-
-    async function syncJobOwnersToPipedrive() {
-        // This needs to be ran at time of close, so possibly set up an endpoint with a webhook for this.
-        // on deal.update.. if deal.status open -> won.. update owner in pipedrive. 
-        updatePolygonCoordinates();
-        saveRegionsToDB();
-        jobsToBeAssigned.forEach(async x => {
-            console.log(`Deal ID: ${x.dealId}, Manager User ID: ${x.installerManagerUserID}`);
-            await fetch(`https://api.pipedrive.com/api/v1/deals/${x.dealId}?api_token=77a5356773f422eb97c617fd7c37ee526da11851`, {
-                method: 'PUT',
-                body: JSON.stringify({'user_id': x.installerManagerUserID}),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-        })
-    }
 });
+
+var drawStyles = [
+  {
+    'id': 'gl-draw-polygon-fill-inactive',
+    'type': 'fill',
+    'filter': ['all',
+      ['==', 'active', 'false'],
+      ['==', '$type', 'Polygon'],
+      ['!=', 'mode', 'static']
+    ],
+    'paint': {
+      'fill-color': {
+      	'type': 'identity',
+        'property': 'user_myFillColorProperty'
+      },
+      'fill-outline-color': '#000000',
+      'fill-opacity': 0.2
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-fill-active',
+    'type': 'fill',
+    'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+    'paint': {
+      'fill-color': '#fbb03b',
+      'fill-outline-color': '#fbb03b',
+      'fill-opacity': 0.1
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-midpoint',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['==', 'meta', 'midpoint']],
+    'paint': {
+      'circle-radius': 3,
+      'circle-color': '#fbb03b'
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-stroke-inactive',
+    'type': 'line',
+    'filter': ['all',
+      ['==', 'active', 'false'],
+      ['==', '$type', 'Polygon'],
+      ['!=', 'mode', 'static']
+    ],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#000000',
+      'line-width': 2,
+      'line-opacity': 0.4,
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-stroke-active',
+    'type': 'line',
+    'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#fbb03b',
+      'line-dasharray': [0.2, 2],
+      'line-width': 2
+    }
+  },
+  {
+    'id': 'gl-draw-line-inactive',
+    'type': 'line',
+    'filter': ['all',
+      ['==', 'active', 'false'],
+      ['==', '$type', 'LineString'],
+      ['!=', 'mode', 'static']
+    ],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#3bb2d0',
+      'line-width': 2
+    }
+  },
+  {
+    'id': 'gl-draw-line-active',
+    'type': 'line',
+    'filter': ['all',
+      ['==', '$type', 'LineString'],
+      ['==', 'active', 'true']
+    ],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#fbb03b',
+      'line-dasharray': [0.2, 2],
+      'line-width': 2
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-and-line-vertex-stroke-inactive',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', 'meta', 'vertex'],
+      ['==', '$type', 'Point'],
+      ['!=', 'mode', 'static']
+    ],
+    'paint': {
+      'circle-radius': 5,
+      'circle-color': '#fff'
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-and-line-vertex-inactive',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', 'meta', 'vertex'],
+      ['==', '$type', 'Point'],
+      ['!=', 'mode', 'static']
+    ],
+    'paint': {
+      'circle-radius': 3,
+      'circle-color': '#fbb03b'
+    }
+  },
+  {
+    'id': 'gl-draw-point-point-stroke-inactive',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', 'active', 'false'],
+      ['==', '$type', 'Point'],
+      ['==', 'meta', 'feature'],
+      ['!=', 'mode', 'static']
+    ],
+    'paint': {
+      'circle-radius': 5,
+      'circle-opacity': 1,
+      'circle-color': '#fff'
+    }
+  },
+  {
+    'id': 'gl-draw-point-inactive',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', 'active', 'false'],
+      ['==', '$type', 'Point'],
+      ['==', 'meta', 'feature'],
+      ['!=', 'mode', 'static']
+    ],
+    'paint': {
+      'circle-radius': 3,
+      'circle-color': '#3bb2d0'
+    }
+  },
+  {
+    'id': 'gl-draw-point-stroke-active',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['==', 'active', 'true'],
+      ['!=', 'meta', 'midpoint']
+    ],
+    'paint': {
+      'circle-radius': 7,
+      'circle-color': '#fff'
+    }
+  },
+  {
+    'id': 'gl-draw-point-active',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['!=', 'meta', 'midpoint'],
+      ['==', 'active', 'true']],
+    'paint': {
+      'circle-radius': 5,
+      'circle-color': '#fbb03b'
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-fill-static',
+    'type': 'fill',
+    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Polygon']],
+    'paint': {
+      'fill-color': '#404040',
+      'fill-outline-color': '#404040',
+      'fill-opacity': 0.1
+    }
+  },
+  {
+    'id': 'gl-draw-polygon-stroke-static',
+    'type': 'line',
+    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Polygon']],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#404040',
+      'line-width': 2
+    }
+  },
+  {
+    'id': 'gl-draw-line-static',
+    'type': 'line',
+    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'LineString']],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#404040',
+      'line-width': 2
+    }
+  },
+  {
+    'id': 'gl-draw-point-static',
+    'type': 'circle',
+    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Point']],
+    'paint': {
+      'circle-radius': 5,
+      'circle-color': '#404040'
+    }
+  }
+];
 
 </script>
 <div id="map" style="width: 100%; height: 100vh;"></div>
+
 
