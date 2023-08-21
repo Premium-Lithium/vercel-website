@@ -3,6 +3,7 @@ import {
     // sendMail,
     getNewAPIToken // todo: remove - only exposing for testing
 } from '../send-mail/logic.js';
+import mjml2html from 'mjml';
 
 import nunjucks from 'nunjucks';
 import pipedrive from 'pipedrive';
@@ -147,12 +148,20 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 // populateEmailTemplateWith(data, templatePath)?
 
 async function loadQuoteEmailWith(customerData) {
-    const filePath = join(__dirname, 'customer_quote_template.html');
+    // try {
+    //     const { html } = mjml2html(mjmlTemplate);
+    //     console.log(html);
+    // } catch (error) {
+    //     console.error('Error converting MJML to HTML:', error);
+    // }
+
+    const filePath = join(__dirname, 'customer_quote_template.mjml');
     try {
-        const templateString = await fs.readFile(filePath, 'utf8');
+        const mjmlString = await fs.readFile(filePath, 'utf8');
+        const { html } = mjml2html(mjmlString);
 
         nunjucks.configure({ autoescape: true });
-        const renderedEmail = nunjucks.renderString(templateString, customerData);
+        const renderedEmail = nunjucks.renderString(html, customerData);
 
         return renderedEmail;
     } catch (err) {
@@ -163,54 +172,6 @@ async function loadQuoteEmailWith(customerData) {
 }
 
 
-async function markAsQuoteIssued(dealId) {
-    // Update the `Quote Issued` field on pipedrive with todays date
-    // todo: this assumes the dealFieldsRequest was successful
-    const dealFields = dealFieldsRequest.data;
-    const dealsApi = new pipedrive.DealsApi(pd);
-
-    const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
-
-    if(quoteIssuedField === undefined) {
-        console.log(`Could not find the "Quote issued" field on pipedrive`);
-        return false;
-    }
-
-    await dealsApi.updateDeal(dealId, {
-        [quoteIssuedField.key]: today()
-    });
-
-    // Move the deal to the quote issued stage
-    const stagesApi = new pipedrive.StagesApi(pd);
-    const B2C_PIPELINE_ID = 23;
-    let opts = {
-        'pipelineId': B2C_PIPELINE_ID,
-        'start': 0,
-        'limit': 56
-    };
-    const stages = await stagesApi.getStages(opts);
-
-    const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
-
-    await dealsApi.updateDeal(dealId, {
-        stage_id: quoteIssuedStage.id
-    });
-
-    return true;
-}
-
-
-function today() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so we add 1.
-    const day = String(today.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-}
-
-
-// ======================================= draft work =======================================
 async function createDraft(sender, recipients, subject, mail_body, content_type) {
     // Build a draft email given the information passed in
     console.log(`Creating draft email for ${sender}`);
@@ -269,6 +230,56 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
             console.log(`Error: Failed to send email: ${error.message}`);
         });
 }
+
+
+async function markAsQuoteIssued(dealId) {
+    // Update the `Quote Issued` field on pipedrive with todays date
+    // todo: this assumes the dealFieldsRequest was successful
+    const dealFields = dealFieldsRequest.data;
+    const dealsApi = new pipedrive.DealsApi(pd);
+
+    const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
+
+    if(quoteIssuedField === undefined) {
+        console.log(`Could not find the "Quote issued" field on pipedrive`);
+        return false;
+    }
+
+    await dealsApi.updateDeal(dealId, {
+        [quoteIssuedField.key]: today()
+    });
+
+    // Move the deal to the quote issued stage
+    const stagesApi = new pipedrive.StagesApi(pd);
+    const B2C_PIPELINE_ID = 23;
+    let opts = {
+        'pipelineId': B2C_PIPELINE_ID,
+        'start': 0,
+        'limit': 56
+    };
+    const stages = await stagesApi.getStages(opts);
+
+    const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
+
+    await dealsApi.updateDeal(dealId, {
+        stage_id: quoteIssuedStage.id
+    });
+
+    return true;
+}
+
+
+function today() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so we add 1.
+    const day = String(today.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+
+// ======================================= draft work =======================================
 
 
 /*
