@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import {
-    sendMail,
+    // sendMail,
     getNewAPIToken // todo: remove - only exposing for testing
 } from '../send-mail/logic.js';
 
@@ -245,22 +245,6 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         ]
     };
 
-// {
-//     "subject":"Did you see last night's game?",
-//     "importance":"Low",
-//     "body":{
-//         "contentType":"HTML",
-//         "content":"They were <b>awesome</b>!"
-//     },
-//     "toRecipients":[
-//         {
-//             "emailAddress":{
-//                 "address":"AdeleV@contoso.onmicrosoft.com"
-//             }
-//         }
-//     ]
-// }
-
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + apiToken
@@ -288,6 +272,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
 }
 
 
+/*
 async function getCategories(userEmailAddress, apiToken) {
     console.log(`Fetching categories for ${userEmailAddress}`);
 
@@ -347,3 +332,4 @@ async function createCategory(userEmailAddress, categoryName, apiToken) {
             console.log(`Error: Failed to create category: ${error.message}`);
         });
 }
+*/
