@@ -1,7 +1,11 @@
 import querystring from 'querystring';
 
+// todo: at some point we want to ideally use this javascript client provided by microsoft to simplify the logic here slightly
+// See documentation here: https://github.com/microsoftgraph/msgraph-sdk-javascript/tree/dev
+// import { Client } from "@microsoft/microsoft-graph-client";
 
-export default async function sendMail(sender, recipients, subject, mail_body, content_type) {
+
+async function sendMail(sender, recipients, subject, mail_body, content_type) {
     let mailAttempt = {
         "success": true,
         "message": `Email sent successfully from ${sender} to ${recipients}`
@@ -100,3 +104,9 @@ async function getNewAPIToken() {
         return null;
     }
 }
+
+
+export {
+    getNewAPIToken, // todo: remove this - only exposing for testing
+    sendMail
+};
