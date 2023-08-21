@@ -3,6 +3,7 @@ import { adminSupabase } from "$lib/supabase"
 
 export async function syncInstallerPostcodes() {
     // Get list of installers with address but no postcode
+    console.log("starting to sync installer postcodes")
     const { data: installersWithoutLocation, error } = await adminSupabase
         .from("installers")
         .select("id, postcode")
@@ -18,6 +19,7 @@ export async function syncInstallerPostcodes() {
     const postcodeToLocationMap = await getBatchLatLonFromPostcodesWrapper(postcodes)
     const postcodesWithLocations = Object.keys(postcodeToLocationMap)
 
+    // Insert location for all jobs with postcodes
     await Promise.all(
         postcodesWithLocations.map(async (postcode) => {
             const id = postcodeToIdMap.get(postcode)
@@ -33,5 +35,6 @@ export async function syncInstallerPostcodes() {
 
         }
     ))
+    console.log("Done syncing installer postcodes")
 }
 

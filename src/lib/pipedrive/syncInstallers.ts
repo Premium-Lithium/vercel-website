@@ -4,6 +4,7 @@ import { adminSupabase } from "$lib/supabase"
 import { extractPostcodeFrom } from "$lib/services/postcodeUtils"
 
 export async function syncInstallers() {
+    console.log("starting to sync installers")
     const installerData = await getInstallerDataFromPipedrive()
     installerData.forEach(async (installer) => {
         const { data, error } = await adminSupabase
@@ -15,6 +16,7 @@ export async function syncInstallers() {
                 postcode: extractPostcodeFrom(installer.address),
             })
     })
+    console.log("done syncing installers")
 }
 
 async function getInstallerDataFromPipedrive() {
