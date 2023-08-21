@@ -39,7 +39,7 @@
 </script>
 
 <div style="padding: 0px 15px;">
-    <button on:click={sendQuoteEmail} class="quote-button"><b>Send Quote Email</b></button>
+    <button on:click={sendQuoteEmail} class="quote-button"><b>Generate Quote Draft</b></button>
 </div>
 
 <style>
