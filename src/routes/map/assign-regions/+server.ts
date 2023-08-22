@@ -4,7 +4,7 @@ import { featureCollection, point, polygon,
          type Polygon, type Feature, type Properties } from '@turf/helpers';
 import { deserializeCoordinates, serializeCoordinates, fetchLatlonFromPostcodesPostcodes,
          fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive, pointsInPolygonFromList,
-         fetchRelevantData, fetchLatlonFromPostcodesPostcodes } from "$lib/mapUtils";
+         fetchRelevantData } from "$lib/mapUtils";
 
 const DB_NAME: string = "installation-manager-regions";
 
@@ -14,7 +14,7 @@ let polygons: [Feature<Polygon, Properties>];
 export async function POST ({request}){
     if(!request.body) return json({message: "Request needs a body"}, {status: 400});
     let dealInfo = await request.json();
-    polygons = loadPolygonsFromDatabase();
+    polygons = await loadPolygonsFromDatabase();
     console.log(dealInfo.current);
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
