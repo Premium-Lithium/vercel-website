@@ -1,9 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
-import { createClient } from "@supabase/supabase-js";
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { supabase } from '$lib/supabase';
 import {BaseChatPromptTemplate,
         renderTemplate,
         type SerializedBasePromptTemplate} from 'langchain/prompts';
@@ -23,8 +21,6 @@ import { HumanMessage,
 import type { Tool } from 'langchain/dist/tools/base';
 import { Calculator } from 'langchain/tools/calculator';
 import { ChainTool } from 'langchain/tools';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 // BOILERPLATE 
 
