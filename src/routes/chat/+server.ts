@@ -124,8 +124,6 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
 
 // END BOILERPLATE
 
-
-let chain;
 let model;
 let vectorStore;
 
@@ -175,7 +173,7 @@ const agent = new LLMSingleActionAgent(
 )
 
 const conversationMemory = new BufferWindowMemory({
-    k: 3
+    k: 2
 });
 
 const agentExecutor = AgentExecutor.fromAgentAndTools(
@@ -197,7 +195,6 @@ export async function POST({ request }) {
         return json({message: response}, {status: 200});
     } catch (error)
     {
-        console.log(error);
         return json({message: error}, {status: 400});
     }
 }

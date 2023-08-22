@@ -1,11 +1,13 @@
 <script>
     import { fly } from 'svelte/transition';
     import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
     let awaitingMessage = false;
     let previousMessages = [];
     const initialMessage = `Greet me with a friendly emoji`;
 
     onMount(async () => {
+        invalidateAll();
         const response = await fetch('chat/', {
             method: 'POST',
             body: JSON.stringify({ "prompt" : [{"role": "user", "content": initialMessage}] }),
@@ -15,7 +17,6 @@
         });
         awaitingMessage = false;
         const { message } = await response.json();
-        console.log(message);
         previousMessages = [{"role": "assistant", "content": message.output}];
     });
 </script>
@@ -55,9 +56,18 @@
                     }
                 });
                 awaitingMessage = false;
-                const { message } = await response.json();
-                console.log(message);
-                previousMessages = [...previousMessages, {"role": "assistant", "content": message.output}];
+                let output;
+                if (!response.ok) {
+                    output = "I'm unable to respond to that.";
+                }
+                else {
+                    const { message } = await response.json();
+                    if (message == 'Agent stopped due to max iterations.') {
+                        output = "Request timed out.";
+                    }
+                    else output = message.output;
+                }
+                previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
             }
         }}
         />
@@ -88,21 +98,23 @@
         font-size: 1.3em;
         padding: 15px; 
         border: 3px solid #177ba7;
-        background-color:#28AAE2;    
+        background-color:#53b4de;    
         color: #FFF;
-        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.5);
+        max-width: 75%;
     }
 
     .message-system, .message-assistant {
         align-self: start;
         border-radius: 30px 30px 30px 1px;
-        background-color: #61b7dc;
+        background-color: #11a3e2;
+        box-shadow: -3px 4px 8px rgba(0, 0, 0, 0.5);
     }
     
     
     .message-user {
         align-self: end;
         border-radius: 30px 30px 5px 30px;
+        box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.5);
     }
 
     .chat-input {
