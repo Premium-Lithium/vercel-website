@@ -1,27 +1,25 @@
-import { json } from '@sveltejs/kit';
-import {
-    // sendMail,
-    getNewAPIToken // todo: remove - only exposing for testing
-} from '../send-mail/logic.js';
-import mjml2html from 'mjml';
-
-import nunjucks from 'nunjucks';
 import pipedrive from 'pipedrive';
-import fs from 'fs/promises';
 import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { populateEmailTemplateWith } from '$lib/file-utils.js';
 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// todo: only used while we don't have an outlook mail client object
+import { getNewAPIToken } from '../send-mail/logic.js';
 
 
 export default async function quoteCustomer(dealId) {
+    let quoteAttempt = {
+        "success": true,
+        "message": `Quote created for deal ${dealId}`
+    };
+
     const customer = await getCustomerInfo(dealId);
 
-    if(customer === null)
-        return json({}, { status: 400 });
+    if(customer === null) {
+        quoteAttempt.success = false;
+        quoteAttempt.message = `Error: Could not fetch customer data for deal ${dealId}`;
+        console.log(quoteAttempt.message);
+        return quoteAttempt;
+    }
 
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
 
@@ -33,7 +31,7 @@ export default async function quoteCustomer(dealId) {
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
 
-    const emailContent = await loadQuoteEmailWith(emailContentData);
+    const emailContent = await populateEmailTemplateWith(emailContentData, './customer_quote_template.mjml', import.meta.url);
 
     const emailData = {
         sender: customer.pl_contact.email,
@@ -45,10 +43,12 @@ export default async function quoteCustomer(dealId) {
 
     // Create a draft email in the BDM's outlook
     createDraft(...Object.values(emailData));
-    // sendMail(...Object.values(emailData));
 
     if(!markAsQuoteIssued(dealId))
         console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+
+    console.log(quoteAttempt.message);
+    return quoteAttempt;
 }
 
 
@@ -146,50 +146,9 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 }
 
 
-// todo: consider breaking this out into its own utility function
-// populateEmailTemplateWith(data, templatePath)?
-
-async function loadQuoteEmailWith(customerData) {
-    // try {
-    //     const { html } = mjml2html(mjmlTemplate);
-    //     console.log(html);
-    // } catch (error) {
-    //     console.error('Error converting MJML to HTML:', error);
-    // }
-
-    const filePath = join(__dirname, 'customer_quote_template.mjml');
-    try {
-        const mjmlString = await fs.readFile(filePath, 'utf8');
-        const { html } = mjml2html(mjmlString);
-
-        nunjucks.configure({ autoescape: true });
-        const renderedEmail = nunjucks.renderString(html, customerData);
-
-        return renderedEmail;
-    } catch (err) {
-        const message = "Error processing the email template";
-        console.error(message, err);
-        return message;
-    }
-}
-
-
+// todo: add meaningful return statements to this to indicate whether or not it worked, and catch these in quoteCustomer above
 async function createDraft(sender, recipients, subject, mail_body, content_type) {
-    // Build a draft email given the information passed in
-    console.log(`Creating draft email for ${sender}`);
-
     const apiToken = await getNewAPIToken();
-
-    /*
-    const QUOTE_CATEGORY_NAME = "Quote";
-    const categories = await getCategories(sender, apiToken);
-    const quotesCategory = categories.find(category => category.displayName === QUOTE_CATEGORY_NAME);
-
-    if(quotesCategory === undefined) {
-        createCategory(sender, QUOTE_CATEGORY_NAME, apiToken);
-        return;
-    }
-    */
 
     const messagePayload = {
         subject: subject,
@@ -219,24 +178,22 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
     };
 
     const apiUrl = `/v1.0/users/${sender}/messages`;
-    console.log(`apiUrl: ${apiUrl}`);
 
     fetch(`https://graph.microsoft.com${apiUrl}`, options)
         .then(res => {
-            console.log(res);
-            if (res.status !== 202) {
+            if (res.status !== 201) {
                 console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
             }
         })
         .catch(error => {
-            console.log(`Error: Failed to send email: ${error.message}`);
+            console.log(`Error: Failed to create draft: ${error.message}`);
         });
 }
 
 
 async function markAsQuoteIssued(dealId) {
     // Update the `Quote Issued` field on pipedrive with todays date
-    // todo: this assumes the dealFieldsRequest was successful
+    // todo: this assumes the dealFieldsRequest in pipedrive-utils was successful
     const dealFields = dealFieldsRequest.data;
     const dealsApi = new pipedrive.DealsApi(pd);
 
@@ -279,69 +236,3 @@ function today() {
 
     return `${year}-${month}-${day}`;
 }
-
-
-// ======================================= draft work =======================================
-
-
-/*
-async function getCategories(userEmailAddress, apiToken) {
-    console.log(`Fetching categories for ${userEmailAddress}`);
-
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiToken
-    };
-
-    const options = {
-        method: 'GET',
-        headers: headers
-    };
-    // todo: this breaks because the application doesn't have the `MailboxSettings.ReadWrite` permission
-    const apiUrl = `/v1.0/users/${userEmailAddress}/outlook/masterCategories`;
-
-    const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
-    if (response.status !== 202)
-        console.log(`Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
-
-    const categoryData = await response.json();
-    const categories = categoryData.value;
-
-    categories.forEach(category => {
-        console.log(`Category: ${category.displayName}`);
-    });
-
-    return categories;
-}
-
-
-async function createCategory(userEmailAddress, categoryName, apiToken) {
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiToken
-    };
-
-    const newCategory = {
-        "displayName": categoryName,
-        "color": "preset9"
-    }
-
-    const options = {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(newCategory)
-    };
-
-    const apiUrl = `/v1.0/users/${userEmailAddress}/outlook/masterCategories`;
-
-    fetch(`https://graph.microsoft.com${apiUrl}`, options)
-        .then(res => {
-            if (res.status !== 200) {
-                console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
-            }
-        })
-        .catch(error => {
-            console.log(`Error: Failed to create category: ${error.message}`);
-        });
-}
-*/
