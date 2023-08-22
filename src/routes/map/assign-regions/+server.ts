@@ -16,6 +16,7 @@ export async function POST ({request}){
     let dealInfo = await request.json();
     polygons = loadPolygonsFromDatabase();
     let relevantDealInfo = await fetchRelevantData(dealInfo, "job");
+    console.log(relevantDealInfo);
     let dealGeographicalPoint = point([relevantDealInfo.latitude, relevantDealInfo.longitude]);
     console.log(pointsInPolygonFromList([dealGeographicalPoint], polygons));
     return json({message: "okay"}, {status: 200});
