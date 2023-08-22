@@ -15,10 +15,9 @@ export async function POST ({request}){
     if(!request.body) return json({message: "Request needs a body"}, {status: 400});
     let dealInfo = await request.json();
     polygons = loadPolygonsFromDatabase();
-    console.log(dealInfo.meta.id);
-    
-    // let dealGeographicalPoint = point([relevantDealInfo.latitude, relevantDealInfo.longitude]);
-    // console.log(pointsInPolygonFromList([dealGeographicalPoint], polygons));
+    let relevantDealInfo = await fetchRelevantData(dealInfo.current, "job");
+    let dealGeographicalPoint = point([relevantDealInfo.latitude, relevantDealInfo.longitude]);
+    console.log(pointsInPolygonFromList([dealGeographicalPoint], polygons));
     return json({message: "okay"}, {status: 200});
 }
     
