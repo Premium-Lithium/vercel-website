@@ -8,8 +8,8 @@ import { deserializeCoordinates, serializeCoordinates, fetchLatlonFromPostcodesP
 
 const DB_NAME: string = "installation-manager-regions";
 
-let installationManagerDetails: [{id: Number, name: string}];
-let polygons: [Feature<Polygon, Properties>];
+let installationManagerDetails: [{id: Number, name: string}] | [] = [];
+let polygons: [Feature<Polygon, Properties>] | [] = [];
 
 export async function POST ({request}){
     if(!request.body) return json({message: "Request needs a body"}, {status: 400});
