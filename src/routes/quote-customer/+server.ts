@@ -27,7 +27,10 @@ export async function POST({ request }) {
         return json({ message: `${errors}` }, { status: 400 })
     }
 
-    quoteCustomer(requestData.deal_id);
+    const quoteAttempt = await quoteCustomer(requestData.deal_id);
 
-    return json({ message: "Successfully quoted customer." }, { status: 200 })
+    return json(
+        { message: quoteAttempt.message },
+        { status: quoteAttempt.success ? 200 : 500 }
+    );
 }
