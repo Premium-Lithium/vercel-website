@@ -36,12 +36,10 @@ export async function POST({ request }) {
         return json({ message: `${message}` }, { status: 400 })
     }
 
-    // Make sure we're sending from a Premium Lithium email address
-    const sender = requestData.sender;
-    if(!sender.endsWith("@premiumlithium.com"))
-        return json({ message: "Sender must be a Premium Lithium email address." }, { status: 400 })
+    const mailAttempt = await sendMail(...Object.values(requestData));
 
-    sendMail(...Object.values(requestData));
-
-    return json({ message: `Email sent successfully from ${requestData.sender}`}, { status: 200 })
+    return json(
+        { message: mailAttempt.message },
+        { status: mailAttempt.success ? 200 : 500 }
+    );
 }
