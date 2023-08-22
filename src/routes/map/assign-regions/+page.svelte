@@ -10,7 +10,7 @@ import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import '@turf/points-within-polygon';
-import { featureCollection, point, polygon } from '@turf/helpers';
+import { featureCollection, point, points, polygon } from '@turf/helpers';
 import pointsWithinPolygon from '@turf/points-within-polygon';
 import { supabase } from '$lib/supabase';
 import { serializeCoordinates, deserializeCoordinates } from '$lib/mapUtils';
@@ -21,7 +21,19 @@ let polygons = [];
 let installationManagerDetails = [];
 let jobsToBeAssigned = [];
 let draw;
-let swatches;
+let idHoveringOver = "";
+
+var swatchColours = [
+      'green',
+      'blue',
+      'orange',
+      'maroon',
+      'cyan',
+      'red',
+      'pink',
+      'yellow'
+
+    ];
 
 const loadPolygonsFromDatabase = async (map) => {
     let {data, error} = await supabase.from(DB_NAME).select('*');
@@ -46,18 +58,6 @@ const loadPolygonsFromDatabase = async (map) => {
 
 
 onMount(async () => {
-    var swatch_colors = [
-        '#ffffcc',
-        '#a1dab4',
-        '#41b6c4',
-        '#2c7fb8',
-        '#253494',
-        '#fed976',
-        '#feb24c',
-        '#fd8d3c',
-        '#f03b20',
-        '#bd0026'
-    ];
 
     mapboxgl.accessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
@@ -124,8 +124,8 @@ onMount(async () => {
     }
 
     
-    //const postcodeIndex = '80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'
-    const postcodeIndex = 'd09ae1ac084a1afd7ddd515c520a36f568390b54';
+    const postcodeIndex = '80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'
+
     async function fetchJobData() {
         const data = await fetchAllPaginated({
             url: 'https://api.pipedrive.com/api/v1/deals',
@@ -196,32 +196,44 @@ onMount(async () => {
         addHomeButton(map);
         map.addControl(draw, 'top-left');
         addSaveButton(map);
-        addSyncButton(map);
+        //addSyncButton(map);
         map.on('draw.update', updatePolygonCoordinates);
         map.on('draw.create', updatePolygonCoordinates);
         map.on('draw.delete', updatePolygonCoordinates);
-        
-        polygons.forEach( x => {draw.add(x);});        
+        map.on('mousemove', (e) => {
+          idHoveringOver = "";
+          polygons.forEach((p,i,a) => {
+            if(pointsWithinPolygon(points([[e.lngLat.lng, e.lngLat.lat]]),polygon([p.geometry.coordinates[0]])).features.length != 0){  
+              idHoveringOver = installationManagerDetails[i].name;
+            }
+          })
+        })
+        let i = 0;
+        polygons.forEach( x => {
+          draw.add(x);
+          draw.setFeatureProperty(draw.getAll().features.pop().id, 'myFillColorProperty', swatchColours[i]);
+          i++;
+        });        
     });
     const updatePolygonCoordinates = (e) => {
         jobsToBeAssigned = [];
         polygons = draw.getAll().features;
         let pointMarkerList = markerIdList.map(m => { return {"marker": m.marker, "point": point(m.marker.getLngLat().toArray())}});
         let points = featureCollection(pointMarkerList.map(obj => obj.point));
-        polygons.forEach((currentElement, index, arr) => {
+        polygons.forEach((currentElement) => {
             if (e && e.features && e.features.length === 1) {
-                draw.setFeatureProperty(e.features[0].id, 'myFillColorProperty', '#660066');
+              let polyColour = polygons.findIndex((p) => p.id === e.features[0].id);
+              draw.setFeatureProperty(e.features[0].id, 'myFillColorProperty', swatchColours[polyColour]);
             }
             const poly = currentElement;
             const pointsInside = pointsWithinPolygon(points,poly).features;
             pointsInside.forEach(point => {
                 let p = pointMarkerList.find(obj => obj.point.geometry.coordinates[0] === point.geometry.coordinates[0] && obj.point.geometry.coordinates[1] === point.geometry.coordinates[1]).marker;
-                let dealId = markerIdList.find(obj => obj.marker === p).id;
-                jobsToBeAssigned.push({"dealId": dealId, "installerManagerUserID": installationManagerDetails[index].id});
             });
         });
         let serial = serializeCoordinates(polygons[0].geometry.coordinates[0]);
     }   
+    // LngLat of York
     const homePosition = {
         center: [-1.0824345406845737,53.957031087688534],
     };
@@ -535,5 +547,21 @@ var drawStyles = [
 
 </script>
 <div id="map" style="width: 100%; height: 100vh;"></div>
+<pre id="info">
+  {idHoveringOver}
+</pre>
+
+<style>
+  #info {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin:20px;
+    margin-right:30px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    font-weight: bolder;
+  }
+</style>
 
 
