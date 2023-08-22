@@ -24,6 +24,46 @@ Get the .env file on your local machine
 pnpx vercel env pull .env
 ```
 
+## Using a local database
+Login to Supabase CLI
+```
+supabase login
+```
+
+Start the local Supabase instance
+```
+supabase start
+```
+
+This may take a while as it needs to download the docker image.
+### Manually interacting with the local DB
+The local db can be accessed by visiting `http://localhost:54323/`
+
+## Updating the DB schema
+
+To change the production schema, we'll need to link the local instance with the remote
+```
+supabase link --project-ref $PROJECT_ID
+```
+$PROJECT_ID can be found by going to `https://supabase.com/dashboard/projects`, clicking the project (pl-web), and then the url contains `https://supabase.com/dashboard/project/$PROJECT_ID`.
+
+Make a change to the local db via the Supabase Studio, and generate a new migration which will be the difference between production and local.
+```
+supabase db diff -f $migration_name
+```
+
+Check that the new migration works as intended on local
+```
+supabase db reset
+```
+
+Push the DB schema to production **Should be implemented using GitHub actions once we've commited to Supabase**
+```
+supabase db push
+```
+---
+## Deprecated 
+---
 ## Using fake database
 
 If you are making changes to the database, you should use a fake local database rather than the production database. In order to do this, first start the local fake postgres database:
@@ -56,3 +96,11 @@ pnpx prisma db seed
 ```
 
 You can change the data that is seeded in the prisma/seed.js file.
+
+## Backing Up the Database
+to generate a local backup of the database, run the command:
+```
+pg_dump postgres://default:s7ogIvaKHLm6@ep-divine-union-019154-pooler.us-east-1.postgres.vercel-storage.com/verceldb > backup
+```
+Changing the name of 'backup' to whatever you want to name your backup file.
+

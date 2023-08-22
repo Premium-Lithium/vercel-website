@@ -13,8 +13,8 @@
           nodePackages.prisma
           nodePackages.pnpm
           nodejs-slim
-          postgresql
-          podman
+          postgresql_15
+          supabase-cli
         ];
         shellHook = with pkgs; ''
           export PRISMA_MIGRATION_ENGINE_BINARY="${prisma-engines}/bin/migration-engine"
