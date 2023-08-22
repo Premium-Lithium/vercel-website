@@ -1,45 +1,54 @@
-import { json } from '@sveltejs/kit';
-import sendMail from '../send-mail/logic.js';
-import nunjucks from 'nunjucks';
 import pipedrive from 'pipedrive';
-import fs from 'fs/promises';
 import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { populateEmailTemplateWith } from '$lib/file-utils.js';
 
+// todo: only used while we don't have an outlook mail client object
+import { getNewAPIToken } from '../send-mail/logic.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 export default async function quoteCustomer(dealId) {
+    let quoteAttempt = {
+        "success": true,
+        "message": `Quote created for deal ${dealId}`
+    };
+
     const customer = await getCustomerInfo(dealId);
 
-    if(customer === null)
-        return json({}, { status: 400 });
+    if(customer === null) {
+        quoteAttempt.success = false;
+        quoteAttempt.message = `Error: Could not fetch customer data for deal ${dealId}`;
+        console.log(quoteAttempt.message);
+        return quoteAttempt;
+    }
 
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
 
-    const customerData = {
+    const emailContentData = {
         pl_bdm_contact_name: customer.pl_contact.name,
         price_calculator_link: priceCalcLink,
-        customer_name: customer.name
+        customer_name: customer.name.split(" ")[0],
+        relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
+        schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
 
-    const emailContent = await loadQuoteEmailWith(customerData);
+    const emailContent = await populateEmailTemplateWith(emailContentData, './customer_quote_template.mjml', import.meta.url);
 
-    sendMail(
-        // [ customer.email ],
-        // REMOVE IN PRODUCTION
-        [ "lewisbowes0@gmail.com" ],
-        // REMOVE IN PRODUCTION
-        customer.pl_contact.email,
-        "Your Solar PV and BESS Quotes - Options and Next Steps",
-        emailContent,
-        "HTML"
-    );
+    const emailData = {
+        sender: customer.pl_contact.email,
+        recipients: [ customer.email ],
+        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+        mail_body: emailContent,
+        content_type: "HTML"
+    };
+
+    // Create a draft email in the BDM's outlook
+    createDraft(...Object.values(emailData));
 
     if(!markAsQuoteIssued(dealId))
         console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+
+    console.log(quoteAttempt.message);
+    return quoteAttempt;
 }
 
 
@@ -109,15 +118,12 @@ function extractSolutionFrom(customerData) {
 
 
 function extractPLContactFrom(customerData) {
-    // todo: get PL contact email from pipedrive
-
-    // Fetch the pipedrive call logs and get the name of the most recent person who called the customer.
-
     // todo: Could there ever be a case where the deal isn't actually linked to someone from premium lithium?
+    const bdm = customerData.user_id;
 
     const plContactPerson = {
-        name: "Lewis Bowes",
-        email: "lewis.bowes@premiumlithium.com"
+        name: bdm.name.split(" ")[0],
+        email: bdm.email
     };
 
     return plContactPerson;
@@ -140,29 +146,54 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 }
 
 
-// todo: consider breaking this out into its own utility function
-// populateEmailTemplateWith(data, templatePath)?
+// todo: add meaningful return statements to this to indicate whether or not it worked, and catch these in quoteCustomer above
+async function createDraft(sender, recipients, subject, mail_body, content_type) {
+    const apiToken = await getNewAPIToken();
 
-async function loadQuoteEmailWith(customerData) {
-    const filePath = join(__dirname, 'customer_quote_template.html');
-    try {
-        const templateString = await fs.readFile(filePath, 'utf8');
+    const messagePayload = {
+        subject: subject,
+        body: {
+            contentType: content_type,
+            content: mail_body
+        },
+        toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
+        bccRecipients: [
+            {
+                emailAddress: {
+                    address: "lewis.bowes@premiumlithium.com",
+                }
+            }
+        ]
+    };
 
-        nunjucks.configure({ autoescape: true });
-        const renderedEmail = nunjucks.renderString(templateString, customerData);
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiToken
+    };
 
-        return renderedEmail;
-    } catch (err) {
-        const message = "Error processing the email template";
-        console.error(message, err);
-        return message;
-    }
+    const options = {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(messagePayload)
+    };
+
+    const apiUrl = `/v1.0/users/${sender}/messages`;
+
+    fetch(`https://graph.microsoft.com${apiUrl}`, options)
+        .then(res => {
+            if (res.status !== 201) {
+                console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
+            }
+        })
+        .catch(error => {
+            console.log(`Error: Failed to create draft: ${error.message}`);
+        });
 }
 
 
 async function markAsQuoteIssued(dealId) {
     // Update the `Quote Issued` field on pipedrive with todays date
-    // todo: this assumes the dealFieldsRequest was successful
+    // todo: this assumes the dealFieldsRequest in pipedrive-utils was successful
     const dealFields = dealFieldsRequest.data;
     const dealsApi = new pipedrive.DealsApi(pd);
 

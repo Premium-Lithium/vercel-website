@@ -1,9 +1,23 @@
-import { json } from '@sveltejs/kit';
 import querystring from 'querystring';
 
+// todo: at some point we want to ideally use this javascript client provided by microsoft to simplify the logic here slightly
+// See documentation here: https://github.com/microsoftgraph/msgraph-sdk-javascript/tree/dev
+// import { Client } from "@microsoft/microsoft-graph-client";
 
-export default async function sendMail(recipients, sender, subject, mail_body, content_type) {
-    console.log(`Sending email from ${sender} to ${recipients}...`);
+
+async function sendMail(sender, recipients, subject, mail_body, content_type) {
+    let mailAttempt = {
+        "success": true,
+        "message": `Email sent successfully from ${sender} to ${recipients}`
+    };
+
+    // Make sure we're sending from a Premium Lithium email address
+    if(!sender.endsWith("@premiumlithium.com")) {
+        mailAttempt.success = false;
+        mailAttempt.message = `Error: Sender '${sender}' is not a Premium Lithium email address.`;
+        console.log(mailAttempt.message);
+        return mailAttempt;
+    }
 
     const messagePayload = {
         message: {
@@ -33,19 +47,20 @@ export default async function sendMail(recipients, sender, subject, mail_body, c
 
     fetch(`https://graph.microsoft.com${apiUrl}`, options)
         .then(res => {
-            if (res.status === 202) {
-                return { statusCode: 202 };
-            } else {
-                console.log(`API request failed with status ${res.status} ${res.statusText}`);
-                return {
-                    statusCode: res.status,
-                    body: res.statusText
-                };
+            if (res.status !== 202) {
+                mailAttempt.success = false;
+                mailAttempt.message = `Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`;
+                console.log(mailAttempt.message);
             }
         })
         .catch(error => {
-            return json({ message: `Failed to send email: ${error.message}`}, { status: 500 })
+            mailAttempt.success = false;
+            mailAttempt.message = `Error: Failed to send email: ${error.message}`;
+            console.log(mailAttempt.message);
         });
+
+    console.log(mailAttempt.message);
+    return mailAttempt;
 }
 
 
@@ -89,3 +104,9 @@ async function getNewAPIToken() {
         return null;
     }
 }
+
+
+export {
+    getNewAPIToken, // todo: remove this - only exposing for testing
+    sendMail
+};

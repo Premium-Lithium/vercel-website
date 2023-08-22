@@ -4,49 +4,76 @@
         <mj-column width="70%">
             <mj-image padding="0" src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196">
         </mj-column>
-      <mj-divider border-width="1px">
     </mj-section>
     <mj-section background-color="white" padding-bottom="0px" padding-top="0">
       <mj-column width="100%">
         <mj-text align="left" line-height="normal" font-size="13px" color="black" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="10px" padding-top="10">
           Dear {{ customer_name }},
-          <br>
-          <br>
 
-          <h4>Thank You for Your Time</h4>
-          I just wanted to extend my gratitude for taking the time to speak with me on the phone CALL_TIME. It was great discussing your solar and storage options.
+          <br><br>
+          Thanks for your call {{ relative_call_time }}, it was great to learn
+          about how we can help you.
           <br><br>
 
           <h4>Your Customised Quotes</h4>
-          As per our discussion, I have attached three quotes based on the different installation dates available, along with their corresponding terms:
+          As per our discussion, I have attached three quotes based on the
+          different installation dates available, along with their corresponding
+          terms.
 
           <br><br>
-          I've set up our <a href="{{ price_calculator_link }}">our price calculator</a> for you based on what we discussed. Please feel free to use this to explore other configurations.
-
+          I've also set up our our price calculator for you based on what we
+          discussed. Please feel free to use this to explore other
+          configurations.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="white" padding-bottom="0px" padding-top="0">
+      <mj-column width="100%">
+        <mj-button href="{{ price_calculator_link }}">Open Price Calculator</mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="white" padding-bottom="0px" padding-top="0">
+      <mj-column width="100%">
+        <mj-text align="left" line-height="normal" font-size="13px" color="black" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="10px" padding-top="10">
           <h4>Attachments Included</h4>
-          For your convenience, the detailed quotes and data sheets are attached to this email.
+          For your convenience, the quotes and product data sheets are attached
+          to this email.
 
           <h4>Next Steps</h4>
-          If you would like to book a follow-up conversation with me to go through these options in more detail, you can do so using the following link: Schedule Follow-Up Conversation.
+          If you would like to book a follow-up conversation with me to go
+          through these options in more detail, you can do so below.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="white" padding-bottom="0px" padding-top="0">
+      <mj-column width="100%">
+        <mj-button href="{{ schedule_call_link }}">Schedule Call with {{ pl_bdm_contact_name }}</mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="white" padding-bottom="20px" padding-top="0">
+      <mj-column width="100%">
+        <mj-text align="left" line-height="normal" font-size="13px" color="black" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding-left="25px" padding-right="25px" padding-bottom="10px" padding-top="10">
+          I am also highly responsive by email, so feel free to put your
+          thoughts in a reply to this message if that suits you better.
 
           <br><br>
-          Alternatively, I am also highly responsive by email, so feel free to put your thoughts in a reply to this message if that suits you better.
 
-          Thank you again for considering us for your solar and storage needs, Robert. I am here to help you every step of the way.
+          Thanks again for considering us for your solar and storage needs {{
+          customer_name }}. I'm here to help you every step of the way.
           <br>
           <br>
 
           Best regards,
           <br>
           {{ pl_bdm_contact_name }}
-
-          <hr>
-
-          <mj-raw>
-            <p style="text-align: center;"><a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/text1@2x.png" border="0" height="18" alt="Human score" style="max-height: 18px;"></a> &nbsp;&nbsp; <a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/stars@2x.png" border="0" height="20" alt="Trustpilot Stars" style="max-height: 20px;"></a> &nbsp;&nbsp; <span style="display: inline-block;"><a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/text2@2x.png" border="0" height="18" alt="number of reviews" style="max-height: 18px;"></a> &nbsp;&nbsp; <a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/brand/n/1/logo.png" border="0" height="20" alt="Trustpilot Logo" style="max-height: 20px; display: inline-block;"></a></span></p>
-          </mj-raw>
-
         </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#efefef" padding-bottom="20px" padding-top="20px">
+      <mj-column width="100%">
+        <mj-raw>
+          <p style="text-align: center;"><a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/text1@2x.png" border="0" height="18" alt="Human score" style="max-height: 18px;"></a> &nbsp;&nbsp; <a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/stars@2x.png" border="0" height="20" alt="Trustpilot Stars" style="max-height: 20px;"></a> &nbsp;&nbsp; <span style="display: inline-block;"><a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/newsletter/en-US/1/62555a86c976acfa4809a8e1/text2@2x.png" border="0" height="18" alt="number of reviews" style="max-height: 18px;"></a> &nbsp;&nbsp; <a href="https://www.trustpilot.com/review/premiumlithium.com?utm_medium=Trustbox&amp;utm_source=EmailNewsletter1" style="text-decoration: none;"><img src="https://emailsignature.trustpilot.com/brand/n/1/logo.png" border="0" height="20" alt="Trustpilot Logo" style="max-height: 20px; display: inline-block;"></a></span></p>
+        </mj-raw>
       </mj-column>
     </mj-section>
   </mj-body>
