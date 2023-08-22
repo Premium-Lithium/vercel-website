@@ -1,7 +1,5 @@
-import type { Properties } from '@turf/helpers';
-import type { Feature } from '@turf/helpers';
-import { supabase } from '$lib/supabase';
-import { featureCollection, point, polygon, type Polygon } from '@turf/helpers';
+import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
+import pointsWithinPolygon from '@turf/points-within-polygon';
 
 export const serializeCoordinates = (coords: [[Number, Number]]) => {
     return coords.reduce(
@@ -22,21 +20,78 @@ export const deserializeCoordinates = (coordString: String) => {
 
 }
 
-export async function loadPolygonsFromDatabase(db_name: string) {
-    let {data, error} = await supabase.from(db_name).select('*');
-    if(!data || error) {
-        console.log(error);
-        return;
-    }
-    console.log(data);
-    let polygons: [Feature<Polygon, Properties>];
-    let installationManagerDetails: [{"id": Number, "name": string}];
-    data.forEach(x => {
-        installationManagerDetails.push({"id": x.id, "name": x.name})
-        if(x.latlong) {
-            let p = polygon([deserializeCoordinates(x.latlong)])
-            polygons.push(p);
-        }
+export function splitArrayIntoNLengthChunks(inputArray: Array<any>, n: Number) {
+    return inputArray.reduce((all,one,i) => {
+        const ch = Math.floor(i/n); 
+        all[ch] = [].concat((all[ch]||[]),one); 
+        return all
+    }, [])
+}
+
+export async function fetchLatlonFromPostcodesPostcodes(postcodes: Array<String>) {
+    const postcodeChunks = splitArrayIntoNLengthChunks(postcodes, 90);
+    const locationChunks = await Promise.all(postcodeChunks.map(async (postcodeChunk) => {
+        const postcodeResponse = await fetch('https://api.postcodes.io/postcodes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ "postcodes": postcodeChunk })
+        });
+
+        const postcodeData = await postcodeResponse.json();
+        const filteredPostcodeData = postcodeData.result.filter(item => item.result !== null);
+        return filteredPostcodeData
+
+    }));
+
+    return locationChunks.reduce((x, y) => x.concat(y));
+}
+
+export async function fetchInstallerDataFromPipedrive() {
+    const data = await fetchAllPaginated({
+        url: 'https://api.pipedrive.com/api/v1/organizations',
+        queryParams: ['filter_id=115', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
+    })
+    return fetchRelevantData(data, "installer");
+}
+
+
+const postcodeIndex = '80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'
+
+export async function fetchJobDataFromPipedrive() {
+    const data = await fetchAllPaginated({
+        url: 'https://api.pipedrive.com/api/v1/deals',
+        //queryParams: ['filter_id=55', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
+        queryParams: ['filter_id=142', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
+    })
+    return fetchRelevantData(data, "job");
+}
+
+export async function fetchRelevantData(data, type) {
+    const filteredData = data.filter(item => item[postcodeIndex] !== null);
+    const postcodes = filteredData.map(item => item[postcodeIndex]).slice(0)
+    const locationData = await fetchLatlonFromPostcodesPostcodes(postcodes);
+
+
+    // Match job data with postcode data
+
+    return locationData.map((data) => {
+        const postcode = data.query;
+        const correspondingDatum = filteredData.find((x) => x[postcodeIndex] === postcode);
+        return {
+            ...correspondingDatum,
+            ...data.result,
+            name: correspondingDatum.title,
+            type,
+        };
+    }) 
+}
+
+export function pointsInPolygonFromList(points, polygonList) {
+    let pointsInEachPolygon = [];
+    polygonList.forEach((polygon) => {
+        pointsInEachPolygon.push(pointsWithinPolygon(points, polygon));
     });
-    return [polygons, installationManagerDetails];
+    return pointsInEachPolygon;
 }

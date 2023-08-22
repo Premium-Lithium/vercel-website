@@ -6,14 +6,15 @@
 
 <script>
 import { onMount } from 'svelte';
-import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
+
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
-import '@turf/points-within-polygon';
-import { featureCollection, point, points, polygon } from '@turf/helpers';
 import pointsWithinPolygon from '@turf/points-within-polygon';
+import { featureCollection, point, points, polygon } from '@turf/helpers';
 import { supabase } from '$lib/supabase';
-import { serializeCoordinates, deserializeCoordinates } from '$lib/mapUtils';
+import { serializeCoordinates, deserializeCoordinates, fetchLatlonFromPostcodesPostcodes,
+         fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive } from '$lib/mapUtils';
+
 
 const DB_NAME = "installation-manager-regions";
 let markerIdList = [];
@@ -69,91 +70,6 @@ onMount(async () => {
     });
 
 
-    function splitArrayIntoNLengthChunks(inputArray, n) {
-        return inputArray.reduce((all,one,i) => {
-            const ch = Math.floor(i/n); 
-            all[ch] = [].concat((all[ch]||[]),one); 
-            return all
-        }, [])
-    }
-
-    async function fetchLatlonFromPostcodesPostcodes(postcodes) {
-        const postcodeChunks = splitArrayIntoNLengthChunks(postcodes, 90);
-        const locationChunks = await Promise.all(postcodeChunks.map(async (postcodeChunk) => {
-            const postcodeResponse = await fetch('https://api.postcodes.io/postcodes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ "postcodes": postcodeChunk })
-            });
-
-            const postcodeData = await postcodeResponse.json();
-            const filteredPostcodeData = postcodeData.result.filter(item => item.result !== null);
-            return filteredPostcodeData
-
-        }));
-
-        return locationChunks.reduce((x, y) => x.concat(y));
-    }
-
-    async function fetchInstallerData() {
-        const data = await fetchAllPaginated({
-            url: 'https://api.pipedrive.com/api/v1/organizations',
-            queryParams: ['filter_id=115', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
-        })
-
-
-        // Remove any postcodes that are null
-        const filteredData = data.filter(item => item.address_postal_code !== null);
-        const postcodes = filteredData.map(item => item.address_postal_code).slice(90)
-        const locationData = await fetchLatlonFromPostcodesPostcodes(postcodes)
-
-
-        // Match installer data with postcode data
-
-        return locationData.map((data) => {
-            const postcode = data.query;
-            const correspondingDatum = filteredData.find((x) => x.address_postal_code === postcode);
-            return {
-                ...correspondingDatum,
-                ...data.result,
-                type: "installer",
-            };
-        }) 
-    }
-
-    
-    const postcodeIndex = '80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'
-
-    async function fetchJobData() {
-        const data = await fetchAllPaginated({
-            url: 'https://api.pipedrive.com/api/v1/deals',
-            //queryParams: ['filter_id=55', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
-            queryParams: ['filter_id=142', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
-        })
-        console.log(data);
-
-        const filteredData = data.filter(item => item[postcodeIndex] !== null);
-        const postcodes = filteredData.map(item => item[postcodeIndex]).slice(0)
-        const locationData = await fetchLatlonFromPostcodesPostcodes(postcodes);
-
-
-        // Match job data with postcode data
-
-        return locationData.map((data) => {
-            const postcode = data.query;
-            const correspondingDatum = filteredData.find((x) => x[postcodeIndex] === postcode);
-            return {
-                ...correspondingDatum,
-                ...data.result,
-                name: correspondingDatum.title,
-                type: "job",
-            };
-        }) 
-    }
-
-
     // Colors for the markers
     const colors = ["white", "gray", "green"];
     const colouringFunction = (data) => {
@@ -163,8 +79,9 @@ onMount(async () => {
     }
 
     map.on('load', async () => {
-        //const installerData = await fetchInstallerData()
-        const data = await fetchJobData()
+        //const installerData = await fetchInstallerDataFromPipedrive()
+        const data = await fetchJobDataFromPipedrive()
+        console.log(data);
         //const data = jobData.concat(installerData)
         for(let postcode in data) {
             const marker = new mapboxgl.Marker({ color: colouringFunction(data[postcode]) })
@@ -308,7 +225,7 @@ onMount(async () => {
                 name: installationManagerDetails[i].name,
                 latlong: serializeCoordinates(polygons[i].geometry.coordinates[0]),
             });
-            console.log(`Saved region for ${installationManagerDetails[i].id}`);
+            console.log(`Saved region for ${installationManagerDetails[i].name}`);
         }
     }
 });
