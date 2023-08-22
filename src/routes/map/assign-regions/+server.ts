@@ -18,7 +18,11 @@ export async function POST ({request}){
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
     let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
-    console.log(pointsInPolygonFromList([dealGeographicalPoint], polygons));
+    pointsInPolygonFromList([dealGeographicalPoint], polygons).forEach((p, i, a) => {
+        if(p.features.length != 0) {
+            console.log(installationManagerDetails[i].name);
+        }
+    });
     return json({message: "okay"}, {status: 200});
 }
     
