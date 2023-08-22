@@ -1,6 +1,6 @@
 import { PIPEDRIVE_API_TOKEN } from "$env/static/private"
 import fetchAllPaginated from "$lib/pipedrive/fetchAllPaginated"
-import { adminSupabase } from "$lib/supabase"
+import { adminSupabase } from "$lib/adminSupabase"
 import { extractPostcodeFrom } from "$lib/services/postcodeUtils"
 
 export async function syncJobs() {

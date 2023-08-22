@@ -1,5 +1,5 @@
 import { getBatchLatLonFromPostcodesWrapper } from "$lib/services/postcodeUtils"
-import { adminSupabase } from "$lib/supabase"
+import { adminSupabase } from "$lib/adminSupabase"
 
 export async function syncJobPostcodes() {
     // Get list of installers with address but no postcode
