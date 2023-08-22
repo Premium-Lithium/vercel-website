@@ -37,7 +37,7 @@ export default async function quoteCustomer(dealId) {
 
     const emailData = {
         sender: customer.pl_contact.email,
-        recipients: [ "lewisbowes0@gmail.com" ],
+        recipients: [ customer.email ],
         subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
         mail_body: emailContent,
         content_type: "HTML"
