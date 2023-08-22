@@ -18,7 +18,7 @@ export async function POST ({request}){
     console.log(dealInfo.current);
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
-    let dealGeographicalPoint = point(latlon);
+    let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
     console.log(pointsInPolygonFromList([dealGeographicalPoint], polygons));
     return json({message: "okay"}, {status: 200});
 }
