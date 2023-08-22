@@ -115,10 +115,10 @@ onMount(() => {
     const colouringFunction = (data) => {
         console.log(data)
         if (data.type === "job") {
-            // something wacky happening with the data
-            //console.log(data["9ff7b589a0c2b843924928cfc1af79dadf22f563"]);
-            // some have this instead????
-            //console.log(data["f0ae912a9d78d9c102153390176de173cbd791eb"]);
+            // two possible job date sources
+            // data["9ff7b589a0c2b843924928cfc1af79dadf22f563"]
+            // and
+            // data["f0ae912a9d78d9c102153390176de173cbd791eb"]
 
             let possibleFinishDate = data["9ff7b589a0c2b843924928cfc1af79dadf22f563"];
             if (possibleFinishDate === null) {
@@ -150,7 +150,7 @@ onMount(() => {
                     linear to begin with
 
             */
-            let upperBound = 200;  // distance of minimum opacity
+            let upperBound = 200;  // days distance of minimum opacity
             let maxAlpha = 1;  // maximum opacity
             let minAlpha = 0.3;  // minimum opacity
 
@@ -163,13 +163,12 @@ onMount(() => {
                 actualAlpha = ((upperBound - daysDifference) / upperBound) * (maxAlpha - minAlpha) + minAlpha;
             }
             
-            // jobs fade from green to grey
-            // test fade function
+            
             let alpha = actualAlpha;
             let color = "rgba(0, 200, 0, " + alpha + ")";
-            // return colour, either string or hex code
+            
             return color;
-            //return "blue";
+            
         }
         if (data.type === "installer") return "blue";
         return "red";
