@@ -8,14 +8,14 @@ import { deserializeCoordinates, serializeCoordinates, fetchLatlonFromPostcodesP
 
 const DB_NAME: string = "installation-manager-regions";
 
-let installationManagerDetails = [];
-let polygons = [];
+let installationManagerDetails;
+let polygons;
 
 export async function POST ({request}){
     if(!request.body) return json({message: "Request needs a body"}, {status: 400});
     let dealInfo = await request.json();
     await loadPolygonsFromDatabase();
-    console.log(polygons);
+    console.log(polygons.geometry.coordinates[0]);
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
     let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
@@ -25,6 +25,8 @@ export async function POST ({request}){
     
 
 const loadPolygonsFromDatabase = async () => {
+    installationManagerDetails = [];
+    polygons = [];
     let {data, error} = await supabase.from(DB_NAME).select('*');
     if(!data || error) {
         return;
