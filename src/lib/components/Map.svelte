@@ -7,11 +7,12 @@
 
 <script>
 export let search = true;
+export let map = undefined;
 import { onMount } from 'svelte';
 onMount(() => {
     const mapboxGlAccessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
     mapboxgl.accessToken = mapboxGlAccessToken;
-    const map = new mapboxgl.Map({
+    map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/satellite-streets-v11?optimize=true',
         center: [-3.435973, 55.378051], // longitude and latitude of the center of the UK
