@@ -26,19 +26,20 @@ onMount(() => {
                 flyTo: {
                     speed: 2.5,
                 },
-            })
+            }),
         );
+        map.resize();
     });
 });
 
 </script>
 
-<div id="map" ></div>
+<div id="map"></div>
 
 <style>
     #map{
-        width: 60vw;
-        height: 60vh;
+        width: 100%;
+        height: 100%;
     }
     
 </style>
