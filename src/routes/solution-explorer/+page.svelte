@@ -1,14 +1,13 @@
 <script>
-    import { onMount } from 'svelte';
+    import { ssp, queryParam } from "sveltekit-search-params"
 
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
     import ProgressHeader from "./ProgressHeader.svelte"
-    import { stage } from "./store"
 
-    onMount(async () => {
-    });
+    const stage = queryParam("stage", ssp.number())
+
 </script>
 
 <body>
