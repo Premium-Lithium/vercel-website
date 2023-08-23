@@ -1,6 +1,8 @@
 <script>
     import { onMount } from 'svelte';
-    import { page } from '$app/stores'
+    // import { page } from '$app/stores'
+    import { Canvas } from '@threlte/core'
+    import Scene from './Scene.svelte'
 
     let someData;
 
@@ -10,7 +12,9 @@
 
 <div class="visualisation-panel">
   <div class="canvas-container">
-    <canvas></canvas>
+    <Canvas>
+        <Scene />
+    </Canvas>
   </div>
 </div>
 
@@ -27,11 +31,5 @@
         padding: 20px;
         width: calc(100% - 40px);
         height: calc(100% - 40px);
-    }
-
-    canvas {
-        background-color: black;
-        width: 100%;
-        height: 100%;
     }
 </style>
