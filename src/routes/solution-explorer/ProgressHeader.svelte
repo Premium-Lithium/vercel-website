@@ -10,7 +10,6 @@
 <div class="container">
     {#each titles.slice(0, -1) as title, i}
         <div class={(i === selectedIndex) ? "highlight" : ""}>
-            {@debug i}
             <div class="title">
                 {title}
             </div>
