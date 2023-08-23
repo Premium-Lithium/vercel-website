@@ -8,7 +8,10 @@
 </script>
 
 <div>
-    <ProgressHeader titles={["first", "second", "third", "fourth", "fifth", "sixth", "seventh"]}/>
+    <ProgressHeader
+        titles={["first", "second", "third", "fourth", "fifth", "sixth", "seventh"]}
+        selectedIndex={6}
+    />
     solution explorer here
 </div>
 

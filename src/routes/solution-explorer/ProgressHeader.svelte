@@ -9,15 +9,21 @@
 
 <div class="container">
     {#each titles.slice(0, -1) as title, i}
-        <div class="title">
-            {title}
+        <div class={(i === selectedIndex) ? "highlight" : ""}>
+            {@debug i}
+            <div class="title">
+                {title}
+            </div>
         </div>
+
         <div class="icon-protector">
             <ChevronRight size="2em" />
         </div>
     {/each}
-    <div class="title">
-        {titles.at(-1)}
+    <div class={(selectedIndex === (titles.length-1)) ? "highlight" : ""}>
+        <div class="title">
+            {titles.at(-1)}
+        </div>
     </div>
 </div>
 
@@ -37,5 +43,11 @@
 
     .icon-protector {
         min-width: 2em;
+    }
+
+    .highlight {
+        border-bottom: solid;
+        min-height: 100%;
+
     }
 </style>
