@@ -38,13 +38,9 @@
     }
 
     h3{
-        color: #28AAE2
+        color: #28AAE2;
     }
-
-    hr{
-        color:  #000;
-    }
-
+    
     .buttons{
         align-items: center;
     }
@@ -53,9 +49,9 @@
         background-color: #28AAE2;
         color: white;
         border:solid #000 1px; 
-        font-size: 30px;
+        font-size: 20px;
         height:auto; 
-        width:200px; 
+        width:100px; 
         padding:10px 5px; 
         margin:30px; 
         border-radius:5px;
