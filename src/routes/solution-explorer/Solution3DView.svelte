@@ -13,8 +13,8 @@
 
 <style>
     .visualisation-panel {
-        width: 50vh;
-        height: 50vh;
+        width: 100vw;
+        height: 100vw;
         background-color: white;
         border-radius: 10px;
         border: 1px solid lightgrey;
