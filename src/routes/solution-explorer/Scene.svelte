@@ -32,34 +32,34 @@
 }}></T.OrthographicCamera> -->
 
 <!-- todo: move these into a json configuration file -->
-<!-- <T.DirectionalLight position={[2, 10, 10]} castShadow intensity=1.5 scale=10.0/> -->
-<!-- <T.DirectionalLight position={[10, 10, 2]} castShadow intensity=2.5/> -->
-<T.PointLight position={[2, 5, 5]}  intensity={500.0} />
+<T.DirectionalLight position={[10, 10, -4]} castShadow intensity={1.5} scale={20.0}/>
+<T.DirectionalLight position={[10, 10, 2]} castShadow intensity=2.5/>
+<T.PointLight position={[10, 5, 0]}  intensity={800.0} />
 
-<T.AmbientLight intensity={1} />
+<T.AmbientLight intensity={2} />
 
 <!-- Stage -->
-<T.Mesh geometry={stage} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
-    <T.MeshStandardMaterial visible={true} color="green" wireframe={false}/>
+<T.Mesh geometry={stage} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+    <T.MeshStandardMaterial visible={true} color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Roof -->
-<T.Mesh geometry={roof} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
-    <T.MeshStandardMaterial color="red" wireframe={false}/>
+<T.Mesh geometry={roof} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+    <T.MeshStandardMaterial color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Battery -->
-<T.Mesh geometry={battery} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
-    <T.MeshStandardMaterial color="orange" wireframe={false}/>
+<T.Mesh geometry={battery} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+    <T.MeshStandardMaterial color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Inverter -->
-<T.Mesh geometry={inverter} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
-    <T.MeshStandardMaterial color="orange" wireframe={false}/>
+<T.Mesh geometry={inverter} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+    <T.MeshStandardMaterial color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Floor -->
 <T.Mesh rotation.x={-Math.PI/2} receiveShadow>
     <T.CircleGeometry args={[5, 40]}/>
-    <T.MeshStandardMaterial color="blue" wireframe={false}/>
+    <T.MeshStandardMaterial color="white" wireframe={false}/>
 </T.Mesh>

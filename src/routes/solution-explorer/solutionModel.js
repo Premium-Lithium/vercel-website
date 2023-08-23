@@ -3,19 +3,20 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 
 
 const wt = 0.17; // wall thickness
-const size = 2.6; // size of one wall (outer dimensions)
+const size = 2.8; // size of one wall (outer dimensions)
 const height = 2.2; // height of one wall (outer dimensions)
 const rl = size * 1.1; // roof length
 const roofEdgeHeight = 0.15; // height of vertical roof edge
 const apexHeight = 0.6; // height of roof apex (above roof edge)
 const battHeight = 0.7; // height of battery
-const floorClearance = 0.05; // height of battery of floor
-const battWidth = 0.9; // distance of battery off the wall
-const battDepth = 0.2; // distance of battery off the wall
-const wallClearance = 0.05; // distance of battery off the wall
+const floorClearance = 0.05; // height of objects off floor
+const battWidth = 0.9;
+const battDepth = 0.2;
+const wallClearance = 0.05; // distance of wall-mounted objects off the wall
 const inverterDepth = 0.17;
 const inverterHeight = 0.6;
 const inverterWidth = 0.3;
+
 
 let stage = buildStage();
 let roof = buildRoof();
