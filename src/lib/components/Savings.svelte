@@ -4,12 +4,10 @@
      export let energySavings = 0;
     
     async function order(){
-        //from the order button
         console.log("ordering ")
     }
 
     async function contactUs(){
-        // button to contact before ordering]
         console.log("contacting")
     }
 
@@ -23,7 +21,7 @@
     <h3> These are estimates. We'll arrange a site survey for you for the most accurate information.</h3>
     <div class=buttons>
     <button type="submit" on:click={contactUs}>Contact us</button>
-    <button type="submit" on:click={order}>order now</button>
+    <button type="submit" on:click={order}>Order Now</button>
     </div>
 </div>
 
@@ -55,7 +53,7 @@
         background-color: #28AAE2;
         color: white;
         border:solid #000 1px; 
-        
+        font-size: 30px;
         height:auto; 
         width:200px; 
         padding:10px 5px; 
