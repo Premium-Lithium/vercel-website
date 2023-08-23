@@ -4,7 +4,6 @@
 
     import ChevronRight from "svelte-material-icons/ChevronRight.svelte"
 
-    console.log(titles)
 </script>
 
 <div class="container">
