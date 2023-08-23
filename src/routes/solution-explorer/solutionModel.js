@@ -22,6 +22,8 @@ let stage = buildStage();
 let roof = buildRoof();
 let battery = buildBattery();
 let inverter = buildInverter();
+let roofSolar = buildRoofSolar();
+
 // let frontWall = buildFrontWall();
 
 
@@ -150,4 +152,41 @@ function buildInverter() {
 }
 
 
-export { battery, inverter, roof, stage };
+function buildRoofSolar() {
+    const panelWidth = size * 0.6;
+    const panelThickness = 0.04;
+
+    const availableWidth = Math.sqrt(Math.pow(rl / 2, 2) + Math.pow(apexHeight, 2));
+    const padding = 0.3; // Space between panels and roof edge
+    const panelHeight = availableWidth - padding * 2;
+
+    const roofSolar = new BoxGeometry(panelHeight, panelThickness, panelWidth);
+
+    const angle = (Math.PI - Math.atan(apexHeight / (rl / 2)));
+    roofSolar.rotateZ(angle);
+
+    const roofSurfaceMidPoint = { x: rl / 4, y: height + apexHeight / 2 + roofEdgeHeight };
+    const panelCentre = normalVector(angle, roofSurfaceMidPoint.x, roofSurfaceMidPoint.y, -panelThickness / 2);
+    roofSolar.translate(panelCentre.x, panelCentre.y, 0);
+
+    return roofSolar;
+}
+
+
+function normalVector(angle, x, y, length) {
+  // Calculate the angle of the normal (perpendicular to the line)
+  const normalAngle = angle + Math.PI / 2;
+
+  // Calculate the components of the normal vector
+  const nx = Math.cos(normalAngle) * length;
+  const ny = Math.sin(normalAngle) * length;
+
+  // New point after traveling along the normal
+  const newX = x + nx;
+  const newY = y + ny;
+
+  return { x: newX, y: newY, nx: nx, ny: ny };
+}
+
+
+export { battery, inverter, roof, stage, roofSolar };
