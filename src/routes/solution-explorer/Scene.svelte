@@ -1,137 +1,12 @@
 <script>
     import { T, useFrame } from '@threlte/core'
-    import { BoxGeometry, BufferGeometry, BufferAttribute, MeshBasicMaterial, OrthographicCamera } from 'three'
-    import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+    import { battery, inverter, stage, roof } from './solutionModel.js';
 
     let rotation = 0;
-    const rotSpeed = 0;
+    const rotSpeed = 0.00;
     useFrame((state, delta) => {
         rotation += delta * rotSpeed;
     })
-
-    const wt = 0.15; // wall thickness
-    const size = 2.6; // size of one wall (outer dimensions)
-    const height = 1.9; // height of one wall (outer dimensions)
-    const rl = size + wt * 3; // roof length
-    const roofEdgeHeight = 0.15; // height of vertical roof edge
-    const apexHeight = 0.6; // height of roof apex (above roof edge)
-    const battHeight = 0.7; // height of battery
-    const battHeightOffFloor = 0.05; // height of battery of floor
-    const battOffWall = 0.05; // distance of battery off the wall
-    const battWidth = 0.9; // distance of battery off the wall
-
-    let stage = buildStage();
-    let roof = buildRoof();
-    let battery = buildBattery();
-    // let frontWall = buildFrontWall();
-
-    function buildStage() {
-        const floor = buildFloor();
-        const rearWall = buildRearWall();
-
-        const stage = mergeGeometries([ floor, rearWall ]);
-        return stage;
-    }
-
-    function buildFloor() {
-        const floor = new BoxGeometry(size, wt, size);
-        floor.translate(0, wt / 2, 0);
-        return floor;
-    }
-
-    function buildRearWall() {
-        const leftWall = new BoxGeometry(wt, height - wt, size);
-        leftWall.translate(-size / 2 + wt/2, height / 2 + wt / 2, 0);
-
-        const rightWall = new BoxGeometry(size - wt, height - wt, wt);
-        rightWall.translate(wt / 2, height / 2 + wt / 2, -size / 2 + wt/2)
-
-        const walls = mergeGeometries([ leftWall, rightWall ]);
-
-        return walls;
-    }
-
-    function buildRoof() {
-        const base = new BoxGeometry(rl, roofEdgeHeight, rl);
-        base.translate(0, height + roofEdgeHeight / 2, 0);
-        delete base.attributes.uv; // remove UVs to avoid merge error
-
-        const peak = buildRoofUpper();
-        peak.translate(0, roofEdgeHeight, 0);
-
-        const roof = mergeGeometries([ base, peak ]);
-        return roof;
-    }
-
-    function buildRoofUpper() {
-        const apexFront = { x: 0, y: apexHeight, z: -(size * 0.8) / 2 };
-        const apexRear = { x: 0, y: apexHeight, z: (size * 0.8) / 2 };
-
-        const roofUpper = new BufferGeometry();
-
-        const hs = rl / 2; // half size
-        const vertices = new Float32Array([
-            // front left AED
-            -hs, 0, -hs, // A, 0
-            apexFront.x, apexFront.y, apexFront.z, // E, 1
-            hs,  0, -hs, // D, 2
-
-            // rear left ABFE
-            -hs, 0, -hs, // A, 3
-            -hs, 0, hs, // B, 6
-            apexRear.x, apexRear.y, apexRear.z, // F, 5
-            apexFront.x, apexFront.y, apexFront.z, // E, 4
-
-            // rear right CFB
-            hs,  0, hs, // C, 7
-            apexRear.x, apexRear.y, apexRear.z, // F, 8
-            -hs, 0, hs, // B, 9
-
-            // front right DEFC
-            hs,  0, -hs, // D, 10
-            apexFront.x, apexFront.y, apexFront.z, // E, 11
-            apexRear.x, apexRear.y, apexRear.z, // F, 12
-            hs,  0, hs, // C, 13
-        ]);
-
-        const indices = new Uint16Array([
-            // front left
-            0,  1, 2, // A, E, D
-
-            // rear left
-            3,  4, 5, // A, F, E
-            5,  6, 3, // A, B, F
-
-            // rear right
-            7,  8, 9, // C, F, B
-
-            // front right
-            10,  11, 12, // D, E, F
-            12,  13, 10, // C, D, F
-        ]);
-
-        roofUpper.setIndex(new BufferAttribute(indices, 1));
-        roofUpper.setAttribute('position', new BufferAttribute(vertices, 3));
-        roofUpper.computeVertexNormals();
-
-        roofUpper.translate(0, height, 0);
-
-        return roofUpper;
-    }
-
-    function buildBattery() {
-        const depth = 0.2;
-        const battery = new BoxGeometry(depth, battHeight, battWidth);
-        const pos = size / 2 - battWidth / 2;
-
-        battery.translate(
-            -size / 2 + wt + depth / 2 + battOffWall,
-            battHeight / 2 + wt + battHeightOffFloor,
-            pos
-        );
-
-        return battery;
-    }
 </script>
 
 <T.OrthographicCamera makeDefault zoom={200.0} position={[0, 1, 10]} on:create={({ ref }) => {
@@ -143,9 +18,13 @@
 }}></T.OrthographicCamera>
 
 <!-- Above angled -->
-<T.PerspectiveCamera makeDefault position={[4, 2.8, 4]} on:create={({ ref }) => {
+<!-- <T.PerspectiveCamera makeDefault position={[4, 2.8, 4]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
-}}></T.PerspectiveCamera>
+}}></T.PerspectiveCamera> -->
+
+<T.OrthographicCamera makeDefault zoom={150.0} position={[5, 3, 5]} on:create={({ ref }) => {
+    ref.lookAt(0, 1, 0)
+}}></T.OrthographicCamera>
 
 <!-- Directly above -->
 <!-- <T.OrthographicCamera makeDefault zoom={300.0} position={[0, 10, 0]} on:create={({ ref }) => {
@@ -171,6 +50,11 @@
 
 <!-- Battery -->
 <T.Mesh geometry={battery} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
+    <T.MeshStandardMaterial color="orange" wireframe={false}/>
+</T.Mesh>
+
+<!-- Inverter -->
+<T.Mesh geometry={inverter} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
     <T.MeshStandardMaterial color="orange" wireframe={false}/>
 </T.Mesh>
 
