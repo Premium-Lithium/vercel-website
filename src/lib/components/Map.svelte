@@ -6,7 +6,7 @@
 </svelte:head>
 
 <script>
-
+export let search = true;
 import { onMount } from 'svelte';
 onMount(() => {
     const mapboxGlAccessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -19,15 +19,17 @@ onMount(() => {
     });
 
     map.on('load', async () => {
-        map.addControl(
-            new MapboxGeocoder({
-                accessToken: mapboxGlAccessToken,
-                mapboxgl: mapboxgl,
-                flyTo: {
-                    speed: 2.5,
-                },
-            }),
-        );
+        if(search){
+            map.addControl(
+                new MapboxGeocoder({
+                    accessToken: mapboxGlAccessToken,
+                    mapboxgl: mapboxgl,
+                    flyTo: {
+                        speed: 2.5,
+                    },
+                }),
+            );
+        }
         map.resize();
     });
 });

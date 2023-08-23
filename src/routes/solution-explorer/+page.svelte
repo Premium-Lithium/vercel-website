@@ -14,7 +14,7 @@
         selectedIndex={6}
     />
     <div class="map-view">
-      <Map/>
+      <Map search={true}/>
     </div>
     solution explorer here
 </body>
