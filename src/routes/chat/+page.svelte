@@ -25,13 +25,13 @@
     <div class="messages">
     {#each previousMessages as message}
         {#if message.role==="user"}
-            <h2 in:fly={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
+            <h2 in:fly|global={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
         {:else}
             <h2 class="message-{message.role}">{message.content}</h2>
         {/if}
     {/each}
     {#if awaitingMessage}
-        <h2 in:fly={{x:-1000, duration:1000}} class="message-assistant">...</h2>
+        <h2 in:fly|global={{x:-1000, duration:1000}} class="message-assistant">...</h2>
     {/if}
     </div>
     <form>
