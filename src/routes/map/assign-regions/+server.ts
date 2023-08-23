@@ -15,6 +15,7 @@ export async function POST ({request}){
     if(!request.body) return json({message: "Request needs a body"}, {status: 400});
     let dealInfo = await request.json();
     await loadPolygonsFromDatabase();
+    console.log(polygons.map((p) => p.geometry.coordinates));
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
     let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
