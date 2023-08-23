@@ -15,9 +15,14 @@
     const rl = size + wt * 3; // roof length
     const roofEdgeHeight = 0.15; // height of vertical roof edge
     const apexHeight = 0.6; // height of roof apex (above roof edge)
+    const battHeight = 0.7; // height of battery
+    const battHeightOffFloor = 0.05; // height of battery of floor
+    const battOffWall = 0.05; // distance of battery off the wall
+    const battWidth = 0.9; // distance of battery off the wall
 
     let stage = buildStage();
     let roof = buildRoof();
+    let battery = buildBattery();
     // let frontWall = buildFrontWall();
 
     function buildStage() {
@@ -113,14 +118,32 @@
 
         return roofUpper;
     }
+
+    function buildBattery() {
+        const depth = 0.2;
+        const battery = new BoxGeometry(depth, battHeight, battWidth);
+        const pos = size / 2 - battWidth / 2;
+
+        battery.translate(
+            -size / 2 + wt + depth / 2 + battOffWall,
+            battHeight / 2 + wt + battHeightOffFloor,
+            pos
+        );
+
+        return battery;
+    }
 </script>
 
-<T.PerspectiveCamera makeDefault position={[10, 0, 0]} on:create={({ ref }) => {
-    ref.lookAt(0, 0, 0)
-}}></T.PerspectiveCamera>
+<T.OrthographicCamera makeDefault zoom={200.0} position={[0, 1, 10]} on:create={({ ref }) => {
+    ref.lookAt(0, 1, 0)
+}}></T.OrthographicCamera>
+
+<T.OrthographicCamera makeDefault zoom={200.0} position={[10, 1, 0]} on:create={({ ref }) => {
+    ref.lookAt(0, 1, 0)
+}}></T.OrthographicCamera>
 
 <!-- Above angled -->
-<T.PerspectiveCamera makeDefault position={[4, 2.3, 4]} on:create={({ ref }) => {
+<T.PerspectiveCamera makeDefault position={[4, 2.8, 4]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
 }}></T.PerspectiveCamera>
 
@@ -144,6 +167,11 @@
 <!-- Roof -->
 <T.Mesh geometry={roof} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
     <T.MeshStandardMaterial color="red" wireframe={false}/>
+</T.Mesh>
+
+<!-- Battery -->
+<T.Mesh geometry={battery} rotation={[0, rotation, 0]} position={[ 0.0, 0.0, 0.0 ]} castShadow>
+    <T.MeshStandardMaterial color="orange" wireframe={false}/>
 </T.Mesh>
 
 <!-- Floor -->
