@@ -14,7 +14,7 @@
 </script>
 
 <div class=body>
-    {#if currentPage > 1}
+    {#if currentPage > 0}
         <button type="submit" on:click={goBack}> previous</button>
     {/if}
     {#if currentPage < lastPage}
