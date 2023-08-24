@@ -15,16 +15,16 @@
 <!-- todo: arrange in new layout and make responsive -->
 <body>
     <ProgressHeader
-        titles={["map", "3d", "result"]}
+        titles={["Energy", "Solar", "Savings", "Investment"]}
         selectedIndex={$stage}
     />
     {#if $stage === 0}
+    {:else if $stage === 1}
         <div class="map-view">
           <Map search={true} style=5/>
         </div>
-    {:else if $stage === 1}
-        <Solution3DView />
     {:else}
+        <Solution3DView />
         REVIEW
     {/if}
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
