@@ -3,7 +3,7 @@ import { supabase } from '$lib/supabase';
 import { featureCollection, point, polygon, 
          type Polygon, type Feature, type Properties } from '@turf/helpers';
 import { deserializeCoordinates, serializeCoordinates, fetchLatlonFromPostcodesPostcodes,
-         fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive, pointsInPolygonFromList,
+         fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive,
          fetchRelevantData } from "$lib/mapUtils";
 
 const DB_NAME: string = "installation-manager-regions";
