@@ -4,27 +4,37 @@
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
-      import { page } from "$app/stores";
+
 
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
     import ComponentProps from './ComponentProps.svelte';
+	
 
-    const stage = queryParam("stage", ssp.number())
+    const stage = queryParam("stage", ssp.number());
     
     const allParams = queryParameters();
-    let use;
-    let cost;
-    let solar;
+    
 
-    function getEnergyCost() {
-        use = $allParams.energyUse;
-        cost = $allParams.energyCost;
-        solar = $allParams.solarEnergy;
-        totalCost = (use - solar) * cost;
-        return (use - solar) * cost;
+    $: total = getEnergyCost();
+
+    // proof of concept search params and store function
+    // as page renders, params may be called before all elements 
+    function getEnergyCost(params) {
+
+        // handle initial errors
+        if (params == null) {
+            return 0;
+        }
+        
+        let use = params.energyUse;
+        let solar = params.solarEnergy;
+        let cost = params.energyCost;
+            
+        return( (params.energyUse - params.solarEnergy) * params.energyCost);
+        
     }
-    $: totalCost = getEnergyCost()
+    $: getEnergyCost();
    
 </script>
 
@@ -36,16 +46,15 @@
     solution explorer here
 </div>
 <div>
+    <!-- Sample components demonstrating how they interact with the store and params-->
     Energy use<ComponentProps id="energyUse"/>kwh<br>
     Energy cost£<ComponentProps id="energyCost"/>/kwh<br>
     Solar Energy<ComponentProps id="solarEnergy"/>kwh<br>
+    <!-- sample to show the output of a function that uses  -->
+    <p>
+        {getEnergyCost($allParams)}
+    </p>
     
-    <p>
-        {getEnergyCost()}
-    </p>
-    <p>
-        {($allParams.energyUse - $allParams.solarEnergy) * $allParams.energyCost}
-    </p>
     <button on:click={() => console.log(getEnergyCost())}>test</button>
 </div>
     
