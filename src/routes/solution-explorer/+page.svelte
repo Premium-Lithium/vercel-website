@@ -15,6 +15,12 @@
     const solar = queryParam("solar", ssp.boolean())
     const ev = queryParam("ev", ssp.boolean())
     const epsups = queryParam("epsups", ssp.boolean())
+    const energyUsage = queryParam("energyusage", ssp.number())
+    const isEnergyUsageExact = queryParam("isenergyusageexact", ssp.boolean())
+    const moreWinterUsage = queryParam("morewinterusage", ssp.boolean())
+    const workFromHome = queryParam("workfromhome", ssp.boolean())
+    const oilAndGas = queryParam("oilandgas", ssp.boolean())
+    const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
 
 </script>
 
@@ -30,6 +36,12 @@
             bind:solar={$solar}
             bind:ev={$ev}
             bind:epsups={$epsups}
+            bind:energyUsage={$energyUsage}
+            bind:isEnergyUsageExact={$isEnergyUsageExact}
+            bind:moreWinterUsage={$moreWinterUsage}
+            bind:workFromHome={$workFromHome}
+            bind:oilAndGas={$oilAndGas}
+            bind:highConsumptionDevices={$highConsumptionDevices}
         />
     {:else if $stage === 1}
         <div class="map-view">
