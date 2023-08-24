@@ -13,15 +13,18 @@
     const stage = queryParam("stage", ssp.number())
     
     const allParams = queryParameters();
-    
+    let use;
+    let cost;
+    let solar;
 
     function getEnergyCost() {
-        const use = $allParams.energyUse;
-        const cost = $allParams.energyCost;
-        const solar = $allParams.solarEnergy;
-        console.log((use - solar) * cost)
+        use = $allParams.energyUse;
+        cost = $allParams.energyCost;
+        solar = $allParams.solarEnergy;
+        totalCost = (use - solar) * cost;
         return (use - solar) * cost;
     }
+    $: totalCost = getEnergyCost()
    
 </script>
 
@@ -38,9 +41,12 @@
     Solar Energy<ComponentProps id="solarEnergy"/>kwh<br>
     
     <p>
-        {getEnergyCost()}
+        {totalCost}
     </p>
-    <button on:click={() => console.log($allParams)}>test</button>
+    <p>
+        {($allParams.energyUse - $allParams.solarEnergy) * $allParams.energyCost}
+    </p>
+    <button on:click={() => console.log(getEnergyCost())}>test</button>
 </div>
     
     <Solution3DView />
