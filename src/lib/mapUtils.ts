@@ -1,4 +1,5 @@
 import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 
 export const serializeCoordinates = (coords: [[Number, Number]]) => {
     return coords.reduce(
@@ -85,4 +86,13 @@ export async function fetchRelevantData(data, type) {
             type,
         };
     }) 
+}
+
+export function pointInPolygonFromList (point, polygons) {
+    polygons.forEach((p,i,a) => {
+        if(booleanPointInPolygon(point, p)) {
+            return i;
+        }
+    })
+    return null;
 }
