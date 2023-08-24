@@ -115,7 +115,7 @@ This is the lead view
   <div class="title">New Leads:</div>
     {#each pendingDeals as deal (deal.id)}
     {#if currentFilters.includes(deal.status)}
-    <div class="deal-container" transition:slide>
+    <div class="deal-container" transition:slide|global>
         <div class="deal-header">
             <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()} ...</a>
           <div>
@@ -134,7 +134,7 @@ This is the lead view
   <div class="title">Accepted Leads:</div>
     {#each acceptedDeals as deal (deal.id)}
     {#if currentFilters.includes(deal.status)}
-    <div class="deal-container" transition:slide>
+    <div class="deal-container" transition:slide|global>
       <Accordian>
       <div class="deal-header" slot="head">
         <a href="/installer_portal/leads/{deal.id}" class="deal-link">{deal.Job.customerName ?? "Customer"} at {deal.Job.postcode.toString().toUpperCase()}</a>

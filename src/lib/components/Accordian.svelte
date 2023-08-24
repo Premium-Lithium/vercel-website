@@ -24,7 +24,7 @@
 	</div>
 	
 	{#if open}
-	<div class="details" transition:slide>
+	<div class="details" transition:slide|global>
 		<slot name="details">
 		</slot>
 	</div>
