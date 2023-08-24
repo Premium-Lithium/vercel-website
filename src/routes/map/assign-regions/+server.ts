@@ -17,9 +17,9 @@ export async function POST ({request}){
     await loadPolygonsFromDatabase();
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
-    let dealGeographicalPoint = point([latlon.result.latitude, latlon.result.longitude]);
+    let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
     let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons)
-    if(!polygonPointIsIn) {
+    if(polygonPointIsIn) {
         console.log(installationManagerDetails[polygonPointIsIn].name);
     }
     return json({message: "okay"}, {status: 200});
