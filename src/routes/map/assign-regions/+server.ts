@@ -17,7 +17,7 @@ export async function POST ({request}){
     await loadPolygonsFromDatabase();
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
-    let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
+    let dealGeographicalPoint = point([latlon.result.latitude, latlon.result.longitude]);
     pointsInPolygonFromList([dealGeographicalPoint], polygons).forEach((p, i, a) => {
         console.log(p.features);
         if(p.features.length != 0) {
