@@ -15,13 +15,18 @@
 <!-- todo: arrange in new layout and make responsive -->
 <body>
     <ProgressHeader
-        titles={["first", "second", "third", "fourth", "fifth", "sixth", "seventh"]}
+        titles={["map", "3d", "result"]}
         selectedIndex={$stage}
     />
-    <Solution3DView />
-    <div class="map-view">
-      <Map search={true}/>
-    </div>
+    {#if $stage === 0}
+        <div class="map-view">
+          <Map search={true}/>
+        </div>
+    {:else if $stage === 1}
+        <Solution3DView />
+    {:else}
+        REVIEW
+    {/if}
     <h2> currentPage: {$stage}</h2>
     <NavButtons bind:currentPage={$stage} lastPage={6}/>
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
@@ -29,9 +34,6 @@
 
 <style>
   .map-view {
-    position: absolute;
-    bottom: 0;
-    right: 0;
     width: 100vw;
     height: 25vh;
   }
