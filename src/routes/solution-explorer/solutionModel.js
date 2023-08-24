@@ -11,7 +11,7 @@ const roofEdgeHeight = 0.15; // height of vertical roof edge
 const apexHeight = 0.65; // height of roof apex (above roof edge)
 const battHeight = 0.7; // height of battery
 const floorClearance = 0.05; // height of objects off floor
-const battInverterSpacing = 0.3; // horizontal space between battery and inverter
+const battInverterSpacing = 0.4; // horizontal space between battery and inverter
 const battWidth = 0.9;
 const battDepth = 0.2;
 const wallClearance = 0.00; // distance of wall-mounted objects off the wall
@@ -29,6 +29,7 @@ export default class SolutionModel {
         this.battery = this.#buildBattery();
         this.inverter = this.#buildInverter();
         this.solar = this.#buildRoofSolar();
+        this.outsideWall = this.#buildOutsideWall();
     }
 
     // set propertyType(type) {
@@ -139,14 +140,14 @@ export default class SolutionModel {
 
     // todo: store and reuse of `x` somewhere (class member variable?)
     #buildBattery() {
-        const battery = new BoxGeometry(battDepth, battHeight, battWidth);
+        const battery = new BoxGeometry(battWidth, battHeight, battDepth);
 
         const x = (size - (wt + wallClearance) * 2 - (battWidth + battInverterSpacing + inverterWidth)) / 2;
 
         battery.translate(
-            -size / 2 + wt + battDepth / 2 + wallClearance,
+            -size / 2 + battWidth / 2 + wt + wallClearance + x,
             battHeight / 2 + wt + floorClearance,
-            size / 2 - battWidth / 2 - wt - wallClearance - x
+            -size / 2 + wt + battDepth / 2 + wallClearance
         );
 
         return battery;
@@ -154,14 +155,14 @@ export default class SolutionModel {
 
 
     #buildInverter() {
-        const inverter = new BoxGeometry(inverterDepth, inverterHeight, inverterWidth);
+        const inverter = new BoxGeometry(inverterWidth, inverterHeight, inverterDepth);
 
         const x = (size - (wt + wallClearance) * 2 - (battWidth + battInverterSpacing + inverterWidth)) / 2;
 
         inverter.translate(
-            -size / 2 + wt + inverterDepth / 2 + wallClearance,
+            size / 2 - inverterWidth / 2 - wt - wallClearance - x,
             wt + floorClearance + (inverterHeight / 2) + (battHeight - inverterHeight),
-            -size / 2 + inverterWidth / 2 + wt + wallClearance + x
+            -size / 2 + wt + inverterDepth / 2 + wallClearance
         );
 
         return inverter;
@@ -186,6 +187,51 @@ export default class SolutionModel {
         roofSolar.translate(panelCentre.x, panelCentre.y, 0);
 
         return roofSolar;
+    }
+
+
+    #buildOutsideWall() {
+        const roofUpper = new BufferGeometry();
+
+        const hs = size / 2;
+
+        const A = [ hs, wt, hs];
+        const B = [ -hs + wt, height, hs];
+        const E = [ -hs + wt, wt, hs];
+
+        const C = [ hs, wt, hs - wt];
+        const D = [ -hs + wt, height, hs - wt];
+        const F = [ -hs + wt, wt, hs - wt];
+
+        const vertices = new Float32Array([
+            ...A, // 0
+            ...B, // 1
+            ...E, // 2
+
+            ...A, // 3
+            ...C, // 4
+            ...D, // 5
+            ...B, // 6
+
+            ...C, // 7
+            ...F, // 8
+            ...D // 9
+        ]);
+
+        const indices = new Uint16Array([
+            0, 1, 2, // A, B, E
+
+            3, 4, 5, // A, C, D
+            5, 6, 3, // D, B, A
+
+            7, 8, 9 // F, C, D
+        ]);
+
+        roofUpper.setIndex(new BufferAttribute(indices, 1));
+        roofUpper.setAttribute('position', new BufferAttribute(vertices, 3));
+        roofUpper.computeVertexNormals();
+
+        return roofUpper;
     }
 }
 

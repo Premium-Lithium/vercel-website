@@ -17,7 +17,7 @@
     })
 </script>
 
-<T.FogExp2 attach="fog" args={['#28AAE2', 0.015]} />
+<T.FogExp2 attach="fog" args={['white', 0.015]} />
 
 <T.OrthographicCamera makeDefault zoom={200.0} position={[0, 2, 10]} on:create={({ ref }) => {
     ref.lookAt(0, 2, 0)
@@ -25,13 +25,13 @@
 
 
 <!-- Above angled -->
-<!-- <T.PerspectiveCamera makeDefault rotation={[0, 0, 0]} position={[4, 2.8, 4]} on:create={({ ref }) => {
+<T.PerspectiveCamera makeDefault rotation={[0, 0, 0]} position={[4, 2.8, 4]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
-}}></T.PerspectiveCamera> -->
+}}></T.PerspectiveCamera>
 
-<T.OrthographicCamera makeDefault zoom={150.0} position={[5, 3, 5]} on:create={({ ref }) => {
+<!-- <T.OrthographicCamera makeDefault zoom={150.0} position={[5, 3, 5]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
-}}></T.OrthographicCamera>
+}}></T.OrthographicCamera> -->
 
 <!-- Directly above -->
 <!-- <T.OrthographicCamera makeDefault zoom={300.0} position={[0, 10, 0]} on:create={({ ref }) => {
@@ -47,30 +47,35 @@
 
 
 <!-- Stage -->
-<T.Mesh geometry={model.stage}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.stage}   castShadow receiveShadow>
     <T.MeshStandardMaterial visible={true} color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Roof -->
-<T.Mesh geometry={model.roof}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow bind:ref={batteryModel}>
+<T.Mesh geometry={model.roof}   castShadow receiveShadow bind:ref={batteryModel}>
     <T.MeshStandardMaterial color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Battery -->
-<T.Mesh geometry={model.battery}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.battery}   castShadow receiveShadow>
     <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
 </T.Mesh>
 
 <CustomRenderer selectedMesh={batteryModel} />
 
 <!-- Inverter -->
-<T.Mesh geometry={model.inverter}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.inverter}   castShadow receiveShadow>
     <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
 </T.Mesh>
 
 <!-- Solar Panel on roof -->
-<T.Mesh geometry={model.solar}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.solar}   castShadow receiveShadow>
     <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
+</T.Mesh>
+
+<!-- outside wall -->
+<T.Mesh geometry={model.outsideWall}   castShadow receiveShadow>
+    <T.MeshStandardMaterial color="red" wireframe={false}/>
 </T.Mesh>
 
 <!-- Floor -->
