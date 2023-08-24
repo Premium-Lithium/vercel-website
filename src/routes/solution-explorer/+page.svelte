@@ -1,7 +1,12 @@
 <script>
     import { onMount } from 'svelte';
+    import { page } from "$app/stores";
 
     import ProgressHeader from "./ProgressHeader.svelte"
+    import ComponentProps from './ComponentProps.svelte';
+
+    let urlParams;
+    $: urlParams = $page.url.searchParams.toString();
 
     onMount(async () => {
     });
@@ -14,6 +19,12 @@
     />
     solution explorer here
 </div>
-
+<div>
+    <ComponentProps id="testid"/>
+    <p>
+        {urlParams}
+    </p>
+</div>
+    
 <style>
 </style>
