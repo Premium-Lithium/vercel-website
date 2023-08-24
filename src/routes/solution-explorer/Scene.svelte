@@ -9,6 +9,7 @@
 
     // let rotation = 32 * Math.PI / 180;
     let batteryModel;
+    const plBlue = "#28AAE2";
 
     let rotation = 0;
     const rotSpeed = 0.2;
@@ -58,24 +59,29 @@
 
 <!-- Battery -->
 <T.Mesh geometry={model.battery}   castShadow receiveShadow>
-    <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false}/>
 </T.Mesh>
 
 <CustomRenderer selectedMesh={batteryModel} />
 
 <!-- Inverter -->
 <T.Mesh geometry={model.inverter}   castShadow receiveShadow>
-    <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false}/>
 </T.Mesh>
 
 <!-- Solar Panel on roof -->
 <T.Mesh geometry={model.solar}   castShadow receiveShadow>
-    <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false}/>
 </T.Mesh>
 
 <!-- outside wall -->
 <T.Mesh geometry={model.outsideWall}   castShadow receiveShadow>
-    <T.MeshStandardMaterial color="red" wireframe={false}/>
+    <T.MeshStandardMaterial color="white" wireframe={false}/>
+</T.Mesh>
+
+<!-- ev charger -->
+<T.Mesh geometry={model.evCharger}   castShadow receiveShadow>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false}/>
 </T.Mesh>
 
 <!-- Floor -->

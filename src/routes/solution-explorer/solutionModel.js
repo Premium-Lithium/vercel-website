@@ -4,7 +4,7 @@ import { normalVector } from './geometry-utils';
 
 
 const wt = 0.17; // wall thickness
-const size = 2.8; // size of one wall (outer dimensions)
+const size = 2.6; // size of one wall (outer dimensions)
 const height = 2.2; // height of one wall (outer dimensions)
 const rl = size * 1.1; // roof length
 const roofEdgeHeight = 0.15; // height of vertical roof edge
@@ -30,6 +30,7 @@ export default class SolutionModel {
         this.inverter = this.#buildInverter();
         this.solar = this.#buildRoofSolar();
         this.outsideWall = this.#buildOutsideWall();
+        this.evCharger = this.#buildEvCharger();
     }
 
     // set propertyType(type) {
@@ -232,6 +233,24 @@ export default class SolutionModel {
         roofUpper.computeVertexNormals();
 
         return roofUpper;
+    }
+
+    #buildEvCharger() {
+        const height = 0.4;
+        const width = 0.2;
+        const depth = 0.1;
+        const evCharger = new BoxGeometry(width, height, depth);
+
+        // const x = (size - (wt + wallClearance) * 2 - (battWidth + battInverterSpacing + inverterWidth)) / 2;
+
+        const hs = size / 2;
+        evCharger.translate(
+            wallClearance + wt + width / 2,
+            wt + floorClearance + (height / 2),
+            hs + wallClearance + depth / 2
+        );
+
+        return evCharger;
     }
 }
 
