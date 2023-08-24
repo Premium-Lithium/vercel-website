@@ -1,35 +1,36 @@
 <script>
-     export let totalSavings = 0;
-     export let paybackTime = 0;
-     export let energySavings = 0;
+    export let totalSavings = 0;
+    export let paybackTime = 0;
+    export let energySavings = 0;
+
+    const currency = new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
     
-    async function order(){
-        console.log("ordering ")
-    }
-
-    async function contactUs(){
-        console.log("contacting")
-    }
-
 </script>
 
-<div class=body>
-    <h1> Your Savings: </h1>
-    <h2> Total: £ {totalSavings} </h2>
-    <h2> Payback Time: {paybackTime} years</h2>
-    <h2> Energy Savings: {energySavings} kWh /year</h2>
-    <h3> These are estimates. We'll arrange a site survey for you for the most accurate information.</h3>
-    <div class=buttons>
-    <button type="submit" on:click={contactUs}>Contact us</button>
-    <button type="submit" on:click={order}>Order Now</button>
-    </div>
-</div>
+<table>
+    <tr>
+        <td>Total</td>
+        <td><b>{currency.format(totalSavings)}</b></td>
+    <tr>
+    <tr>
+        <td>Payback</td>
+        <td><b>{currency.format(paybackTime)}</b></td>
+    <tr>
+    <tr>
+        <td>Energy savings</td>
+        <td><b>{currency.format(energySavings)}</b></td>
+    <tr>
+</table>
+<div class="helptext"> These are estimates. We'll arrange a site survey for you for the most accurate information.</div>
 
 <style>
     .body {
         margin: 0;
-        width: 100vw;
-        height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -46,16 +47,32 @@
     }
 
     button{
-        background-color: #28AAE2;
+        background-color: var(--plblue);
         color: white;
         border:solid #000 1px; 
         font-size: 20px;
         height:auto; 
-        width:100px; 
-        padding:10px 5px; 
+        padding: 1rem; 
         margin:30px; 
         border-radius:5px;
         
+    }
+
+    table {
+        margin-left: 2rem;
+        margin-right: 2rem;
+        margin-top: 1rem;
+        font-size: 1.5rem;
+    }
+
+    tr, td {
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+
+    .helptext {
+        margin: 1rem;
+        color: var(--plblue);
     }
 
 </style>
