@@ -34,6 +34,8 @@
         return( (params.energyUse - params.solarEnergy) * params.energyCost);
         
     }
+
+    
     $: getEnergyCost();
    
 </script>
@@ -61,7 +63,12 @@
     <ComponentProps type="toggle" id="btn3" text="3"/>
     <ComponentProps type="toggle" id="btn4" text="4"/>
     <p>
-        You have clicked buttons
+        You have selected:
+        {$allParams.btn1=="true" ? "1" : "not1"} 
+        {$allParams.btn2=="true" ? "2" : "not 1"} 
+        {$allParams.btn3=="true" ? "3" : "not 1"} 
+        {$allParams.btn4=="true" ? "4" : "not 1"} 
+        
     </p>
 </div>
     
