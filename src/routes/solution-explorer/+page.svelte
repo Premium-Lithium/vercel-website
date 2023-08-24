@@ -17,7 +17,7 @@
         selectedIndex={6}
     />
     <div class="map-view">
-      <Map search={true}/>
+      <Map search={true} style=5/>
     </div>
     <h2> currentPage: {currentPage}</h2>
     <NavButtons bind:currentPage lastPage={5}/>

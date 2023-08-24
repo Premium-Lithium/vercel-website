@@ -187,4 +187,4 @@ onMount(() => {
 
 </script>
 
-<Map bind:map search={true}/>
+<Map bind:map search={true} style={0}/>
