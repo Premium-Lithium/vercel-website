@@ -1,28 +1,29 @@
 <script>
-    import { onMount } from 'svelte';
+    import { ssp, queryParam } from "sveltekit-search-params"
+
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
+  
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
 
-    onMount(async () => {
-    });
-    let currentPage = 1
+    const stage = queryParam("stage", ssp.number())
+
 </script>
 
 <!-- todo: arrange in new layout and make responsive -->
 <body>
     <ProgressHeader
         titles={["first", "second", "third", "fourth", "fifth", "sixth", "seventh"]}
-        selectedIndex={6}
+        selectedIndex={$stage}
     />
     <Solution3DView />
     <div class="map-view">
       <Map search={true}/>
     </div>
-    <h2> currentPage: {currentPage}</h2>
-    <NavButtons bind:currentPage lastPage={5}/>
+    <h2> currentPage: {$stage}</h2>
+    <NavButtons bind:currentPage={$stage} lastPage={6}/>
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
 </body>
 
