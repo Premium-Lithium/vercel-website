@@ -20,7 +20,7 @@
     />
     {#if $stage === 0}
         <div class="map-view">
-          <Map search={true}/>
+          <Map search={true} style=5/>
         </div>
     {:else if $stage === 1}
         <Solution3DView />
