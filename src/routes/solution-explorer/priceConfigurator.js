@@ -4,14 +4,15 @@ let minPannelOutput = 0;
 let maxPannelOutput = 0;
 let minPannelCost = 0;
 let maxPannelCost = 0;
-let batterySize = 0;
-let batteryCost = 0;
-let solution = {houseType: "", pannels: true, battery: true, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: ""};
-let energyOutput = 5000;
+const averageElectricityCost =  0.34; // taken from octopus energy 
+let solution = {houseType: "detatched", solar: true, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: ""};
+let energyUsage = 5000;
 let result = {minSaving: 0, maxSaving: 10000, minPayback: 0, maxPayback:0, minEnergy: 0, maxEnergy: 0}
 
 
 function getAverage(){
+    const url = "https://data.gov.uk/api/action/" // url for dataset 
+    // POST request 
     // todo find national dataset api thing
     return 2000
 }
@@ -19,7 +20,7 @@ function getAverage(){
 function getAverageFromHousehold(household){
     return 3000
 }
-
+  
 function getAverageFromHouseType(houseType){
     return 3000
 }
@@ -46,7 +47,8 @@ function calculateUpfrontCost(solution){
     
     console.log("battery price: ", batteryCost);
     console.log("min solar: ", minPannelCost, " max solar: ", maxPannelCost);
-    energyOutput =  calculateEnergyUse();
+    energyUsage =  calculateEnergyUse();
+    const energyCost = energyUsage*averageElectricityCost;
     // minEnergySavings = energyOutput- (batterySize + minPannelOutput);
     // maxEnergySavings = energyOutput - (batterySize + maxPannelOutput)
     const minCost = batteryCost + minPannelCost; 
