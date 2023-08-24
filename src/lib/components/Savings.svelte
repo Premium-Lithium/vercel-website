@@ -14,14 +14,25 @@
 </script>
 
 <div class=body>
-    <h1> Your Savings: </h1>
-    <h2> Total: £ {totalSavings} </h2>
-    <h2> Payback Time: {paybackTime} years</h2>
-    <h2> Energy Savings: {energySavings} kWh /year</h2>
-    <h3> These are estimates. We'll arrange a site survey for you for the most accurate information.</h3>
+    <table>
+        <tr>
+            <td>Total</td>
+            <td>{totalSavings}</td>
+        <tr>
+        <tr>
+            <td>Payback</td>
+            <td>{paybackTime}</td>
+        <tr>
+        <tr>
+            <td>Energy savings</td>
+            <td>{energySavings}</td>
+        <tr>
+        <h2> Energy Savings: {energySavings} kWh /year</h2>
+        <h3> These are estimates. We'll arrange a site survey for you for the most accurate information.</h3>
+    </table>
     <div class=buttons>
-    <button type="submit" on:click={contactUs}>Contact us</button>
-    <button type="submit" on:click={order}>Order Now</button>
+        <button type="submit" on:click={contactUs}>Contact us</button>
+        <button type="submit" on:click={order}>Order Now</button>
     </div>
 </div>
 
