@@ -23,13 +23,13 @@
 
 
 <!-- Above angled -->
-<T.PerspectiveCamera makeDefault rotation={[0, 0, 0]} position={[4, 2.8, 4]} on:create={({ ref }) => {
+<!-- <T.PerspectiveCamera makeDefault rotation={[0, 0, 0]} position={[4, 2.8, 4]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
-}}></T.PerspectiveCamera>
+}}></T.PerspectiveCamera> -->
 
-<!-- <T.OrthographicCamera makeDefault zoom={150.0} position={[5, 3, 5]} on:create={({ ref }) => {
+<T.OrthographicCamera makeDefault zoom={150.0} position={[5, 3, 5]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
-}}></T.OrthographicCamera> -->
+}}></T.OrthographicCamera>
 
 <!-- Directly above -->
 <!-- <T.OrthographicCamera makeDefault zoom={300.0} position={[0, 10, 0]} on:create={({ ref }) => {
