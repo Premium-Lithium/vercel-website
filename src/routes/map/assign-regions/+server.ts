@@ -1,10 +1,8 @@
 import { json } from "@sveltejs/kit";
 import { supabase } from '$lib/supabase';
-import { featureCollection, point, polygon, 
-         type Polygon, type Feature, type Properties } from '@turf/helpers';
-import { deserializeCoordinates, serializeCoordinates, fetchLatlonFromPostcodesPostcodes,
-         fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive,
-         fetchRelevantData, pointInPolygonFromList} from "$lib/mapUtils";
+import { point, polygon} from '@turf/helpers';
+import { deserializeCoordinates, fetchLatlonFromPostcodesPostcodes,
+         pointInPolygonFromList} from "$lib/mapUtils";
 
 const DB_NAME: string = "installation-manager-regions";
 
@@ -18,6 +16,7 @@ export async function POST ({request}){
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
     let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
+    console.log(polygons.map((p) => p.features.coordinates[0]));
     let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons)
     if(polygonPointIsIn) {
         console.log(installationManagerDetails[polygonPointIsIn].name);
