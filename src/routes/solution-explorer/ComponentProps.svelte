@@ -1,21 +1,19 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/stores";
+    import {queryParam } from "sveltekit-search-params"
 
 	
-
+    // use component ID as value in store
     export let id;
-    let inputContent;
-
+    const componentParam = queryParam(id);
+    
+    // navigate to new url
     function inputChanged() {
-        console.log(inputContent);
-        console.log(id);
-        $page.url.searchParams.set(id, inputContent);
-
         goto('?' + $page.url.searchParams.toString(), {noScroll: true, keepFocus:true});
     }
 
 </script>
 
 
-<input bind:value={inputContent} on:input={() => inputChanged()}>
+<input bind:value={$componentParam} on:input={() => inputChanged()}>
