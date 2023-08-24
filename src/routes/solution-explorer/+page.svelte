@@ -32,7 +32,9 @@
           <input type="number" id="peakSolarPower" name="peakSolarPower" bind:value={peakSolarPower}>
           <label for="solarLoss">Solar Loss</label>
           <input type="number" id="solarLoss" name="solarLoss" bind:value={solarLoss}>
-          <input type="submit" value="Submit" on:click={async () => {queryPV(latitude, longitude, peakSolarPower, solarLoss)}}>
+          <input type="submit" value="Submit" on:click={async () => {
+            await queryPV(latitude, longitude, peakSolarPower, solarLoss)
+          }}>
         </div>
     {:else if $stage === 1}
         <Solution3DView />
