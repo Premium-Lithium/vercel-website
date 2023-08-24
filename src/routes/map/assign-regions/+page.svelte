@@ -1,12 +1,6 @@
-<svelte:head>
-    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
-</svelte:head>
-
-
 <script>
 import { onMount } from 'svelte';
-
+import Map from '$lib/components/Map.svelte';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import pointsWithinPolygon from '@turf/points-within-polygon';
@@ -23,6 +17,7 @@ let installationManagerDetails = [];
 let jobsToBeAssigned = [];
 let draw;
 let idHoveringOver = "";
+let map;
 
 var swatchColours = [
       'green',
@@ -59,17 +54,6 @@ const loadPolygonsFromDatabase = async (map) => {
 
 
 onMount(async () => {
-
-    mapboxgl.accessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
-
-    const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-3.435973, 55.378051], // longitude and latitude of the center of the UK
-        zoom: 5 // zoom level
-    });
-
-
     // Colors for the markers
     const colors = ["white", "gray", "green"];
     const colouringFunction = (data) => {
@@ -463,7 +447,7 @@ var drawStyles = [
 ];
 
 </script>
-<div id="map" style="width: 100%; height: 100vh;"></div>
+<Map bind:map search:{false}/>
 <pre id="info">
   {idHoveringOver}
 </pre>

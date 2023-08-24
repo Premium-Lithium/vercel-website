@@ -8,12 +8,12 @@ dependencies:
   '@auth0/auth0-spa-js':
     specifier: ^2.1.0
     version: 2.1.0
-  '@microsoft/microsoft-graph-client':
-    specifier: ^3.0.5
-    version: 3.0.5
   '@mapbox/mapbox-gl-draw':
     specifier: ^1.4.2
     version: 1.4.2
+  '@microsoft/microsoft-graph-client':
+    specifier: ^3.0.5
+    version: 3.0.5
   '@pipedrive/app-extensions-sdk':
     specifier: ^0.9.0
     version: 0.9.0
@@ -29,15 +29,18 @@ dependencies:
   '@threlte/core':
     specifier: ^6.0.6
     version: 6.0.6(svelte@4.2.0)(three@0.155.0)
-  '@types/three':
-    specifier: ^0.155.1
-    version: 0.155.1
+  '@turf/boolean-point-in-polygon':
+    specifier: ^6.5.0
+    version: 6.5.0
   '@turf/helpers':
     specifier: ^6.5.0
     version: 6.5.0
   '@turf/points-within-polygon':
     specifier: ^6.5.0
     version: 6.5.0
+  '@types/three':
+    specifier: ^0.155.1
+    version: 0.155.1
   '@vercel/postgres':
     specifier: ^0.4.0
     version: 0.4.0
@@ -62,9 +65,6 @@ dependencies:
   nunjucks:
     specifier: ^3.2.4
     version: 3.2.4
-  openai:
-    specifier: 4.0.0-beta.12
-    version: 4.0.0-beta.12
   openai:
     specifier: 4.0.0-beta.12
     version: 4.0.0-beta.12
@@ -1999,6 +1999,10 @@ packages:
       - encoding
       - supports-color
 
+  /@mapbox/point-geometry@0.1.0:
+    resolution: {integrity: sha512-6j56HdLTwWGO0fJPlrZtdU/B13q8Uwmo18Ck2GnGgN9PCFyKTZ3UbXeEdRFh18i9XQ92eH2VdtpJHpBD3aripQ==}
+    dev: false
+
   /@microsoft/microsoft-graph-client@3.0.5:
     resolution: {integrity: sha512-xQADFNLUhE78RzYadFZtOmy/5wBZenSZhVK193m40MTDC5hl1aYMQO1QOJApnKga8WcvMCDCU10taRhuXTOz5w==}
     engines: {node: '>=12.0.0'}
@@ -2019,10 +2023,6 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.6
       tslib: 2.6.0
-    dev: false
-
-  /@mapbox/point-geometry@0.1.0:
-    resolution: {integrity: sha512-6j56HdLTwWGO0fJPlrZtdU/B13q8Uwmo18Ck2GnGgN9PCFyKTZ3UbXeEdRFh18i9XQ92eH2VdtpJHpBD3aripQ==}
     dev: false
 
   /@neoconfetti/svelte@1.0.0:
@@ -2337,10 +2337,6 @@ packages:
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  /@tweenjs/tween.js@18.6.4:
-    resolution: {integrity: sha512-lB9lMjuqjtuJrx7/kOkqQBtllspPIN+96OvTCeJ2j5FEzinoAXTdAMFnDAQT1KVPRlnYfBrqxtqP66vDM40xxQ==}
-    dev: false
-
   /@turf/boolean-point-in-polygon@6.5.0:
     resolution: {integrity: sha512-DtSuVFB26SI+hj0SjrvXowGTUCHlgevPAIsukssW6BG5MlNSBQAo70wpICBNJL6RjukXg8d2eXaAWuD/CqL00A==}
     dependencies:
@@ -2370,6 +2366,10 @@ packages:
       '@turf/boolean-point-in-polygon': 6.5.0
       '@turf/helpers': 6.5.0
       '@turf/meta': 6.5.0
+    dev: false
+
+  /@tweenjs/tween.js@18.6.4:
+    resolution: {integrity: sha512-lB9lMjuqjtuJrx7/kOkqQBtllspPIN+96OvTCeJ2j5FEzinoAXTdAMFnDAQT1KVPRlnYfBrqxtqP66vDM40xxQ==}
     dev: false
 
   /@types/acorn@4.0.6:
@@ -4886,13 +4886,13 @@ packages:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
 
+  /geojson-flatten@1.1.1:
+    resolution: {integrity: sha512-k/6BCd0qAt7vdqdM1LkLfAy72EsLDy0laNwX0x2h49vfYCiQkRc4PSra8DNEdJ10EKRpwEvDXMb0dBknTJuWpQ==}
+    dev: false
+
   /get-caller-file@2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
-    dev: false
-
-  /geojson-flatten@1.1.1:
-    resolution: {integrity: sha512-k/6BCd0qAt7vdqdM1LkLfAy72EsLDy0laNwX0x2h49vfYCiQkRc4PSra8DNEdJ10EKRpwEvDXMb0dBknTJuWpQ==}
     dev: false
 
   /get-func-name@2.0.0:
@@ -5090,6 +5090,10 @@ packages:
 
   /hast-util-whitespace@2.0.1:
     resolution: {integrity: sha512-nAxA0v8+vXSBDt3AnRUNjyRIQ0rD+ntpbAp4LnPkumc5M9yUbSMa4XDU9Q6etY4f1Wp4bNgvc1yjiZtsTTrSng==}
+    dev: false
+
+  /hat@0.0.3:
+    resolution: {integrity: sha512-zpImx2GoKXy42fVDSEad2BPKuSQdLcqsCYa48K3zHSzM/ugWuYjLDr8IXxpVuL7uCLHw56eaiLxCRthhOzf5ug==}
     dev: false
 
   /he@1.2.0:

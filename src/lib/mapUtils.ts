@@ -1,5 +1,4 @@
 import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
-import pointsWithinPolygon from '@turf/points-within-polygon';
 
 export const serializeCoordinates = (coords: [[Number, Number]]) => {
     return coords.reduce(
@@ -86,12 +85,4 @@ export async function fetchRelevantData(data, type) {
             type,
         };
     }) 
-}
-
-export function pointsInPolygonFromList(points, polygonList) {
-    let pointsInEachPolygon = [];
-    polygonList.forEach((polygon) => {
-        pointsInEachPolygon.push(pointsWithinPolygon(points, polygon));
-    });
-    return pointsInEachPolygon;
 }
