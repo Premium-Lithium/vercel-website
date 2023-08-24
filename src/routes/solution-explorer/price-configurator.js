@@ -11,9 +11,21 @@ let energyOutput = 5000;
 let result = {minSaving: 0, maxSaving: 10000, minPayback: 0, maxPayback:0, minEnergy: 0, maxEnergy: 0}
 
 
-function getNationalAverages(){
-    // read data from database 
+function getAverage(){
+    // todo find national dataset api thing
+    return 2000
+}
 
+function getAverageFromHousehold(household){
+    return 3000
+}
+
+function getAverageFromHouseType(houseType){
+    return 3000
+}
+
+function getAverageFromPostcode(postcode){
+    return 25000
 }
 
 
@@ -25,15 +37,16 @@ function calculateUpfrontCost(solution){
         const pannelCosts = solarQuote(solution, installationDate);
         minPannelCost = pannelCosts[0].price;
         maxPannelCost = pannelCosts[1].price;
-
     }
+
     if (solution.battery == true){
         solution.batterySize_kWh = 5;
         batteryCost = quoteToInstall(solution, installationDate).price.total;
     }
+    
     console.log("battery price: ", batteryCost);
     console.log("min solar: ", minPannelCost, " max solar: ", maxPannelCost);
-    // energyOutput =  calculateEnergyUse();
+    energyOutput =  calculateEnergyUse();
     // minEnergySavings = energyOutput- (batterySize + minPannelOutput);
     // maxEnergySavings = energyOutput - (batterySize + maxPannelOutput)
     const minCost = batteryCost + minPannelCost; 
@@ -64,15 +77,20 @@ function calculateEnergyUse(){
         // get average consumption from some national database 
         if (solution.postcode != ""){
             // get mean energy based on postcode
+            const postcodeAverage = getAverageFromPostcode(solution.postcode);
         }
         if (solution.peopleInHouse != 0){
             // get mean based on people in house
+            const householdAverage = getAverageFromHousehold(solution.peopleInHouse);
         }
         if (solution.houseType != ""){
             // get mean based on house type
+            const houseTypeAverage = getAverageFromHouseType(solution.houseType);
         }
         //get basic average 
-        //do average of all averages we got 
+        const basicAverage = getAverage();
+        //do average of all averages we got
+        // solution.usage = add averages / no of averages 
         
     }else {
         return solution.usage;
