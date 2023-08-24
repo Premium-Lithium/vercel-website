@@ -5,7 +5,7 @@
 
 function quoteToInstall(solution, installMonth) {
     // todo: validate customer solution object passed in (ajv here or before call?)
-
+    console.log(solution);
     // todo: define this as typescript interface?
     let quote = {
         price: {
@@ -71,10 +71,61 @@ function quoteToInstall(solution, installMonth) {
     quote.price.total_after_discount -= quote.discount.value;
 
     // todo: break down the price into its components (so these can be tabulated in an email)
-
+    console.log(quote)
     return quote;
 }
 
+
+function solarQuote(solution, installationDate){
+    let minSolar = {
+        quantity: 0,
+        price: 0, 
+    }
+
+    let maxSolar = {
+        quantity: 0,
+        price: 0,
+    }
+
+    console.log("calculating solar price");
+    // Typical Size Solar Panel Arrays Based On R esidential Property Type	
+    // From spreadsheet   
+    switch(solution.houseType) {
+        case "mid_terrace":
+            minSolar.quantity = 8;
+            maxSolar.quantity = 12;
+            break;
+        case "end_terrace":
+            minSolar.quantity = 8;
+            maxSolar.quantity = 14;
+            break;
+        case "semi_detatched":
+            minSolar.quantity = 12;
+            maxSolar.quantity = 18;
+            break;
+        case "detatched":
+            minSolar.quantity = 14;
+            maxSolar.quantity = 20;
+            break;
+    }
+    const minSolarPrice = getSolarPrice(minSolar);
+    const maxSolarPrice = getSolarPrice(maxSolar);
+    minSolar.price = minSolarPrice;
+    maxSolar.price = maxSolarPrice;
+    return [minSolar, maxSolar]
+}
+
+
+function getSolarPrice(solar, installMonth){
+    let price  = 0;
+    price += 5995; // price of 6 pannels
+    const additionalPannels = solar.quantity - 6;
+    price += 500 * additionalPannels; // each one after is £500
+    if (installMonth){
+        price = price * calculateDiscountFrom(installMonth);
+    }
+    return price;
+}
 
 function getEVChargerPrice(evCharger) {
     // todo: get ev charger price from pipedrive products api
@@ -115,4 +166,4 @@ function monthsFromNowUntil(installMonth) {
 }
 
 
-export { earliestInstallMonth, quoteToInstall };
+export { earliestInstallMonth, quoteToInstall, solarQuote };

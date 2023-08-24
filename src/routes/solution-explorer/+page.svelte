@@ -5,10 +5,15 @@
     import NavButtons from "$lib/components/NavButtons.svelte";
 
     import ProgressHeader from "./ProgressHeader.svelte"
+	  import { calculateUpfrontCost } from './price-configurator';
 
-    onMount(async () => {
-    });
     let currentPage = 1
+    let price =  0; 
+    let solution = {houseType: "detatched", solar: true, battery: true, evCharger: {included: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "YO10 3LH"};
+    onMount(async () => {
+        price = calculateUpfrontCost(solution);
+    });
+
 </script>
 
 <body>
@@ -16,6 +21,7 @@
         titles={["first", "second", "third", "fourth", "fifth", "sixth", "seventh"]}
         selectedIndex={6}
     />
+    <h1> price: £{price[0]} to £{price[1]}</h1>
     <div class="map-view">
       <Map search={true}/>
     </div>
