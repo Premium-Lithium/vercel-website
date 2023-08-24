@@ -1,9 +1,11 @@
 <script>
     import { T, useFrame } from '@threlte/core'
-    import { battery, inverter, stage, roof, roofSolar } from './solutionModel.js';
+    import { SolutionModel } from './solutionModel.js';
     import CustomRenderer from './CustomRenderer.svelte';
     import { OrbitControls } from '@threlte/extras'
 
+
+    let model = new SolutionModel("test");
 
     // let rotation = 32 * Math.PI / 180;
     let batteryModel;
@@ -45,29 +47,29 @@
 
 
 <!-- Stage -->
-<T.Mesh geometry={stage}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.stage}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
     <T.MeshStandardMaterial visible={true} color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Roof -->
-<T.Mesh geometry={roof}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow bind:ref={batteryModel}>
+<T.Mesh geometry={model.roof}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow bind:ref={batteryModel}>
     <T.MeshStandardMaterial color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Battery -->
-<T.Mesh geometry={battery}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.battery}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
     <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
 </T.Mesh>
 
 <CustomRenderer selectedMesh={batteryModel} />
 
 <!-- Inverter -->
-<T.Mesh geometry={inverter}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.inverter}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
     <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
 </T.Mesh>
 
 <!-- Solar Panel on roof -->
-<T.Mesh geometry={roofSolar}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.solar}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
     <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
 </T.Mesh>
 
