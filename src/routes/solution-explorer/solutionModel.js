@@ -10,6 +10,7 @@ const roofEdgeHeight = 0.15; // height of vertical roof edge
 const apexHeight = 0.6; // height of roof apex (above roof edge)
 const battHeight = 0.7; // height of battery
 const floorClearance = 0.05; // height of objects off floor
+const battInverterSpacing = 0.3; // horizontal space between battery and inverter
 const battWidth = 0.9;
 const battDepth = 0.2;
 const wallClearance = 0.05; // distance of wall-mounted objects off the wall
@@ -126,13 +127,16 @@ function buildRoofUpper() {
 }
 
 
+// todo: store and reuse of `x` somewhere (class member variable?)
 function buildBattery() {
     const battery = new BoxGeometry(battDepth, battHeight, battWidth);
+
+    const x = (size - (wt + wallClearance) * 2 - (battWidth + battInverterSpacing + inverterWidth)) / 2;
 
     battery.translate(
         -size / 2 + wt + battDepth / 2 + wallClearance,
         battHeight / 2 + wt + floorClearance,
-        size / 2 - battWidth / 2 - wt - wallClearance
+        size / 2 - battWidth / 2 - wt - wallClearance - x
     );
 
     return battery;
@@ -142,10 +146,12 @@ function buildBattery() {
 function buildInverter() {
     const inverter = new BoxGeometry(inverterDepth, inverterHeight, inverterWidth);
 
+    const x = (size - (wt + wallClearance) * 2 - (battWidth + battInverterSpacing + inverterWidth)) / 2;
+
     inverter.translate(
         -size / 2 + wt + inverterDepth / 2 + wallClearance,
-        battHeight / 2 + wt + floorClearance,
-        -size / 2 + inverterWidth / 2 + wt + wallClearance
+        wt + floorClearance + (inverterHeight / 2) + (battHeight - inverterHeight),
+        -size / 2 + inverterWidth / 2 + wt + wallClearance + x
     );
 
     return inverter;
