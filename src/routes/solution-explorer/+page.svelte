@@ -47,15 +47,22 @@
 </div>
 <div>
     <!-- Sample components demonstrating how they interact with the store and params-->
-    Energy use<ComponentProps id="energyUse"/>kwh<br>
-    Energy cost£<ComponentProps id="energyCost"/>/kwh<br>
-    Solar Energy<ComponentProps id="solarEnergy"/>kwh<br>
+    Energy use<ComponentProps type="number" id="energyUse"/>kwh<br>
+    Energy cost£<ComponentProps type="number" id="energyCost"/>/kwh<br>
+    Solar Energy<ComponentProps type="number" id="solarEnergy"/>kwh<br>
     <!-- sample to show the output of a function that uses  -->
     <p>
         {getEnergyCost($allParams)}
     </p>
     
-    <button on:click={() => console.log(getEnergyCost())}>test</button>
+    <!-- sample buttons-->
+    <ComponentProps type="toggle" id="btn1" text="1"/>
+    <ComponentProps type="toggle" id="btn2" text="2"/><br>
+    <ComponentProps type="toggle" id="btn3" text="3"/>
+    <ComponentProps type="toggle" id="btn4" text="4"/>
+    <p>
+        You have clicked buttons
+    </p>
 </div>
     
     <Solution3DView />
