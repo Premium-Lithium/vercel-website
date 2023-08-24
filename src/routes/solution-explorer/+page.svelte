@@ -4,17 +4,21 @@
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
+  
+    import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
 
     const stage = queryParam("stage", ssp.number())
 
 </script>
 
+<!-- todo: arrange in new layout and make responsive -->
 <body>
     <ProgressHeader
         titles={["first", "second", "third", "fourth", "fifth", "sixth", "seventh"]}
         selectedIndex={$stage}
     />
+    <Solution3DView />
     <div class="map-view">
       <Map search={true}/>
     </div>
