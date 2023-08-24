@@ -20,7 +20,7 @@
     />
     <Solution3DView />
     <div class="map-view">
-      <Map search={true}/>
+      <Map search={true} style=5/>
     </div>
     <h2> currentPage: {$stage}</h2>
     <NavButtons bind:currentPage={$stage} lastPage={6}/>
@@ -30,9 +30,9 @@
 <style>
   .map-view {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 100vw;
-    height: 25vh;
+    bottom: 10px;
+    right: 10px;
+    width: calc(100vw - 20px);
+    height: 30vh;
   }
 </style>

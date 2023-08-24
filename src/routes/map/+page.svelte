@@ -1,22 +1,11 @@
-<svelte:head>
-    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
-</svelte:head>
-
 <script>
-
 import { onMount } from 'svelte';
 import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
+import Map from "$lib/components/Map.svelte";
+let map;
 
 onMount(() => {
-    mapboxgl.accessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
-
-    const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-3.435973, 55.378051], // longitude and latitude of the center of the UK
-        zoom: 5 // zoom level
-    });
+    
 
     function splitArrayIntoNLengthChunks(inputArray, n) {
         return inputArray.reduce((all,one,i) => {
@@ -198,4 +187,4 @@ onMount(() => {
 
 </script>
 
-<div id="map" style="width: 100%; height: 100vh;"></div>
+<Map bind:map search={true} style={0}/>
