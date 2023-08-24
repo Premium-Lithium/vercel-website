@@ -41,7 +41,7 @@
     Solar Energy<ComponentProps id="solarEnergy"/>kwh<br>
     
     <p>
-        {totalCost}
+        {getEnergyCost()}
     </p>
     <p>
         {($allParams.energyUse - $allParams.solarEnergy) * $allParams.energyCost}
