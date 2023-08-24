@@ -2,8 +2,8 @@
     export let currentPage = 0;
     export let lastPage = 0;
 
-    import PageNext from "svelte-material-icons/PageNext.svelte"
-    import PagePrevious from "svelte-material-icons/PagePrevious.svelte"
+    import ChevronRight from "svelte-material-icons/ChevronRight.svelte"
+    import ChevronLeft from "svelte-material-icons/ChevronLeft.svelte"
 
     function goBack(){
         currentPage -=1;
@@ -18,10 +18,18 @@
 
 <div class=body>
     {#if currentPage > 0}
-        <button type="submit" on:click={goBack}><PagePrevious/></button>
+        <button type="submit" on:click={goBack}>
+            <ChevronLeft/> Back
+        </button>
+    {:else}
+        <div/>
     {/if}
     {#if currentPage < lastPage}
-        <button type="submit" on:click={goNext}><PageNext/></button>
+        <button type="submit" on:click={goNext}>
+            Next <ChevronRight/>
+        </button>
+    {:else}
+        <div/>
     {/if}
 </div>
 
@@ -29,8 +37,8 @@
     .body {
         margin: 0;
         display: flex;
-        align-items: right;
         flex-direction: row;
+        justify-content: space-between;
     }
 
     button{
@@ -43,6 +51,9 @@
         padding:10px 5px; 
         margin:30px; 
         border-radius:5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         
     }
 </style>
