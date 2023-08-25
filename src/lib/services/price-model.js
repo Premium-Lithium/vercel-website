@@ -89,24 +89,32 @@ function solarQuote(solution, installationDate){
 
     console.log("calculating solar price");
     // Typical Size Solar Panel Arrays Based On R esidential Property Type	
-    // From spreadsheet   
-    switch(solution.houseType) {
-        case "mid_terrace":
-            minSolar.quantity = 8;
-            maxSolar.quantity = 12;
-            break;
-        case "end_terrace":
-            minSolar.quantity = 8;
-            maxSolar.quantity = 14;
-            break;
-        case "semi_detatched":
-            minSolar.quantity = 12;
-            maxSolar.quantity = 18;
-            break;
-        case "detatched":
-            minSolar.quantity = 14;
-            maxSolar.quantity = 20;
-            break;
+    // From spreadsheet
+    if (solution.solar.selectedPannels == 0){
+        switch(solution.houseType) {
+            case "mid_terrace":
+                minSolar.quantity = 8;
+                maxSolar.quantity = 12;
+                break;
+            case "end_terrace":
+                minSolar.quantity = 8;
+                maxSolar.quantity = 14;
+                break;
+            case "semi_detatched":
+                minSolar.quantity = 12;
+                maxSolar.quantity = 18;
+                break;
+            case "detatched":
+                minSolar.quantity = 14;
+                maxSolar.quantity = 20;
+                break;
+        }
+    } else{
+        const solar = {
+            price: 0,
+            quantity: solution.solar.selectedPannels,
+        }
+        return getSolarPrice(solar)
     }
     const minSolarPrice = getSolarPrice(minSolar);
     const maxSolarPrice = getSolarPrice(maxSolar);
