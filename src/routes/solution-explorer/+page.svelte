@@ -8,7 +8,6 @@
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
 
-    import { queryPV } from './solarAPI';
     const stage = queryParam("stage", ssp.number())
     let peakSolarPower = 8.8;
     let solarLoss = 14;
@@ -33,7 +32,20 @@
           <label for="solarLoss">Solar Loss</label>
           <input type="number" id="solarLoss" name="solarLoss" bind:value={solarLoss}>
           <input type="submit" value="Submit" on:click={async () => {
-            await queryPV(latitude, longitude, peakSolarPower, solarLoss)
+            let res = await fetch('solution-explorer/', {
+              method: "POST",
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                'requestType': 'PVGIS',
+                'lat': latitude,
+                'lon': longitude,
+                'peakPower': peakSolarPower,
+                'loss': solarLoss,
+              })
+            });
+            console.log(await res.json());
           }}>
         </div>
     {:else if $stage === 1}
