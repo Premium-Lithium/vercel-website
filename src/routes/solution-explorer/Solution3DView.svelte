@@ -1,47 +1,66 @@
 <script>
-  import { onMount, afterUpdate } from 'svelte';
-  import Scene from './Scene.svelte'
-  import { Canvas } from '@threlte/core'
+    import { onMount, tick, afterUpdate } from 'svelte';
+    import { writable } from 'svelte/store';
+    import Scene from './Scene.svelte'
+    import { Canvas } from '@threlte/core'
 
-  let scenePanel;
+    let scenePanel;
+    let canvasInner;
 
-  // todo: initialise 3d view camera zoom based on available space
-  function resizeCanvas() {
-    const size = Math.min(window.innerWidth, window.innerHeight);
-    scenePanel.style.width = `${size}px`;
-    scenePanel.style.height = `${size}px`;
-  }
+    let sizeStore = writable(0);
+    let size;
+    sizeStore.subscribe(value => { size = value; });
 
-  onMount(() => {
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-  });
+    // todo: initialise 3d view camera zoom based on available space
+    function resizeCanvas() {
+        const newSize = Math.min(scenePanel.offsetWidth, scenePanel.offsetHeight);
+        canvasInner.style.width = `${newSize}px`;
+        canvasInner.style.height = `${newSize}px`;
+        sizeStore.set(newSize); // Update the size
+    }
 
-  afterUpdate(resizeCanvas);
+    onMount(async () => {
+        window.addEventListener('resize', resizeCanvas);
+        await tick(); // Wait for any pending state changes to be applied
+        resizeCanvas();
+    });
+
+    afterUpdate(resizeCanvas);
 </script>
 
 <div class="canvas-container" bind:this={scenePanel}>
-  <Canvas>
-    <Scene />
-  </Canvas>
+    <div class="canvas-inner" bind:this={canvasInner}>
+        <Canvas>
+            <Scene size={size}/>
+        </Canvas>
+    </div>
 </div>
 
 <style>
-  .canvas-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-  }
+    .canvas-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+    }
 
-  .canvas-container::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      background: radial-gradient(ellipse at center, rgba(255,255,255,0) 50%, rgba(255, 255, 255, 1) 75%, rgba(255,255,255,1) 100%);
-      pointer-events: none; /* Allows interaction with canvas */
-  }
+    .canvas-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
 
+    .canvas-inner::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: radial-gradient(ellipse at center, rgba(255,255,255,0) 50%, rgba(255, 255, 255, 1) 75%, rgba(255,255,255,1) 100%);
+        pointer-events: none; /* Allows interaction with canvas */
+    }
 </style>

@@ -4,9 +4,11 @@
     import CustomRenderer from './CustomRenderer.svelte';
     import { OrbitControls } from '@threlte/extras'
 
+    const camZoomToSizeRatio = 120.0 / 1000.0; // Considers fade out size around border of canvas
+
+    export let size;
     let model = new SolutionModel("test");
 
-    // let rotation = 32 * Math.PI / 180;
     let batteryModel;
     const plBlue = "#28AAE2";
 
@@ -19,14 +21,14 @@
 
 <T.FogExp2 attach="fog" args={['white', 0.015]} />
 
-<T.OrthographicCamera makeDefault zoom={120.0} position={[10, 6, 10]} on:create={({ ref }) => {
+<T.OrthographicCamera makeDefault zoom={size * camZoomToSizeRatio} position={[10, 6, 10]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
 }}></T.OrthographicCamera>
 
 <!-- todo: move these into a json configuration file -->
 <T.DirectionalLight position={[10, 10, -4]} castShadow intensity={1.5} scale={20.0}/>
 <T.DirectionalLight position={[10, 10, 2]} castShadow intensity={3.5}/>
-<T.PointLight position={[10, 5, 0]}  intensity={600.0} />
+<T.PointLight position={[10, 5, 0]}  intensity={400.0} />
 
 <T.AmbientLight intensity={0.5} />
 
