@@ -1,6 +1,7 @@
-import { BoxGeometry, BufferGeometry, BufferAttribute, MeshBasicMaterial, OrthographicCamera } from 'three'
+import { Vector3, BoxGeometry, BufferGeometry, BufferAttribute, MeshBasicMaterial, OrthographicCamera } from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { normalVector } from './geometry-utils';
+import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
 
 const wt = 0.17; // wall thickness
@@ -18,6 +19,8 @@ const wallClearance = 0.00; // distance of wall-mounted objects off the wall
 const inverterDepth = 0.17;
 const inverterHeight = 0.5;
 const inverterWidth = 0.3;
+const panelWidth = size * 0.6;
+const panelThickness = 0.06;
 
 
 export default class SolutionModel {
@@ -31,6 +34,17 @@ export default class SolutionModel {
         this.solar = this.#buildRoofSolar();
         this.outsideWall = this.#buildOutsideWall();
         this.evCharger = this.#buildEvCharger();
+        this.groundSolar = this.#buildGroundSolar();
+
+        // temp
+        const points = [];
+            for (let j = 0; j < Math.PI; j += (2 * Math.PI) / 100) {
+            points.push(Math.cos(j), Math.sin(j), 0);
+        }
+
+        this.testLine = new MeshLine();
+        this.testLine.setPoints( points, p => 2 );
+        this.lineMaterial = new MeshLineMaterial({ lineWidth: 2, color: "blue"});
     }
 
     // set propertyType(type) {
@@ -171,9 +185,6 @@ export default class SolutionModel {
 
 
     #buildRoofSolar() {
-        const panelWidth = size * 0.6;
-        const panelThickness = 0.06;
-
         const availableWidth = Math.sqrt(Math.pow(rl / 2, 2) + Math.pow(apexHeight, 2));
         const padding = 0.3; // Space between panels and roof edge
         const panelHeight = availableWidth - padding * 2;
@@ -235,6 +246,7 @@ export default class SolutionModel {
         return roofUpper;
     }
 
+
     #buildEvCharger() {
         const height = 0.4;
         const width = 0.2;
@@ -251,6 +263,28 @@ export default class SolutionModel {
         );
 
         return evCharger;
+    }
+
+
+    #buildGroundSolar() {
+        const panelHeight = 1;
+
+        // todo: translate solar panel upwards to place edge on ground as angle changes
+        const groundMountAngle_degs = 30;
+
+        const groundSolar = new BoxGeometry(panelHeight, panelThickness, panelWidth);
+
+        const angle = groundMountAngle_degs * Math.PI / 180;
+        groundSolar.rotateZ(-angle);
+
+        // const roofSurfaceMidPoint = { x: rl / 4, y: height + apexHeight / 2 + roofEdgeHeight };
+        // const panelCentre = normalVector(angle, roofSurfaceMidPoint.x, roofSurfaceMidPoint.y, -panelThickness / 2);
+        // roofSolar.translate(panelCentre.x, panelCentre.y, 0);
+
+        const panelCentre = { x: 3, y: 0.2 };
+        groundSolar.translate(panelCentre.x, panelCentre.y, -1);
+
+        return groundSolar;
     }
 }
 
