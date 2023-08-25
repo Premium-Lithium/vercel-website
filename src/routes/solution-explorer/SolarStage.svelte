@@ -8,6 +8,9 @@
 
     // Question 2
     export let solarLocation
+
+    let map;
+    console.log(map)
 </script>
 
 <div>
@@ -71,6 +74,7 @@
         search={true}
         style=5
         bind:searchedLocation={solarLocation}
+        bind:map
     />
 </div>
 
