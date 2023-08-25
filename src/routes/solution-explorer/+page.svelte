@@ -12,9 +12,9 @@
     const stage = queryParam("stage", ssp.number())
     let peakSolarPower = 8.8;
     let solarLoss = 14;
-    let output;
     let latitude = 53.95924825020342;
     let longitude = -1.0772513524147558;
+    let output;
 </script>
 
 <!-- todo: arrange in new layout and make responsive -->
