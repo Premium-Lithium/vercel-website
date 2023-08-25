@@ -1,8 +1,8 @@
 import { json } from "@sveltejs/kit";
 import { supabase } from '$lib/supabase';
 import { point, polygon} from '@turf/helpers';
-import { deserializeCoordinates, fetchLatlonFromPostcodesPostcodes,
-         pointInPolygonFromList} from "$lib/mapUtils";
+import { serializeCoordinates, deserializeCoordinates, fetchLatlonFromPostcodesPostcodes,
+    fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive } from '$lib/mapUtils';
 
 const DB_NAME: string = "installation-manager-regions";
 
@@ -16,7 +16,7 @@ export async function POST ({request}){
     let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
     console.log(latlon);
     let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
-    console.log(polygons.map((p) => p.geometry.coordinates));
+    polygons[0].geometry.coordinates.forEach((x) => console.log(x[0], x[1]));
     let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons)
     if(polygonPointIsIn) {
         console.log(installationManagerDetails[polygonPointIsIn].name);
@@ -49,7 +49,7 @@ const loadPolygonsFromDatabase = async () => {
 async function syncJobOwnersToPipedrive(dealId: Number, installerManagerUserID: Number) {
     // This needs to be ran at time of close, so possibly set up an endpoint with a webhook for this.
     // on deal.update.. if deal.status open -> won.. update owner in pipedrive. 
-    await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=77a5356773f422eb97c617fd7c37ee526da11851`, {
+    let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=77a5356773f422eb97c617fd7c37ee526da11851`, {
         method: 'PUT',
         body: JSON.stringify({'user_id': installerManagerUserID}),
         headers: {

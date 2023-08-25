@@ -212,6 +212,18 @@ onMount(async () => {
             console.log(`Saved region for ${installationManagerDetails[i].name}`);
         }
     }
+
+    async function syncJobOwnersToPipedrive() {
+      // This needs to be ran at time of close, so possibly set up an endpoint with a webhook for this.
+      // on deal.update.. if deal.status open -> won.. update owner in pipedrive.
+      let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=77a5356773f422eb97c617fd7c37ee526da11851`, {
+          method: 'PUT',
+          body: JSON.stringify({'user_id': installerManagerUserID}),
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      })
+}
 });
 
 var drawStyles = [
