@@ -447,7 +447,7 @@ var drawStyles = [
 ];
 
 </script>
-<Map bind:map search:{false}/>
+<Map bind:map search={false} style={6}/>
 <pre id="info">
   {idHoveringOver}
 </pre>
