@@ -89,10 +89,10 @@ export async function fetchRelevantData(data, type) {
 }
 
 export function pointInPolygonFromList (point, polygons) {
-    polygons.forEach((p,i,a) => {
-        if(booleanPointInPolygon(point, p)) {
+    for (let i = 0; i < polygons.length; i++) {
+        if (booleanPointInPolygon(point, polygons[i])) {
             return i;
         }
-    })
+    }
     return null;
 }
