@@ -12,11 +12,6 @@
 
     console.log(type);
     const componentParam = queryParam(id);
-    
-    // navigate to new url
-    function inputChanged() {
-        goto('?' + $page.url.searchParams.toString(), {noScroll: true, keepFocus:true});
-    }
 
     function buttonClicked() {
         if ($componentParam == "true") {
