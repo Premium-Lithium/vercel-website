@@ -17,7 +17,7 @@
    
 </script>
 
-<div>
+<body>
     <ProgressHeader
         titles={["map", "3d", "result"]}
         selectedIndex={$stage}
