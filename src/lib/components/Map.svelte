@@ -1,10 +1,3 @@
-<svelte:head>
-    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
-    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
-    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
-</svelte:head>
-
 <script>
 export let search = true;
 export let map = undefined;
@@ -20,7 +13,11 @@ const styles = [
     'mapbox://styles/mapbox/navigation-night-v1']
 
 export let style = 5;
+
 import { onMount } from 'svelte';
+import mapboxgl from "mapbox-gl"
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
+
 onMount(() => {
     const mapboxGlAccessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
     mapboxgl.accessToken = mapboxGlAccessToken;
@@ -52,6 +49,9 @@ onMount(() => {
 <div id="map"></div>
 
 <style>
+    @import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+    @import 'mapbox-gl/dist/mapbox-gl.css';
+
     #map{
         width: 100%;
         height: 100%;

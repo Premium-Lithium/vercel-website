@@ -8,6 +8,7 @@
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
     import EnergyStage from "./EnergyStage.svelte"
+    import SolarStage from "./SolarStage.svelte"
 
     const stage = queryParam("stage", ssp.number())
 
@@ -44,9 +45,8 @@
             bind:highConsumptionDevices={$highConsumptionDevices}
         />
     {:else if $stage === 1}
-        <div class="map-view">
-          <Map search={true} style=5/>
-        </div>
+        <SolarStage
+        />
     {:else}
         <Solution3DView />
         REVIEW
@@ -55,9 +55,3 @@
     <NavButtons bind:currentPage={$stage} lastPage={6}/>
 </body>
 
-<style>
-  .map-view {
-    width: 100vw;
-    height: 25vh;
-  }
-</style>
