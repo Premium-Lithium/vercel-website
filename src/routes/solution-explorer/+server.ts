@@ -8,19 +8,31 @@ const schema = {
     "properties": {
         "requestType": {
         "type": "string",
-        "enum": ["PVGIS"]
+        "enum": ["PVGIS"],
+        "errorMessage": "requestType should be one of ['PVGIS']",
         },
         "lat": {
-        "type": "number"
+        "type": "number",
+        "maximum": 90,
+        "minimum": -90,
+        "errorMessage": "lat should be between -90 and 90"
         },
         "lon": {
-        "type": "number"
+        "type": "number",
+        "maximum": 180,
+        "minimum": -180,
+        "errorMessage": "lon should be between -180 and 180"
         },
         "peakPower": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "errorMessage": "peakPower should be a positive number"        
         },
         "loss": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "errorMessage": "loss should be between 0 and 100."
         }
     },
     "required": ["requestType", "lat", "lon", "peakPower", "loss"]
@@ -35,7 +47,11 @@ const options = {
 
 export async function POST({request}) {
     let requestData = await request.json();
-    validate(requestData, schema);
+    const validationErrors = validate(requestData, schema);
+    if(validationErrors.length) {
+        const errors = validationErrors.join(", ");
+        return json({ message: `${errors}` }, { status: 400 })
+    }
     if(requestData.requestType != 'PVGIS') return json({message: "Unexpected endpoint"}, {status: 400});
     let lat = requestData.lat;
     let lon = requestData.lon;
