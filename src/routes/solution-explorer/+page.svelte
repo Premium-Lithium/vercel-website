@@ -7,13 +7,18 @@
   
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
+	import { onMount } from "svelte";
 
     const stage = queryParam("stage", ssp.number())
+    let map;
     let peakSolarPower = 8.8;
     let solarLoss = 14;
     let latitude = 53.95924825020342;
     let longitude = -1.0772513524147558;
+    let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
     let output;
+
+    $: console.log(map?.features)
 </script>
 
 <!-- todo: arrange in new layout and make responsive -->
@@ -24,7 +29,7 @@
     />
     {#if $stage === 0}
         <div class="map-view">
-          <Map search={true} style=5/>
+          <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
         </div>
         <div class="solar-api">
           <label for="peakSolarPower">Peak Solar Power</label>
@@ -39,8 +44,8 @@
               },
               body: JSON.stringify({
                 'requestType': 'PVGIS',
-                'lat': latitude,
-                'lon': longitude,
+                'lat': mapboxSearchResult.latitude,
+                'lon': mapboxSearchResult.longitude,
                 'peakPower': peakSolarPower,
                 'loss': solarLoss,
               })

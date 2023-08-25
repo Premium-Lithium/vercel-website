@@ -8,6 +8,7 @@
 <script>
 export let search = true;
 export let map = undefined;
+export let searchResult = {'latitude': undefined, 'longitude': undefined};
 const styles = [
     'mapbox://styles/mapbox/streets-v12',
     'mapbox://styles/mapbox/outdoors-v12',
@@ -33,14 +34,19 @@ onMount(() => {
 
     map.on('load', async () => {
         if(search){
+            const search = new MapboxGeocoder({
+                accessToken: mapboxGlAccessToken,
+                mapboxgl: mapboxgl,
+                flyTo: {
+                    speed: 2.5,
+                },
+            });
+            search.on('result', (e) => {
+                searchResult.latitude = e.result.geometry.coordinates[1];
+                searchResult.longitude = e.result.geometry.coordinates[0];
+            })
             map.addControl(
-                new MapboxGeocoder({
-                    accessToken: mapboxGlAccessToken,
-                    mapboxgl: mapboxgl,
-                    flyTo: {
-                        speed: 2.5,
-                    },
-                }),
+                search,
             );
         }
         map.resize();
