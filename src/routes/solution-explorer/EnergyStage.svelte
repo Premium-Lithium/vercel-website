@@ -43,7 +43,7 @@
             <label for="battery" >Battery</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={battery}>
+            <input type="checkbox" id="battery" bind:checked={battery}>
         </td>
     </tr>
     <tr>
@@ -51,7 +51,7 @@
             <label for="solar">Solar</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={solar}>
+            <input type="checkbox" id="solar" bind:checked={solar}>
         </td>
     </tr>
     <tr>
@@ -59,7 +59,7 @@
             <label for="ev">Electric Vehicle Charger</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={ev}>
+            <input type="checkbox" id="ev" bind:checked={ev}>
         </td>
     </tr>
     <tr>
@@ -67,7 +67,7 @@
             <label for="epsups">EPS / UPS</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={epsups}>
+            <input type="checkbox" id="epsups" bind:checked={epsups}>
         </td>
     </tr>
     <tr>
@@ -75,7 +75,7 @@
             <label for="notsure">Not sure</label>
         </td>
         <td>
-            <input type="checkbox" on:change={notSure} checked={!(battery || solar || ev || epsups)}>
+            <input type="checkbox" id="notsure" on:change={notSure} checked={!(battery || solar || ev || epsups)}>
         </td>
     </tr>
 </table>
@@ -96,6 +96,7 @@
 
 <label for="low">Low</label>
 <input
+    id="low"
     type="radio"
     name="energy"
     value={lowEnergyEstimate}
@@ -104,6 +105,7 @@
 >
 <label for="medium">Medium</label>
 <input
+    id="medium"
     type="radio"
     name="energy"
     value={mediumEnergyEstimate}
@@ -112,6 +114,7 @@
 >
 <label for="high">High</label>
 <input
+    id="high"
     type="radio"
     name="energy"
     value={highEnergyEstimate}
@@ -121,7 +124,7 @@
 
 <!-- TODO: add not sure -->
 
-<h2>3. What are you energy usage habits?</h2>
+<h2>3. What are your energy usage habits?</h2>
 
 <table>
     <tr>
@@ -129,7 +132,7 @@
             <label for="winter" >Do you use more energy in winter?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={moreWinterUsage}>
+            <input type="checkbox" id="winter" bind:checked={moreWinterUsage}>
         </td>
     </tr>
     <tr>
@@ -137,7 +140,7 @@
             <label for="workfromhome" >Does anyone in your household work from home?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={workFromHome}>
+            <input type="checkbox" id="winter" bind:checked={workFromHome}>
         </td>
     </tr>
     <tr>
@@ -145,15 +148,15 @@
             <label for="gasusage" >Do you use oil and gas?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={oilAndGas}>
+            <input type="checkbox" id="gasusage" bind:checked={oilAndGas}>
         </td>
     </tr>
     <tr>
         <td>
-            <label for="gasusage" >Do you have any high consumption devices (eg EV Charger, Immersion Heater)?</label>
+            <label for="highconsumptiondevices" >Do you have any high consumption devices (eg EV Charger, Immersion Heater)?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={highConsumptionDevices}>
+            <input type="checkbox" id="highconsumptiondevices" bind:checked={highConsumptionDevices}>
         </td>
     </tr>
 </table>
