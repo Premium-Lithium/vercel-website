@@ -23,6 +23,10 @@
     const oilAndGas = queryParam("oilandgas", ssp.boolean())
     const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
 
+    const existingSolar = queryParam("existingsolar", ssp.boolean())
+    const numberOfPanels = queryParam("numberofpanels", ssp.number())
+    const solarTariff = queryParam("solartariff", ssp.string())
+
 </script>
 
 <!-- todo: arrange in new layout and make responsive -->
@@ -46,6 +50,9 @@
         />
     {:else if $stage === 1}
         <SolarStage
+            bind:existingSolar={$existingSolar}
+            bind:numberOfPanels={$numberOfPanels}
+            bind:solarTariff={$solarTariff}
         />
     {:else}
         <Solution3DView />
