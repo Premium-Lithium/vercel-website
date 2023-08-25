@@ -29,6 +29,10 @@
     const highEnergyEstimate = 4300
 
     // Question 3
+    export let moreWinterUsage
+    export let workFromHome
+    export let oilAndGas
+    export let highConsumptionDevices
 
 </script>
 
@@ -125,7 +129,7 @@
             <label for="winter" >Do you use more energy in winter?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={battery}>
+            <input type="checkbox" bind:checked={moreWinterUsage}>
         </td>
     </tr>
     <tr>
@@ -133,7 +137,7 @@
             <label for="workfromhome" >Does anyone in your household work from home?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={battery}>
+            <input type="checkbox" bind:checked={workFromHome}>
         </td>
     </tr>
     <tr>
@@ -141,7 +145,7 @@
             <label for="gasusage" >Do you use oil and gas?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={battery}>
+            <input type="checkbox" bind:checked={oilAndGas}>
         </td>
     </tr>
     <tr>
@@ -149,7 +153,7 @@
             <label for="gasusage" >Do you have any high consumption devices (eg EV Charger, Immersion Heater)?</label>
         </td>
         <td>
-            <input type="checkbox" bind:checked={battery}>
+            <input type="checkbox" bind:checked={highConsumptionDevices}>
         </td>
     </tr>
 </table>
