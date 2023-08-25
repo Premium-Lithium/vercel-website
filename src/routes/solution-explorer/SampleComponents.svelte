@@ -1,11 +1,29 @@
 <script lang="ts">
-    import ComponentProps from "./ComponentProps.svelte";
-    import { queryParam, queryParameters } from "sveltekit-search-params"
-
-
-    const allParams = queryParameters();
     
 
+    import ComponentProps from "./ComponentProps.svelte";
+    import { queryParam, queryParameters, ssp } from "sveltekit-search-params"
+
+    // declare parameters
+    const allParams = queryParameters({
+        energyUse: ssp.number(),
+        solarEnergy: ssp.number(),
+        energyCost: ssp.number(),
+        btn1: ssp.boolean(),
+        btn2: ssp.boolean(),
+        btn3: ssp.boolean(),
+        btn4: ssp.boolean()
+    });
+
+
+    const defaults = {
+        energyUse: 20,
+        solarEnergy: 15,
+        energyCost: 0.3
+    }
+    
+    
+    
     // proof of concept search params and store function
     // as page renders, params may be called before all elements 
     function getEnergyCost(params) {
@@ -15,16 +33,20 @@
             return 0;
         }
         
-        let use = params.energyUse;
-        let solar = params.solarEnergy;
-        let cost = params.energyCost;
+        console.log(defaults);
+        
+
+        
+        let use = (params.energyUse == null ? defaults : params).energyUse;
+        let solar = (params.solarEnergy == null ? defaults : params).solarEnergy;
+        let cost = (params.energyCost == null ? defaults : params).energyCost;
             
-        return( (params.energyUse - params.solarEnergy) * params.energyCost);
+        return( (use - solar) * cost);
         
     }
 
     
-
+    
 </script>
 <div>
     <!-- Sample components demonstrating how they interact with the store and params-->
@@ -43,10 +65,10 @@
     <ComponentProps type="toggle" id="btn4" text="4"/>
     <p>
         You have selected:
-        {$allParams.btn1=="true" ? "1" : ""} 
-        {$allParams.btn2=="true" ? "2" : ""} 
-        {$allParams.btn3=="true" ? "3" : ""} 
-        {$allParams.btn4=="true" ? "4" : ""} 
+        {$allParams.btn1===true ? "1" : ""} 
+        {$allParams.btn2===true ? "2" : ""} 
+        {$allParams.btn3===true ? "3" : ""} 
+        {$allParams.btn4===true ? "4" : ""} 
         
     </p>
 </div>
