@@ -1,44 +1,65 @@
 <script>
-  import { onMount, afterUpdate } from 'svelte';
-  import Scene from './Scene.svelte'
-  import { Canvas } from '@threlte/core'
+    import { onMount, tick, afterUpdate } from 'svelte';
+    import { writable } from 'svelte/store';
+    import Scene from './Scene.svelte'
+    import { Canvas } from '@threlte/core'
 
-  let scenePanel;
+    let scenePanel;
+    let canvasInner;
 
-  function resizeCanvas() {
-    const size = Math.min(window.innerWidth, window.innerHeight);
-    scenePanel.style.width = `${size}px`;
-    scenePanel.style.height = `${size}px`;
-  }
+    let sizeStore = writable(0);
+    let size;
+    sizeStore.subscribe(value => { size = value; });
 
-  onMount(() => {
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-  });
+    function resizeCanvas() {
+        const newSize = Math.min(scenePanel.offsetWidth, scenePanel.offsetHeight);
+        canvasInner.style.width = `${newSize}px`;
+        canvasInner.style.height = `${newSize}px`;
+        sizeStore.set(newSize); // Update the size
+    }
 
-  afterUpdate(resizeCanvas);
+    onMount(async () => {
+        window.addEventListener('resize', resizeCanvas);
+        await tick();
+        resizeCanvas();
+    });
+
+    afterUpdate(resizeCanvas);
 </script>
 
-<div class="visualisation-panel" bind:this={scenePanel}>
-  <div class="canvas-container">
-    <Canvas>
-      <Scene />
-    </Canvas>
-  </div>
+<div class="canvas-container" bind:this={scenePanel}>
+    <div class="canvas-inner" bind:this={canvasInner}>
+        <Canvas>
+            <Scene size={size}/>
+        </Canvas>
+    </div>
 </div>
 
 <style>
-  .visualisation-panel {
-      width: 100%;
-      height: 100%;
-      background-color: white;
-      border-radius: 10px;
-      border: 1px solid lightgrey;
-  }
+    .canvas-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+    }
 
-  .canvas-container {
-      padding: 20px;
-      width: calc(100% - 40px);
-      height: calc(100% - 40px);
-  }
+    .canvas-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .canvas-inner::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: radial-gradient(ellipse at center, rgba(255,255,255,0) 50%, rgba(255, 255, 255, 1) 75%, rgba(255,255,255,1) 100%);
+        pointer-events: none; /* Allows interaction with canvas */
+    }
 </style>
