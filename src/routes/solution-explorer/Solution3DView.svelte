@@ -5,6 +5,7 @@
 
   let scenePanel;
 
+  // todo: initialise 3d view camera zoom based on available space
   function resizeCanvas() {
     const size = Math.min(window.innerWidth, window.innerHeight);
     scenePanel.style.width = `${size}px`;
@@ -19,26 +20,28 @@
   afterUpdate(resizeCanvas);
 </script>
 
-<div class="visualisation-panel" bind:this={scenePanel}>
-  <div class="canvas-container">
-    <Canvas>
-      <Scene />
-    </Canvas>
-  </div>
+<div class="canvas-container" bind:this={scenePanel}>
+  <Canvas>
+    <Scene />
+  </Canvas>
 </div>
 
 <style>
-  .visualisation-panel {
+  .canvas-container {
+      position: relative;
       width: 100%;
       height: 100%;
-      background-color: white;
-      border-radius: 10px;
-      border: 1px solid lightgrey;
   }
 
-  .canvas-container {
-      padding: 20px;
-      width: calc(100% - 40px);
-      height: calc(100% - 40px);
+  .canvas-container::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0) 50%, rgba(255, 255, 255, 1) 75%, rgba(255,255,255,1) 100%);
+      pointer-events: none; /* Allows interaction with canvas */
   }
+
 </style>
