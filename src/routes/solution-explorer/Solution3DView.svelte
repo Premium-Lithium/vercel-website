@@ -11,7 +11,6 @@
     let size;
     sizeStore.subscribe(value => { size = value; });
 
-    // todo: initialise 3d view camera zoom based on available space
     function resizeCanvas() {
         const newSize = Math.min(scenePanel.offsetWidth, scenePanel.offsetHeight);
         canvasInner.style.width = `${newSize}px`;
@@ -21,7 +20,7 @@
 
     onMount(async () => {
         window.addEventListener('resize', resizeCanvas);
-        await tick(); // Wait for any pending state changes to be applied
+        await tick();
         resizeCanvas();
     });
 
