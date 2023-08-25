@@ -1,27 +1,32 @@
 <script lang="ts">
-    
+	import { number } from "nunjucks/src/tests";
+
 
     import LoadableInput from "./LoadableInput.svelte";
-    import { queryParam, queryParameters, ssp } from "sveltekit-search-params"
+    import { queryParameters, ssp } from "sveltekit-search-params"
 
     // declare parameters
     const allParams = queryParameters({
         energyUse: ssp.number(),
         solarEnergy: ssp.number(),
         energyCost: ssp.number(),
-        btn1: ssp.boolean(),
+        btn1: ssp.,
         btn2: ssp.boolean(),
         btn3: ssp.boolean(),
         btn4: ssp.boolean()
     });
 
+    interface energyData {
+        energyUse: number;
+        solarEnergy: number;
+        energyCost: number;
+    }
 
-    const defaults = {
+    const defaults: energyData = {
         energyUse: 20,
         solarEnergy: 15,
         energyCost: 0.3
     }
-    
     
     
     // proof of concept search params and store function
@@ -40,10 +45,9 @@
         return( (use - solar) * cost);
         
     }
-
-    
     
 </script>
+
 <div>
     <!-- Sample components demonstrating how they interact with the store and params-->
     Energy use<LoadableInput type="number" id="energyUse"/>kwh<br>
