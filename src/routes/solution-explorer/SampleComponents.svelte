@@ -32,11 +32,7 @@
         if (params == null) {
             return 0;
         }
-        
-        console.log(defaults);
-        
-
-        
+     
         let use = (params.energyUse == null ? defaults : params).energyUse;
         let solar = (params.solarEnergy == null ? defaults : params).solarEnergy;
         let cost = (params.energyCost == null ? defaults : params).energyCost;
@@ -59,7 +55,7 @@
     </p>
     
     <!-- sample buttons-->
-    <LoadableInput type="toggle" id="btn1" text="1"/>
+    <LoadableInput type="toggle" id="btn1" text="1" defaultValue=false/>
     <LoadableInput type="toggle" id="btn2" text="2"/><br>
     <LoadableInput type="toggle" id="btn3" text="3"/>
     <LoadableInput type="toggle" id="btn4" text="4"/>

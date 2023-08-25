@@ -58,6 +58,7 @@
           <input type="number" id="peakSolarPower" name="peakSolarPower" bind:value={peakSolarPower}>
           <label for="solarLoss">Solar Loss</label>
           <input type="number" id="solarLoss" name="solarLoss" bind:value={solarLoss}>
+          <!--
           <input type="submit" value="Submit" on:click={async () => {
             let res = await fetch('solution-explorer/', {
               method: "POST",
@@ -74,6 +75,7 @@
             });
             console.log(await res.json());
           }}>
+        -->
         </div>
 
     {:else if $stage === 2}
