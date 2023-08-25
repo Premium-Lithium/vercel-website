@@ -1,5 +1,5 @@
 <script>
-    import { ssp, queryParam, queryParameters } from "sveltekit-search-params"
+    import { ssp, queryParam} from "sveltekit-search-params"
 
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
@@ -8,35 +8,12 @@
 
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
-    import ComponentProps from './ComponentProps.svelte';
+    import SampleComponents from "./SampleComponents.svelte"
 	
 
     const stage = queryParam("stage", ssp.number());
     
-    const allParams = queryParameters();
     
-
-    $: total = getEnergyCost();
-
-    // proof of concept search params and store function
-    // as page renders, params may be called before all elements 
-    function getEnergyCost(params) {
-
-        // handle initial errors
-        if (params == null) {
-            return 0;
-        }
-        
-        let use = params.energyUse;
-        let solar = params.solarEnergy;
-        let cost = params.energyCost;
-            
-        return( (params.energyUse - params.solarEnergy) * params.energyCost);
-        
-    }
-
-    
-    $: getEnergyCost();
    
 </script>
 
@@ -47,31 +24,10 @@
     />
     solution explorer here
 </div>
-<div>
-    <!-- Sample components demonstrating how they interact with the store and params-->
-    Energy use<ComponentProps type="number" id="energyUse"/>kwh<br>
-    Energy cost£<ComponentProps type="number" id="energyCost"/>/kwh<br>
-    Solar Energy<ComponentProps type="number" id="solarEnergy"/>kwh<br>
-    <!-- sample to show the output of a function that uses  -->
-    <p>
-        {getEnergyCost($allParams)}
-    </p>
-    
-    <!-- sample buttons-->
-    <ComponentProps type="toggle" id="btn1" text="1"/>
-    <ComponentProps type="toggle" id="btn2" text="2"/><br>
-    <ComponentProps type="toggle" id="btn3" text="3"/>
-    <ComponentProps type="toggle" id="btn4" text="4"/>
-    <p>
-        You have selected:
-        {$allParams.btn1=="true" ? "1" : "not1"} 
-        {$allParams.btn2=="true" ? "2" : "not 1"} 
-        {$allParams.btn3=="true" ? "3" : "not 1"} 
-        {$allParams.btn4=="true" ? "4" : "not 1"} 
-        
-    </p>
-</div>
-    
+
+    <div>
+        <SampleComponents/>
+    </div>
     <Solution3DView />
     <div class="map-view">
       <Map search={true}/>
