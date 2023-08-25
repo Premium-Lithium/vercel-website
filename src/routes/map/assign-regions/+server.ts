@@ -20,7 +20,7 @@ export async function POST ({request}){
     let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons)
     if(polygonPointIsIn) {
         console.log(installationManagerDetails[polygonPointIsIn].name);
-        syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails.id);
+        syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails[polygonPointIsIn].id);
     }
     return json({message: "okay"}, {status: 200});
 }
@@ -56,5 +56,7 @@ async function syncJobOwnersToPipedrive(dealId: Number, installerManagerUserID: 
             'Content-Type': 'application/json',
         },
     })
+
+    console.log(await res.json());
 }
 
