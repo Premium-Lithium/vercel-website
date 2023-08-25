@@ -5,6 +5,9 @@
     export let existingSolar;
     export let numberOfPanels
     export let solarTariff
+
+    // Question 2
+    export let solarLocation
 </script>
 
 <div>
@@ -62,9 +65,17 @@
 
 {/if}
 
+<h2>2. Locate and highlight the roof for the solar installation</h2>
 <div class="map-view">
-  <Map search={true} style=5/>
+    <Map
+        search={true}
+        style=5
+        bind:searchedLocation={solarLocation}
+    />
 </div>
+
+<h2>3. Roof details</h2>
+<!-- Do this in 3d? -->
 
 <style>
   .map-view {

@@ -26,6 +26,7 @@
     const existingSolar = queryParam("existingsolar", ssp.boolean())
     const numberOfPanels = queryParam("numberofpanels", ssp.number())
     const solarTariff = queryParam("solartariff", ssp.string())
+    const solarLocation = queryParam("solarlocation", ssp.string())
 
 </script>
 
@@ -53,6 +54,7 @@
             bind:existingSolar={$existingSolar}
             bind:numberOfPanels={$numberOfPanels}
             bind:solarTariff={$solarTariff}
+            bind:solarLocation={$solarLocation}
         />
     {:else}
         <Solution3DView />

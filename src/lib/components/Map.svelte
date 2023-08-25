@@ -13,6 +13,7 @@ const styles = [
     'mapbox://styles/mapbox/navigation-night-v1']
 
 export let style = 5;
+export let searchedLocation = undefined;
 
 import { onMount } from 'svelte';
 import mapboxgl from "mapbox-gl"
@@ -37,6 +38,8 @@ onMount(() => {
                     flyTo: {
                         speed: 2.5,
                     },
+                }).on("result", (selected) => {
+                    searchedLocation = selected.result.place_name
                 }),
             );
         }
