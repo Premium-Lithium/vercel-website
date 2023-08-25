@@ -1,12 +1,14 @@
 <script>
-    import { ssp, queryParam } from "sveltekit-search-params"
+    import { ssp, queryParam} from "sveltekit-search-params"
 
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
-  
+
+
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
+    import SampleComponents from "./SampleComponents.svelte"
     import EnergyStage from "./EnergyStage.svelte"
 
     const stage = queryParam("stage", ssp.number())
@@ -26,9 +28,9 @@
     const workFromHome = queryParam("workfromhome", ssp.boolean())
     const oilAndGas = queryParam("oilandgas", ssp.boolean())
     const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
+
 </script>
 
-<!-- todo: arrange in new layout and make responsive -->
 <body>
     <ProgressHeader
         titles={["Energy", "Solar", "Savings", "Investment"]}
@@ -73,6 +75,10 @@
             console.log(await res.json());
           }}>
         </div>
+
+    {:else if $stage === 2}
+        <SampleComponents />
+
     {:else}
         <Solution3DView />
         REVIEW
