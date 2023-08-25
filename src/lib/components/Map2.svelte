@@ -20,7 +20,6 @@ import mapboxgl from "mapbox-gl"
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
 
 onMount(() => {
-    console.log(searchedLocation)
     const mapboxGlAccessToken = 'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
     mapboxgl.accessToken = mapboxGlAccessToken;
     map = new mapboxgl.Map({
@@ -30,31 +29,22 @@ onMount(() => {
         zoom: 5 // zoom level
     });
 
-    const geocoder = new MapboxGeocoder({
-        accessToken: mapboxGlAccessToken,
-        mapboxgl: mapboxgl,
-        flyTo: {
-            speed: 2.5,
-        },
-    })
-
     map.on('load', async () => {
         if(search){
             map.addControl(
-                geocoder
-                /*
-                .on("result", (selected) => {
+                new MapboxGeocoder({
+                    accessToken: mapboxGlAccessToken,
+                    mapboxgl: mapboxgl,
+                    flyTo: {
+                        speed: 2.5,
+                    },
+                }).on("result", (selected) => {
                     searchedLocation = selected.result.place_name
-                    console.log(map)
-                })
-                */
+                }),
             );
         }
         map.resize();
     });
-
-    console.log(geocoder)
-    if (searchedLocation) geocoder.setInput(searchedLocation)
 });
 
 </script>
