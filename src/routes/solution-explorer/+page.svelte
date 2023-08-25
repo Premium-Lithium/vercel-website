@@ -19,23 +19,27 @@
 
 <div>
     <ProgressHeader
-        titles={["first", "second", "third", "fourth", "fifth", "sixth", "seventh"]}
-        selectedIndex={6}
+        titles={["map", "3d", "result"]}
+        selectedIndex={$stage}
     />
-    solution explorer here
-</div>
-
-    <div>
-        <SampleComponents/>
-    </div>
-    <Solution3DView />
-    <div class="map-view">
-      <Map search={true}/>
-    </div>
-    <h2> currentPage: {$stage}</h2>
-    <NavButtons bind:currentPage={$stage} lastPage={6}/>
+    {#if $stage === 0}
+        <div class="map-view">
+          <Map search={true} style=5/>
+        </div>
+    {:else if $stage === 1}
+        <Solution3DView />
+    {:else if $stage === 2}
+        <SampleComponents />
+    {:else}
+        REVIEW
+    {/if}
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
-
+    <NavButtons bind:currentPage={$stage} lastPage={6}/>
+</body>
 
 <style>
+  .map-view {
+    width: 100vw;
+    height: 25vh;
+  }
 </style>
