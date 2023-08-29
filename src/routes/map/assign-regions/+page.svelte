@@ -118,9 +118,7 @@ onMount(async () => {
     }
 
     map.on('load', async () => {
-        //const installerData = await fetchInstallerDataFromPipedrive()
         const data = await fetchJobDataFromPipedrive()
-        //const data = jobData.concat(installerData)
         for(let postcode in data) {
             const marker = new mapboxgl.Marker({ color: colouringFunction(data[postcode]) })
                 .setLngLat([data[postcode].longitude, data[postcode].latitude])
