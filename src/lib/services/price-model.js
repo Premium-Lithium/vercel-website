@@ -33,7 +33,7 @@ function quoteToInstall(solution, installMonth) {
             battery.price = 7990;
             break;
         case 15:
-            battery.price = 11985
+            battery.price = 11985;
         case 20:
             battery.price = 15980;
             break;
@@ -63,7 +63,10 @@ function quoteToInstall(solution, installMonth) {
         price: 0,
         quantity: 0,
     }
-    if (solution.solar.selected){
+    let panels = getReccomendedSolarpanels(solution.houseType);
+    solution.solar.minpanels = panels[0];
+    solution.solar.maxpanels = panels[1];
+    if (solution.solar.selectedpanels > 0){
         solar = solarQuote(solution);
         quote.price.breakdown.push(solar);
     }
@@ -84,6 +87,8 @@ function quoteToInstall(solution, installMonth) {
     quote.price.total_after_discount -= quote.discount.value;
 
     // todo: break down the price into its components (so these can be tabulated in an email)
+
+    console.log(quote);
     return quote;
 }
 

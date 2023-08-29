@@ -1,6 +1,6 @@
 <script>
     import { earliestInstallMonth, quoteToInstall } from "$lib/services/price-model.js"
-	export let solution = {houseType: "detatched", solar: {selected: true, minpanels: 0, maxpanels:20, selectedpanels: 0}, 
+	export let solution = {houseType: "detatched", solar: {selected: true, minpanels: 0, maxpanels:20, selectedpanels: 14}, 
                             battery: true, batterySize_kWh: 5, evCharger: {selected: true}, 
                             usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "", 
                             addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false},
