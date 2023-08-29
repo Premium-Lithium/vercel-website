@@ -12,7 +12,7 @@
         buildInputs = with pkgs; [
           nodePackages.prisma
           nodePackages.pnpm
-          nodejs-slim
+          nodejs_18
           postgresql_15
           supabase-cli
         ];

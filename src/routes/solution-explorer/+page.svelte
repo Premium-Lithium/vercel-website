@@ -10,6 +10,7 @@
     import ProgressHeader from "./ProgressHeader.svelte"
     import SampleComponents from "./SampleComponents.svelte"
     import EnergyStage from "./EnergyStage.svelte"
+	  import InvestmentStage from "./InvestmentStage.svelte";
 
     const stage = queryParam("stage", ssp.number())
     let map;
@@ -28,6 +29,8 @@
     const workFromHome = queryParam("workfromhome", ssp.boolean())
     const oilAndGas = queryParam("oilandgas", ssp.boolean())
     const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
+
+    let purchaseClick = false;
 
 </script>
 
@@ -78,6 +81,11 @@
 
     {:else if $stage === 2}
         <SampleComponents />
+
+    {:else if $stage === 3}
+        <InvestmentStage 
+            
+        />
 
     {:else}
         <Solution3DView />
