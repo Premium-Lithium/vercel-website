@@ -21,6 +21,7 @@
     $: offPeak = tariffType === "Off-Peak";
     let peakTariff = 0.47;
     let offPeakTariff = 0.18;
+    let sellTariff = 0.08;
     let offPeakRatio=0.2;  // ratio of power currently used off peak
 
     // calculated values (hard coded for now)
@@ -32,8 +33,8 @@
     
 
     // stages of savings screen
-    let savingStage = 1;
-    let stages = ["Your tariff", "Your usage", "Your Savings"]
+    let savingStage = 2;
+    let stages = ["Your tariff", "Your usage", "Solar power","Your Savings"]
 
     // questions asked
     /*
@@ -68,6 +69,7 @@
     }
 
     let customizeDayEnergyVisible = false;
+    let customizeMonthEnergyVisible = false;
 
 </script>
 <div class="savings-screen">
@@ -124,17 +126,40 @@
                     <div>
                         <button on:click={() => customizeDayEnergyVisible = !customizeDayEnergyVisible}>Customize></button>
                         {#if customizeDayEnergyVisible}
-                            <div class="customise-daily-energy">
-
+                            <div class="customise-energy">
+                                Customisable bar chart goes here?
                             </div>
                         {/if}
                     </div>
                 </div>
                 <p>Monthly energy usage</p>
-
+                <div class="energyDiv">
+                
+                <div>More energy during:<br>
+                    <label><input name="energyTime" value="summer" type="radio">Summer</label><br>
+                    <label><input name="energyTime" value="winter" type="radio">Winter</label><br>
+                    <label><input name="energyTime" value="none" type="radio">Neither</label><br>
+                </div>
+                <div>
+                    <button on:click={() => customizeMonthEnergyVisible = !customizeMonthEnergyVisible}>Customize></button>
+                    {#if customizeMonthEnergyVisible}
+                        <div class="customise-energy">
+                            Customisable bar chart goes here?
+                        </div>
+                    {/if}
+                </div>
+            </div>
+            {:else if stages[savingStage] === "Solar power"}
+                <p>Solar energy returns, comparison of battery to no battery</p>
+                <label>Export value £<input type="number" step=0.01 bind:value={sellTariff}> /kwh</label>
+                <p>Estimate of Savings + income without battery</p>
+                <p><strong>Estimate of savings with battery</strong></p>
 
             {:else if stages[savingStage] === "Your Savings"}
-                <p> how much can ya save?</p>
+                <p><strong>Your savings!</strong></p>
+                <p>With just solar you could save...</p>
+                <p>With solar and a battery you could save ..</p>
+                <p>By switching to an off-peak tariff, you could save...</p>
             {/if}
         </div>
         <div id="offPeakSavingsDiv" class="info-box">
@@ -159,7 +184,7 @@
     *{
         z-index: auto;
     }
-    .customise-daily-energy {
+    .customise-energy {
         width: 200%;
         height: 200%;
         background-color: #189ad2;
