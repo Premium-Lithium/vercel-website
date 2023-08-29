@@ -5,11 +5,10 @@
                             usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "", 
                             addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false},
                         };
-
     let earliestInstall = earliestInstallMonth();
     let installationDate = earliestInstall;
-    const reccomendedBattery = solution.batterySize_kWh; 
-    let selectedBattery = "reccomended";
+    const recommendedBattery = solution.batterySize_kWh; 
+    let selectedBattery = "recommended";
     let ups = true;
     let evCharger = false;
     let smartBattery = false;
@@ -25,9 +24,8 @@
     }
 
     function batteryChange(){
-        console.log(selectedBattery);
-        if (selectedBattery == "reccomended"){
-            solution.batterySize_kWh = reccomendedBattery;
+        if (selectedBattery == "recommended"){
+            solution.batterySize_kWh = recommendedBattery;
         }else if (selectedBattery == "smaller"){
             solution.batterySize_kWh = 5;
         }else{
@@ -48,7 +46,7 @@
         <h2> Which battery would you like ?</h2>
         <form>
             <input type="radio" bind:group={selectedBattery} value="recommended" on:change={batteryChange}>
-            <label for="reccomended"> Reccommended battery {reccomendedBattery} kWh </label>
+            <label for="recommended"> Recommended battery {recommendedBattery} kWh </label>
             <br>
             <input type="radio" bind:group={selectedBattery} value="smaller" on:change={batteryChange}>
             <label for="smaller"> Smaller battery 5 kWh </label>
@@ -61,7 +59,7 @@
 
     {#if solution.solar.selected == true}
         <h2> Solar </h2>
-        <h3> For your house we reccomend between {solution.solar.minPannels} and {solution.solar.maxPannels} pannels</h3>
+        <h3> For your house we recommend between {solution.solar.minPannels} and {solution.solar.maxPannels} pannels</h3>
         <h3> select how many pannels you would like: </h3>
         <input
             type="range"
