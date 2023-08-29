@@ -69,7 +69,8 @@
             max={solution.solar.maxPannels}
             bind:value={solution.solar.selectedPannels}
             on:change={solarChange}
-        />
+        /> {solution.solar.selectedPannels} solar pannels
+        
     {/if}
     <h2> Interested in any add ons?</h2>
     <div class="addOns">
