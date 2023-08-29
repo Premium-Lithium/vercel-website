@@ -1,11 +1,10 @@
-import { solarQuote, quoteToInstall, earliestInstallMonth } from '$lib/services/price-model.js';
+import { solarQuote, quoteToInstall, earliestInstallMonth, getAddOnCost } from '$lib/services/price-model.js';
 
 let minPannelOutput = 0;
 let maxPannelOutput = 0;
 let minPannelCost = 0;
 let maxPannelCost = 0;
 const averageElectricityCost =  0.34; // taken from octopus energy 
-let solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: ""};
 let energyUsage = 5000;
 let result = {minSaving: 0, maxSaving: 10000, minPayback: 0, maxPayback:0, minEnergy: 0, maxEnergy: 0}
 
@@ -33,7 +32,8 @@ function getAverageFromPostcode(postcode){
 function calculateUpfrontCost(solution){
     // cost = (pannel + battery + installation) - pre order%
     let installationDate = earliestInstallMonth(); 
-    let batteryCost = 0; 
+    let batteryCost = 0;
+    let addOnCost = 0; 
 
     if (solution.battery == true){
         solution.batterySize_kWh = 5;
@@ -42,32 +42,23 @@ function calculateUpfrontCost(solution){
 
     if (solution.solar.selected == true){
         if (solution.solar.selectedPannels == 0){
-            console.log("aaaaaaaaaaaaaaaaaaaa");
             const pannelCosts = solarQuote(solution, installationDate);
             console.log("pannel costs: ", pannelCosts)
-            minPannelCost = pannelCosts[0].price;
-            maxPannelCost = pannelCosts[1].price;
-            solution.solar.minPannels = pannelCosts[0].quantity;
-            solution.solar.maxPannels = pannelCosts[1].quantity;
+            addOnCost = getAddOnCost(solution.addOns, solution.solar.minPannels);
+            minPannelCost = batteryCost + pannelCosts[0].price + addOnCost;
+            addOnCost = getAddOnCost(solution.addOns, solution.solar.maxPannels);
+            maxPannelCost = batteryCost + pannelCosts[1].price + addOnCost;
+            return [minPannelCost, maxPannelCost]
         }else{
-            console.log("aaaaa");
+            console.log("getting price of ", solution.solar.selectedPannels, " pannels")
             const pannelCost  = solarQuote(solution, installationDate);
-            console.log(pannelCost);
-            const minCost = batteryCost + pannelCost;
-            return [minCost]
+            addOnCost = getAddOnCost(solution.addOns, solution.solar.selectedPannels);
+            const minCost = batteryCost + pannelCost[0].price + addOnCost;
+            console.log("prices", pannelCost, batteryCost)
+            return [minCost, 0]
 
         }
     }
-    
-    console.log("battery price: ", batteryCost);
-    console.log("min solar: ", minPannelCost, " max solar: ", maxPannelCost);
-    // energyUsage =  calculateEnergyUse();
-    const energyCost = solution.usage * averageElectricityCost;
-    // minEnergySavings = energyOutput- (batterySize + minPannelOutput);
-    // maxEnergySavings = energyOutput - (batterySize + maxPannelOutput)
-    const minCost = batteryCost + minPannelCost; 
-    const maxCost = batteryCost + maxPannelCost;
-    return [minCost, maxCost, minSolar.quantity, maxSolar.quantity];
 }
 
 function calculateSavings(){
