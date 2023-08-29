@@ -62,8 +62,8 @@ const postcodeIndex = '80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'
 export async function fetchJobDataFromPipedrive() {
     const data = await fetchAllPaginated({
         url: 'https://api.pipedrive.com/api/v1/deals',
-        //queryParams: ['filter_id=55', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
-        queryParams: ['filter_id=142', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
+        queryParams: ['filter_id=55', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
+        //queryParams: ['filter_id=142', 'api_token=77a5356773f422eb97c617fd7c37ee526da11851'],
     })
     return fetchRelevantData(data, "job");
 }

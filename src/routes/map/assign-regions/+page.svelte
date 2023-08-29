@@ -6,7 +6,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import pointsWithinPolygon from '@turf/points-within-polygon';
 import { featureCollection, point, points, polygon } from '@turf/helpers';
 import { supabase } from '$lib/supabase';
-import { serializeCoordinates, deserializeCoordinates, fetchLatlonFromPostcodesPostcodes,
+import { serializeCoordinates, deserializeCoordinates,
          fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive } from '$lib/mapUtils';
 
 
