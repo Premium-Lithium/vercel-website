@@ -54,11 +54,66 @@ const loadPolygonsFromDatabase = async (map) => {
 
 
 onMount(async () => {
-    // Colors for the markers
-    const colors = ["white", "gray", "green"];
+  const colors = ["white", "gray", "green"];
     const colouringFunction = (data) => {
-        if (data.type === "job") return "blue";
-        if (data.type === "installer") return "green";
+        console.log(data)
+        if (data.type === "job") {
+            // two possible job date sources
+            // data["9ff7b589a0c2b843924928cfc1af79dadf22f563"]
+            // and
+            // data["f0ae912a9d78d9c102153390176de173cbd791eb"]
+
+            let possibleFinishDate = data["9ff7b589a0c2b843924928cfc1af79dadf22f563"];
+            if (possibleFinishDate === null) {
+                possibleFinishDate = data["f0ae912a9d78d9c102153390176de173cbd791eb"];
+                
+            }
+            // compare to current date
+            // if in past, red
+            
+            // get current date and scheduled date
+            const currentDate = new Date().setHours(0, 0, 0, 0);
+            let jobDate = new Date(possibleFinishDate).setHours(0, 0, 0, 0);
+
+            let daysDifference = Math.round((jobDate - currentDate) / (60 * 60 * 24 * 1000));
+            
+            
+            // those in the past
+            if (jobDate < currentDate) {
+                return "red";
+            }
+            
+
+            // get degree of fade: (toggle to prioritise newest/oldest?)
+            //algorithm:
+            /*
+                set target date
+                get distance from target date
+                determine colour gradient from distance
+                    linear to begin with
+
+            */
+            let upperBound = 200;  // days distance of minimum opacity
+            let maxAlpha = 1;  // maximum opacity
+            let minAlpha = 0.3;  // minimum opacity
+
+            let actualAlpha;
+
+            // linear scale, sooner = brighter
+            if (daysDifference > upperBound) {
+                actualAlpha = minAlpha;
+            } else {
+                actualAlpha = ((upperBound - daysDifference) / upperBound) * (maxAlpha - minAlpha) + minAlpha;
+            }
+            
+            
+            let alpha = actualAlpha;
+            let color = "rgba(0, 200, 0, " + alpha + ")";
+            
+            return color;
+            
+        }
+        if (data.type === "installer") return "blue";
         return "red";
     }
 
