@@ -1,7 +1,5 @@
 <script lang="ts">
     import { queryParameters, ssp } from "sveltekit-search-params"
-    import LoadableInput from "./LoadableInput.svelte";
-	import { indexOf } from "nunjucks/src/lib";
 
     // algorithm for pricing to follow - use estimates of usage and solar power per day/month
     // get an estimate that includes increased consumption/lower solar in winter - more bought from grid
