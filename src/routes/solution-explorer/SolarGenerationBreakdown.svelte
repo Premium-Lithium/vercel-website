@@ -50,7 +50,7 @@
         {#each monthlyValues as value, index}
             <div class="column">
                 <svg height=200 width="100%">
-                <rect x=0 y={svgHeight - value * scaleFactor} rx=5 ry=5 width=100% height={value * scaleFactor} fill="#28AAE2" />
+                <rect x=0 y={svgHeight - value * scaleFactor} rx=5 ry=5 width=100% height={value * scaleFactor} fill="var(--plblue)" />
                 </svg>
                 <div class="column-label">{months[index]}</div>
             </div>
