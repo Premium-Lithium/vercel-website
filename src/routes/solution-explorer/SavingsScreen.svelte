@@ -134,9 +134,9 @@
                 <div class="energyDiv">
                 
                 <div>More energy during:<br>
-                    <label><input name="energyTime" value="summer" type="radio">Summer</label><br>
-                    <label><input name="energyTime" value="winter" type="radio">Winter</label><br>
-                    <label><input name="energyTime" value="none" type="radio">Neither</label><br>
+                    <label><input name="energyMonth" value="summer" type="radio">Summer</label><br>
+                    <label><input name="energyMonth" value="winter" type="radio">Winter</label><br>
+                    <label><input name="energyMonth" value="none" type="radio">Neither</label><br>
                 </div>
                 <div>
                     <button on:click={() => customizeMonthEnergyVisible = !customizeMonthEnergyVisible}>Customize></button>
