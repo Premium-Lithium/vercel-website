@@ -37,7 +37,11 @@ import Investments from "./Investments.svelte";
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
 </script>  
 <body>
-{#if $stage === 0}
+    <ProgressHeader
+        titles={["Energy", "Solar", "Savings", "Investment"]}
+        bind:selectedIndex={$stage}
+    />
+    {#if $stage === 0}
         <EnergyStage
             bind:battery={$battery}
             bind:solar={$solar}
