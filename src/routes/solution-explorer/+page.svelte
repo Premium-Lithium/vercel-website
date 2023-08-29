@@ -56,7 +56,7 @@
         />
     {:else if $stage === 1}
    
-        <div class="map-view"> <!--
+        <div class="map-view"> 
           <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
         </div>
         <div class="solar-api">
