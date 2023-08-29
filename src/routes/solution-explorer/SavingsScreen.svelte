@@ -12,21 +12,25 @@
     let energyUse = 2900;  // kwh per year
     let solarTariffType = "SEG";  // SEG or FIT
     let winterUsage = "higher"; // higher, lower, the same
-    let dailyUsagePattern = "day";  // day, night, the same
+    let dailyUsagePattern = "day";  // day, night, the same?
+    let offPeakStart = 0;
+    let offPeakEnd = 7; 
     
     // starting values for data from this page
     let offPeak;
     $: offPeak = tariffType === "Off-Peak";
     let peakTariff = 0.47;
-    let offPeakTeriff = 0.18;
+    let offPeakTariff = 0.18;
     let offPeakRatio=0.2;  // ratio of power currently used off peak
 
     // calculated values (hard coded for now)
     let offPeakSavings = 1000;
     let offPeakPotentialSavings = "800";
 
+    let avgDayEnergy = energyUse / 365.25;
+
     // stages of savings screen
-    let savingStage = 0;
+    let savingStage = 1;
     let stages = ["Your tariff", "Your rates", "Your usage", "Your Savings"]
 
     // questions asked
@@ -59,8 +63,11 @@
         // set tariff type in url (later)
         // slightly different wording for next section,
         tariffType = type;
-
     }
+
+
+    let nightrange = 0;
+    let nightend = 0;
 
 
 </script>
@@ -76,16 +83,31 @@
 </div>
     <div class="grid-container">
         <div id="questions">
+
             {#if stages[savingStage] == "Your tariff"}
                 <p>What tariff type are you paying for you electricity?</p>
                 {#each tariffButtonOptions as option, i}
-                    <button class="tariff-button" on:click={() => tariffSelected(option)}>{option}</button>
+                    <button class:selected={tariffType === option} class="tariff-button" on:click={() => tariffSelected(option)}>{option}</button>
                 {/each}
+                <br>
+                <button on:click={() => savingStage++}>Go!</button>
             {:else if stages[savingStage] == "Your rates"}
-                <p>What do ya pay?</p>
-            {:else if stages[savingStage] == "Your usage"}
-                <p> how much do ya use?</p>
-            {:else if stages[savingStage] == "Your Savings"}
+                <p>What are your electricity rates?</p>
+                {#if tariffType === "Off-Peak"}
+                    <form>
+                        <label>Daytime £<input bind:value={peakTariff}> /kwh</label><br>
+                        <label>Nighttime £<input bind:value={offPeakTariff}> /kwh</label><br>
+                        <label>Night start<input type="range" min=0 max=24 step=1 bind:value={offPeakStart}></label>{offPeakStart}<br>
+                        <label>Night end<input type="range" min=0 max=24 step=1 bind:value={offPeakEnd}></label>{offPeakEnd}<br>
+                    </form>
+                {/if}
+
+            {:else if stages[savingStage] === "Your usage"}
+                <p> Energy usage patterns</p>
+                
+
+
+            {:else if stages[savingStage] === "Your Savings"}
                 <p> how much can ya save?</p>
             {/if}
         </div>
@@ -149,7 +171,11 @@
     .tariff-button {
         background-color: var(--pl-blue);
     }
-    
+    .tariff-button.selected {
+        border: 10px solid white;
+        background-color: blue;
+        color: white;
+    }
     #questions {
         border: 1px solid black;
     }
