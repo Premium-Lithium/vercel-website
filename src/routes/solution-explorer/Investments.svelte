@@ -1,27 +1,27 @@
 <script>
-    import { onMount } from "svelte";
-    import { calculateUpfrontCost } from "./priceConfigurator.js";
-    import { earliestInstallMonth } from "$lib/services/price-model.js"
+    import { earliestInstallMonth, quoteToInstall } from "$lib/services/price-model.js"
 	export let solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, 
                             battery: true, batterySize_kWh: 5, evCharger: {selected: true}, 
                             usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "", 
                             addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false},
                         };
-    let quote = calculateUpfrontCost(solution);
-    // let installDateStr = solution.installMonth.toISOString().slice(0, 7);
-    const reccomendedBattery = solution.batterySize_kWh;
+
+    let earliestInstall = earliestInstallMonth();
+    let installationDate = earliestInstall;
+    const reccomendedBattery = solution.batterySize_kWh; 
     let selectedBattery = "reccomended";
     let ups = true;
     let evCharger = false;
     let smartBattery = false;
     let birdGuard = false;
+    let quote = quoteToInstall(solution, installationDate);
 
     function addOnChange(){
         solution.addOns.ups = ups;
         solution.addOns.evCharger = evCharger;
         solution.addOns.smartBattery = smartBattery;
         solution.addOns.birdGuard = birdGuard;
-        quote  = calculateUpfrontCost(solution);
+        quote  = quoteToInstall(solution, installationDate);
         console.log("quote =  ", quote);
     }
 
@@ -34,12 +34,11 @@
         }else{
             solution.batterySize_kWh = 20;
         }
-        quote = calculateUpfrontCost(solution);
+        quote = quoteToInstall(solution, installationDate);
     }
 
     function solarChange(){
-        quote = calculateUpfrontCost(solution);
-
+        quote = quoteToInstall(solution, installationDate);
     }
 
 </script>
@@ -50,7 +49,7 @@
         <h2> Which battery would you like ?</h2>
         <form>
             <input type="radio" bind:group={selectedBattery} value="recommended" on:change={batteryChange}>
-            <label for="reccomended"> Reccommended battery {solution.batterySize_kWh} kWh </label>
+            <label for="reccomended"> Reccommended battery {reccomendedBattery} kWh </label>
             <br>
             <input type="radio" bind:group={selectedBattery} value="smaller" on:change={batteryChange}>
             <label for="smaller"> Smaller battery 5 kWh </label>
@@ -74,18 +73,20 @@
         />
     {/if}
     <h2> Interested in any add ons?</h2>
-    <input type="checkbox" bind:checked={ups} on:change={addOnChange}>
-    <label for="ups"> Upgrade of EPS to UPS</label>
-    <br>
-    <input type="checkbox" bind:checked={evCharger} on:change={addOnChange}>
-    <label for="evCharger"> EV Charger</label>
-    <br>
-    <input type="checkbox" bind:checked={smartBattery} on:change={addOnChange}>
-    <label for="smartBattery"> Smart battery to existing solar array connection</label>
-    <br>
-    <input type="checkbox" bind:checked={birdGuard} on:change={addOnChange}>
-    <label for="birdGuard"> Bird Guard (Per Solar Pannel)</label>
-    <br>
+    <div class="addOns">
+        <input type="checkbox" bind:checked={ups} on:change={addOnChange}>
+        <label for="ups"> Upgrade of EPS to UPS</label>
+        <br>
+        <input type="checkbox" bind:checked={evCharger} on:change={addOnChange}>
+        <label for="evCharger"> EV Charger</label>
+        <br>
+        <input type="checkbox" bind:checked={smartBattery} on:change={addOnChange}>
+        <label for="smartBattery"> Smart battery to existing solar array connection</label>
+        <br>
+        <input type="checkbox" bind:checked={birdGuard} on:change={addOnChange}>
+        <label for="birdGuard"> Bird Guard (Per Solar Pannel)</label>
+        <br>
+    </div>
 
     <h1> Final price: £{quote.price.total_after_discount}</h1>
     <h1>Payback: 5 years </h1>
@@ -126,6 +127,12 @@
         padding: 1rem; 
         margin:30px; 
         border-radius:5px;
+    }
+
+
+    input{
+        align-items: center;
+        accent-color: var(--plblue);
     }
 
     .helptext {

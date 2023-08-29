@@ -89,31 +89,6 @@ function quoteToInstall(solution, installMonth) {
     return quote;
 }
 
-function batteryQuote(solution){
-    let battery = {
-        name: "",
-        quantity: 0,
-        price: 0
-    };
-
-    // todo: load pricing model parameters from spreadsheet/settings/elsewhere
-    switch(solution.batterySize_kWh) {
-        case 5:
-            battery.price = 2698;
-            break;
-        case 10:
-            battery.price = 4498;
-            break;
-        case 15:
-            battery.price = 11985
-        case 20:
-            battery.price = 8093;
-            break;
-        
-    }
-}
-
-
 function solarQuote(solution){
     let minSolar = {
         name: "solar",

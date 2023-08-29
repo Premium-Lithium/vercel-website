@@ -69,7 +69,11 @@
                 included: true,
                 capacity_kwh: 7
             },
-            installMonth: earliestInstall
+            solar: {
+                selected: false,
+            },
+            installMonth: earliestInstall,
+            addOns: { selected: false},
         }
 
         return defaultSolution;
