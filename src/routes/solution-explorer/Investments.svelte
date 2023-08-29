@@ -22,7 +22,6 @@
         solution.addOns.smartBattery = smartBattery;
         solution.addOns.birdGuard = birdGuard;
         quote  = quoteToInstall(solution, installationDate);
-        console.log("quote =  ", quote);
     }
 
     function batteryChange(){

@@ -5,7 +5,6 @@
 
 function quoteToInstall(solution, installMonth) {
     // todo: validate customer solution object passed in (ajv here or before call?)
-    console.log(solution);
     // todo: define this as typescript interface?
     let quote = {
         price: {
@@ -85,7 +84,6 @@ function quoteToInstall(solution, installMonth) {
     quote.price.total_after_discount -= quote.discount.value;
 
     // todo: break down the price into its components (so these can be tabulated in an email)
-    console.log(quote)
     return quote;
 }
 
@@ -114,8 +112,6 @@ function solarQuote(solution){
         const minSolarPrice = getSolarPrice(minSolar);
         minSolar.price = minSolarPrice;
     }
-    console.log("calculating solar price");  
-    console.log("solar price = ", minSolar.price);
     return minSolar;
 }
 
@@ -197,8 +193,6 @@ function getEVChargerPrice(evCharger) {
 
 function calculateDiscountFrom(installMonth) {
     const DISCOUNT_PER_MONTH = 0.05;
-    console.log("install month = : ", installMonth);
-
     const numMonthsInFuture = monthsFromNowUntil(installMonth);
     const discountMultiplier = Math.min(numMonthsInFuture, 11) * DISCOUNT_PER_MONTH;
 
