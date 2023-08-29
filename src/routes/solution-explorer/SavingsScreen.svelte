@@ -67,6 +67,7 @@
         tariffType = type;
     }
 
+    let customizeDayEnergyVisible = false;
 
 </script>
 <div class="savings-screen">
@@ -121,7 +122,12 @@
                         <label><input name="energyTime" value="none" type="radio">Neither</label><br>
                     </div>
                     <div>
-                        <button>Customize></button>
+                        <button on:click={() => customizeDayEnergyVisible = !customizeDayEnergyVisible}>Customize></button>
+                        {#if customizeDayEnergyVisible}
+                            <div class="customise-daily-energy">
+
+                            </div>
+                        {/if}
                     </div>
                 </div>
                 <p>Monthly energy usage</p>
@@ -150,6 +156,15 @@
 </div>
 
 <style>
+    *{
+        z-index: auto;
+    }
+    .customise-daily-energy {
+        width: 200%;
+        height: 200%;
+        background-color: #189ad2;
+        position: relative;
+    }
     :root {
         --pl-blue: #28AAE2;
     }
