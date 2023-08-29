@@ -4,7 +4,7 @@
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
-
+    import Loading from "$lib/components/Loading.svelte";
 
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
@@ -20,6 +20,7 @@
     let solarAzimuth = 0; // 0=south, -90=east, 180=north, 90=west
     let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
     let monthlySolarGenerationValues = [];
+    let loadingSolarValues = false;
 
     const battery = queryParam("battery", ssp.boolean())
     const solar = queryParam("solar", ssp.boolean())
@@ -67,6 +68,7 @@
           <input type="number" id="solarAzimuth" name="solarAzimuth" bind:value={solarAzimuth}/>
           <input type="submit" value="Submit" on:click={async () => {
             monthlySolarGenerationValues = [];
+            loadingSolarValues = true;
             let res = await fetch('solution-explorer/', {
               method: "POST",
               headers: {
@@ -83,12 +85,17 @@
               })
             });
             res = await res.json();
+            loadingSolarValues = false;
             console.log(res);
             res.outputs.monthly.fixed.forEach((x) => {
               monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
             })
           }}> 
+          {#if loadingSolarValues}
+          <Loading/>
+          {:else}
           <SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues}/>
+          {/if}
         </div>
 
     {:else if $stage === 2}
