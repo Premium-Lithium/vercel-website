@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { number } from "nunjucks/src/tests";
 
-
     import LoadableInput from "./LoadableInput.svelte";
     import { queryParameters, ssp } from "sveltekit-search-params"
 
@@ -10,19 +9,13 @@
         energyUse: ssp.number(),
         solarEnergy: ssp.number(),
         energyCost: ssp.number(),
-        btn1: ssp.,
+        btn1: ssp.number(),
         btn2: ssp.boolean(),
         btn3: ssp.boolean(),
         btn4: ssp.boolean()
     });
 
-    interface energyData {
-        energyUse: number;
-        solarEnergy: number;
-        energyCost: number;
-    }
-
-    const defaults: energyData = {
+    const defaults = {
         energyUse: 20,
         solarEnergy: 15,
         energyCost: 0.3

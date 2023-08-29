@@ -51,7 +51,8 @@
             bind:highConsumptionDevices={$highConsumptionDevices}
         />
     {:else if $stage === 1}
-        <div class="map-view">
+   
+        <div class="map-view"> <!--
           <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
         </div>
         <div class="solar-api">
@@ -59,7 +60,7 @@
           <input type="number" id="peakSolarPower" name="peakSolarPower" bind:value={peakSolarPower}>
           <label for="solarLoss">Solar Loss</label>
           <input type="number" id="solarLoss" name="solarLoss" bind:value={solarLoss}>
-          <!--
+          
           <input type="submit" value="Submit" on:click={async () => {
             let res = await fetch('solution-explorer/', {
               method: "POST",
@@ -80,10 +81,9 @@
         </div>
 
     {:else if $stage === 2}
-        <SampleComponents />
-
+      <SavingsScreen/>
     {:else if $stage === 4}
-        <SavingsScreen/>
+        <SampleComponents />
     {:else}
         <Solution3DView />
         REVIEW
