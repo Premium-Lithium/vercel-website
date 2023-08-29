@@ -8,16 +8,16 @@
 <script>
 export let search = true;
 export let map = undefined;
+export let searchResult = {'latitude': undefined, 'longitude': undefined};
 const styles = [
-    'mapbox://styles/mapbox/streets-v12',
-    'mapbox://styles/mapbox/outdoors-v12',
-    'mapbox://styles/mapbox/light-v11',
-    'mapbox://styles/mapbox/dark-v11',
-    'mapbox://styles/mapbox/satellite-v9',
-    'mapbox://styles/mapbox/satellite-streets-v12',
-    'mapbox://styles/mapbox/navigation-day-v1',
-    'mapbox://styles/mapbox/navigation-day-v1',
-    'mapbox://styles/mapbox/navigation-night-v1']
+    'mapbox://styles/mapbox/streets-v12',           // 0
+    'mapbox://styles/mapbox/outdoors-v12',          // 1
+    'mapbox://styles/mapbox/light-v11',             // 2
+    'mapbox://styles/mapbox/dark-v11',              // 3
+    'mapbox://styles/mapbox/satellite-v9',          // 4
+    'mapbox://styles/mapbox/satellite-streets-v12', // 5
+    'mapbox://styles/mapbox/navigation-day-v1',     // 6
+    'mapbox://styles/mapbox/navigation-night-v1']   // 7
 
 export let style = 5;
 import { onMount } from 'svelte';
@@ -33,14 +33,19 @@ onMount(() => {
 
     map.on('load', async () => {
         if(search){
+            const search = new MapboxGeocoder({
+                accessToken: mapboxGlAccessToken,
+                mapboxgl: mapboxgl,
+                flyTo: {
+                    speed: 2.5,
+                },
+            });
+            search.on('result', (e) => {
+                searchResult.latitude = e.result.geometry.coordinates[1];
+                searchResult.longitude = e.result.geometry.coordinates[0];
+            })
             map.addControl(
-                new MapboxGeocoder({
-                    accessToken: mapboxGlAccessToken,
-                    mapboxgl: mapboxgl,
-                    flyTo: {
-                        speed: 2.5,
-                    },
-                }),
+                search,
             );
         }
         map.resize();
