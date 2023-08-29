@@ -22,8 +22,10 @@ export async function POST ({request}){
     let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons)
     if(polygonPointIsIn) {
         await syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails[polygonPointIsIn].id);
+        return json({message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.`}, {status: 200});
     }
-    return json({message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.`}, {status: 200});
+    return json({message: `Deal with id ${dealInfo.meta.id} not inside a defined region.`}, {status: 204});
+    
 }
     
 
