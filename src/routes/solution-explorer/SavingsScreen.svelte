@@ -111,8 +111,6 @@
                 
             {:else if stages[savingStage] === "Your usage"}
                 <p> Energy usage patterns</p>
-                <!--how much is off peak
-                detailed monthly usage patterns-->
                 {#if offPeak}
                     <label>Ratio of off peak use?<input type="number" step=0.1 bind:value={offPeakRatio}></label>
                 {/if}
@@ -165,9 +163,7 @@
         <div id="offPeakSavingsDiv" class="info-box">
             <input type="checkbox" bind:checked={offPeak}>
             <h1>Your savings!</h1>
-            <!--
-                Show initial savings from using solar/buying off peak
-            -->
+            
             {#if offPeak}
                 <h2>Off peak savings £{offPeakSavings} per year!</h2>
             {:else}
