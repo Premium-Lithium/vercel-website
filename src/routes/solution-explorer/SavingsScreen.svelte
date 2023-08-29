@@ -184,9 +184,6 @@
         background-color: #189ad2;
         position: relative;
     }
-    :root {
-        --pl-blue: #28AAE2;
-    }
     .energyDiv {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -218,7 +215,7 @@
         margin-top: 2px;
         margin-bottom: 2px;;
         border: 1px solid black;
-        background-color: var(--pl-blue);
+        background-color: var(--plblue);
         
     }
     .side-bar-stage:hover {
@@ -228,7 +225,7 @@
         background-color: blue;
     }
     .tariff-button {
-        background-color: var(--pl-blue);
+        background-color: var(--plblue);
     }
     .tariff-button.selected {
         border: 10px solid white;
