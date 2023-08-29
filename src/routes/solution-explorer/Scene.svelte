@@ -1,12 +1,16 @@
 <script>
     import { T, useFrame } from '@threlte/core'
-    import { battery, inverter, stage, roof, roofSolar } from './solutionModel.js';
+    import { SolutionModel } from './solutionModel.js';
     import CustomRenderer from './CustomRenderer.svelte';
     import { OrbitControls } from '@threlte/extras'
 
+    const camZoomToSizeRatio = 120.0 / 1000.0; // Considers fade out size around border of canvas
 
-    // let rotation = 32 * Math.PI / 180;
+    export let size;
+    let model = new SolutionModel("test");
+
     let batteryModel;
+    const plBlue = "#28AAE2";
 
     let rotation = 0;
     const rotSpeed = 0.2;
@@ -15,64 +19,63 @@
     })
 </script>
 
-<T.FogExp2 attach="fog" args={['#28AAE2', 0.015]} />
+<T.FogExp2 attach="fog" args={['white', 0.015]} />
 
-<T.OrthographicCamera makeDefault zoom={200.0} position={[0, 2, 10]} on:create={({ ref }) => {
-    ref.lookAt(0, 2, 0)
+<T.OrthographicCamera makeDefault zoom={size * camZoomToSizeRatio} position={[10, 6, 10]} on:create={({ ref }) => {
+    ref.lookAt(0, 1, 0)
 }}></T.OrthographicCamera>
-
-
-<!-- Above angled -->
-<T.PerspectiveCamera makeDefault rotation={[0, 0, 0]} position={[4, 2.8, 4]} on:create={({ ref }) => {
-    ref.lookAt(0, 1, 0)
-}}></T.PerspectiveCamera>
-
-<!-- <T.OrthographicCamera makeDefault zoom={150.0} position={[5, 3, 5]} on:create={({ ref }) => {
-    ref.lookAt(0, 1, 0)
-}}></T.OrthographicCamera> -->
-
-<!-- Directly above -->
-<!-- <T.OrthographicCamera makeDefault zoom={300.0} position={[0, 10, 0]} on:create={({ ref }) => {
-    ref.lookAt(0, 0, 0)
-}}></T.OrthographicCamera> -->
 
 <!-- todo: move these into a json configuration file -->
 <T.DirectionalLight position={[10, 10, -4]} castShadow intensity={1.5} scale={20.0}/>
-<T.DirectionalLight position={[10, 10, 2]} castShadow intensity={2.5}/>
-<T.PointLight position={[10, 5, 0]}  intensity={600.0} />
+<T.DirectionalLight position={[10, 10, 2]} castShadow intensity={3.5}/>
+<T.PointLight position={[10, 5, 0]}  intensity={400.0} />
 
-<T.AmbientLight intensity={0.3} />
-
+<T.AmbientLight intensity={0.5} />
 
 <!-- Stage -->
-<T.Mesh geometry={stage}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
+<T.Mesh geometry={model.stage} castShadow receiveShadow>
     <T.MeshStandardMaterial visible={true} color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Roof -->
-<T.Mesh geometry={roof}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow bind:ref={batteryModel}>
-    <T.MeshStandardMaterial color="white" wireframe={false}/>
+<T.Mesh geometry={model.roof} castShadow receiveShadow bind:ref={batteryModel}>
+    <T.MeshStandardMaterial color="white" wireframe={false} visible={true}/>
 </T.Mesh>
 
 <!-- Battery -->
-<T.Mesh geometry={battery}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
-    <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
+<T.Mesh geometry={model.battery} castShadow receiveShadow>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
 </T.Mesh>
 
 <CustomRenderer selectedMesh={batteryModel} />
 
 <!-- Inverter -->
-<T.Mesh geometry={inverter}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
-    <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
+<T.Mesh geometry={model.inverter} castShadow receiveShadow>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
 </T.Mesh>
 
 <!-- Solar Panel on roof -->
-<T.Mesh geometry={roofSolar}  position={[ 0.0, 0.0, 0.0 ]} castShadow receiveShadow>
-    <T.MeshStandardMaterial color="#28AAE2" wireframe={false}/>
+<T.Mesh geometry={model.solar} castShadow receiveShadow>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
+</T.Mesh>
+
+<!-- outside wall -->
+<T.Mesh geometry={model.outsideWall} castShadow receiveShadow>
+    <T.MeshStandardMaterial color="white" wireframe={false} visible={true}/>
+</T.Mesh>
+
+<!-- ev charger -->
+<T.Mesh geometry={model.evCharger} castShadow receiveShadow>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
+</T.Mesh>
+
+<!-- ev charger -->
+<T.Mesh geometry={model.groundSolar} castShadow receiveShadow>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
 </T.Mesh>
 
 <!-- Floor -->
 <T.Mesh rotation.x={-Math.PI/2} receiveShadow>
-    <T.CircleGeometry args={[10, 64]}/>
-    <T.MeshStandardMaterial color="white" wireframe={false}/>
+    <T.CircleGeometry args={[25, 64]}/>
+    <T.MeshStandardMaterial color="white" wireframe={false} visible={true}/>
 </T.Mesh>

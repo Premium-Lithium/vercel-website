@@ -7,22 +7,18 @@
 </script>
 
 <div class="container">
-    {#each titles.slice(0, -1) as title, i}
+    {#each titles as title, i}
         <div class={(i === selectedIndex) ? "highlight" : ""}>
-            <div class="title">
+            <div class="title" on:click={() => {selectedIndex = i}}>
                 {title}
             </div>
         </div>
-
+        {#if i != titles.length-1}
         <div class="icon-protector">
             <ChevronRight size="2em" />
         </div>
+        {/if}
     {/each}
-    <div class={(selectedIndex === (titles.length-1)) ? "highlight" : ""}>
-        <div class="title">
-            {titles.at(-1)}
-        </div>
-    </div>
 </div>
 
 <style>
@@ -37,6 +33,11 @@
     }
 
     .title {
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 
     .icon-protector {

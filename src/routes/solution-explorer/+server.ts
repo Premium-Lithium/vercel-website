@@ -9,31 +9,43 @@ const schema = {
         "requestType": {
         "type": "string",
         "enum": ["PVGIS"],
-        "errorMessage": "requestType should be one of ['PVGIS']",
+        "errorMessage": "requestType should be one of ['PVGIS'].",
         },
         "lat": {
         "type": "number",
         "maximum": 90,
         "minimum": -90,
-        "errorMessage": "lat should be between -90 and 90"
+        "errorMessage": "lat should be between -90 and 90."
         },
         "lon": {
         "type": "number",
         "maximum": 180,
         "minimum": -180,
-        "errorMessage": "lon should be between -180 and 180"
+        "errorMessage": "lon should be between -180 and 180."
         },
         "peakPower": {
         "type": "number",
         "minimum": 0,
-        "errorMessage": "peakPower should be a positive number"        
+        "errorMessage": "peakPower should be a positive number."        
         },
         "loss": {
         "type": "number",
         "minimum": 0,
         "maximum": 100,
         "errorMessage": "loss should be between 0 and 100."
-        }
+        },
+        "angle": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 90,
+        "errorMessage": "angle should be between 0 and 90."
+        },
+        "azimuth": {
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180,
+        "errorMessage": "angle should be between -180 and 180."
+        },
     },
     "required": ["requestType", "lat", "lon", "peakPower", "loss"]
 }
@@ -57,6 +69,8 @@ export async function POST({request}) {
     let lon = requestData.lon;
     let peakPower = requestData.peakPower;
     let loss = requestData.loss;
-    let res = await fetch(`https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?lat=${lat}&lon=${lon}&peakpower=${peakPower}&loss=${loss}&outputformat=json`, options)
+    let angle = requestData.angle;
+    let azimuth = requestData.azimuth;
+    let res = await fetch(`https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?lat=${lat}&lon=${lon}&peakpower=${peakPower}&loss=${loss}&angle=${angle}&aspect=${azimuth}&outputformat=json`, options)
     return res;
 }
