@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { page } from '$app/stores'
-    import { earliestInstallMonth, quoteToInstall } from './price-model';
+    import { earliestInstallMonth, quoteToInstall } from '$lib/services/price-model.js';
 
 
     const dealId = `${$page.url.searchParams.get('dealId')}`;
@@ -69,7 +69,11 @@
                 included: true,
                 capacity_kwh: 7
             },
-            installMonth: earliestInstall
+            solar: {
+                selected: false,
+            },
+            installMonth: earliestInstall,
+            addOns: { selected: false},
         }
 
         return defaultSolution;
