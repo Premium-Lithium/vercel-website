@@ -56,7 +56,6 @@ const loadPolygonsFromDatabase = async (map) => {
 onMount(async () => {
   const colors = ["white", "gray", "green"];
     const colouringFunction = (data) => {
-        console.log(data)
         if (data.type === "job") {
             // two possible job date sources
             // data["9ff7b589a0c2b843924928cfc1af79dadf22f563"]
