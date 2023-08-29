@@ -105,12 +105,15 @@
 <style>
   .map-view {
     width: 100vw;
-    height: 25vh;
+    height: 40vh;
   }
   .solar-api {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 90vw;
-    left: 5vw;
+    margin: 20px 5vw;
+    
     position: relative;
-    margin: 40px;
   }
 </style>

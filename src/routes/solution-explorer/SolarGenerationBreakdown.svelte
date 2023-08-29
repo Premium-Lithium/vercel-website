@@ -1,30 +1,30 @@
 <script>
     export let monthlyValues = [];
-    //for(let i = 0; i < 12; i++) monthlyValues.push(Math.random() * 100);
     const months = [
     "J", "F", "M", "A", "M", "J",
     "J", "A", "S", "O", "N", "D"
     ];
     $: maxVal = Math.max(...monthlyValues);
     const svgHeight = 200;
-    $: scaleFactor = svgHeight / maxVal; // Assuming 200 is the max height for columns
+    $: scaleFactor = svgHeight / maxVal;
     
 </script>
 
 <style>
     .chart-container {
-        width: calc(100% - 20px);
+        max-width: 100%;
         height: 250px;
         display: flex;
         align-items: flex-end;
-        justify-content: space-around;
+        justify-content: center;
         margin-left: 10px;
         margin-right: 10px;
     }
     .column {
         width: calc((100%/ 12) - 20px);
+        min-width: 10px;
         text-align: center;
-        margin: 2px 0px 2px 10px;
+        margin: 1px 0px 1px 10px;
     }
     rect {
         animation: grow 1s ease-in-out forwards;
