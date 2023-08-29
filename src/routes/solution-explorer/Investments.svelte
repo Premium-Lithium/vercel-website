@@ -61,7 +61,7 @@
 
     {#if solution.solar.selected == true}
         <h2> Solar </h2>
-        <h3> For your type of house we reccomend between {solution.solar.minPannels} and {solution.solar.maxPannels} pannels</h3>
+        <h3> For your house we reccomend between {solution.solar.minPannels} and {solution.solar.maxPannels} pannels</h3>
         <h3> select how many pannels you would like: </h3>
         <input
             type="range"
@@ -92,7 +92,7 @@
     <h1>Payback: 5 years </h1>
     <h1> Savings: 2000kWh </h1>
 
-    <h2> Breakdown of price </h2>
+    <h2> Breakdown</h2>
     {#each quote.price.breakdown as item}
         <li> {item.quantity} {item.name} £{item.price} </li>
     {/each}
