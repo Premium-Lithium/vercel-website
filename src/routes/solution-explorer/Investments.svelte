@@ -1,6 +1,6 @@
 <script>
     import { earliestInstallMonth, quoteToInstall } from "$lib/services/price-model.js"
-	export let solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, 
+	export let solution = {houseType: "detatched", solar: {selected: true, minpanels: 0, maxpanels:20, selectedpanels: 0}, 
                             battery: true, batterySize_kWh: 5, evCharger: {selected: true}, 
                             usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "", 
                             addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false},
@@ -59,15 +59,15 @@
 
     {#if solution.solar.selected == true}
         <h2> Solar </h2>
-        <h3> For your house we recommend between {solution.solar.minPannels} and {solution.solar.maxPannels} pannels</h3>
-        <h3> select how many pannels you would like: </h3>
+        <h3> For your house we recommend between {solution.solar.minpanels} and {solution.solar.maxpanels} panels</h3>
+        <h3> select how many panels you would like: </h3>
         <input
             type="range"
-            min={solution.solar.minPannels}
-            max={solution.solar.maxPannels}
-            bind:value={solution.solar.selectedPannels}
+            min={solution.solar.minpanels}
+            max={solution.solar.maxpanels}
+            bind:value={solution.solar.selectedpanels}
             on:change={solarChange}
-        /> {solution.solar.selectedPannels} solar pannels
+        /> {solution.solar.selectedpanels} solar panels
         
     {/if}
     <h2> Interested in any add ons?</h2>

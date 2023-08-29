@@ -27,15 +27,15 @@ function quoteToInstall(solution, installMonth) {
     // todo: load pricing model parameters from spreadsheet/settings/elsewhere
     switch(solution.batterySize_kWh) {
         case 5:
-            battery.price = 2698;
+            battery.price = 3995;
             break;
         case 10:
-            battery.price = 4498;
+            battery.price = 7990;
             break;
         case 15:
             battery.price = 11985
         case 20:
-            battery.price = 8093;
+            battery.price = 15980;
             break;
         
     }
@@ -68,7 +68,7 @@ function quoteToInstall(solution, installMonth) {
         quote.price.breakdown.push(solar);
     }
 
-    getAddOnCost(solution.addOns, solution.solar.selectedPannels, quote);
+    getAddOnCost(solution.addOns, solution.solar.selectedpanels, quote);
 
     // Calculate total of components
     quote.price.breakdown.forEach(component => {
@@ -99,23 +99,23 @@ function solarQuote(solution){
         quantity: 0,
         price: 0,
     }
-    let pannels = getReccomendedSolarPannels(solution.houseType);
-    solution.solar.minPannels = pannels[0];
-    solution.solar.maxPannels = pannels[1];
-    if (solution.solar.selectedPannels == 0){
+    let panels = getReccomendedSolarpanels(solution.houseType);
+    solution.solar.minpanels = panels[0];
+    solution.solar.maxpanels = panels[1];
+    if (solution.solar.selectedpanels == 0){
         const minSolarPrice = getSolarPrice(minSolar);
         const maxSolarPrice = getSolarPrice(maxSolar);
         minSolar.price = minSolarPrice;
         maxSolar.price = maxSolarPrice;
     }else{
-        minSolar.quantity = solution.solar.selectedPannels;
+        minSolar.quantity = solution.solar.selectedpanels;
         const minSolarPrice = getSolarPrice(minSolar);
         minSolar.price = minSolarPrice;
     }
     return minSolar;
 }
 
-function getReccomendedSolarPannels(houseType){
+function getReccomendedSolarpanels(houseType){
     // Typical Size Solar Panel Arrays Based On R esidential Property Type	
     // From spreadsheet 
     let min = 0;
@@ -143,13 +143,13 @@ function getReccomendedSolarPannels(houseType){
 
 function getSolarPrice(solar){
     let price  = 0;
-    price += 5995; // price of 6 pannels
-    const additionalPannels = solar.quantity - 6;
-    price += 500 * additionalPannels; // each one after is £500
+    price += 5995; // price of 6 panels
+    const additionalpanels = solar.quantity - 6;
+    price += 500 * additionalpanels; // each one after is £500
     return price;
 }
 
-function getAddOnCost(addOns, pannels, quote){
+function getAddOnCost(addOns, panels, quote){
     if (addOns.evCharger == true){
         const evCharger =  { name: "EV Charger",
             quantity: 1,
@@ -175,8 +175,8 @@ function getAddOnCost(addOns, pannels, quote){
     if (addOns.birdGuard == true){
         const birdGuard = {
             name: "bird guard",
-            quantity: pannels,
-            price: 79*pannels,
+            quantity: panels,
+            price: 79*panels,
         }
         quote.price.breakdown.push(birdGuard);
     }
