@@ -38,7 +38,7 @@
 <body>
     <ProgressHeader
         titles={["Energy", "Solar", "Savings", "Investment"]}
-        selectedIndex={$stage}
+        bind:selectedIndex={$stage}
     />
     {#if $stage === 0}
         <EnergyStage
