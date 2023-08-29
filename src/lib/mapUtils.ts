@@ -1,6 +1,11 @@
 import fetchAllPaginated from '$lib/pipedrive/fetchAllPaginated';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 
+/**
+ * Returns a string representation of an array of coordinates.
+ * @param {Array<Array<[Number, Number]>>} coords A 2D array of x y coordinates.
+ * @return {string} A comma separated string containing each x y coordinate.
+ */
 export const serializeCoordinates = (coords: [[Number, Number]]) => {
     return coords.reduce(
         (acc, cv, ci, arr) => {
@@ -9,6 +14,11 @@ export const serializeCoordinates = (coords: [[Number, Number]]) => {
     )
 }
 
+/**
+ * Takes a string representing coordinates and returns a 2D array representation.
+ * @param {string} coordString A comma seperated string containing each x y coordinate.
+ * @returns {Array<[Number, Number]>} A 2D array of x y coordinates
+ */
 export const deserializeCoordinates = (coordString: String) => {
     let coordSplit = coordString.split(',').map(x => parseFloat(x));
     let coords = [];
@@ -28,6 +38,11 @@ export function splitArrayIntoNLengthChunks(inputArray: Array<any>, n: Number) {
     }, [])
 }
 
+/**
+ * Gets the latitude and longitude for each postcode in an array.
+ * @param {Array<string>} postcodes An array of postcodes.
+ * @returns
+ */
 export async function fetchLatlonFromPostcodesPostcodes(postcodes: Array<String>) {
     const postcodeChunks = splitArrayIntoNLengthChunks(postcodes, 90);
     const locationChunks = await Promise.all(postcodeChunks.map(async (postcodeChunk) => {
@@ -87,6 +102,11 @@ export async function fetchRelevantData(data, type) {
     }) 
 }
 
+/**
+ * @param point A Turf.js point.
+ * @param polygons A list of Turf.js polygons.
+ * @returns The first index of polygons which the point is inside.
+ */
 export function pointInPolygonFromList (point, polygons) {
     for (let i = 0; i < polygons.length; i++) {
         if (booleanPointInPolygon(point, polygons[i])) {
