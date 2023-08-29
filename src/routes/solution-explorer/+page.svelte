@@ -10,9 +10,9 @@
   import ProgressHeader from "./ProgressHeader.svelte"
   import SampleComponents from "./SampleComponents.svelte"
   import EnergyStage from "./EnergyStage.svelte"
-import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
-import Investments from "./Investments.svelte";
-
+  import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
+  import Investments from "./Investments.svelte";
+  import SavingsScreen from "./SavingsScreen.svelte";
   const stage = queryParam("stage", ssp.number())
   let map;
   let peakSolarPower = 8.8;
@@ -55,7 +55,8 @@ import Investments from "./Investments.svelte";
             bind:highConsumptionDevices={$highConsumptionDevices}
         />
     {:else if $stage === 1}
-        <div class="map-view">
+   
+        <div class="map-view"> 
           <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
         </div>
         <div class="solar-api">
@@ -100,6 +101,8 @@ import Investments from "./Investments.svelte";
         </div>
 
     {:else if $stage === 2}
+      <SavingsScreen/>
+    {:else if $stage === 4}
         <SampleComponents />
     {:else if $stage ===4}
     <Investments solution={solution}/>    
