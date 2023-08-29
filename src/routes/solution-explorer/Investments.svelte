@@ -1,16 +1,14 @@
 <script>
     import { onMount } from "svelte";
     import { calculateUpfrontCost } from "./priceConfigurator.js";
+    import { earliestInstallMonth } from "$lib/services/price-model.js"
 	export let solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, 
                             battery: true, batterySize_kWh: 5, evCharger: {selected: true}, 
                             usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "", 
                             addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false},
                         };
-    let breakdown = {battery: 0, solar: 0, ups: 0, evCharger: 0, smartBattery: 0, birdGuard: 0, discount: 0}
-    let price = [0,0];
-    onMount(async () => {
-        price = calculateUpfrontCost(solution);
-    });
+    let quote = calculateUpfrontCost(solution);
+    // let installDateStr = solution.installMonth.toISOString().slice(0, 7);
     const reccomendedBattery = solution.batterySize_kWh;
     let selectedBattery = "reccomended";
     let ups = true;
@@ -23,7 +21,8 @@
         solution.addOns.evCharger = evCharger;
         solution.addOns.smartBattery = smartBattery;
         solution.addOns.birdGuard = birdGuard;
-        price  = calculateUpfrontCost(solution);
+        quote  = calculateUpfrontCost(solution);
+        console.log("quote =  ", quote);
     }
 
     function batteryChange(){
@@ -31,15 +30,15 @@
         if (selectedBattery == "reccomended"){
             solution.batterySize_kWh = reccomendedBattery;
         }else if (selectedBattery == "smaller"){
-            solution.batterySize_kWh = reccomendedBattery -2;
+            solution.batterySize_kWh = 5;
         }else{
-            solution.batterySize_kWh = reccomendedBattery +2;
+            solution.batterySize_kWh = 20;
         }
-        price = calculateUpfrontCost(solution);
+        quote = calculateUpfrontCost(solution);
     }
 
     function solarChange(){
-        price = calculateUpfrontCost(solution);
+        quote = calculateUpfrontCost(solution);
 
     }
 
@@ -54,10 +53,10 @@
             <label for="reccomended"> Reccommended battery {solution.batterySize_kWh} kWh </label>
             <br>
             <input type="radio" bind:group={selectedBattery} value="smaller" on:change={batteryChange}>
-            <label for="smaller"> Smaller battery {solution.batterySize_kWh-2} kWh </label>
+            <label for="smaller"> Smaller battery 5 kWh </label>
             <br>
             <input type="radio" bind:group={selectedBattery} value="larger" on:change={batteryChange}>
-            <label for="larger"> Larger battery {solution.batterySize_kWh+2} kWh </label>
+            <label for="larger"> Larger battery 20 kWh </label>
             <br>
         </form>
     {/if}
@@ -88,14 +87,15 @@
     <label for="birdGuard"> Bird Guard (Per Solar Pannel)</label>
     <br>
 
-    <h1> Final price: £{price[0]}</h1>
+    <h1> Final price: £{quote.price.total_after_discount}</h1>
     <h1>Payback: 5 years </h1>
     <h1> Savings: 2000kWh </h1>
 
     <h2> Breakdown of price </h2>
-    <h3> Price of {solution.batterySize_kWh} kWh battery: {breakdown.battery} </h3>
-    <h3> Price of {solution.solar.selectedPannels} solar pannels: {breakdown.solar} </h3>
-    <h3> Discount: - £{breakdown.discount} </h3>
+    {#each quote.price.breakdown as item}
+        <li> {item.quantity} {item.name} £{item.price} </li>
+    {/each}
+    <li> Discount: -£{quote.discount.value} </li>
     <div class="helptext"> These are estimates. We'll arrange a site survey for you for the most accurate information.</div>
     <div class=buttons>
         <button> Recieve Your quote in email </button>

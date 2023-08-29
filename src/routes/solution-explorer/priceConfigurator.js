@@ -34,10 +34,11 @@ function calculateUpfrontCost(solution){
     let installationDate = earliestInstallMonth(); 
     let batteryCost = 0;
     let addOnCost = 0; 
+    let quote = quoteToInstall(solution, installationDate);
+    return quote;
 
     if (solution.battery == true){
         solution.batterySize_kWh = 5;
-        batteryCost = quoteToInstall(solution, installationDate).price.total;
     }
 
     if (solution.solar.selected == true){

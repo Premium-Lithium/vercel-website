@@ -59,13 +59,24 @@ function quoteToInstall(solution, installMonth) {
         quote.price.breakdown.push(charger);
     }
 
+    let solar = {
+        name: "solar", 
+        price: 0,
+        quantity: 0,
+    }
+    if (solution.solar.selected){
+        solar = solarQuote(solution);
+        quote.price.breakdown.push(solar);
+    }
+
+    getAddOnCost(solution.addOns, solution.solar.selectedPannels, quote);
+
     // Calculate total of components
     quote.price.breakdown.forEach(component => {
         quote.price.total += component.price;
     });
 
     quote.price.total_after_discount = quote.price.total;
-
     // Apply pre-order discount
     const discountMultiplier = calculateDiscountFrom(installMonth);
 
@@ -78,14 +89,40 @@ function quoteToInstall(solution, installMonth) {
     return quote;
 }
 
+function batteryQuote(solution){
+    let battery = {
+        name: "",
+        quantity: 0,
+        price: 0
+    };
 
-function solarQuote(solution, installationDate){
+    // todo: load pricing model parameters from spreadsheet/settings/elsewhere
+    switch(solution.batterySize_kWh) {
+        case 5:
+            battery.price = 2698;
+            break;
+        case 10:
+            battery.price = 4498;
+            break;
+        case 15:
+            battery.price = 11985
+        case 20:
+            battery.price = 8093;
+            break;
+        
+    }
+}
+
+
+function solarQuote(solution){
     let minSolar = {
+        name: "solar",
         quantity: 0,
         price: 0, 
     }
 
     let maxSolar = {
+        name: "max solar",
         quantity: 0,
         price: 0,
     }
@@ -104,7 +141,7 @@ function solarQuote(solution, installationDate){
     }
     console.log("calculating solar price");  
     console.log("solar price = ", minSolar.price);
-    return [minSolar, maxSolar]
+    return minSolar;
 }
 
 function getReccomendedSolarPannels(houseType){
@@ -133,32 +170,46 @@ function getReccomendedSolarPannels(houseType){
     return [min, max]
 }
 
-function getSolarPrice(solar, installMonth){
+function getSolarPrice(solar){
     let price  = 0;
     price += 5995; // price of 6 pannels
     const additionalPannels = solar.quantity - 6;
     price += 500 * additionalPannels; // each one after is £500
-    if (installMonth){
-        price = price * calculateDiscountFrom(installMonth);
-    }
     return price;
 }
 
-function getAddOnCost(addOns, pannels){
-    let addOnPrice = 0;
+function getAddOnCost(addOns, pannels, quote){
     if (addOns.evCharger == true){
-        addOnPrice += 695;
+        const evCharger =  { name: "EV Charger",
+            quantity: 1,
+            price: 695,
+        }
+        quote.price.breakdown.push(evCharger);
     }
     if (addOns.ups == true){
-        addOnPrice += 995
+        const ups =  { name: "Upgrade of EPS to UPS",
+            quantity: 1,
+            price: 995,
+        }
+        quote.price.breakdown.push(ups);
     }
     if (addOns.smartBattery == true){
-        addOnPrice += 495;
+        const smartBattery = {
+            name: "smart battery to existing solar array connection",
+            quantity: 1,
+            price: 495,
+        }
+        quote.price.breakdown.push(smartBattery);
     }
     if (addOns.birdGuard == true){
-        addOnPrice += (79 * pannels);
+        const birdGuard = {
+            name: "bird guard",
+            quantity: pannels,
+            price: 79*pannels,
+        }
+        quote.price.breakdown.push(birdGuard);
     }
-    return addOnPrice
+    return quote
 }
 
 function getEVChargerPrice(evCharger) {
@@ -171,6 +222,7 @@ function getEVChargerPrice(evCharger) {
 
 function calculateDiscountFrom(installMonth) {
     const DISCOUNT_PER_MONTH = 0.05;
+    console.log("install month = : ", installMonth);
 
     const numMonthsInFuture = monthsFromNowUntil(installMonth);
     const discountMultiplier = Math.min(numMonthsInFuture, 11) * DISCOUNT_PER_MONTH;
