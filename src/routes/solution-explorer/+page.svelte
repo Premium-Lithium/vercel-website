@@ -104,8 +104,8 @@
       <SavingsScreen/>
     {:else if $stage === 4}
         <SampleComponents />
-    {:else if $stage ===4}
-    <Investments solution={solution}/>    
+    {:else if $stage ===5}
+        <Investments solution={solution}/>    
     {:else}
         <Solution3DView />
         REVIEW

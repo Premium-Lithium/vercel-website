@@ -1,5 +1,6 @@
 <script lang="ts">
     import { queryParameters, ssp } from "sveltekit-search-params"
+    import { energySavings } from "./energySavingsCalculator"
 
     // algorithm for pricing to follow - use estimates of usage and solar power per day/month
     // get an estimate that includes increased consumption/lower solar in winter - more bought from grid
@@ -21,6 +22,17 @@
     let offPeakTariff = 0.18;
     let sellTariff = 0.08;
     let offPeakRatio=0.2;  // ratio of power currently used off peak
+    let supplier = "octopus";
+    let totalCost = 50000000;
+    let batterySize = 5;
+
+    let savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, supplier)
+    console.log(savings);
+    let solarSavings = savings[0];
+    let batterySavings = savings[1];
+    let soldEnergy = savings[2];
+    let totalSavings = savings[3];
+    let payback = savings[4]
 
     // calculated values (hard coded for now)
     let offPeakSavings = 1000;
@@ -153,9 +165,11 @@
 
             {:else if stages[savingStage] === "Your Savings"}
                 <p><strong>Your savings!</strong></p>
-                <p>With just solar you could save...</p>
-                <p>With solar and a battery you could save ..</p>
+                <p>With just solar you could save £{solarSavings}</p>
+                <p>With a {batterySize} kWh battery you could save £{batterySavings} by buying only off peak energy</p>
+                <p>With solar and a battery you could save £{totalSavings}</p>
                 <p>By switching to an off-peak tariff, you could save...</p>
+                <p>You could payback the installation cost in {payback} years! </p>
             {/if}
         </div>
         <div id="offPeakSavingsDiv" class="info-box">
