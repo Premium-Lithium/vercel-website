@@ -1,26 +1,27 @@
 <script>
+    export let queryParams;
     // Question 1
-    export let battery
-    export let solar
-    export let ev
-    export let epsups
+
+//    export let queryParams.solar
+//    export let queryParams.ev
+//    export let queryParams.epsups
 
     function notSure() {
-        battery = false
-        solar = false
-        ev = false
-        epsups = false
+        queryParams.battery = false
+        queryParams.solar = false
+        queryParams.ev = false
+        queryParams.epsups = false
     }
 
     // Question 2
-    export let energyUsage
-    export let isEnergyUsageExact
+//    export let queryParams.energyUsage
+//    export let queryParams.isEnergyUsageExact
 
     function nonExact() {
-        isEnergyUsageExact = false
+        queryParams.isEnergyUsageExact = false
     }
     function exact() {
-        isEnergyUsageExact = true
+        queryParams.isEnergyUsageExact = true
     }
 
     // energy use stats from 'https://www.britishgas.co.uk/energy/guides/average-bill.html'
@@ -29,10 +30,10 @@
     const highEnergyEstimate = 4300
 
     // Question 3
-    export let moreWinterUsage
-    export let workFromHome
-    export let oilAndGas
-    export let highConsumptionDevices
+//    export let queryParams.moreWinterUsage
+//    export let queryParams.workFromHome
+//    export let queryParams.oilAndGas
+//    export let queryParams.highConsumptionDevices
 
 </script>
 
@@ -43,7 +44,7 @@
             <label for="battery" >Battery</label>
         </td>
         <td>
-            <input type="checkbox" id="battery" bind:checked={battery}>
+            <input type="checkbox" id="battery" bind:checked={queryParams.battery}>
         </td>
     </tr>
     <tr>
@@ -51,7 +52,7 @@
             <label for="solar">Solar</label>
         </td>
         <td>
-            <input type="checkbox" id="solar" bind:checked={solar}>
+            <input type="checkbox" id="solar" bind:checked={queryParams.solar}>
         </td>
     </tr>
     <tr>
@@ -59,7 +60,7 @@
             <label for="ev">Electric Vehicle Charger</label>
         </td>
         <td>
-            <input type="checkbox" id="ev" bind:checked={ev}>
+            <input type="checkbox" id="ev" bind:checked={queryParams.ev}>
         </td>
     </tr>
     <tr>
@@ -67,7 +68,7 @@
             <label for="epsups">EPS / UPS</label>
         </td>
         <td>
-            <input type="checkbox" id="epsups" bind:checked={epsups}>
+            <input type="checkbox" id="epsups" bind:checked={queryParams.epsups}>
         </td>
     </tr>
     <tr>
@@ -75,7 +76,7 @@
             <label for="notsure">Not sure</label>
         </td>
         <td>
-            <input type="checkbox" id="notsure" on:change={notSure} checked={!(battery || solar || ev || epsups)}>
+            <input type="checkbox" id="notsure" on:change={notSure} checked={!(queryParams.battery || queryParams.solar || queryParams.ev || queryParams.epsups)}>
         </td>
     </tr>
 </table>
@@ -87,10 +88,10 @@
         type="range"
         min=0
         max=10000
-        bind:value={energyUsage}
+        bind:value={queryParams.energyUsage}
         on:change={exact}
     />
-{energyUsage}kWh / year
+{queryParams.energyUsage}kWh / year
 </div>
 
 
@@ -100,7 +101,7 @@
     type="radio"
     name="energy"
     value={lowEnergyEstimate}
-    bind:group={energyUsage}
+    bind:group={queryParams.energyUsage}
     on:change={nonExact}
 >
 <label for="medium">Medium</label>
@@ -109,7 +110,7 @@
     type="radio"
     name="energy"
     value={mediumEnergyEstimate}
-    bind:group={energyUsage}
+    bind:group={queryParams.energyUsage}
     on:change={nonExact}
 >
 <label for="high">High</label>
@@ -118,7 +119,7 @@
     type="radio"
     name="energy"
     value={highEnergyEstimate}
-    bind:group={energyUsage}
+    bind:group={queryParams.energyUsage}
     on:change={nonExact}
 >
 
@@ -132,7 +133,7 @@
             <label for="winter" >Do you use more energy in winter?</label>
         </td>
         <td>
-            <input type="checkbox" id="winter" bind:checked={moreWinterUsage}>
+            <input type="checkbox" id="winter" bind:checked={queryParams.moreWinterUsage}>
         </td>
     </tr>
     <tr>
@@ -140,7 +141,7 @@
             <label for="workfromhome" >Does anyone in your household work from home?</label>
         </td>
         <td>
-            <input type="checkbox" id="winter" bind:checked={workFromHome}>
+            <input type="checkbox" id="winter" bind:checked={queryParams.workFromHome}>
         </td>
     </tr>
     <tr>
@@ -148,7 +149,7 @@
             <label for="gasusage" >Do you use oil and gas?</label>
         </td>
         <td>
-            <input type="checkbox" id="gasusage" bind:checked={oilAndGas}>
+            <input type="checkbox" id="gasusage" bind:checked={queryParams.oilAndGas}>
         </td>
     </tr>
     <tr>
@@ -156,7 +157,7 @@
             <label for="highconsumptiondevices" >Do you have any high consumption devices (eg EV Charger, Immersion Heater)?</label>
         </td>
         <td>
-            <input type="checkbox" id="highconsumptiondevices" bind:checked={highConsumptionDevices}>
+            <input type="checkbox" id="highconsumptiondevices" bind:checked={queryParams.highConsumptionDevices}>
         </td>
     </tr>
 </table>
