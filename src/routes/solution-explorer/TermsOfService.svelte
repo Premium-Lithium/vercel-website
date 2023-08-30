@@ -48,7 +48,6 @@
         display: flex;
         flex-direction: column;
         gap:1em;
-        padding-bottom: 5em;
         align-items: center;
         
     }
@@ -84,12 +83,10 @@
     .order-acc {
         background-image: radial-gradient(#5DC7F5F0, var(--plblue));
         margin:auto;
-        width: 85%;
     }
     .order-dec {
         background-image: radial-gradient(orangered, red);
         margin:auto;
-        width: 85%;
     }
     .order-dec:hover {
         box-shadow: 0 5px 15px orangered;
