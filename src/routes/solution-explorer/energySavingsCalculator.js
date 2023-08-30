@@ -22,12 +22,11 @@ function energyBuying(energyLeftOver, batterySize, peakCost, offPeakCost, offPea
     return batterySavings
 }
 
-function segExport(energyUsage, solarOutput, supplier){ 
+function segExport(energyUsage, solarOutput, sellTariff){ 
     // sell extra energy from solar panels 
     if (solarOutput > energyUsage){
         let extraEnergy = solarOutput - energyUsage;
-        let segRates = getSegRateFromSupplier(supplier)
-        let soldEnergy = extraEnergy * segRates; 
+        let soldEnergy = extraEnergy * sellTariff; 
         return soldEnergy
     }
     return 0
@@ -38,14 +37,14 @@ function calcPayback(totalSavings, totalCost){
     return payback 
 }
 
-export function energySavings(energyUsage, solarOutput, batterySize, totalCost, peakCost, offPeakCost, tariffType, offPeakRatio, supplier){
+export function energySavings(energyUsage, solarOutput, batterySize, totalCost, peakCost, offPeakCost, tariffType, offPeakRatio, sellTariff){
     let energyLeftOver = energyUsage - solarOutput;
     let solarEnergySavings = solarSavings(energyUsage, solarOutput, peakCost, offPeakCost, offPeakRatio, tariffType)
     let batteryEnergySavings = 0;
     if (solarOutput < energyUsage){
         batteryEnergySavings = energyBuying(energyLeftOver, batterySize, peakCost, offPeakCost, offPeakRatio);
     }
-    let soldEnergy = segExport(energyUsage, solarOutput);
+    let soldEnergy = segExport(energyUsage, solarOutput, sellTariff);
     let totalSavings = solarEnergySavings + batteryEnergySavings + soldEnergy;
     let payback = calcPayback(totalSavings, totalCost);
     return [solarEnergySavings.toFixed(2), batteryEnergySavings.toFixed(2), soldEnergy.toFixed(2), totalSavings.toFixed(2), payback.toFixed(2)]

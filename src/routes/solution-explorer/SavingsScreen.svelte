@@ -24,13 +24,13 @@
     let supplier = "octopus";
     let totalCost = 5000;
     let batterySize = 10;
-
-    let savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, supplier);
+    let savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, sellTariff);
     let solarSavings = savings[0];
     let batterySavings = savings[1];
     let soldEnergy = savings[2];
     let totalSavings = savings[3];
-    let payback = savings[4]
+    let payback = savings[4];
+    $: savings = getSavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, sellTariff);
 
     // calculated values (hard coded for now)
     let offPeakSavings = 1000;
@@ -74,6 +74,15 @@
         // set tariff type in url (later)
         // slightly different wording for next section,
         tariffType = type;
+    }
+
+    function getSavings(){
+        savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, sellTariff);
+        solarSavings = savings[0];
+        batterySavings = savings[1];
+        soldEnergy = savings[2];
+        totalSavings = savings[3];
+        payback = savings[4];
     }
 
     let customizeDayEnergyVisible = false;
@@ -140,7 +149,6 @@
                 </div>
                 <p>Monthly energy usage</p>
                 <div class="energyDiv">
-                
                 <div>More energy during:<br>
                     <label><input name="energyMonth" value="summer" type="radio">Summer</label><br>
                     <label><input name="energyMonth" value="winter" type="radio">Winter</label><br>
@@ -155,7 +163,7 @@
                     {/if}
                 </div>
             </div>
-            {:else if stages[savingStage] === "Solar power"}
+            {:else if stages[savingStage] === "Solar power" }
                 <p>Solar energy returns, comparison of battery to no battery</p>
                 <label>Export value £<input type="number" step=0.01 bind:value={sellTariff}> /kwh</label>
                 <p>Estimate of Savings + income without battery</p>
