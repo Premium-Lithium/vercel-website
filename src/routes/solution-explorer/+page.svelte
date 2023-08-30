@@ -10,7 +10,7 @@
     import ProgressHeader from "./ProgressHeader.svelte"
     import SampleComponents from "./SampleComponents.svelte"
     import EnergyStage from "./EnergyStage.svelte"
-	  import InvestmentStage from "./InvestmentStage.svelte";
+	  import PurchaseDeposit from "./PurchaseDeposit.svelte";
 
     const stage = queryParam("stage", ssp.number())
     let map;
@@ -82,8 +82,8 @@
     {:else if $stage === 2}
         <SampleComponents />
 
-    {:else if $stage === 3}
-        <InvestmentStage 
+    {:else if $stage === 4}
+        <PurchaseDeposit 
             
         />
 
