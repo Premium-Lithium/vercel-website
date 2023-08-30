@@ -4,7 +4,7 @@
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
-
+    import SolutionModel from './solutionModel.js';
 
     import Solution3DView from './Solution3DView.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
@@ -28,6 +28,17 @@
     const workFromHome = queryParam("workfromhome", ssp.boolean())
     const oilAndGas = queryParam("oilandgas", ssp.boolean())
     const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
+
+    // let focalItem = "house";
+    let model = new SolutionModel();
+
+    function focusMain() {
+      model.camPos = 10;
+    }
+
+    function focusSolar() {
+      model.camPos = 0;
+    }
 
 </script>
 
@@ -80,7 +91,13 @@
         <SampleComponents />
 
     {:else}
-        <Solution3DView />
+        <div style="height: 1000px">
+          <Solution3DView bind:model/>
+        </div>
+        <div>
+          <button on:click={focusMain}>Main View</button>
+          <button on:click={focusSolar}>Focus Solar</button>
+        </div>
         REVIEW
     {/if}
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>

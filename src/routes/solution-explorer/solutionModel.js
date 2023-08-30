@@ -1,7 +1,7 @@
-import { Vector3, BoxGeometry, BufferGeometry, BufferAttribute, MeshBasicMaterial, OrthographicCamera } from 'three'
+import { BoxGeometry, BufferGeometry, BufferAttribute /*, MeshBasicMaterial, OrthographicCamera */ } from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { normalVector } from './geometry-utils';
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
+// import { MeshLine, MeshLineMaterial } from 'three.meshline';
 
 
 const wt = 0.17; // wall thickness
@@ -9,7 +9,7 @@ const size = 2.6; // size of one wall (outer dimensions)
 const height = 2.2; // height of one wall (outer dimensions)
 const rl = size * 1.1; // roof length
 const roofEdgeHeight = 0.15; // height of vertical roof edge
-const apexHeight = 0.65; // height of roof apex (above roof edge)
+const apexHeight = 0.55; // height of roof apex (above roof edge)
 const battHeight = 0.7; // height of battery
 const floorClearance = 0.05; // height of objects off floor
 const battInverterSpacing = 0.4; // horizontal space between battery and inverter
@@ -37,19 +37,23 @@ export default class SolutionModel {
         this.groundSolar = this.#buildGroundSolar();
 
         // temp
-        const points = [];
-            for (let j = 0; j < Math.PI; j += (2 * Math.PI) / 100) {
-            points.push(Math.cos(j), Math.sin(j), 0);
-        }
-
-        this.testLine = new MeshLine();
-        this.testLine.setPoints( points, p => 2 );
-        this.lineMaterial = new MeshLineMaterial({ lineWidth: 2, color: "blue"});
+        this.camPos = 0;
+        // temp
     }
 
     // set propertyType(type) {
     // todo
     // }
+    focusMainView() {
+        // todo: move cameras
+        console.log("Focusing on main view...");
+        this.camPos = 10;
+    }
+
+    focusSolar() {
+        console.log("Focusing on solar view...");
+        this.camPos = 0;
+    }
 
     displayOption() {
         console.log('Option value is ' + this.option);

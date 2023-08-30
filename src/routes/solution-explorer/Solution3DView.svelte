@@ -4,12 +4,13 @@
     import Scene from './Scene.svelte'
     import { Canvas } from '@threlte/core'
 
+    export let model;
     let scenePanel;
     let canvasInner;
 
     let sizeStore = writable(0);
-    let size;
-    sizeStore.subscribe(value => { size = value; });
+    let canvasSize;
+    sizeStore.subscribe(value => { canvasSize = value; });
 
     function resizeCanvas() {
         const newSize = Math.min(scenePanel.offsetWidth, scenePanel.offsetHeight);
@@ -30,7 +31,7 @@
 <div class="canvas-container" bind:this={scenePanel}>
     <div class="canvas-inner" bind:this={canvasInner}>
         <Canvas>
-            <Scene size={size}/>
+            <Scene canvasSize={canvasSize} bind:model={model}/>
         </Canvas>
     </div>
 </div>

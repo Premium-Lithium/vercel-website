@@ -1,27 +1,33 @@
 <script>
     import { T, useFrame } from '@threlte/core'
-    import { SolutionModel } from './solutionModel.js';
     import CustomRenderer from './CustomRenderer.svelte';
     import { OrbitControls } from '@threlte/extras'
 
     const camZoomToSizeRatio = 120.0 / 1000.0; // Considers fade out size around border of canvas
 
-    export let size;
-    let model = new SolutionModel("test");
+    export let model;
+    export let canvasSize;
 
     let batteryModel;
     const plBlue = "#28AAE2";
+
+    let pos;
+
+    // $: pos = model.camPos;
+    // temp
+    pos = 10;
 
     let rotation = 0;
     const rotSpeed = 0.2;
     useFrame((state, delta) => {
         rotation += delta * rotSpeed;
+        // console.log(model.camPos);
     })
 </script>
 
 <T.FogExp2 attach="fog" args={['white', 0.015]} />
 
-<T.OrthographicCamera makeDefault zoom={size * camZoomToSizeRatio} position={[10, 6, 10]} on:create={({ ref }) => {
+<T.OrthographicCamera makeDefault zoom={canvasSize * camZoomToSizeRatio} position={[pos, 6, 10]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
 }}></T.OrthographicCamera>
 
@@ -47,7 +53,7 @@
     <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
 </T.Mesh>
 
-<CustomRenderer selectedMesh={batteryModel} />
+<!-- <CustomRenderer selectedMesh={batteryModel} /> -->
 
 <!-- Inverter -->
 <T.Mesh geometry={model.inverter} castShadow receiveShadow>
