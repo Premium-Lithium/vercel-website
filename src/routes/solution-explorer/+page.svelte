@@ -13,6 +13,7 @@
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+
   const stage = queryParam("stage", ssp.number())
   let map;
   let peakSolarPower = 8.8;
@@ -22,6 +23,8 @@
   let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
+
+  let termsOfServiceAccepted;
 
   const battery = queryParam("battery", ssp.boolean())
   const solar = queryParam("solar", ssp.boolean())
@@ -103,9 +106,7 @@
     {:else if $stage === 2}
       <SavingsScreen/>
     {:else if $stage === 4}
-        <SampleComponents />
-    {:else if $stage ===4}
-    <Investments solution={solution}/>    
+        <Investments solution={solution}/>  
     {:else}
         <Solution3DView />
         REVIEW

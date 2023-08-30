@@ -9,7 +9,7 @@
 </script>
 
 <Modal bind:showModal bind:dialog>
-    <div slot="header" class="modal-header">
+    <div slot="header" class="modal-header"> 
         <slot name="header"/>
     </div>
     <div class="modal-outer">
