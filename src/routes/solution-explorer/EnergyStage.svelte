@@ -1,10 +1,6 @@
 <script>
     export let queryParams;
-    // Question 1
 
-//    export let queryParams.solar
-//    export let queryParams.ev
-//    export let queryParams.epsups
 
     function notSure() {
         queryParams.battery = false
@@ -12,10 +8,6 @@
         queryParams.ev = false
         queryParams.epsups = false
     }
-
-    // Question 2
-//    export let queryParams.energyUsage
-//    export let queryParams.isEnergyUsageExact
 
     function nonExact() {
         queryParams.isEnergyUsageExact = false
@@ -29,11 +21,6 @@
     const mediumEnergyEstimate = 2900
     const highEnergyEstimate = 4300
 
-    // Question 3
-//    export let queryParams.moreWinterUsage
-//    export let queryParams.workFromHome
-//    export let queryParams.oilAndGas
-//    export let queryParams.highConsumptionDevices
 
 </script>
 
