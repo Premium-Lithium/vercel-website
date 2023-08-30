@@ -42,15 +42,6 @@
         quote = quoteToInstall(solution, installationDate);
     }
 
-
-    function order() {
-        if (tosAccepted) {
-            alert("Buy the thing");
-        } else {
-            alert("agree to the ToS");
-        }
-    }
-
 </script>
 
 <div class=body>
