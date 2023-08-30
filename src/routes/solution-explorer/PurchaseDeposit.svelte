@@ -1,7 +1,7 @@
 <script lang="ts">
 	//Test admin key: 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
 	import '@shopify/shopify-api/adapters/web-api';
-	import { shopifyApi, LATEST_API_VERSION } from '@shopify/shopify-api';
+	import fetch from 'node-fetch';
 	import Client from 'shopify-buy';
 
 	// Button
@@ -15,8 +15,8 @@
 
 	// Build client - link this instance to the target store
     const client = Client.buildClient({
-		domain: shopify_domain,
 		storefrontAccessToken: shopify_apiKey
+		domain: shopify_domain,
 	});
 
 	// Retrieve shop and product info
