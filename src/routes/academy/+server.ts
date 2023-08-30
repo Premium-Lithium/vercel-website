@@ -13,7 +13,7 @@ async function addDeal() {
             user_id: 14071067,
             person_id: deal.person_id,
             org_id: deal.org_id,
-            stage_id: 22,
+            stage_id: 159,
             status: 'open',
             expected_close_date: '2024-02-11',
             probability: 60,
