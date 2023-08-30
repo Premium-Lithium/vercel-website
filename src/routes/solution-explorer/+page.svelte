@@ -1,5 +1,9 @@
 <script>
   import { ssp, queryParam} from "sveltekit-search-params";
+  import MapboxDraw from "@mapbox/mapbox-gl-draw";
+  import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+  import area from '@turf/area';
+  import { onMount } from "svelte";
 
   import Map from '$lib/components/Map.svelte';
   import Savings from "$lib/components/Savings.svelte";
@@ -10,10 +14,10 @@
   import ProgressHeader from "./ProgressHeader.svelte";
   import SampleComponents from "./SampleComponents.svelte";
   import EnergyStage from "./EnergyStage.svelte";
-    import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
-    import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+  import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+
   const stage = queryParam("stage", ssp.number())
   let map, draw;
   let peakSolarPower = 8.8;
@@ -36,6 +40,35 @@
   const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
+
+  onMount(() => {
+    map.on('load', () => {
+      // Add drawing component.
+      draw = new MapboxDraw({
+              displayControlsDefault: false,
+              controls: {
+                  polygon: true,
+                  trash: true,
+              },
+          });
+      map.addControl(draw, 'top-left');
+      
+      map.on('draw.modechange', function(event) {
+      // Only allow one polygon to be displayed.
+      if(event.mode === "draw_polygon"){
+          const allFeatures = draw.getAll();
+          if (allFeatures.features.length > 1) {
+              const firstPolygonId = allFeatures.features[0].id;
+              draw.delete(firstPolygonId);
+          }
+      }
+      });
+      map.on('draw.create', function(event){
+          console.log(area(draw.getAll().features[0]));
+      });
+    });
+  });
+
 </script>  
 <body>
     <ProgressHeader
@@ -59,7 +92,6 @@
    
         <div class="map-view"> 
           <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
-          <SolarPanelEstimator bind:map/>
         </div>
         <div class="solar-api">
           <label for="peakSolarPower">Peak Solar Power</label>
