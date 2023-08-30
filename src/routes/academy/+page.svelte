@@ -133,7 +133,7 @@
                                 aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
                                 aria-haspopup="listbox"
                                 aria-expanded="false"
-                                class="sc-aXZVg bjsJSY"
+								class="sc-aXZVg jXABNp"
                                 value=""
                                 autocomplete="one-time-code"
                                 required
