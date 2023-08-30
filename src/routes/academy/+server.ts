@@ -2,7 +2,13 @@ import { PIPEDRIVE_API_TOKEN } from "$env/static/private";
 
 let deal = {name: "", email: "", phone: "", academyName: "", companyName: "test", companyAddress: "", person_id: 0, org_id: 0};
 
-async function addDeal() {
+async function addNewInstaller(deal){
+    const orgId = await addOrganisation(deal);
+    const personId = await addPerson(deal);
+    await addDeal(deal, orgId, personId);
+}
+
+async function addDeal(deal, orgId, personId) {
     try {
         console.log('Sending request...');
 
@@ -11,8 +17,8 @@ async function addDeal() {
             value: 0,
             currency: 'GBP',
             user_id: 14071067,
-            person_id: deal.person_id,
-            org_id: deal.org_id,
+            person_id: personId,
+            org_id: orgId,
             stage_id: 159,
             status: 'open',
             expected_close_date: '2024-02-11',
@@ -38,7 +44,7 @@ async function addDeal() {
     }
 }
 
-async function addOrganisation(){
+async function addOrganisation(deal){
     try {
         console.log('Sending request...');
         //required field(s): name
@@ -56,8 +62,8 @@ async function addOrganisation(){
             },
             body: JSON.stringify(data),
         });
-        deal.org_id = response.data.id;
         console.log('Organization was added successfully', response);
+        return response.data.id;
     } catch (err) {
         const errorToLog = err.context?.body || err;
 
@@ -65,7 +71,7 @@ async function addOrganisation(){
     }
 }
 
-async function addPerson(){
+async function addPerson(deal){
     console.log('Sending request...');
     try{
         //required field(s): name
@@ -84,14 +90,10 @@ async function addPerson(){
             },
             body: JSON.stringify(data),
         });
-        deal.person_id = response.data.id;
-        console.log('Person was added successfully', response);
+        return response.data.id;
         } catch (err) {
             const errorToLog = err.context?.body || err;
             console.log('Adding failed', errorToLog);
         }  
     }
 
-addOrganisation();
-addPerson();
-addDeal();
