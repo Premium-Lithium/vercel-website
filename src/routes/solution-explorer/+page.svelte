@@ -13,6 +13,7 @@
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+	import TermsOfService from "./TermsOfService.svelte";
   const stage = queryParam("stage", ssp.number())
   let map;
   let peakSolarPower = 8.8;
@@ -103,9 +104,8 @@
     {:else if $stage === 2}
       <SavingsScreen/>
     {:else if $stage === 4}
-        <SampleComponents />
-    {:else if $stage ===4}
-    <Investments solution={solution}/>    
+        <Investments solution={solution}/>
+        <TermsOfService/>    
     {:else}
         <Solution3DView />
         REVIEW
