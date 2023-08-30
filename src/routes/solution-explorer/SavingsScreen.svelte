@@ -25,8 +25,7 @@
     let totalCost = 5000;
     let batterySize = 10;
 
-    let savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, supplier)
-    console.log(savings);
+    let savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, supplier);
     let solarSavings = savings[0];
     let batterySavings = savings[1];
     let soldEnergy = savings[2];

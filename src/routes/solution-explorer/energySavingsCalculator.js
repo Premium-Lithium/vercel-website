@@ -18,7 +18,7 @@ function solarSavings(energyUsage, solarOutput, peakCost, offPeakCost, offPeakRa
 function energyBuying(energyLeftOver, batterySize, peakCost, offPeakCost, offPeakRatio){ 
     // savings from buying off peak and using battery instead of buying on peak
     let peakUsage = 1-offPeakRatio;
-    let batterySavings = (peakCost * energyLeftOver * peakUsage) - (offPeakCost * energyLeftOver * peakUsage ); //??????????????????????
+    let batterySavings = (peakCost * energyLeftOver * peakUsage) - (offPeakCost * energyLeftOver * peakUsage );
     return batterySavings
 }
 
@@ -53,7 +53,6 @@ export function energySavings(energyUsage, solarOutput, batterySize, totalCost, 
 
 function getSegRateFromSupplier(supplier){
     let segTariff = 0.08 // average from https://solarenergyuk.org/resource/smart-export-guarantee/
-    // todo get this form somewhere 
     switch(supplier) {
         case "octopus":
             segTariff = 0.15;
