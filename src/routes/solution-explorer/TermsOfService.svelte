@@ -28,8 +28,8 @@
 </script>
 <div class="body">
 <div class="tos-div">
-    <button on:click={order} class={tosAccepted ? 'order-acc' : 'order-dec'}>{ tosAccepted ? "Order now": "Please accept terms of service"}</button>
-    <button class="tos-button" on:click={tosClicked}>View and accept terms of service</button>
+    <button on:click={order} class={tosAccepted ? 'order-acc' : 'order-dec'}>{ tosAccepted ? "Order now": "Order now"}</button>
+    
     <Modal bind:showModal={tosVisible} bind:dialog>
         <h2>Terms of service</h2>
         <p>
@@ -63,7 +63,7 @@
 
     }
     button:hover {
-        box-shadow: 0 5px 15px 10px var(--plblue);
+        box-shadow: 0 5px 15px 5px var(--plblue);
     }
     .agree-button {
         background-color: green;
@@ -85,21 +85,10 @@
         margin:auto;
     }
     .order-dec {
-        background-image: radial-gradient(orangered, red);
+        background-image: radial-gradient(var(--plblue), grey);
         margin:auto;
     }
     .order-dec:hover {
         box-shadow: 0 5px 15px orangered;
-    }
-    .tos-button{
-        display: block;
-        margin: auto;
-        background-color: var(--plblue);
-        color: white;
-        border:solid #000 1px; 
-        font-size: 20px;
-        height:auto; 
-        padding: 1rem; 
-        border-radius:5px;
     }
 </style>
