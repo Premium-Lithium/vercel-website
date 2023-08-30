@@ -1,9 +1,6 @@
 import { PIPEDRIVE_API_TOKEN } from "$env/static/private";
 
 let deal = {name: "", email: "", phone: "", academyName: "", companyName: "test", companyAddress: "", person_id: 0, org_id: 0};
-const pipedrive = require('pipedrive');
-const defaultClient = new pipedrive.ApiClient();
-defaultClient.authentications.api_key.apiKey = PIPEDRIVE_API_TOKEN;
 
 async function addDeal() {
     try {
@@ -25,7 +22,7 @@ async function addDeal() {
             add_time: new Date().toLocaleString(),
         }
         
-        const response = await fetch('https://api.pipedrive.com/api/v1/deals?api_token=77a5356773f422eb97c617fd7c37ee526da11851' {
+        const response = await fetch(`https://api.pipedrive.com/api/v1/deals?api_token=${PIPEDRIVE_API_TOKEN}` {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -52,7 +49,7 @@ async function addOrganisation(){
             visible_to: "3",
             add_time: new Date().toLocaleString()
         }
-        const response = await fetch('https://api.pipedrive.com/api/v1/organizations?api_token=77a5356773f422eb97c617fd7c37ee526da11851' {
+        const response = await fetch(`https://api.pipedrive.com/api/v1/organizations?api_token=${PIPEDRIVE_API_TOKEN}` {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -80,7 +77,7 @@ async function addPerson(){
             visible_to: "3",
             add_time: new Date().toLocaleString()
         }
-        const response = await fetch('https://api.pipedrive.com/api/v1/persons?api_token=77a5356773f422eb97c617fd7c37ee526da11851' {
+        const response = await fetch(`https://api.pipedrive.com/api/v1/persons?api_token=${PIPEDRIVE_API_TOKEN}` {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
