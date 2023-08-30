@@ -1,7 +1,5 @@
 import { PIPEDRIVE_API_TOKEN } from "$env/static/private";
 
-let deal = {name: "", email: "", phone: "", academyName: "", companyName: "test", companyAddress: "", person_id: 0, org_id: 0};
-
 async function addNewInstaller(deal){
     const orgId = await addOrganisation(deal);
     const personId = await addPerson(deal);
