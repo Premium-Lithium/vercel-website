@@ -1,40 +1,35 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/stores";
-    import {queryParam } from "sveltekit-search-params"
+    import {queryParam, ssp } from "sveltekit-search-params"
 
 	
     // use component ID as value in store
     export let id;
     export let type;  // component type
     export let text = "";
-    export const defaultValue = "";
+
 
     console.log(type);
-    const componentParam = queryParam(id);
+    const componentParam = queryParam(id, ssp.boolean());
 
     function buttonClicked() {
-        if ($componentParam == "true") {
-            $componentParam = "false";
-        } else if ($componentParam = "false") {
-            $componentParam = "true"
+        if ($componentParam == true) {
+            $componentParam = false;
+        } else if ($componentParam == false) {
+            $componentParam = true
         } else {
-            console.log("Button not initialised, default to false");
-            $componentParam = "false";
+            $componentParam = false;
         }
     }
 
 </script>
 
 {#if type == "number"}
-    <input {id} type="number" bind:value={$componentParam} on:input={() => inputChanged()}>
+    <input {id} type="number" bind:value={$componentParam}>
 {:else if type == "toggle"}
-    <script>
-        // default value
-        defaultValue ? $componentParam = defaultValue: $componentParam = "false" ;
-        console.log($componentParam);
-    </script>
-    <button type="button"  class={$componentParam} on:click={() => buttonClicked()}>
+
+    <button type="button"  class={$componentParam ? "true" : "false"} on:click={() => buttonClicked()}>
         {text}
     </button>
 {/if}

@@ -112,6 +112,7 @@ export function pointInPolygonFromList (point, polygons) {
         if (booleanPointInPolygon(point, polygons[i])) {
             return i;
         }
+        console.log(`not in polygon ${i}`);
     }
     return null;
 }

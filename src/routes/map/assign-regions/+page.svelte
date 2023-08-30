@@ -7,7 +7,7 @@ import pointsWithinPolygon from '@turf/points-within-polygon';
 import { featureCollection, point, points, polygon } from '@turf/helpers';
 import { supabase } from '$lib/supabase';
 import { serializeCoordinates, deserializeCoordinates,
-         fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive } from '$lib/mapUtils';
+         fetchInstallerDataFromPipedrive, fetchJobDataFromPipedrive, pointInPolygonFromList } from '$lib/mapUtils';
 
 
 const DB_NAME = "installation-manager-regions";
@@ -125,7 +125,7 @@ onMount(async () => {
             markerIdList.push({"marker": marker, "id": data[postcode].id});
 
             const popup = new mapboxgl.Popup({ offset: 25 })
-                .setText(data[postcode].name);
+                .setText(pointInPolygonFromList(point([data[postcode].longitude, data[postcode].latitude]), polygons));
 
             marker.setPopup(popup); // Associate the popup with the marker
 
