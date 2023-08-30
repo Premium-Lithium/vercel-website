@@ -51,37 +51,19 @@ export function energySavings(energyUsage, solarOutput, batterySize, totalCost, 
 }
 
 function getSegRateFromSupplier(supplier){
-    let segTariff = 0.08 // average from https://solarenergyuk.org/resource/smart-export-guarantee/
-    switch(supplier) {
-        case "octopus":
-            segTariff = 0.15;
-            break;
-        case "tesla":
-            segTariff = 0.11;
-            break;
-        case "british gas":
-            segTariff = 0.064;
-        case "bulb energy":
-            segTariff = 0.0557;
-            break;
-        case "eon":
-            segTariff = 0.055;
-            break;
-        case "scottish power":
-            segTariff = 0.055;
-            break;
-        case "ovo":
-            segTariff = 0.04;
-            break;
-        case "sse":
-            segTariff = 0.035;
-            break;
-        case "shell":
-            segTariff = 0.035;
-            break;
-        case "edf":
-            segTariff = 0.03;
-            break; 
-    }
+    // average from https://solarenergyuk.org/resource/smart-export-guarantee/
+    const rates = new Map([
+        ["octopus", 0.15],
+        ["tesla", 0.11],
+        ["british gas", 0.064],
+        ["bulb energy", 0.0557],
+        ["eon", 0.055],
+        ["scottish power", 0.055],
+        ["ovo", 0.04],
+        ["sse", 0.035],
+        ["shell", 0.035],
+        ["edf", 0.03]
+    ])
+    let segTariff = rates.get(supplier)
     return segTariff;
 }
