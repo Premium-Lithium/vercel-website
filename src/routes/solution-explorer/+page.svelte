@@ -24,6 +24,8 @@
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
 
+  let termsOfServiceAccepted;
+
   const battery = queryParam("battery", ssp.boolean())
   const solar = queryParam("solar", ssp.boolean())
   const ev = queryParam("ev", ssp.boolean())
@@ -105,7 +107,7 @@
       <SavingsScreen/>
     {:else if $stage === 4}
         <Investments solution={solution}/>
-        <TermsOfService/>    
+        <TermsOfService bind:tosAccepted={termsOfServiceAccepted}/>    
     {:else}
         <Solution3DView />
         REVIEW
