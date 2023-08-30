@@ -11,10 +11,8 @@
   import SampleComponents from "./SampleComponents.svelte";
   import EnergyStage from "./EnergyStage.svelte";
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
+  import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
   import Investments from "./Investments.svelte";
-	import { onMount } from "svelte";
-  import MapboxDraw from "@mapbox/mapbox-gl-draw";
-  import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
   const stage = queryParam("stage", ssp.number())
   let map, draw;
@@ -38,30 +36,6 @@
   const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
-  onMount(async () => {
-    map.on('load', () => {
-      draw = new MapboxDraw({
-            displayControlsDefault: false,
-            controls: {
-                polygon: true,
-                trash: true,
-            },
-        });
-    map.addControl(draw, 'top-left');
-    });
-    
-    map.on('draw.create', function(event) {
-      // Get all the features drawn so far
-      const allFeatures = draw.getAll();
-
-      // If there are more than one polygons, remove the oldest one
-      if (allFeatures.features.length > 1) {
-          // Get the id of the first polygon
-          const firstPolygonId = allFeatures.features[0].id;
-          draw.delete(firstPolygonId);
-      }
-    });
-  });
 </script>  
 <body>
     <ProgressHeader
@@ -84,6 +58,7 @@
     {:else if $stage === 1}
         <div class="map-view">
           <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
+          <SolarPanelEstimator bind:map/>
         </div>
         <div class="solar-api">
           <label for="peakSolarPower">Peak Solar Power</label>
