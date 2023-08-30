@@ -7,9 +7,8 @@
 
     // static values for data from other pages
     let tariffType = "Off-Peak";  // string: specific type of tariff
-    let solarEnergy = 1500; // kwh per year
-    let energyUse = 2900;  // kwh per year
-    let solarTariffType = "SEG";  // SEG or FIT
+    let solarEnergy = 3500; // kwh per year
+    let energyUse = 4900;  // kwh per year
     let winterUsage = "higher"; // higher, lower, the same
     let dailyUsagePattern = "day";  // day, night, the same?
     let offPeakStart = 0;
@@ -23,8 +22,8 @@
     let sellTariff = 0.08;
     let offPeakRatio=0.2;  // ratio of power currently used off peak
     let supplier = "octopus";
-    let totalCost = 50000000;
-    let batterySize = 5;
+    let totalCost = 5000;
+    let batterySize = 10;
 
     let savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, supplier)
     console.log(savings);

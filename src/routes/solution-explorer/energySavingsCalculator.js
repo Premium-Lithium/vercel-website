@@ -8,45 +8,51 @@ function solarSavings(energyUsage, solarOutput, peakCost, offPeakCost, offPeakRa
         energyLeftOver = (energyUsage - solarOutput) * offPeakCost;
     } else{
         energyCost = (energyUsage *(1-offPeakRatio) * peakCost) + (energyUsage * offPeakRatio * offPeakCost); //working out off peak and on peak cost
-        energyLeftOver = (energyUsage - solarOutput);
+        energyLeftOver = energyUsage - solarOutput;
         energyLeftOver = (energyLeftOver * (1-offPeakRatio) * peakCost) + (energyLeftOver * offPeakRatio * offPeakCost);
     }
     energySavings = energyCost - energyLeftOver;
     return energySavings
 }
 
-function energyBuying(energyLeftOver, batterySize, offPeakRatio){ // savings from buying off peak and using battery instead of buying on peak
-    let offPeakCost = 0.45; //get real numbers for this 
-    let peakCost = 0.66; 
+function energyBuying(energyLeftOver, batterySize, peakCost, offPeakCost, offPeakRatio){ 
+    // savings from buying off peak and using battery instead of buying on peak
     let peakUsage = 1-offPeakRatio;
     let batterySavings = (peakCost * energyLeftOver * peakUsage) - (offPeakCost * energyLeftOver * peakUsage ); //??????????????????????
     return batterySavings
 }
 
-function segExport(energyUsage, solarOutput, supplier){ // sell extra energy from solar panels 
-    let extraEnergy = solarOutput - energyUsage;
-    let segRates = getSegRateFromSupplier(supplier) // todo get number from somewhere price per kWh 
-    let soldEnergy = extraEnergy * segRates; // todo find out how to calc extra energy 
-    return soldEnergy
+function segExport(energyUsage, solarOutput, supplier){ 
+    // sell extra energy from solar panels 
+    if (solarOutput > energyUsage){
+        let extraEnergy = solarOutput - energyUsage;
+        let segRates = getSegRateFromSupplier(supplier)
+        let soldEnergy = extraEnergy * segRates; 
+        return soldEnergy
+    }
+    return 0
 }
 
 function calcPayback(totalSavings, totalCost){
-    const payback = totalSavings/totalCost;
+    const payback = totalCost/totalSavings;
     return payback 
 }
 
 export function energySavings(energyUsage, solarOutput, batterySize, totalCost, peakCost, offPeakCost, tariffType, offPeakRatio, supplier){
     let energyLeftOver = energyUsage - solarOutput;
     let solarEnergySavings = solarSavings(energyUsage, solarOutput, peakCost, offPeakCost, offPeakRatio, tariffType)
-    let batteryEnergySavings = energyBuying(energyLeftOver, batterySize, offPeakRatio);
+    let batteryEnergySavings = 0;
+    if (solarOutput < energyUsage){
+        batteryEnergySavings = energyBuying(energyLeftOver, batterySize, peakCost, offPeakCost, offPeakRatio);
+    }
     let soldEnergy = segExport(energyUsage, solarOutput);
     let totalSavings = solarEnergySavings + batteryEnergySavings + soldEnergy;
     let payback = calcPayback(totalSavings, totalCost);
-    return [solarEnergySavings, batteryEnergySavings, soldEnergy, totalSavings, payback]
+    return [solarEnergySavings.toFixed(2), batteryEnergySavings.toFixed(2), soldEnergy.toFixed(2), totalSavings.toFixed(2), payback.toFixed(2)]
 }
 
 function getSegRateFromSupplier(supplier){
-    let segTariff = 0.05 // average from https://solarenergyuk.org/resource/smart-export-guarantee/
+    let segTariff = 0.08 // average from https://solarenergyuk.org/resource/smart-export-guarantee/
     // todo get this form somewhere 
     switch(supplier) {
         case "octopus":
