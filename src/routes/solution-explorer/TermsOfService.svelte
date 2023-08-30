@@ -26,32 +26,37 @@
     }
     
 </script>
-<div>
-
-<button class="tos-button" on:click={tosClicked}>See terms of service</button>
-<Modal bind:showModal={tosVisible} bind:dialog>
-    <h2>Terms of service</h2>
-    <p>
-        To proceed, you must agree to our terms of service
-        <a target="_blank" href="solution-explorer/docs/terms-of-service.html">Click here for our terms of service</a>
-    </p>
-    <div class="button-div">
-        <button class="agree-button" on:click={() => tosChoice(true)}>I agree</button>
-        <button class="disagree-button" on:click={() => tosChoice(false)}>I disagree</button>
-    </div>
-</Modal>
-
-<button on:click={order} class={tosAccepted ? 'a' : 'b'}>{ tosAccepted ? "Order now": "Please accept terms of service"}</button>
-
+<div class="body">
+<div class="tos-div">
+    <button on:click={order} class={tosAccepted ? 'order-acc' : 'order-dec'}>{ tosAccepted ? "Order now": "Please accept terms of service"}</button>
+    <button class="tos-button" on:click={tosClicked}>View and accept terms of service</button>
+    <Modal bind:showModal={tosVisible} bind:dialog>
+        <h2>Terms of service</h2>
+        <p>
+            To proceed, you must agree to our terms of service
+            <a target="_blank" href="solution-explorer/docs/terms-of-service.html">Click here for our terms of service</a>
+        </p>
+        <div class="button-div">
+            <button class="agree-button" on:click={() => tosChoice(true)}>I agree</button>
+            <button class="disagree-button" on:click={() => tosChoice(false)}>I disagree</button>
+        </div>
+    </Modal>
+</div>
 </div>
 <style>
-    button{
+    .tos-div {
+        display: flex;
+        flex-direction: column;
+        gap:1em;
+        padding-bottom: 5em;
+        align-items: center;
+        
+    }
+    button {
         background-color: var(--plblue);
         color: white;
         border:solid #000 1px; 
         font-size: 20px;
-        height:auto;
-        width: auto;
         padding: 1rem; 
         border-radius:5px;
         transition-duration: 1s;
@@ -76,13 +81,17 @@
         display: grid;
         gap: 2em;
     }
-    .a {
+    .order-acc {
         background-image: radial-gradient(#5DC7F5F0, var(--plblue));
+        margin:auto;
+        width: 85%;
     }
-    .b {
-        background-image: radial-gradient(orangered, red);   
+    .order-dec {
+        background-image: radial-gradient(orangered, red);
+        margin:auto;
+        width: 85%;
     }
-    .b:hover {
+    .order-dec:hover {
         box-shadow: 0 5px 15px orangered;
     }
     .tos-button{

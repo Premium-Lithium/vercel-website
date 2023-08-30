@@ -1,4 +1,6 @@
 <script>
+	import TermsOfService from "./TermsOfService.svelte";
+
     import { earliestInstallMonth, quoteToInstall } from "$lib/services/price-model.js"
 	export let solution = {houseType: "detatched", solar: {selected: true, minpanels: 0, maxpanels:20, selectedpanels: 14}, 
                             battery: true, batterySize_kWh: 5, evCharger: {selected: true}, 
@@ -14,6 +16,8 @@
     let smartBattery = false;
     let birdGuard = false;
     let quote = quoteToInstall(solution, installationDate);
+
+    let tosAccepted = false;
 
     function addOnChange(){
         solution.addOns.ups = ups;
@@ -36,6 +40,10 @@
 
     function solarChange(){
         quote = quoteToInstall(solution, installationDate);
+    }
+
+    function order() {
+        alert("order button clicked");
     }
 
 </script>
@@ -99,9 +107,11 @@
     <div class=buttons>
         <button> Recieve Your quote in email </button>
         <button> Book meeting with a consultant </button>
-        <button> Order Now </button>
+        <TermsOfService bind:tosAccepted={tosAccepted}/> 
+        
     </div>
 </div>
+ 
 
 <style>
     .body{
@@ -110,10 +120,15 @@
         flex-direction: column;
         align-items: center;
         overflow: hidden;
+        
     }
 
     .buttons{
         align-items: center;
+        display: flex;
+        flex-direction: row;
+        position: relative;
+       
     }
 
     button{
