@@ -20,8 +20,8 @@ export async function POST ({request}){
     let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
     console.log(dealGeographicalPoint);
     // polygons.forEach((p) => {p.geometry.coordinates.forEach((x) => console.log(x[0], x[1]))});
-    let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons)
-    if(polygonPointIsIn) {
+    let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons);
+    if(polygonPointIsIn != null) {
         await syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails[polygonPointIsIn].id);
         return json({message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.`}, {status: 200});
     }
