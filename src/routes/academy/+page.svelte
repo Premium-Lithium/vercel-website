@@ -1,3 +1,22 @@
+<script>
+    let name = "";
+    let email = "";
+    let phoneNumber = "";
+    let academyName = "";
+    let companyName = "";
+    let companyAddress = "";
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        addNewInstaller(name, email, phoneNumber, academyName, companyName, companyAddress);
+    }
+
+    function addNewInstaller(name, email, phoneNumber, academyName, companyName, companyAddress) {
+        console.log(`Adding new installer: ${name}, ${email}, ${phoneNumber}, ${academyName}, ${companyName}, ${companyAddress}`);
+        // TODO: add new deal to pipedrive here
+    }
+</script>
+
 <div class="body">
 	<img
 		class="logo"
@@ -12,7 +31,7 @@
 	<div class="sc-kdBSHD iYHVXt">
 		<div class="sc-koXPp gZGbcL">
 			<div class="sc-eeDRCY dTIjiu">
-				<form action="#" name="Academy Registration">
+				<form action="#" name="Academy Registration" on:submit={handleSubmit}>
 					<div class="sc-jlZhew dHgxMY">
 						<label
 							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
@@ -28,8 +47,8 @@
 								aria-required="true"
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
-								value=""
                                 autocomplete="one-time-code"
+                                bind:value={name}
                                 required
 							/>
 						</div>
@@ -49,7 +68,7 @@
 								aria-required="true"
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
-								value=""
+								bind:value={email}
                                 autocomplete="one-time-code"
                                 required
 							/>
@@ -70,7 +89,7 @@
 								aria-required="true"
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
-								value=""
+								bind:value={phoneNumber}
                                 autocomplete="one-time-code"
                                 required
 							/>
@@ -91,7 +110,7 @@
 								aria-required="true"
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_error V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_helpText"
 								class="sc-aXZVg jXABNp"
-								value=""
+								bind:value={academyName}
                                 autocomplete="one-time-code"
                                 required
 							/>
@@ -112,7 +131,7 @@
 								aria-required="true"
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
-								value=""
+								bind:value={companyName}
                                 autocomplete="one-time-code"
                                 required
 							/>
@@ -134,7 +153,7 @@
                                 aria-haspopup="listbox"
                                 aria-expanded="false"
 								class="sc-aXZVg jXABNp"
-                                value=""
+                                bind:value={companyAddress}
                                 autocomplete="one-time-code"
                                 required
                             />
