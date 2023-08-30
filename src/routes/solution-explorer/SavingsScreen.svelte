@@ -6,7 +6,7 @@
     // get an estimate that includes increased consumption/lower solar in winter - more bought from grid
 
     // static values for data from other pages
-    let tariffType = "Off-Peak";  // string: specific type of tariff
+    let tariffType = "off-peak";  // string: specific type of tariff
     let solarEnergy = 3500; // kwh per year
     let energyUse = 4900;  // kwh per year
     let winterUsage = "higher"; // higher, lower, the same

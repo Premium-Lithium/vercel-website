@@ -3,7 +3,7 @@ function solarSavings(energyUsage, solarOutput, peakCost, offPeakCost, offPeakRa
     let energyCost = 0;
     let energyLeftOver = 0;
 
-    if (tariffType == "offPeak"){
+    if (tariffType == "off-peak"){
         energyCost = energyUsage * offPeakCost;
         energyLeftOver = (energyUsage - solarOutput) * offPeakCost;
     } else{
