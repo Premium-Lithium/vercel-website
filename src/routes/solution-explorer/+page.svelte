@@ -129,7 +129,7 @@ const allQueryParameters = queryParameters({
   }
 
   .footer{
-    position: relative;
+    position: absolute;
     bottom: 0;
   }
 
