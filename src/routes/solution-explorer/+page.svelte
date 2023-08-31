@@ -39,14 +39,12 @@
         moreWinterUsage: ssp.boolean(),
         workFromHome: ssp.boolean(),
         oilAndGas: ssp.boolean(),
-        highConsumptionDevices: ssp.boolean()
+        highConsumptionDevices: ssp.boolean(),
         existingSolar: ssp.boolean(),
         numberOfPanels: ssp.number(),
         solarTarrif: ssp.string(),
         solarLocation: ssp.string(),
     });
-
-    let termsOfServiceAccepted;
 
 
     const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
@@ -64,10 +62,7 @@
         />
     {:else if $stage === 1}
         <SolarStage
-            bind:existingSolar={$existingSolar}
-            bind:numberOfPanels={$numberOfPanels}
-            bind:solarTariff={$solarTariff}
-            bind:solarLocation={$solarLocation}
+            bind:queryParams={$allQueryParameters}
         />
     {:else if $stage === 2}
         <SavingsScreen/>
