@@ -14,7 +14,7 @@
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
 	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
-	import { beforeUpdate, onMount } from "svelte";
+	import { onMount } from "svelte";
 
   const stage = queryParam("stage", ssp.number(0))
   let map;
@@ -109,7 +109,6 @@ onMount(() => {
       <SavingsScreen/>
     {:else if $stage === 3}
         <Investments solution={solution}/>
-
 
     {:else}
         <Solution3DView />
