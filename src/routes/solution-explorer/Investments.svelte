@@ -42,6 +42,10 @@
         quote = quoteToInstall(solution, installationDate);
     }
 
+    function order() {
+        alert("order button clicked");
+    }
+
 </script>
 
 <div class=body>
@@ -101,29 +105,9 @@
     <li> Discount: -£{quote.discount.value} </li>
     <div class="helptext"> These are estimates. We'll arrange a site survey for you for the most accurate information.</div>
     <div class=buttons>
-        <table class="btn-tbl">
-            
-            <tr>
-                <td>
-                    <button> Recieve Your quote in email </button>
-                </td>
-                <td>
-                    <!--<button on:click={order} class={!tosAccepted ? "disabled-btn" : "enabled-btn"}>Order now!</button>-->
-                    <TermsOfService bind:tosAccepted={tosAccepted}/>
-                </td>
-                <td>
-                    <button> Book meeting with a consultant </button>
-                </td>
-            </tr>
-            <tr><td></td><td>
-                <label><input type="checkbox" bind:checked={tosAccepted}>I have read and agree to the <a target="_blank" href="solution-explorer/docs/terms-of-service.html">terms of service</a></label>
-            </td><td></td></tr>
-
-
-        <!--
-            <TermsOfService bind:tosAccepted={tosAccepted}/>
-        -->
-        </table>
+        <button> Recieve Your quote in email </button>
+        <button> Book meeting with a consultant </button>
+        <TermsOfService bind:tosAccepted={tosAccepted}/> 
         
     </div>
 </div>
@@ -139,10 +123,6 @@
         
     }
 
-    .disabled-btn {
-        background-color: grey;
-    }
- 
     .buttons{
         align-items: center;
         display: flex;
@@ -161,7 +141,6 @@
         padding: 1rem; 
         margin:30px; 
         border-radius:5px;
-        width: 70%
     }
 
 
