@@ -16,7 +16,7 @@
 	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
 	import { beforeUpdate, onMount } from "svelte";
 
-  const stage = queryParam("stage", ssp.number())
+  const stage = queryParam("stage", ssp.number(0))
   let map;
   let peakSolarPower = 8.8;
   let solarLoss = 14;
