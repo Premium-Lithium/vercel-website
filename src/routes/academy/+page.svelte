@@ -1,9 +1,11 @@
 <script>
+    let submitted = false;
     let deal = {name: "", email: "", phone: "", academyName: "", companyName: "", companyAddress: ""};
     function handleSubmit(event) {
         console.log("adding installer.........")
         event.preventDefault();
         addNewInstaller();
+        submitted = true;
     }
 
     async function addNewInstaller() {
@@ -24,6 +26,7 @@
 		class="logo"
 		src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500"
 	/>
+    {#if !submitted}
 	<h1>Become an Installation Partner today</h1>
 	<h2>
 		Please complete the form below and one of the team will be in touch to discuss this great
@@ -170,6 +173,12 @@
 			</div>
 		</div>
 	</div>
+    {:else}
+        <div class="formSent">
+            <h1> Thank you for signing up!  </h1>
+            <h1> One of the team will be in touch soon to discuss this opportunity</h1>
+        </div>
+    {/if}
 </div>
 
 <style>
