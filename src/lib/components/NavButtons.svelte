@@ -46,7 +46,7 @@
         border: none; 
         font-size: 20px;
         padding:10px 10px; 
-        margin:1em; 
+        margin:0.5em;
         border-radius:5px;
     }
 </style>
