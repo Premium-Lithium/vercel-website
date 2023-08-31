@@ -38,6 +38,7 @@ async function addDeal(companyName, orgId, personId) {
         }
         const dealsApi = new pipedrive.DealsApi(pd);
         const deal = await dealsApi.addDeal(data);
+        console.log("dealAdded: ", deal);
     } catch (err) {
         const errorToLog = err.context?.body || err;
 
@@ -60,8 +61,9 @@ async function addOrganisation(deal){
         const orgApi = new pipedrive.OrganizationsApi(pd);
         const response = await orgApi.addOrganization(data);
 
-        console.log('Organization was added successfully', response);
-        const orgId = response.id;
+        console.log('Organisation was added successfully', response);
+        const orgId = response.data.id;
+        console.log("orgId = :", orgId);
         await addPerson(deal, orgId);
     } catch (err) {
         const errorToLog = err.context?.body || err;
@@ -85,8 +87,9 @@ async function addPerson(deal, orgId){
         const personApi = new pipedrive.PersonsApi(pd);
         const response = await personApi.addPerson(data);
 
-        console.log('Organization was added successfully', response);
-        const personId = response.id;
+        console.log('person was added successfully', response);
+        const personId = response.data.id;
+        console.log("person Id = ", personId);
         await addDeal(deal.companyName, orgId, personId);
         } catch (err) {
             const errorToLog = err.context?.body || err;
