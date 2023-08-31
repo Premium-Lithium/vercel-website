@@ -1,15 +1,21 @@
 <script>
-    import { addInstaller } from "./addInstaller.js"
     let deal = {name: "", email: "", phone: "", academyName: "", companyName: "", companyAddress: ""};
     function handleSubmit(event) {
+        console.log("adding installer.........")
         event.preventDefault();
         addNewInstaller();
     }
 
     async function addNewInstaller() {
-        console.log(`Adding new installer: ${name}, ${email}, ${phoneNumber}, ${academyName}, ${companyName}, ${companyAddress}`);
-        // TODO: add new deal to pipedrive here
-        const response = await addInstaller(deal);
+        const response = await fetch('academy/', { 
+                method: "POST",
+                body: JSON.stringify({
+                    deal
+        }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
     }
 </script>
 
@@ -27,7 +33,7 @@
 	<div class="sc-kdBSHD iYHVXt">
 		<div class="sc-koXPp gZGbcL">
 			<div class="sc-eeDRCY dTIjiu">
-				<form action="#" name="Academy Registration" on:submit={handleSubmit}>
+				<form action="#" name="Academy Registration" on:submit={handleSubmit} autocomplete="off">
 					<div class="sc-jlZhew dHgxMY">
 						<label
 							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"

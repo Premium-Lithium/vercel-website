@@ -1,17 +1,28 @@
-import { PIPEDRIVE_API_TOKEN } from "$env/static/private";
+import { json } from '@sveltejs/kit';
+import pipedrive from 'pipedrive';
+import { pd } from '../../lib/pipedrive-utils.js'
 
-export async function addInstaller(deal){
-    const orgId = await addOrganisation(deal);
-    const personId = await addPerson(deal);
-    await addDeal(deal, orgId, personId);
+export async function POST({ request }) {
+    
+    const { deal } = await request.json();
+    console.log("deal :", deal);
+    addInstaller(deal);
+    return json({}, {status: 200})
 }
 
-async function addDeal(deal, orgId, personId) {
+
+async function addInstaller(deal){
+    const orgId = await addOrganisation(deal);
+}
+
+
+
+async function addDeal(companyName, orgId, personId) {
     try {
         console.log('Sending request...');
 
         const data = {
-            title: deal.companyName,
+            title: companyName,
             value: 0,
             currency: 'GBP',
             user_id: 14071067,
@@ -25,21 +36,14 @@ async function addDeal(deal, orgId, personId) {
             visible_to: 1,
             add_time: new Date().toLocaleString(),
         }
-        
-        const response = await fetch(`https://api.pipedrive.com/api/v1/deals?api_token=${PIPEDRIVE_API_TOKEN}` {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-
-        console.log('Deal was added successfully!', response);
+        const dealsApi = new pipedrive.DealsApi(pd);
+        const deal = await dealsApi.addDeal(data);
     } catch (err) {
         const errorToLog = err.context?.body || err;
 
         console.log('Adding failed', errorToLog);
     }
+        
 }
 
 async function addOrganisation(deal){
@@ -53,15 +57,12 @@ async function addOrganisation(deal){
             visible_to: "3",
             add_time: new Date().toLocaleString()
         }
-        const response = await fetch(`https://api.pipedrive.com/api/v1/organizations?api_token=${PIPEDRIVE_API_TOKEN}` {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
+        const orgApi = new pipedrive.OrganizationsApi(pd);
+        const response = await orgApi.addOrganization(data);
+
         console.log('Organization was added successfully', response);
-        return response.data.id;
+        const orgId = response.id;
+        await addPerson(deal, orgId);
     } catch (err) {
         const errorToLog = err.context?.body || err;
 
@@ -69,7 +70,7 @@ async function addOrganisation(deal){
     }
 }
 
-async function addPerson(deal){
+async function addPerson(deal, orgId){
     console.log('Sending request...');
     try{
         //required field(s): name
@@ -81,17 +82,16 @@ async function addPerson(deal){
             visible_to: "3",
             add_time: new Date().toLocaleString()
         }
-        const response = await fetch(`https://api.pipedrive.com/api/v1/persons?api_token=${PIPEDRIVE_API_TOKEN}` {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-        return response.data.id;
+        const personApi = new pipedrive.PersonsApi(pd);
+        const response = await personApi.addPerson(data);
+
+        console.log('Organization was added successfully', response);
+        const personId = response.id;
+        await addDeal(deal.companyName, orgId, personId);
         } catch (err) {
             const errorToLog = err.context?.body || err;
+
             console.log('Adding failed', errorToLog);
-        }  
+        } 
     }
 
