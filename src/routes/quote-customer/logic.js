@@ -1,6 +1,7 @@
 import pipedrive from 'pipedrive';
 import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
+import path from 'path';
 
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
@@ -31,7 +32,8 @@ export default async function quoteCustomer(dealId) {
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
 
-    const emailContent = await populateEmailTemplateWith(emailContentData, './customer_quote_template.mjml', import.meta.url);
+    const templatePath = path.join(process.cwd(), 'customer_quote_template.mjml');
+    const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
     const emailData = {
         sender: customer.pl_contact.email,
