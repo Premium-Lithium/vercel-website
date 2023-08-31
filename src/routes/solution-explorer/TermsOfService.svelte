@@ -29,7 +29,7 @@
 <div class="body">
 <div class="tos-div">
     <button on:click={order} class={tosAccepted ? 'order-acc' : 'order-dec'}>{ tosAccepted ? "Order now": "Order now"}</button>
-    
+    <button class="tos-button" on:click={tosClicked}>View and accept terms of service</button>
     <Modal bind:showModal={tosVisible} bind:dialog>
         <h2>Terms of service</h2>
         <p>
