@@ -27,6 +27,7 @@
   let loadingSolarValues = false;
 
 const allQueryParameters = queryParameters({
+    // energy stage params
     battery: ssp.boolean(),
     solar: ssp.boolean(),
     ev: ssp.boolean(),
@@ -36,7 +37,15 @@ const allQueryParameters = queryParameters({
     moreWinterUsage: ssp.boolean(),
     workFromHome: ssp.boolean(),
     oilAndGas: ssp.boolean(),
-    highConsumptionDevices: ssp.boolean()
+    highConsumptionDevices: ssp.boolean(),
+    // solar stage params
+    peakSolarPower: ssp.number(8.8),
+    solarLoss: ssp.number(15),
+    solarAngle: ssp.number(45),
+    solarAzimuth: ssp.number(0),
+    monthlySolarGenerationValues: ssp.array(),
+    mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558})
+
 
 });
 // prevent negative pages
