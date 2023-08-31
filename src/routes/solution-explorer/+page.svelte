@@ -108,7 +108,10 @@ const allQueryParameters = queryParameters({
         REVIEW
     {/if}
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
-    <NavButtons bind:currentPage={$stage} lastPage={6}/>
+    <div class="footer">
+      <NavButtons bind:currentPage={$stage} lastPage={6}/>
+    </div>
+    
 </body>
 <style>
   .map-view {
@@ -124,4 +127,10 @@ const allQueryParameters = queryParameters({
     
     position: relative;
   }
+
+  .footer{
+    position: absolute;
+    bottom: 0;
+  }
+
 </style>
