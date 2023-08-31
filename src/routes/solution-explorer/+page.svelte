@@ -16,7 +16,7 @@
 	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
 	import { onMount } from "svelte";
 
-  const stage = queryParam("stage", ssp.number(0))
+  const stage = queryParam("stage", ssp.number())
   let map;
   let peakSolarPower = 8.8;
   let solarLoss = 14;
@@ -50,6 +50,9 @@ const allQueryParameters = queryParameters({
 });
 // prevent negative pages
 onMount(() => {
+    if ($stage == null) {
+        $stage = 0;
+    }
     if($stage < 0) {
         $stage = 0;
     }
