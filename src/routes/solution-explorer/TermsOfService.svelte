@@ -29,7 +29,7 @@
 <div class="body">
 <div class="tos-div">
     <button on:click={order} class={tosAccepted ? 'order-acc' : 'order-dec'}>{ tosAccepted ? "Order now": "Please accept terms of service"}</button>
-    <button class="tos-button" on:click={tosClicked}>View and accept terms of service</button>
+    <button class="pl-button" on:click={tosClicked}>View and accept terms of service</button>
     <Modal bind:showModal={tosVisible} bind:dialog>
         <h2>Terms of service</h2>
         <p>
@@ -51,20 +51,7 @@
         align-items: center;
         
     }
-    button {
-        background-color: var(--plblue);
-        color: white;
-        border:solid #000 1px; 
-        font-size: 20px;
-        padding: 1rem; 
-        border-radius:5px;
-        transition-duration: 1s;
-        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
-
-    }
-    button:hover {
-        box-shadow: 0 5px 15px 10px var(--plblue);
-    }
+    
     .agree-button {
         background-color: green;
         color: white;
@@ -83,10 +70,26 @@
     .order-acc {
         background-image: radial-gradient(#5DC7F5F0, var(--plblue));
         margin:auto;
+        color: white;
+        border:solid #000 1px; 
+        font-size: 20px;
+        padding: 1rem; 
+        border-radius:5px;
+        transition-duration: 1s;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+
     }
     .order-dec {
         background-image: radial-gradient(orangered, red);
         margin:auto;
+        color: white;
+        border:solid #000 1px; 
+        font-size: 20px;
+        padding: 1rem; 
+        border-radius:5px;
+        transition-duration: 1s;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+
     }
     .order-dec:hover {
         box-shadow: 0 5px 15px orangered;
