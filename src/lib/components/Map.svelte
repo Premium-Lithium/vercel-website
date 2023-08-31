@@ -1,6 +1,8 @@
 <script>
-import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl';
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
+
 export let search = true;
 export let map = undefined;
 export let searchResult = {'latitude': undefined, 'longitude': undefined};
@@ -18,8 +20,6 @@ export let style = 5;
 export let searchedLocation = undefined;
 
 import { onMount } from 'svelte';
-import mapboxgl from "mapbox-gl"
-import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
 
 onMount(() => {
     console.log(searchedLocation)
