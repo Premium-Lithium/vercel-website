@@ -23,17 +23,11 @@ async function addDeal(companyName, orgId, personId) {
 
         const data = {
             title: companyName,
-            value: 0,
-            currency: 'GBP',
-            user_id: 14071067,
+            // user_id: 14071067,
             person_id: personId,
             org_id: orgId,
             stage_id: 159,
-            status: 'open',
-            expected_close_date: '2024-02-11',
-            probability: 60,
-            lost_reason: null,
-            visible_to: 1,
+            visible_to: 3,
             add_time: new Date().toLocaleString(),
         }
         const dealsApi = new pipedrive.DealsApi(pd);
@@ -53,7 +47,7 @@ async function addOrganisation(deal){
         //required field(s): name
         const data = {
             name: deal.companyName,
-            owner_id: 14071067,
+            // owner_id: 14071067,
             address: deal.companyAddress,
             visible_to: "3",
             add_time: new Date().toLocaleString()
@@ -78,7 +72,7 @@ async function addPerson(deal, orgId){
         //required field(s): name
         const data = {
             name: deal.name,
-            owner_id: 14071067,
+            // owner_id: 14071067,
             email: deal.email,
             phone: deal.phone,
             visible_to: "3",
