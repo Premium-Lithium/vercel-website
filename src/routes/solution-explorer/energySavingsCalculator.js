@@ -4,28 +4,28 @@ function solarSavings(options){ //how much they save per year using solar panels
     let energyLeftOver = 0;
 
     if (options.tariffType == "off-peak"){
-        energyCost = options.energyUsage * options.offPeakCost;
-        energyLeftOver = (options.energyUsage - options.solarOutput) * options.offPeakCost;
+        energyCost = options.energyUse * options.offPeakTariff;
+        energyLeftOver = (options.energyUse - options.solarEnergy) * options.offPeakTariff;
     } else{
-        energyCost = (options.energyUsage *(1-options.offPeakRatio) * options.peakCost) + (options.energyUsage * options.offPeakRatio * options.offPeakCost); //working out off peak and on peak cost
-        energyLeftOver = options.energyUsage - options.solarOutput;
-        energyLeftOver = (energyLeftOver * (1-options.offPeakRatio) * options.peakCost) + (energyLeftOver * options.offPeakRatio * options.offPeakCost);
+        energyCost = (options.energyUse *(1-options.offPeakRatio) * options.peakTariff) + (options.energyUse * options.offPeakRatio * options.offPeakTariff); //working out off peak and on peak cost
+        energyLeftOver = options.energyUse - options.solarEnergy;
+        energyLeftOver = (energyLeftOver * (1-options.offPeakRatio) * options.peakTariff) + (energyLeftOver * options.offPeakRatio * options.offPeakTariff);
     }
     energySavings = energyCost - energyLeftOver;
     return energySavings
 }
 
-function energyBuying(options){ 
+function energyBuying(options, energyLeftOver){ 
     // savings from buying off peak and using battery instead of buying on peak
     let peakUsage = 1-options.offPeakRatio;
-    let batterySavings = (options.peakCost * options.energyLeftOver * peakUsage) - (options.offPeakCost * options.energyLeftOver * peakUsage );
+    let batterySavings = (options.peakTariff * energyLeftOver * peakUsage) - (options.offPeakTariff * energyLeftOver * peakUsage );
     return batterySavings
 }
 
 function segExport(options){ 
     // sell extra energy from solar panels 
-    if (options.solarOutput > options.energyUsage){
-        let extraEnergy = options.solarOutput - options.energyUsage;
+    if (options.solarEnergy > options.energyUse){
+        let extraEnergy = options.solarEnergy - options.energyUse;
         let soldEnergy = extraEnergy * options.sellTariff; 
         return soldEnergy
     }
@@ -38,11 +38,11 @@ function calcPayback(totalSavings, totalCost){
 }
 
 export function energySavings(options){
-    let energyLeftOver = options.energyUsage - options.solarOutput;
+    let energyLeftOver = options.energyUse - options.solarEnergy;
     let solarEnergySavings = solarSavings(options)
     let batteryEnergySavings = 0;
-    if (options.solarOutput < options.energyUsage){
-        batteryEnergySavings = energyBuying(energyLeftOver, options);
+    if (options.solarEnergy < options.energyUse){
+        batteryEnergySavings = energyBuying(options, energyLeftOver);
     }
     let soldEnergy = segExport(options);
     let totalSavings = solarEnergySavings + batteryEnergySavings + soldEnergy;

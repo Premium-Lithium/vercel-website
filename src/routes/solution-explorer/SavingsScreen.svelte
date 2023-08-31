@@ -31,7 +31,7 @@
     let offPeakSavings = 1000;
     let offPeakPotentialSavings = "800";
 
-    let avgDayEnergy = energyUse / 365.25;
+    let avgDayEnergy = savingsOptions.energyUse / 365.25;
     let energyByHour = Array(24).fill((avgDayEnergy/24).toFixed(4));
     
 
