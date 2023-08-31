@@ -1,5 +1,5 @@
-<script>
-  import { ssp, queryParam} from "sveltekit-search-params"
+<script lang="ts">
+  import { ssp, queryParam, queryParameters} from "sveltekit-search-params"
 
   import Map from '$lib/components/Map.svelte';
   import Savings from "$lib/components/Savings.svelte";
@@ -13,6 +13,7 @@
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+
   const stage = queryParam("stage", ssp.number())
   let map;
   let peakSolarPower = 8.8;
@@ -23,16 +24,22 @@
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
 
-  const battery = queryParam("battery", ssp.boolean())
-  const solar = queryParam("solar", ssp.boolean())
-  const ev = queryParam("ev", ssp.boolean())
-  const epsups = queryParam("epsups", ssp.boolean())
-  const energyUsage = queryParam("energyusage", ssp.number())
-  const isEnergyUsageExact = queryParam("isenergyusageexact", ssp.boolean())
-  const moreWinterUsage = queryParam("morewinterusage", ssp.boolean())
-  const workFromHome = queryParam("workfromhome", ssp.boolean())
-  const oilAndGas = queryParam("oilandgas", ssp.boolean())
-  const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
+const allQueryParameters = queryParameters({
+    battery: ssp.boolean(),
+    solar: ssp.boolean(),
+    ev: ssp.boolean(),
+    epsups: ssp.boolean(),
+    energyUsage: ssp.number(),
+    isEnergyUsageExact: ssp.boolean(),
+    moreWinterUsage: ssp.boolean(),
+    workFromHome: ssp.boolean(),
+    oilAndGas: ssp.boolean(),
+    highConsumptionDevices: ssp.boolean()
+
+  });
+
+  let termsOfServiceAccepted;
+
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
 </script>  
@@ -43,16 +50,8 @@
     />
     {#if $stage === 0}
         <EnergyStage
-            bind:battery={$battery}
-            bind:solar={$solar}
-            bind:ev={$ev}
-            bind:epsups={$epsups}
-            bind:energyUsage={$energyUsage}
-            bind:isEnergyUsageExact={$isEnergyUsageExact}
-            bind:moreWinterUsage={$moreWinterUsage}
-            bind:workFromHome={$workFromHome}
-            bind:oilAndGas={$oilAndGas}
-            bind:highConsumptionDevices={$highConsumptionDevices}
+            bind:queryParams={$allQueryParameters}
+           
         />
     {:else if $stage === 1}
    
@@ -103,9 +102,7 @@
     {:else if $stage === 2}
       <SavingsScreen/>
     {:else if $stage === 4}
-        <SampleComponents />
-    {:else if $stage ===5}
-        <Investments solution={solution}/>    
+        <Investments solution={solution}/>  
     {:else}
         <Solution3DView />
         REVIEW
