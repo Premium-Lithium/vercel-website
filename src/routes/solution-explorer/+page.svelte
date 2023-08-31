@@ -8,7 +8,7 @@
 
   import Solution3DView from './Solution3DView.svelte'
   import ProgressHeader from "./ProgressHeader.svelte"
-  import SampleComponents from "./SampleComponents.svelte"
+  
   import EnergyStage from "./EnergyStage.svelte"
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
