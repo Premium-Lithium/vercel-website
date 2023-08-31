@@ -13,6 +13,8 @@
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
+	import { beforeUpdate, onMount } from "svelte";
 
   const stage = queryParam("stage", ssp.number())
   let map;
@@ -36,9 +38,13 @@ const allQueryParameters = queryParameters({
     oilAndGas: ssp.boolean(),
     highConsumptionDevices: ssp.boolean()
 
-  });
-
-  let termsOfServiceAccepted;
+});
+// prevent negative pages
+onMount(() => {
+    if($stage < 0) {
+        $stage = 0;
+    }
+});
 
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
@@ -101,8 +107,10 @@ const allQueryParameters = queryParameters({
 
     {:else if $stage === 2}
       <SavingsScreen/>
-    {:else if $stage === 4}
-        <Investments solution={solution}/>  
+    {:else if $stage === 3}
+        <Investments solution={solution}/>
+
+
     {:else}
         <Solution3DView />
         REVIEW
