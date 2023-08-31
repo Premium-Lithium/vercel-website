@@ -2,13 +2,15 @@
     import { queryParameters, ssp } from "sveltekit-search-params"
     import { energySavings } from "./energySavingsCalculator"
 
+    let savingsOptions = {
+        tariffType: "off-peak", solarEnergy: 3500, energyUse: 4900, 
+        peakTariff: 0.47, offPeakTariff: 0.18, sellTariff: 0.08, 
+        offPeakRatio: 0.8, supplier: "octopus", batterySize: 5, totalCost: 500000}
+
     // algorithm for pricing to follow - use estimates of usage and solar power per day/month
     // get an estimate that includes increased consumption/lower solar in winter - more bought from grid
 
     // static values for data from other pages
-    let tariffType = "off-peak";  // string: specific type of tariff
-    let solarEnergy = 3500; // kwh per year
-    let energyUse = 4900;  // kwh per year
     let winterUsage = "higher"; // higher, lower, the same
     let dailyUsagePattern = "day";  // day, night, the same?
     let offPeakStart = 0;
@@ -16,21 +18,14 @@
     
     // starting values for data from this page
     let offPeak;
-    $: offPeak = tariffType === "Off-Peak";
-    let peakTariff = 0.47;
-    let offPeakTariff = 0.18;
-    let sellTariff = 0.08;
-    let offPeakRatio=0.2;  // ratio of power currently used off peak
-    let supplier = "octopus";
-    let totalCost = 5000;
-    let batterySize = 10;
-    let savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, sellTariff);
+    $: offPeak = savingsOptions.tariffType === "Off-Peak";
+    let savings = energySavings(savingsOptions);
     let solarSavings = savings[0];
     let batterySavings = savings[1];
     let soldEnergy = savings[2];
     let totalSavings = savings[3];
     let payback = savings[4];
-    $: savings = getSavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, sellTariff);
+    $: savings = getSavings(savingsOptions);
 
     // calculated values (hard coded for now)
     let offPeakSavings = 1000;
@@ -73,11 +68,11 @@
         // set tariff type locally
         // set tariff type in url (later)
         // slightly different wording for next section,
-        tariffType = type;
+        savingsOptions.tariffType = type;
     }
 
     function getSavings(){
-        savings = energySavings(energyUse, solarEnergy, batterySize, totalCost, peakTariff, offPeakTariff, tariffType, offPeakRatio, sellTariff);
+        savings = energySavings(savingsOptions);
         solarSavings = savings[0];
         batterySavings = savings[1];
         soldEnergy = savings[2];
@@ -105,31 +100,31 @@
             {#if stages[savingStage] == "Your tariff"}
                 <p>What tariff type are you paying for you electricity?</p>
                 {#each tariffButtonOptions as option, i}
-                    <button class:selected={tariffType === option} class="tariff-button" on:click={() => tariffSelected(option)}>{option}</button>
+                    <button class:selected={savingsOptions.tariffType === option} class="tariff-button" on:click={() => tariffSelected(option)}>{option}</button>
                 {/each}
                 <br>
                 
-                {#if tariffType === "Off-Peak"}
+                {#if savingsOptions.tariffType === "Off-Peak"}
                 <p>What are your electricity rates?</p>
                 
                     <form>
-                        <label>Daytime £<input bind:value={peakTariff}> /kwh</label><br>
-                        <label>Nighttime £<input bind:value={offPeakTariff}> /kwh</label><br>
+                        <label>Daytime £<input bind:value={savingsOptions.peakTariff}> /kwh</label><br>
+                        <label>Nighttime £<input bind:value={savingsOptions.offPeakTariff}> /kwh</label><br>
                         <label>Night start<input type="range" min=0 max=24 step=1 bind:value={offPeakStart}></label>{offPeakStart}<br>
                         <label>Night end<input type="range" min=0 max=24 step=1 bind:value={offPeakEnd}></label>{offPeakEnd}<br>
                     </form>
                     <br><button on:click={() => savingStage++}>Go!</button>
-                {:else if tariffType == null}
+                {:else if savingsOptions.tariffType == null}
                     <br>
                 {:else}
-                    <label>Energy rate £<input bind:value={peakTariff}> /kwh</label>
+                    <label>Energy rate £<input bind:value={savingsOptions.peakTariff}> /kwh</label>
                     <br><button on:click={() => savingStage++}>Go!</button>
                 {/if}
                 
             {:else if stages[savingStage] === "Your usage"}
                 <p> Energy usage patterns</p>
                 {#if offPeak}
-                    <label>Ratio of off peak use?<input type="number" step=0.1 bind:value={offPeakRatio}></label>
+                    <label>Ratio of off peak use?<input type="number" step=0.1 bind:value={savingsOptions.offPeakRatio}></label>
                 {/if}
                 <p>Daily energy usage</p>
                 <div class="energyDiv">
@@ -165,14 +160,14 @@
             </div>
             {:else if stages[savingStage] === "Solar power" }
                 <p>Solar energy returns, comparison of battery to no battery</p>
-                <label>Export value £<input type="number" step=0.01 bind:value={sellTariff}> /kwh</label>
+                <label>Export value £<input type="number" step=0.01 bind:value={savingsOptions.sellTariff}> /kwh</label>
                 <p>Estimate of Savings + income without battery</p>
                 <p><strong>Estimate of savings with battery</strong></p>
 
             {:else if stages[savingStage] === "Your Savings"}
                 <p><strong>Your savings!</strong></p>
                 <p>With just solar you could save £{solarSavings}</p>
-                <p>With a {batterySize} kWh battery you could save £{batterySavings} by buying only off peak energy</p>
+                <p>With a {savingsOptions.batterySize} kWh battery you could save £{batterySavings} by buying only off peak energy</p>
                 <p>With solar and a battery you could save £{totalSavings}</p>
                 <p>By switching to an off-peak tariff, you could save...</p>
                 <p>You could payback the installation cost in {payback} years! </p>

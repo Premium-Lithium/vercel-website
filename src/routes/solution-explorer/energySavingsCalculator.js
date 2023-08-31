@@ -1,32 +1,32 @@
-function solarSavings(energyUsage, solarOutput, peakCost, offPeakCost, offPeakRatio, tariffType){ //how much they save per year using solar panels
+function solarSavings(options){ //how much they save per year using solar panels
     let energySavings = 0;
     let energyCost = 0;
     let energyLeftOver = 0;
 
-    if (tariffType == "off-peak"){
-        energyCost = energyUsage * offPeakCost;
-        energyLeftOver = (energyUsage - solarOutput) * offPeakCost;
+    if (options.tariffType == "off-peak"){
+        energyCost = options.energyUsage * options.offPeakCost;
+        energyLeftOver = (options.energyUsage - options.solarOutput) * options.offPeakCost;
     } else{
-        energyCost = (energyUsage *(1-offPeakRatio) * peakCost) + (energyUsage * offPeakRatio * offPeakCost); //working out off peak and on peak cost
-        energyLeftOver = energyUsage - solarOutput;
-        energyLeftOver = (energyLeftOver * (1-offPeakRatio) * peakCost) + (energyLeftOver * offPeakRatio * offPeakCost);
+        energyCost = (options.energyUsage *(1-options.offPeakRatio) * options.peakCost) + (options.energyUsage * options.offPeakRatio * options.offPeakCost); //working out off peak and on peak cost
+        energyLeftOver = options.energyUsage - options.solarOutput;
+        energyLeftOver = (energyLeftOver * (1-options.offPeakRatio) * options.peakCost) + (energyLeftOver * options.offPeakRatio * options.offPeakCost);
     }
     energySavings = energyCost - energyLeftOver;
     return energySavings
 }
 
-function energyBuying(energyLeftOver, batterySize, peakCost, offPeakCost, offPeakRatio){ 
+function energyBuying(options){ 
     // savings from buying off peak and using battery instead of buying on peak
-    let peakUsage = 1-offPeakRatio;
-    let batterySavings = (peakCost * energyLeftOver * peakUsage) - (offPeakCost * energyLeftOver * peakUsage );
+    let peakUsage = 1-options.offPeakRatio;
+    let batterySavings = (options.peakCost * options.energyLeftOver * peakUsage) - (options.offPeakCost * options.energyLeftOver * peakUsage );
     return batterySavings
 }
 
-function segExport(energyUsage, solarOutput, sellTariff){ 
+function segExport(options){ 
     // sell extra energy from solar panels 
-    if (solarOutput > energyUsage){
-        let extraEnergy = solarOutput - energyUsage;
-        let soldEnergy = extraEnergy * sellTariff; 
+    if (options.solarOutput > options.energyUsage){
+        let extraEnergy = options.solarOutput - options.energyUsage;
+        let soldEnergy = extraEnergy * options.sellTariff; 
         return soldEnergy
     }
     return 0
@@ -37,20 +37,20 @@ function calcPayback(totalSavings, totalCost){
     return payback 
 }
 
-export function energySavings(energyUsage, solarOutput, batterySize, totalCost, peakCost, offPeakCost, tariffType, offPeakRatio, sellTariff){
-    let energyLeftOver = energyUsage - solarOutput;
-    let solarEnergySavings = solarSavings(energyUsage, solarOutput, peakCost, offPeakCost, offPeakRatio, tariffType)
+export function energySavings(options){
+    let energyLeftOver = options.energyUsage - options.solarOutput;
+    let solarEnergySavings = solarSavings(options)
     let batteryEnergySavings = 0;
-    if (solarOutput < energyUsage){
-        batteryEnergySavings = energyBuying(energyLeftOver, batterySize, peakCost, offPeakCost, offPeakRatio);
+    if (options.solarOutput < options.energyUsage){
+        batteryEnergySavings = energyBuying(energyLeftOver, options);
     }
-    let soldEnergy = segExport(energyUsage, solarOutput, sellTariff);
+    let soldEnergy = segExport(options);
     let totalSavings = solarEnergySavings + batteryEnergySavings + soldEnergy;
-    let payback = calcPayback(totalSavings, totalCost);
+    let payback = calcPayback(totalSavings, options.totalCost);
     return [solarEnergySavings.toFixed(2), batteryEnergySavings.toFixed(2), soldEnergy.toFixed(2), totalSavings.toFixed(2), payback.toFixed(2)]
 }
 
-function getSegRateFromSupplier(supplier){
+function getSegRateFromSupplier(options){
     // average from https://solarenergyuk.org/resource/smart-export-guarantee/
     const rates = new Map([
         ["octopus", 0.15],
@@ -64,6 +64,5 @@ function getSegRateFromSupplier(supplier){
         ["shell", 0.035],
         ["edf", 0.03]
     ])
-    let segTariff = rates.get(supplier)
-    return segTariff;
+    options.sellTariff = rates.get(options.supplier)
 }
