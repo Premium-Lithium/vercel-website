@@ -41,15 +41,8 @@
     }
 
     async function fetchData() {
-        const dataUrl = `${$page.url.origin}/installer-portal`;
-
-        const res = await fetch(dataUrl, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${$accessToken}`
-            },
-        })
-        return await res.json();
+        // TODO: reimplement for supabase
+        return undefined
     }
 
 </script>
