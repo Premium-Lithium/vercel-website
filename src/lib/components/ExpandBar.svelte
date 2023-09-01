@@ -72,11 +72,17 @@
             <p class="bottom-text">Expected delivery</p>
             <p class="bottom-text">May 2025</p>
         </div>
-    </div>
+        
+    </div><p>Assuming:<br>
+            £0.30 / kwh average energy cost
+            Maximum delivery discount
+            £0.08 solar energy tariff
+
+        </p>
     <div class=bottom-div>
         <div>
             <p>These are estimates based on national averages
-                To get a more detailed estimate, do something idk
+                To get a more detailed estimate, change the values
             </p>
         </div>
         <div class=expand-icon-spacing></div>
