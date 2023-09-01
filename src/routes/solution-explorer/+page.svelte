@@ -158,7 +158,7 @@ const allQueryParameters = queryParameters({
   .savings{
     height: 10%;
     display: flex;
-    overflow-y: hidden;
+    overflow-y: visible;
     background-color: chartreuse;
   }
 
