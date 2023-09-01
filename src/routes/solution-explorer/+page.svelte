@@ -51,10 +51,12 @@ const allQueryParameters = queryParameters({
         bind:selectedIndex={$stage}
     />
     {#if $stage === 0}
+      {#key $allQueryParameters}
       <Carousel bind:carousel>
         <EnergyStage
         bind:queryParams={$allQueryParameters}/>
       </Carousel>
+      {/key}
     {:else if $stage === 1}
    
         <div class="map-view"> 
