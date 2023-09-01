@@ -56,6 +56,7 @@ const allQueryParameters = queryParameters({
         <EnergyStage
         bind:queryParams={$allQueryParameters}/>
       </Carousel>
+      
       {/key}
     {:else if $stage === 1}
    
