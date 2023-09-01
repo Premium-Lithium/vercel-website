@@ -5,7 +5,6 @@
     export let infinite = false;
     export let dots = true;
     export let arrows = true;
-    export let 
 </script>
 
 
