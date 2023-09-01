@@ -14,6 +14,8 @@
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
 
+	import ExpandBar from "$lib/components/ExpandBar.svelte";
+
   const stage = queryParam("stage", ssp.number())
   let map;
   let peakSolarPower = 8.8;
@@ -107,6 +109,9 @@ const allQueryParameters = queryParameters({
         <Solution3DView />
         REVIEW
     {/if}
+    <div style="height: 3rem;">
+        <ExpandBar />
+    </div>
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
     <NavButtons bind:currentPage={$stage} lastPage={6}/>
 </body>

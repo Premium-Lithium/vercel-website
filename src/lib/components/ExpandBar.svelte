@@ -1,0 +1,73 @@
+<script lang="ts">
+	import { afterUpdate, onMount } from "svelte";
+    export let price = 12345;
+    export let yearlySavings = 1234;
+    export let expandText = ["You invest", "You save"];
+    // import from svelte material icons
+    import ChevronDoubleUp from "svelte-material-icons/ChevronDoubleUp.svelte"
+
+    const currency = new Intl.NumberFormat('en-GB', {
+      stylde: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+
+
+    
+</script>
+
+<div class=body>
+    <div class="expandText">
+        <p class="bottomText">{expandText[0]}&nbsp;&nbsp; {currency.format(price) }</p>
+        <div class="divider">
+        </div>
+        <p class="bottomText">{expandText[1]}&nbsp;&nbsp; {currency.format(yearlySavings)} / yr</p>
+    </div>
+        
+    <div class="expandIcon">
+        <ChevronDoubleUp height=100% width=100% color=#e6e6e6 class=chevron/>
+        
+    </div>
+
+</div>
+
+<style>
+    /* should fill div it is placed in */
+    .body {
+        display: flex;
+        background-color: #6d6c6c;
+        width: 99%;
+        height: 99%;
+        margin: 0.5%;
+        border-radius: 5px;
+    }
+
+    .expandIcon {
+        background-color: var(--plblue);
+        height:100%;
+        width: 3rem;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    .expandText {
+        width:100%;
+        display: grid;
+        grid-template-columns: 1fr 1px 1fr;
+        place-items: center;
+    }
+
+    .divider {
+        background-color: var(--plblue);
+        width: 1px;
+        height: 75%;
+        border-radius: 1px;
+        box-shadow: 0 0 1px 2px rgba(40, 170, 226, 0.4);
+    }
+
+    p {
+        color: white;
+        margin: auto;
+    }
+</style>
