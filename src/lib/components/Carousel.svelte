@@ -14,14 +14,16 @@
 
 	function updateSlides() {
 		slides.forEach((slide, index) => {
-		    slide.style.opacity = index === currentIndex ? 1 : 0.1;
+		    slide.style.opacity = index === currentIndex ? 1 : 0.25;
             slide.style.transition = `opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)`;
             slide.style.width = `80vw`
-            slide.style.margin = `2.5vw`;
+            slide.style.margin = index == 0 ? `5vw 2.5vw 5vw 10vw` : index == totalSlides-1 ? `5vw 10vw 5vw 2.5vw` : `5vw 2.5vw 5vw 2.5vw`;
+            slide.style.border = `2px solid #e1e1e1`;
+            slide.style.boxShadow = `0px 0px 8px rgba(111,111,111,.5)`
 		});
 
         slideContainer.style.transform = `translateX(calc(${currentIndex} * -80vw))`
-        slideContainer.style.width = `calc(${totalSlides} * 85vw `
+        slideContainer.style.width = `calc(${totalSlides} * 80vw + (calc(${totalSlides} + 1) * 5vw`
 
 
 	}
