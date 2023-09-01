@@ -5,6 +5,15 @@
     export let infinite = false;
     export let dots = true;
     export let arrows = true;
+
+    export function nextPage() {
+        carousel.goToNext({ animated:true })
+    }
+
+    export function prevPage() {
+        carousel.goToPrev({ animated:true })
+    }
+
 </script>
 
 
