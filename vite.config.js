@@ -9,4 +9,7 @@ export default defineConfig({
     server: {
         cors: false,
     },
+	optimizeDeps: {
+		include: ['lodash.get', 'lodash.isequal', 'lodash.clonedeep']
+	}
 });

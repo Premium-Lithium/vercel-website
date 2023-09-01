@@ -13,6 +13,7 @@
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+	import Carousel from "$lib/components/Carousel.svelte";
 
   const stage = queryParam("stage", ssp.number())
   let map;
@@ -23,6 +24,7 @@
   let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
+  let carousel;
 
 const allQueryParameters = queryParameters({
     battery: ssp.boolean(),
@@ -49,10 +51,10 @@ const allQueryParameters = queryParameters({
         bind:selectedIndex={$stage}
     />
     {#if $stage === 0}
+      <Carousel bind:carousel>
         <EnergyStage
-            bind:queryParams={$allQueryParameters}
-           
-        />
+        bind:queryParams={$allQueryParameters}/>
+      </Carousel>
     {:else if $stage === 1}
    
         <div class="map-view"> 
