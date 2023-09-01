@@ -8,11 +8,13 @@
 
   import Solution3DView from './Solution3DView.svelte'
   import ProgressHeader from "./ProgressHeader.svelte"
-  import SampleComponents from "./SampleComponents.svelte"
+  
   import EnergyStage from "./EnergyStage.svelte"
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
+	import { onMount } from "svelte";
 
   const stage = queryParam("stage", ssp.number())
   let map;
@@ -25,6 +27,7 @@
   let loadingSolarValues = false;
 
 const allQueryParameters = queryParameters({
+    // energy stage params
     battery: ssp.boolean(),
     solar: ssp.boolean(),
     ev: ssp.boolean(),
@@ -34,11 +37,26 @@ const allQueryParameters = queryParameters({
     moreWinterUsage: ssp.boolean(),
     workFromHome: ssp.boolean(),
     oilAndGas: ssp.boolean(),
-    highConsumptionDevices: ssp.boolean()
+    highConsumptionDevices: ssp.boolean(),
+    // solar stage params
+    peakSolarPower: ssp.number(8.8),
+    solarLoss: ssp.number(15),
+    solarAngle: ssp.number(45),
+    solarAzimuth: ssp.number(0),
+    monthlySolarGenerationValues: ssp.array(),
+    mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558})
 
-  });
 
-  let termsOfServiceAccepted;
+});
+// prevent negative pages
+onMount(() => {
+    if ($stage == null) {
+        $stage = 0;
+    }
+    if($stage < 0) {
+        $stage = 0;
+    }
+});
 
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
@@ -103,8 +121,9 @@ const allQueryParameters = queryParameters({
 
     {:else if $stage === 2}
       <SavingsScreen/>
-    {:else if $stage === 4}
-        <Investments solution={solution}/>  
+    {:else if $stage === 3}
+        <Investments solution={solution}/>
+
     {:else}
         <div class="modelView">
             3d model goes here
