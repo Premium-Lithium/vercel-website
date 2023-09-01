@@ -11,11 +11,8 @@
     let batteryModel;
     const plBlue = "#28AAE2";
 
-    let pos;
-
     // $: pos = model.camPos;
     // temp
-    pos = 10;
 
     let rotation = 0;
     const rotSpeed = 0.2;
@@ -27,7 +24,7 @@
 
 <T.FogExp2 attach="fog" args={['white', 0.015]} />
 
-<T.OrthographicCamera makeDefault zoom={canvasSize * camZoomToSizeRatio} position={[pos, 6, 10]} on:create={({ ref }) => {
+<T.OrthographicCamera makeDefault zoom={canvasSize * camZoomToSizeRatio} position={[0, 6, 10]} on:create={({ ref }) => {
     ref.lookAt(0, 1, 0)
 }}></T.OrthographicCamera>
 

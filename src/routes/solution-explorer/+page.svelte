@@ -6,7 +6,7 @@
     import NavButtons from "$lib/components/NavButtons.svelte";
     import SolutionModel from './solutionModel.js';
 
-    import Solution3DView from './Solution3DView.svelte'
+    import ModelVisualisation from './ModelVisualisation.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
     import SampleComponents from "./SampleComponents.svelte"
     import EnergyStage from "./EnergyStage.svelte"
@@ -29,16 +29,11 @@
     const oilAndGas = queryParam("oilandgas", ssp.boolean())
     const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
 
-    // let focalItem = "house";
+    // This is the object that exposes an API for interacting
     let model = new SolutionModel();
-
-    function focusMain() {
-      model.camPos = 10;
-    }
-
-    function focusSolar() {
-      model.camPos = 0;
-    }
+    // model.focus_on("solar");
+    // model.remove_product("battery");
+    // model.reset();
 
 </script>
 
@@ -92,7 +87,7 @@
 
     {:else}
         <div style="height: 1000px">
-          <Solution3DView bind:model/>
+          <ModelVisualisation bind:model/>
         </div>
         <div>
           <button on:click={focusMain}>Main View</button>
