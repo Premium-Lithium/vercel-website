@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="typescript">
 	import { afterUpdate, onMount } from "svelte";
     export let price = 12345;
     export let yearlySavings = 1234;
@@ -7,7 +7,7 @@
     import ChevronDoubleUp from "svelte-material-icons/ChevronDoubleUp.svelte"
 
     const currency = new Intl.NumberFormat('en-GB', {
-      stylde: 'currency',
+      style: 'currency',
       currency: 'GBP',
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
@@ -19,13 +19,19 @@
 
 <div class=body>
     <div class="expandText">
-        <p class="bottomText">{expandText[0]}&nbsp;&nbsp; {currency.format(price) }</p>
+        <div class=left-text>
+            <p class="bottom-text">{expandText[0]}</p>
+            <p class=bottom-text>{currency.format(price) }</p>
+        </div>
         <div class="divider">
         </div>
-        <p class="bottomText">{expandText[1]}&nbsp;&nbsp; {currency.format(yearlySavings)} / yr</p>
+        <div class=right-text>
+            <p class="bottom-text">{expandText[1]}</p>
+            <p>{currency.format(yearlySavings)} / yr</p>
+        </div>
     </div>
         
-    <div class="expandIcon">
+    <div class="expand-icon">
         <ChevronDoubleUp height=100% width=100% color=#e6e6e6 class=chevron/>
         
     </div>
@@ -40,13 +46,13 @@
         width: 99%;
         height: 99%;
         margin: 0.5%;
-        border-radius: 5px;
+        border-radius: 10px;
     }
 
-    .expandIcon {
+    .expand-icon {
         background-color: var(--plblue);
         height:100%;
-        width: 3rem;
+        width: 5rem;
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
     }
@@ -64,6 +70,12 @@
         height: 75%;
         border-radius: 1px;
         box-shadow: 0 0 1px 2px rgba(40, 170, 226, 0.4);
+    }
+
+    .bottom-text {
+        text-align: center;
+        margin: 0.4em;
+
     }
 
     p {
