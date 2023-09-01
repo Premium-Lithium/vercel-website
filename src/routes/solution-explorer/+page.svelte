@@ -46,10 +46,12 @@ const allQueryParameters = queryParameters({
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
 </script>  
 <body>
-    <ProgressHeader
-        titles={["Energy", "Solar", "Savings", "Investment"]}
-        bind:selectedIndex={$stage}
-    />
+  <div class="progressHeader">
+      <ProgressHeader
+          titles={["Energy", "Solar", "Savings", "Investment"]}
+          bind:selectedIndex={$stage}
+      />
+  </div>
     {#if $stage === 0}
         <EnergyStage
             bind:queryParams={$allQueryParameters}
@@ -106,16 +108,28 @@ const allQueryParameters = queryParameters({
     {:else if $stage === 4}
         <Investments solution={solution}/>  
     {:else}
-        <Solution3DView />
-        REVIEW
+        <div class="modelView">
+            3d model goes here
+        </div>
+        <div class="questions">
+          questions here
+        </div>
+        <!-- <Solution3DView /> -->
+        <!-- REVIEW -->
     {/if}
-    <div style="height: 3rem;">
+      <div class="savings">
         <ExpandBar />
     </div>
-    <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
-    <NavButtons bind:currentPage={$stage} lastPage={6}/>
+      <div class="footer">
+        <NavButtons bind:currentPage={$stage} lastPage={6}/>
+    </div>
 </body>
+
 <style>
+
+  .progressHeader{
+    height: 5%;
+  }
   .map-view {
     width: 100vw;
     height: 40vh;
@@ -129,4 +143,33 @@ const allQueryParameters = queryParameters({
     
     position: relative;
   }
+
+  .modelView{
+    overflow-y: hidden;
+    background-color: var(--plblue);
+    height: 30%;
+  }
+
+  .questions{
+    overflow-y: hidden;
+    background-color: rgb(224, 224, 224);
+    height: 45%
+  }
+  .savings{
+    height: 10%;
+    display: flex;
+    overflow-y: hidden;
+    background-color: chartreuse;
+  }
+
+  .footer{
+    height: 10%;
+    width: 100%;
+    position: absolute;
+    background-color: aliceblue;
+    bottom: 0;
+    overflow: hidden;
+  }
+
+
 </style>
