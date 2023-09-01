@@ -1,8 +1,11 @@
 <script>
+    // This component is responsible for providing a complete visualisation of the solution model.
+
     import { onMount, tick, afterUpdate } from 'svelte';
     import { writable } from 'svelte/store';
     import Scene from './Scene.svelte'
     import { Canvas } from '@threlte/core'
+	import Accordian from '$lib/components/Accordian.svelte';
 
     export let model;
     let scenePanel;
