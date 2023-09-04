@@ -5,63 +5,61 @@
 	import Savings from '$lib/components/Savings.svelte';
 	import NavButtons from '$lib/components/NavButtons.svelte';
 	import Loading from '$lib/components/Loading.svelte';
-  import Carousel from '$lib/components/Carousel.svelte';
-  
-  import { onMount } from "svelte";
-  
+	import Carousel from '$lib/components/Carousel.svelte';
+
+	import { onMount } from 'svelte';
+
 	import Solution3DView from './Solution3DView.svelte';
 	import ProgressHeader from './ProgressHeader.svelte';
 	import EnergyStage from './EnergyStage.svelte';
 	import Investments from './Investments.svelte';
 	import SavingsScreen from './SavingsScreen.svelte';
-	
+
 	import SolarApi from './SolarApi.svelte';
 
-  import nextSlide from '$lib/components/Carousel.svelte';
+	import nextSlide from '$lib/components/Carousel.svelte';
 	import { browser } from '$app/environment';
 
 	let map;
-  let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
-  let monthlySolarGenerationValues = [];
-  let loadingSolarValues = false;
+	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
+	let monthlySolarGenerationValues = [];
+	let loadingSolarValues = false;
 	let carouselEnergyStage;
-  let carouselSolar;
+	let carouselSolar;
 	let carouselSavings;
 	let carouselInvestments;
   let carouselStages = [{'energy': 0},{'solar': 0},{'savings': 0},{'investments': 0}];
 	let termsOfServiceAccepted;
-  const stage = queryParam('stage',ssp.number());
+	const stage = queryParam('stage', ssp.number());
 
-const allQueryParameters = queryParameters({
-    // energy stage params
-    battery: ssp.boolean(),
-    solar: ssp.boolean(),
-    ev: ssp.boolean(),
-    epsups: ssp.boolean(),
-    energyUsage: ssp.number(),
-    isEnergyUsageExact: ssp.boolean(),
-    moreWinterUsage: ssp.boolean(),
-    workFromHome: ssp.boolean(),
-    oilAndGas: ssp.boolean(),
-    highConsumptionDevices: ssp.boolean(),
-    // solar stage params
-    peakSolarPower: ssp.number(8.8),
-    solarLoss: ssp.number(15),
-    solarAngle: ssp.number(45),
-    solarAzimuth: ssp.number(0),
-    mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558})
-
-
-});
-// prevent negative pages
-onMount(() => {
-    if ($stage == null) {
-        $stage = 0;
-    }
-    if($stage < 0) {
-        $stage = 0;
-    }
-});
+	const allQueryParameters = queryParameters({
+		// energy stage params
+		battery: ssp.boolean(),
+		solar: ssp.boolean(),
+		ev: ssp.boolean(),
+		epsups: ssp.boolean(),
+		energyUsage: ssp.number(),
+		isEnergyUsageExact: ssp.boolean(),
+		moreWinterUsage: ssp.boolean(),
+		workFromHome: ssp.boolean(),
+		oilAndGas: ssp.boolean(),
+		highConsumptionDevices: ssp.boolean(),
+		// solar stage params
+		peakSolarPower: ssp.number(8.8),
+		solarLoss: ssp.number(15),
+		solarAngle: ssp.number(45),
+		solarAzimuth: ssp.number(0),
+		mapboxSearchParams: ssp.object({ latitude: 53.95924825020342, longitude: -1.0772513524147558 })
+	});
+	// prevent negative pages
+	onMount(() => {
+		if ($stage == null) {
+			$stage = 0;
+		}
+		if ($stage < 0) {
+			$stage = 0;
+		}
+	});
 
 	const solution = {
 		houseType: 'detatched',
@@ -99,7 +97,7 @@ onMount(() => {
 
 	{:else if $stage === 2}
 		{#key $allQueryParameters}
-    <!-- Todo make better looking -->
+			<!-- Todo make better looking -->
 			<Carousel bind:this={carouselSavings}>
 				<SavingsScreen />
 			</Carousel>
@@ -121,51 +119,49 @@ onMount(() => {
 {/if}
 
 <style>
-  
-  .progressHeader{
-    height: 5%;
-  }
-  
-  .map-view {
-    width: 100vw;
-    height: 40vh;
-  }
-  
-  .solar-api {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 90vw;
-    margin: 20px 5vw;
-    
-    position: relative;
-  }
+	.progressHeader {
+		height: 5%;
+	}
 
-  .modelView{
-    overflow-y: hidden;
-    background-color: var(--plblue);
-    height: 30%;
-  }
+	.map-view {
+		width: 100vw;
+		height: 40vh;
+	}
 
-  .questions{
-    overflow-y: hidden;
-    background-color: rgb(224, 224, 224);
-    height: 45%
-  }
-  .savings{
-    height: 10%;
-    display: flex;
-    overflow-y: hidden;
-    background-color: chartreuse;
-  }
+	.solar-api {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 90vw;
+		margin: 20px 5vw;
 
-  .footer{
-    height: 10%;
-    width: 100%;
-    position: absolute;
-    background-color: aliceblue;
-    bottom: 0;
-    overflow: hidden;
-  }
-  
+		position: relative;
+	}
+
+	.modelView {
+		overflow-y: hidden;
+		background-color: var(--plblue);
+		height: 30%;
+	}
+
+	.questions {
+		overflow-y: hidden;
+		background-color: rgb(224, 224, 224);
+		height: 45%;
+	}
+	.savings {
+		height: 10%;
+		display: flex;
+		overflow-y: hidden;
+		background-color: chartreuse;
+	}
+
+	.footer {
+		height: 10%;
+		width: 100%;
+		position: absolute;
+		background-color: aliceblue;
+		bottom: 0;
+		overflow: hidden;
+	}
 </style>
