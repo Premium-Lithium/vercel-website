@@ -16,6 +16,8 @@
 	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
 	import { onMount } from "svelte";
 
+	import ExpandBar from "./ExpandBar.svelte";
+
   const stage = queryParam("stage", ssp.number())
   let map;
   let peakSolarPower = 8.8;
@@ -135,7 +137,7 @@ onMount(() => {
         <!-- REVIEW -->
     {/if}
       <div class="savings">
-        <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
+        <ExpandBar />
       </div>
       <div class="footer">
         <NavButtons bind:currentPage={$stage} lastPage={6}/>
@@ -175,7 +177,7 @@ onMount(() => {
   .savings{
     height: 10%;
     display: flex;
-    overflow-y: hidden;
+    overflow-y: visible;
     background-color: chartreuse;
   }
 
