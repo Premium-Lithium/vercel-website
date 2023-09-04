@@ -12,18 +12,28 @@
 		updateSlides();
 	});
 
-	function updateSlides() {
+	export function updateSlides() {
+        let slideWidth = '80vw';
+        let slidePadding = `calc((100vw - ${slideWidth}) / 4)`
 		slides.forEach((slide, index) => {
-		    slide.style.opacity = index === currentIndex ? 1 : 0.25;
+		    slide.style.opacity = index === currentIndex ? 1 : 0.5;
             slide.style.transition = `opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)`;
-            slide.style.width = `80vw`
-            slide.style.margin = index == 0 ? `5vw 2.5vw 5vw 10vw` : index == totalSlides-1 ? `5vw 10vw 5vw 2.5vw` : `5vw 2.5vw 5vw 2.5vw`;
-            slide.style.border = `2px solid #e1e1e1`;
-            slide.style.boxShadow = `0px 0px 8px rgba(111,111,111,.5)`
+            slide.style.width = slideWidth;
+
+            if (index == 0)
+            slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}*2)`
+            else if (index == totalSlides-1)
+            slide.style.margin = `${slidePadding} calc(${slidePadding}*2) ${slidePadding} calc(${slidePadding}/2)`
+            else
+            slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}/2)`
+
+            slide.style.boxShadow = `0px 2px 8px rgba(180,180,180,.9)`;
+            slide.style.borderRadius = `10px`;
+            slide.style.padding = `10px`;
 		});
 
-        slideContainer.style.transform = `translateX(calc(${currentIndex} * -80vw))`
-        slideContainer.style.width = `calc(${totalSlides} * 80vw + (calc(${totalSlides} + 1) * 5vw`
+        slideContainer.style.transform = `translateX(calc(${currentIndex} * -${slideWidth}))`
+        slideContainer.style.width = `calc(${totalSlides} * ${slideWidth} + (calc(${totalSlides} + 1) * ${slidePadding}`
 
 
 	}
