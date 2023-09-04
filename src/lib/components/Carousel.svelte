@@ -20,6 +20,7 @@
 		    slide.style.opacity = index === currentIndex ? 1 : 0.5;
             slide.style.transition = `opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)`;
             slide.style.width = slideWidth;
+            slide.style.height = slideWidth;
 
             if (index == 0)                  slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}*2)`
             else if (index == totalSlides-1) slide.style.margin = `${slidePadding} calc(${slidePadding}*2) ${slidePadding} calc(${slidePadding}/2)`
@@ -57,7 +58,7 @@
         const distance = endX - startX;
 
         // Change this threshold as needed
-        const swipeThreshold = 50;
+        const swipeThreshold = 100;
 
         if (distance > swipeThreshold) {
             prevSlide();
