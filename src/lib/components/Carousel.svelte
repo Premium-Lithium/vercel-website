@@ -1,5 +1,6 @@
 <script>
-	import { onMount, tick } from 'svelte';
+	import { onMount} from 'svelte';
+    import { send, receive } from './transition.js';
 	let slideContainer;
 	export let currentIndex = 0;
 	let totalSlides = 0;
@@ -22,9 +23,9 @@
             slide.style.width = slideWidth;
             slide.style.height = slideWidth;
 
-            if (index == 0)                  slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}*2)`
-            else if (index == totalSlides-1) slide.style.margin = `${slidePadding} calc(${slidePadding}*2) ${slidePadding} calc(${slidePadding}/2)`
-            else                             slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}/2)`
+            if (index == 0)                  slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}/2) calc(${slidePadding}/4) calc(${slidePadding}*2)`
+            else if (index == totalSlides-1) slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}*2) calc(${slidePadding}/4) calc(${slidePadding}/2)`
+            else                             slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}/2) calc(${slidePadding}/4) calc(${slidePadding}/2)`
 
             slide.style.boxShadow = `0px 2px 8px rgba(180,180,180,.9)`;
             slide.style.borderRadius = `10px`;
@@ -75,7 +76,9 @@
         <slot />
     </div>
     <div class="dots-container">
-
+        {#each [...Array(slides.length)].keys() as s}
+        <span class={`${s == currentIndex ? "dot highlighted" : "dot"}`}></span>
+        {/each}
     </div>
 </div>
 
@@ -95,6 +98,28 @@
         position: relative;
         transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 	}
+
+    .dots-container {
+        width: 100%;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .highlighted {
+        background-color: var(--plblue);
+        transition: background-color 0.2s ease;
+    }
+
+    .dot {
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        border: 1px solid rgba(0,0,0,0.3);
+        transition: background-color 0.2s ease;
+    }
 
     .next-button {
         position: absolute;
