@@ -3,13 +3,15 @@
 import { describe, expect, it, test } from 'vitest'
 
 // test data structure, example for price check function, which is gone now :'-(
-const priceDatum = {
+const priceCheckDatum = {
     "daytimeEnergyPrice": 0.74,
     "nightEnergyPrice": 0.22,
     "totalEnergyUse": 4344.16,
     "nightEnergyRatio": 0.45,
     "totalEnergyPrice": 2198.14
 }
+
+const priceCheckStructure = ["daytime energy price £/kwh" ,"nighttime energy price £/kwh", "annual energy use", "ratio used at night, as decimal", "return: amount spent in total"];
 
 
 describe.skip("price check", () => {
