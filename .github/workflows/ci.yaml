@@ -11,10 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    matrix: 
-      node-version: [12.x, 14.x, 16.x]
-    
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -34,11 +30,19 @@ jobs:
         with:
           version: latest
 
+      - name: Use node js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: "npm"
+      - run: npm run test
+
+      
       - run: supabase db start
       - run: supabase db lint
       - run: supabase test db
 
-      - run: npm run test
+
 
       - name: Verify generated types are checked in
         run: |
