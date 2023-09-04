@@ -13,6 +13,7 @@
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+  import  InstallationDate  from "./InstallationDate.svelte";
 	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
 	import { onMount } from "svelte";
 
@@ -27,6 +28,7 @@
   let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
+  let installationDate = new Date().toISOString().slice(0, 7);
 
 const allQueryParameters = queryParameters({
     // energy stage params
@@ -46,10 +48,10 @@ const allQueryParameters = queryParameters({
     solarAngle: ssp.number(45),
     solarAzimuth: ssp.number(0),
     monthlySolarGenerationValues: ssp.array(),
-    mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558})
-
-
+    mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558}),
+    installationDate: ssp.string()
 });
+
 // prevent negative pages
 onMount(() => {
     if ($stage == null) {
@@ -131,7 +133,7 @@ onMount(() => {
             3d model goes here
         </div>
         <div class="questions">
-          questions here
+          <InstallationDate bind:installationDate={installationDate}/>
         </div>
         <!-- <Solution3DView /> -->
         <!-- REVIEW -->
@@ -171,6 +173,8 @@ onMount(() => {
 
   .questions{
     overflow-y: hidden;
+    align-items: center;
+    flex-direction: column;
     background-color: rgb(224, 224, 224);
     height: 45%
   }
