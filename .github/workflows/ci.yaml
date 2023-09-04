@@ -22,11 +22,10 @@ jobs:
         with:
           version: latest
 
-      - name: Use pnpm
-        uses: pnpm/action-setup@v2
+    - uses: pnpm/action-setup@v2
         with:
           version: 8
-      - name: Use node??
+      - name: Use node
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
