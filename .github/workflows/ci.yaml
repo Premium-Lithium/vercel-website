@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: nix develop
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
         with:
@@ -23,6 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+      - run: pnpm install
       - name: run tests?
         run: pnpm run test
 
