@@ -16,17 +16,31 @@ export async function POST ({request}){
         return json({message: "Unchanged deal"}, {status: 202});
     }
     await loadPolygonsFromDatabase();
-    let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
-    let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
-    console.log(dealGeographicalPoint);
-    // polygons.forEach((p) => {p.geometry.coordinates.forEach((x) => console.log(x[0], x[1]))});
-    let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons);
-    if(polygonPointIsIn != null) {
-        await syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails[polygonPointIsIn].id);
-        return json({message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.`}, {status: 200});
+    try {
+        let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code']]))[0];
+        let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
+        console.log(dealGeographicalPoint);
+        let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons);
+        if(polygonPointIsIn != null) {
+            await syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails[polygonPointIsIn].id);
+            return json({message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.`}, {status: 200});
+        }
+        return json({message: `Deal with id ${dealInfo.meta.id} not inside a defined region.`}, {status: 202});
+    } catch (e) {
+        try {
+            let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['5849f39e5668de78c3342074d94a7ed5910e3258']]))[0];
+            let dealGeographicalPoint = point([latlon.result.longitude, latlon.result.latitude]);
+            console.log(dealGeographicalPoint);
+            let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons);
+            if(polygonPointIsIn != null) {
+                await syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails[polygonPointIsIn].id);
+                return json({message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.`}, {status: 200});
+            }
+            return json({message: `Deal with id ${dealInfo.meta.id} not inside a defined region.`}, {status: 202});
+        } catch (e) {
+            return json({message: e}, {status: 500});
+        }
     }
-    return json({message: `Deal with id ${dealInfo.meta.id} not inside a defined region.`}, {status: 202});
-    
 }
     
 

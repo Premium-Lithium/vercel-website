@@ -19,12 +19,16 @@
 	import SolarQuestions from './SolarQuestions.svelte';
 
 	import nextSlide from '$lib/components/Carousel.svelte';
+  import  InstallationDate  from "./InstallationDate.svelte";
 	import { browser } from '$app/environment';
+
+	import ExpandBar from "./ExpandBar.svelte";
 
 	let map;
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
 	let monthlySolarGenerationValues = [];
 	let loadingSolarValues = false;
+  let installationDate = new Date().toISOString().slice(0, 7);
 	let carouselEnergyStage;
 	let carouselSolar;
 	let carouselSavings;
@@ -158,13 +162,15 @@
 
 	.questions {
 		overflow-y: hidden;
+    align-items: center;
+    flex-direction: column;
 		background-color: rgb(224, 224, 224);
 		height: 45%;
 	}
 	.savings {
 		height: 10%;
 		display: flex;
-		overflow-y: hidden;
+		overflow-y: visible;
 		background-color: chartreuse;
 	}
 
