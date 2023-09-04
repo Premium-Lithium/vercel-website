@@ -14,23 +14,14 @@
 	import Investments from './Investments.svelte';
 	import SavingsScreen from './SavingsScreen.svelte';
 	import Carousel from '$lib/components/Carousel.svelte';
-	import SolarApi from './SolarApi.svelte';
-
-  import { nextPage, prevPage } from '$lib/components/Carousel.svelte';
+	import {SolarApi, peakSolarPower, solarLoss, solarAngle, solarAzimuth}  from './SolarApi.svelte';
 
 	const stage = queryParam('stage', ssp.number());
 	let map;
-	let peakSolarPower = 8.8;
-	let solarLoss = 14;
-	let solarAngle = 45;
-	let solarAzimuth = 0; // 0=south, -90=east, 180=north, 90=west
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
 	let monthlySolarGenerationValues = [];
 	let loadingSolarValues = false;
-	let carouselEnergyStage;
-  let carouselSolar;
-	let carouselSavings;
-	let carouselInvestments;
+	let carousel;
 
 	const allQueryParameters = queryParameters({
 		battery: ssp.boolean(),
@@ -62,80 +53,74 @@
 </script>
 
 <body>
-    <ProgressHeader
-        titles={["Energy", "Solar", "Savings", "Investment"]}
-        bind:selectedIndex={$stage}
-    />
-    {#if $stage === 0}
-      {#key $allQueryParameters}
-      <Carousel bind:carousel>
-        <EnergyStage
-        bind:queryParams={$allQueryParameters}/>
-      </Carousel>
-      
-      {/key}
-    {:else if $stage === 1}
-   
-        <div class="map-view"> 
-          <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
-        </div>
-        <div class="solar-api">
-          <label for="peakSolarPower">Peak Solar Power</label>
-          <input type="number" id="peakSolarPower" name="peakSolarPower" bind:value={peakSolarPower}>
-          <label for="solarLoss">Solar Loss</label>
-          <input type="number" id="solarLoss" name="solarLoss" bind:value={solarLoss}>
-          <label for="solarAngle">Solar Panel Angle</label>
-          <input type="number" id="solarAngle" name="solarAngle" bind:value={solarAngle}/>
-          <label for="solarAzimuth">Solar Panel Azimuth</label>
-          <input type="number" id="solarAzimuth" name="solarAzimuth" bind:value={solarAzimuth}/>
-          <input type="submit" value="Submit" on:click={async () => {
-            monthlySolarGenerationValues = [];
-            loadingSolarValues = true;
-            let res = await fetch('solution-explorer/', {
-              method: "POST",
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                'requestType': 'PVGIS',
-                'lat': mapboxSearchResult.latitude,
-                'lon': mapboxSearchResult.longitude,
-                'peakPower': peakSolarPower,
-                'loss': solarLoss,
-                'angle': solarAngle,
-                'azimuth': solarAzimuth,
-              })
-            });
-            res = await res.json();
-            loadingSolarValues = false;
-            console.log(res);
-            res.outputs.monthly.fixed.forEach((x) => {
-              monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
-            })
-          }}> 
-          {#if loadingSolarValues}
-          <Loading/>
-          {:else}
-          <SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues}/>
-          {/if}
-        </div>
-
+	<ProgressHeader
+		titles={['Energy', 'Solar', 'Savings', 'Investment']}
+		bind:selectedIndex={$stage}
+	/>
+	{#if $stage === 0}
+		{#key $allQueryParameters}
+			<Carousel bind:carousel>
+				<EnergyStage bind:queryParams={$allQueryParameters} />
+			</Carousel>
+		{/key}
+	{:else if $stage === 1}
+		<div class="map-view">
+			<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
+		</div>
+		<div>
+			<Carousel bind:carousel>
+				<SolarApi />
+			</Carousel>
+		</div>
+		<input
+			type="submit"
+			value="Submit"
+			on:click={async () => {
+				monthlySolarGenerationValues = [];
+				loadingSolarValues = true;
+				let res = await fetch('solution-explorer/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						requestType: 'PVGIS',
+						lat: mapboxSearchResult.latitude,
+						lon: mapboxSearchResult.longitude,
+						peakPower: peakSolarPower,
+						loss: solarLoss,
+						angle: solarAngle,
+						azimuth: solarAzimuth
+					})
+				});
+				res = await res.json();
+				loadingSolarValues = false;
+				console.log(res);
+				res.outputs.monthly.fixed.forEach((x) => {
+					monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
+				});
+			}}
+		/>
+		<div>
+			{#if !loadingSolarValues}
+				<!-- Replace this with "fill in previous form" or block user from swiping until submitted -->
+				<SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues} />
+			{/if}
+		</div>
 	{:else if $stage === 2}
 		{#key $allQueryParameters}
-    <!-- Todo make better looking -->
-			<Carousel bind:carouselSavings>
+			<!-- Todo make better looking -->
+			<Carousel bind:carousel>
 				<SavingsScreen />
 			</Carousel>
 		{/key}
-
 	{:else if $stage === 3}
 		{#key $allQueryParameters}
 			<!-- Todo make less bad looking -->
-			<Carousel bind:carouselInvestments>
+			<Carousel bind:carousel>
 				<Investments {solution} />
 			</Carousel>
 		{/key}
-
 	{:else}
 		<Solution3DView />
 		REVIEW
