@@ -1,6 +1,5 @@
 <script>
 	import { onMount} from 'svelte';
-    import { send, receive } from './transition.js';
 	let slideContainer;
 	export let currentIndex = 0;
 	let totalSlides = 0;
