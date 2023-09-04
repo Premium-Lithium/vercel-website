@@ -37,7 +37,7 @@ describe.skip("total cost calculator", () => {
     }),
 
     test("Negative values", () =>  {
-        expect(priceCalc(-1, -1, -1, -1)).tobe("Invalid input")
+        expect(priceCalc(-1, -1, -1, -1)).toBe("Invalid input")
     }),
     test("Type error", () =>  {
         expect(priceCalc("words", "shouldn't", "be", "here")).toBe("Invalid input")
