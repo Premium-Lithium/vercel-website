@@ -14,7 +14,7 @@ const priceCheckDatum = {
 const priceCheckStructure = ["daytime energy price £/kwh" ,"nighttime energy price £/kwh", "annual energy use", "ratio used at night, as decimal", "return: amount spent in total"];
 
 
-describe.skip("price check", () => {
+describe.skip("total cost calculator", () => {
     test.each([
         [0.74,0.22,4344.16,0.45,2198.14],
         [0.35,0.23,9433.49,0.17,3109.28],
@@ -32,8 +32,15 @@ describe.skip("price check", () => {
         [0.77,0.12,13893.16,0.26,8349.79],
         [0.29,0.1,5914.78,0.23,1456.81],
         [0.78,0.15,5684.89,0.56,2428.59]
-    ])('priceCalc(%i, %i, %i, %i) -> %i', (a, b, c, d, e) => {
+    ])('test various values', (a, b, c, d, e) => {
         expect(priceCalc(a,b,c,d)).toBe(e);
+    }),
+
+    test("Negative values", () =>  {
+        expect(priceCalc(-1, -1, -1, -1)).tobe("Invalid input")
+    }),
+    test("Type error", () =>  {
+        expect(priceCalc("words", "shouldn't", "be", "here")).toBe("Invalid input")
     })
 });
 
