@@ -1,10 +1,9 @@
-/*
+
 
 import { describe, expect, it, test } from 'vitest'
-import { priceCalc } from '../routes/solution-explorer/priceCalc';
 
 
-describe("price check", () => {
+describe.skip("price check", () => {
     test.each([
         [0.74,0.22,4344.16,0.45,2198.14],
         [0.35,0.23,9433.49,0.17,3109.28],
@@ -26,4 +25,5 @@ describe("price check", () => {
         expect(priceCalc(a,b,c,d)).toBe(e);
     })
 });
-*/
+
+
