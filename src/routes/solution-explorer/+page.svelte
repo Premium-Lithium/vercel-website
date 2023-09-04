@@ -10,6 +10,7 @@
   import ProgressHeader from "./ProgressHeader.svelte"
   
   import EnergyStage from "./EnergyStage.svelte"
+	  import PurchaseDeposit from "./PurchaseDeposit.svelte";
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
@@ -64,6 +65,8 @@ onMount(() => {
 
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
+    let purchaseClick = false;
+
 </script>  
 <body>
   <div class="progressHeader">
@@ -124,9 +127,12 @@ onMount(() => {
         </div>
 
     {:else if $stage === 2}
-      <SavingsScreen/>
-    {:else if $stage === 3}
-        <Investments solution={solution}/>
+        <SampleComponents />
+
+    {:else if $stage === 4}
+        <PurchaseDeposit 
+            
+        />
 
     {:else}
         <div class="modelView">
