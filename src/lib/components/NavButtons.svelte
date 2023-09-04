@@ -1,7 +1,6 @@
 <script lang="ts">
     export let currentPage = 0;
     export let lastPage = 0;
-    let testNumber;
 
     import ChevronRight from "svelte-material-icons/ChevronRight.svelte"
     import ChevronLeft from "svelte-material-icons/ChevronLeft.svelte"
