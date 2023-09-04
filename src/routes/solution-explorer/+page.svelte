@@ -16,6 +16,7 @@
 	import SavingsScreen from './SavingsScreen.svelte';
 
 	import SolarApi from './SolarApi.svelte';
+	import SolarQuestions from './SolarQuestions.svelte';
 
 	import nextSlide from '$lib/components/Carousel.svelte';
 	import { browser } from '$app/environment';
@@ -28,7 +29,7 @@
 	let carouselSolar;
 	let carouselSavings;
 	let carouselInvestments;
-  let carouselStages = [{'energy': 0},{'solar': 0},{'savings': 0},{'investments': 0}];
+	let carouselStages = [{ energy: 0 }, { solar: 0 }, { savings: 0 }, { investments: 0 }];
 	let termsOfServiceAccepted;
 	const stage = queryParam('stage', ssp.number());
 
@@ -45,8 +46,12 @@
 		oilAndGas: ssp.boolean(),
 		highConsumptionDevices: ssp.boolean(),
 		// solar questions params
-		haveSolar: ssp.boolean(),
-		haventSolar: ssp.boolean(false),
+		hasSolarYes: ssp.boolean(),
+		hasSolarNo: ssp.boolean(),
+		wantsSolarYes: ssp.boolean(),
+		wantsSolarNo: ssp.boolean(),
+		panelsWanted: ssp.number(),
+		energyGeneration: ssp.number(),
 		// solar stage params
 		peakSolarPower: ssp.number(8.8),
 		solarLoss: ssp.number(15),
@@ -79,46 +84,50 @@
 </script>
 
 {#if browser}
-<body>
-  <div class="progressHeader">
-      <ProgressHeader
-          titles={["Energy", "Solar", "Savings", "Investment"]}
-          bind:selectedIndex={$stage}
-      />
-  </div>
-    {#if $stage === 0}
-      <Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
-        <EnergyStage
-        bind:queryParams={$allQueryParameters}/>
-      </Carousel>
-    {:else if $stage === 1}
-   
-        <div class="map-view"> 
-          <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
-        </div>
-        <SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues/>
-
-	{:else if $stage === 2}
-		{#key $allQueryParameters}
-			<!-- Todo make better looking -->
-			<Carousel bind:this={carouselSavings}>
-				<SavingsScreen />
+	<body>
+		<div class="progressHeader">
+			<ProgressHeader
+				titles={['Energy', 'Solar', 'Savings', 'Investment']}
+				bind:selectedIndex={$stage}
+			/>
+		</div>
+		{#if $stage === 0}
+			<Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
+				<EnergyStage bind:queryParams={$allQueryParameters} />
 			</Carousel>
-		{/key}
-	{:else if $stage === 3}
-		{#key $allQueryParameters}
-			<!-- Todo make less bad looking -->
-			<Carousel bind:this={carouselInvestments}>
-				<Investments {solution} />
+		{:else if $stage === 1}
+			<Carousel bind:this={carouselEnergyStage}>
+				<div>
+					<SolarQuestions bind:queryParams={$allQueryParameters} />
+				</div>
+				<div class="map-view">
+					<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
+				</div>
+				<div>
+					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
+				</div>
 			</Carousel>
-		{/key}
-	{:else}
-		<Solution3DView />
-		REVIEW
-	{/if}
-	<Savings totalSavings={10000} paybackTime={5} energySavings={20000} />
-	<NavButtons bind:currentPage={$stage} lastPage={6} />
-</body>
+		{:else if $stage === 2}
+			{#key $allQueryParameters}
+				<!-- Todo make better looking -->
+				<Carousel bind:this={carouselSavings}>
+					<SavingsScreen />
+				</Carousel>
+			{/key}
+		{:else if $stage === 3}
+			{#key $allQueryParameters}
+				<!-- Todo make less bad looking -->
+				<Carousel bind:this={carouselInvestments}>
+					<Investments {solution} />
+				</Carousel>
+			{/key}
+		{:else}
+			<Solution3DView />
+			REVIEW
+		{/if}
+		<Savings totalSavings={10000} paybackTime={5} energySavings={20000} />
+		<NavButtons bind:currentPage={$stage} lastPage={6} />
+	</body>
 {/if}
 
 <style>
