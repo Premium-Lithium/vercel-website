@@ -1,5 +1,4 @@
 import { describe, expect, it, test } from 'vitest'
-import {calculatePrice} from './priceCalc'
 import { priceCalc } from '../routes/solution-explorer/priceCalc';
 
 let priceSamples = [
@@ -21,11 +20,7 @@ let priceSamples = [
     [0.78,0.15,5684.89,0.56,2428.59]
 ]
 
-describe("armithmetic check", () => {
-    test('adds 1 + 2 + 3 equals 6', () => {
-        expect(calculatePrice(1,2,3)).toBe(6)
-    });
-})
+
 describe("price check", () => {
     test.each([
         [0.74,0.22,4344.16,0.45,2198.14],
