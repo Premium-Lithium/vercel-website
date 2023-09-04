@@ -1,40 +1,36 @@
 <script>
 	import { onMount, tick } from 'svelte';
 	let slideContainer;
-	let currentIndex = 0;
+	export let currentIndex = 0;
 	let totalSlides = 0;
 	let slides = [];
+    let startX = 0;
 
 	onMount(async () => {
-		await tick(); // Wait for the DOM to be updated
+		// await tick(); // Wait for the DOM to be updated
 		slides = Array.from(slideContainer.children);
 		totalSlides = slides.length;
 		updateSlides();
 	});
 
-	export function updateSlides() {
+	function updateSlides() {
         let slideWidth = '80vw';
-        let slidePadding = `calc((100vw - ${slideWidth}) / 4)`
+        let slidePadding = `5vw`
 		slides.forEach((slide, index) => {
 		    slide.style.opacity = index === currentIndex ? 1 : 0.5;
             slide.style.transition = `opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)`;
             slide.style.width = slideWidth;
 
-            if (index == 0)
-            slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}*2)`
-            else if (index == totalSlides-1)
-            slide.style.margin = `${slidePadding} calc(${slidePadding}*2) ${slidePadding} calc(${slidePadding}/2)`
-            else
-            slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}/2)`
+            if (index == 0)                  slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}*2)`
+            else if (index == totalSlides-1) slide.style.margin = `${slidePadding} calc(${slidePadding}*2) ${slidePadding} calc(${slidePadding}/2)`
+            else                             slide.style.margin = `${slidePadding} calc(${slidePadding}/2) ${slidePadding} calc(${slidePadding}/2)`
 
             slide.style.boxShadow = `0px 2px 8px rgba(180,180,180,.9)`;
             slide.style.borderRadius = `10px`;
-            slide.style.padding = `10px`;
 		});
 
-        slideContainer.style.transform = `translateX(calc(${currentIndex} * -${slideWidth}))`
-        slideContainer.style.width = `calc(${totalSlides} * ${slideWidth} + (calc(${totalSlides} + 1) * ${slidePadding}`
-
+        slideContainer.style.transform = `translateX(calc(${currentIndex} * -1 * ${slideWidth} + ${currentIndex} * -0.5 * ${slidePadding}))`;
+        slideContainer.style.width = `calc(${totalSlides} * ${slideWidth} + (${totalSlides} + 1) * ${slidePadding})`;
 
 	}
 
@@ -51,11 +47,34 @@
 			updateSlides();
 		}
 	}
+
+    function handleTouchStart(event) {
+        startX = event.touches[0].clientX;
+    }
+
+    function handleTouchEnd(event) {
+        const endX = event.changedTouches[0].clientX;
+        const distance = endX - startX;
+
+        // Change this threshold as needed
+        const swipeThreshold = 50;
+
+        if (distance > swipeThreshold) {
+            prevSlide();
+        } else if (distance < -swipeThreshold) {
+            nextSlide();
+        }
+    }
 </script>
 
-<div class="carousel">
+<div class="carousel"
+    on:touchstart={handleTouchStart} 
+    on:touchend={handleTouchEnd}>
     <div class="slide-container" bind:this={slideContainer}>
         <slot />
+    </div>
+    <div class="dots-container">
+
     </div>
 </div>
 
