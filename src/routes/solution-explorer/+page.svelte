@@ -142,7 +142,7 @@ onMount(() => {
         <ExpandBar />
       </div>
       <div class="footer">
-        <NavButtons bind:currentPage={$stage} lastPage={6}/>
+        <NavButtons bind:currentPage={$stage} lastPage={3}/>
     </div>
 </body>
 
