@@ -1,12 +1,26 @@
 <script lang="ts">
     import { queryParameters, ssp } from "sveltekit-search-params"
-    import { energySavings } from "./energySavingsCalculator"
+    import { energySavings } from "./energySavingsCalculator.js"
+    
+    
+    type Options = {
+        tariffType: string;
+        solarEnergy: number;
+        energyUse: number;
+        peakTariff: number ;
+        offPeakTariff: number;
+        sellTariff: number;
+        offPeakRatio: number;
+        supplier: string;
+        batterySize: number;
+        totalCost: number;
+    }
+    
 
-    let savingsOptions = {
+    let savingsOptions: Options = {
         tariffType: "off-peak", solarEnergy: 3500, energyUse: 4900, 
         peakTariff: 0.47, offPeakTariff: 0.18, sellTariff: 0.08, 
         offPeakRatio: 0.8, supplier: "octopus", batterySize: 5, totalCost: 500000}
-
     // algorithm for pricing to follow - use estimates of usage and solar power per day/month
     // get an estimate that includes increased consumption/lower solar in winter - more bought from grid
 
