@@ -1,7 +1,7 @@
 <script lang="ts">
 
 	import SolarGenerationBreakdown from './SolarGenerationBreakdown.svelte';
-
+	import Loading from '$lib/components/Loading.svelte';
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
     
 	export let loadingSolarValues = false;
@@ -53,9 +53,13 @@
 </div>
 
 <div>
-	{#if !loadingSolarValues}
+	{#if monthlySolarGenerationValues.length != 0}
 		<!-- Replace this with "fill in previous form" or block user from swiping until submitted -->
 		<SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues} />
+	{:else if loadingSolarValues}
+	<div class="loading">
+		<Loading/>
+	</div>
 	{/if}
 </div>
 
@@ -70,7 +74,10 @@
 		position: relative;
 	}
 
-	.solarQuestions {
+	.loading {
 		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
 	}
 </style>

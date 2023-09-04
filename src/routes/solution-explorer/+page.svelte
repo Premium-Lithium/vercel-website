@@ -18,7 +18,7 @@
 	import SolarApi from './SolarApi.svelte';
 
 	import nextSlide from '$lib/components/Carousel.svelte';
-	import SolarQuestions from './SolarQuestions.svelte';
+	import { browser } from '$app/environment';
 
 	let map;
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
@@ -28,6 +28,7 @@
 	let carouselSolar;
 	let carouselSavings;
 	let carouselInvestments;
+  let carouselStages = [{'energy': 0},{'solar': 0},{'savings': 0},{'investments': 0}];
 	let termsOfServiceAccepted;
 	const stage = queryParam('stage', ssp.number());
 
@@ -77,27 +78,26 @@
 	};
 </script>
 
+{#if browser}
 <body>
-	<div class="progressHeader">
-		<ProgressHeader
-			titles={['Energy', 'Solar', 'Savings', 'Investment']}
-			bind:selectedIndex={$stage}
-		/>
-	</div>
-	{#if $stage === 0}
-		{#key $allQueryParameters}
-			<Carousel bind:this={carouselEnergyStage}>
-				<EnergyStage bind:queryParams={$allQueryParameters} />
-			</Carousel>
-		{/key}
-	{:else if $stage === 1}
-		<Carousel bind:this={carouselSolar}>
-			<div><SolarQuestions bind:allQueryParameters={$allQueryParameters} /></div>
-			<div class="map-view">
-				<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
-			</div>
-			<div><SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues /></div>
-		</Carousel>
+  <div class="progressHeader">
+      <ProgressHeader
+          titles={["Energy", "Solar", "Savings", "Investment"]}
+          bind:selectedIndex={$stage}
+      />
+  </div>
+    {#if $stage === 0}
+      <Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
+        <EnergyStage
+        bind:queryParams={$allQueryParameters}/>
+      </Carousel>
+    {:else if $stage === 1}
+   
+        <div class="map-view"> 
+          <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
+        </div>
+        <SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues/>
+
 	{:else if $stage === 2}
 		{#key $allQueryParameters}
 			<!-- Todo make better looking -->
@@ -119,6 +119,7 @@
 	<Savings totalSavings={10000} paybackTime={5} energySavings={20000} />
 	<NavButtons bind:currentPage={$stage} lastPage={6} />
 </body>
+{/if}
 
 <style>
 	.progressHeader {
