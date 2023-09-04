@@ -23,8 +23,7 @@ jobs:
       - run: supabase db lint
       - run: supabase test db
 
-      - run: nix develop
-      - run: pnpm run test
+      - run: npm run test
 
       - name: Verify generated types are checked in
         run: |
