@@ -11,6 +11,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [15]
 
     steps:
       - uses: actions/checkout@v3
@@ -19,11 +22,16 @@ jobs:
         with:
           version: latest
 
-      - name: Use node js
+      - name: Use pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use node??
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
-          cache: "npm"
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: run tests?
       - run: npm run test
 
 
