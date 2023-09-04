@@ -26,7 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
       - name: run tests?
-      - run: npm run test
+        run: npm run test
 
       - uses: supabase/setup-cli@v1
         with:
