@@ -20,10 +20,7 @@
     $: expandOpen = false;
 
     let barHeight;
-    function rand(min, max) {
-        return Number(((Math.random() * (max - min) ) + min).toFixed(2));
-    }
-    let arr = [];
+    
     function expandClicked() {
         expandOpen = !expandOpen;
     }
