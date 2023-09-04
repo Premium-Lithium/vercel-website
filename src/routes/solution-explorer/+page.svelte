@@ -18,6 +18,7 @@
 	import SolarApi from './SolarApi.svelte';
 
 	import nextSlide from '$lib/components/Carousel.svelte';
+	import SolarQuestions from './SolarQuestions.svelte';
 
 	let map;
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
@@ -42,6 +43,9 @@
 		workFromHome: ssp.boolean(),
 		oilAndGas: ssp.boolean(),
 		highConsumptionDevices: ssp.boolean(),
+		// solar questions params
+		haveSolar: ssp.boolean(),
+		haventSolar: ssp.boolean(false),
 		// solar stage params
 		peakSolarPower: ssp.number(8.8),
 		solarLoss: ssp.number(15),
@@ -87,12 +91,12 @@
 			</Carousel>
 		{/key}
 	{:else if $stage === 1}
-		
 		<Carousel bind:this={carouselSolar}>
+			<div><SolarQuestions bind:allQueryParameters={$allQueryParameters} /></div>
 			<div class="map-view">
 				<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
 			</div>
-			<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
+			<div><SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues /></div>
 		</Carousel>
 	{:else if $stage === 2}
 		{#key $allQueryParameters}

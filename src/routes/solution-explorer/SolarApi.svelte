@@ -9,7 +9,6 @@
 
 	let monthlySolarGenerationValues = [];
 
-	console.log(allQueryParameters.monthlySolarGenerationValues);
 </script>
 
 <div class="solar-api">
@@ -69,5 +68,9 @@
 		margin: 20px 5vw;
 
 		position: relative;
+	}
+
+	.solarQuestions {
+		display: flex;
 	}
 </style>
