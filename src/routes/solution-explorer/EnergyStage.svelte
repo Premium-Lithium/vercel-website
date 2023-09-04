@@ -1,5 +1,8 @@
 <script>
+	import Carousel from "$lib/components/Carousel.svelte";
+
     export let queryParams;
+    let carousel;
 
 
     function notSure() {
@@ -23,7 +26,6 @@
 
 
 </script>
-
 <div>
     <h2>1. What are you looking for?</h2>
     <table>

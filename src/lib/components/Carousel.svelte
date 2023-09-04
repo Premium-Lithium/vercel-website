@@ -5,40 +5,37 @@
     export let infinite = false;
     export let dots = true;
     export let arrows = true;
-
-    export function nextPage() {
-        carousel.goToNext({ animated:true })
-    }
-
-    export function prevPage() {
-        carousel.goToPrev({ animated:true })
-    }
-
 </script>
 
-
-<div class="carousel-outer">
-    {#if browser}
-    <Carousel 
-    bind:this={carousel}
-    bind:infinite
-    bind:dots
-    bind:arrows
-    >
-    <slot/>  
-    </Carousel>
-    {/if}
+<div class="carousel">
+    <div class="slide-container" bind:this={slideContainer}>
+        <slot />
+    </div>
 </div>
 
+<button class="prev-button" on:click={prevSlide}>Previous</button>
+<button class="next-button" on:click={nextSlide}>Next</button>
+
 <style>
-    .carousel-outer {
-        display: flex;
-        align-items: center;
-        width: 80%;
-        aspect-ratio: 1;
-        margin: 10%;
-        border: 1px #e6e6e6 solid;
-        border-radius: 10px;
-        box-shadow: 0px 0px 14px #bebebe;
+	.carousel {
+		overflow: hidden;
+		width: 100%;
+		position: relative;
+		margin: 0 auto;
+	}
+
+	.slide-container {
+		display: flex;
+        position: relative;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+    .next-button {
+        position: absolute;
+        right: 25vw;
+    }
+    .prev-button {
+        position: absolute;
+        left: 25vw;
     }
 </style>
