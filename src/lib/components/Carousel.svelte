@@ -38,14 +38,14 @@
 
 	}
 
-	function nextSlide() {
+	export function nextSlide() {
 		if (currentIndex < totalSlides - 1) {
 			currentIndex++;
 			updateSlides();
 		}
 	}
 
-	function prevSlide() {
+	export function prevSlide() {
 		if (currentIndex > 0) {
 			currentIndex--;
 			updateSlides();
