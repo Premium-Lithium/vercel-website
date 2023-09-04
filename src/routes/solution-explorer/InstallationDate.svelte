@@ -12,7 +12,5 @@
 <body>
     <h2>When Do You Want This Installed?</h2>
     <label for="date">Installation Date:</label>
-    <input type="date" id="date" name="date" bind:value={installationDate} min={earliestInstall.toISOString().slice(0, 10)}>
+    <input type="month" id="date" name="date" bind:value={installationDate} min={earliestInstall.toISOString().slice(0, 7)}>
 </body>
-<style>
-</style>
