@@ -6,17 +6,17 @@
 
 
     function notSure() {
-        queryParams.battery = false
-        queryParams.solar = false
-        queryParams.ev = false
-        queryParams.epsups = false
+        queryParams.battery = false;
+        queryParams.solar = false;
+        queryParams.ev = false;
+        queryParams.epsups = false;
     }
 
     function nonExact() {
-        queryParams.isEnergyUsageExact = false
+        queryParams.isEnergyUsageExact = false;
     }
     function exact() {
-        queryParams.isEnergyUsageExact = true
+        queryParams.isEnergyUsageExact = true;
     }
 
     // energy use stats from 'https://www.britishgas.co.uk/energy/guides/average-bill.html'
