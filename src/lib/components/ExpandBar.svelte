@@ -1,5 +1,6 @@
 <script lang="typescript">
 	import { afterUpdate, onMount } from "svelte";
+    import { slide, blur } from "svelte/transition";
     export let price = 12345;
     export let yearlySavings = 1234;
     export let expandText = ["You invest", "You save"];
@@ -32,7 +33,7 @@
 <div class="main-bar" bind:clientHeight={barHeight}>
 
 {#if !expandOpen}
-<div class=body >
+<div class=body out:blur={{amount:10, delay:100, }}>
     <div class="expandText">
         <div class=left-text>
             <p class="bottom-text">{expandText[0]}</p>
@@ -54,7 +55,7 @@
 </div>
 
 {:else}
-<div class=long-body>
+<div class=long-body transition:slide={{delay: 150, duration: 500, axis: "y"}}>
     <div class="expandText">
         <div>
             <p class="bottom-text">{expandText[0]}</p>
