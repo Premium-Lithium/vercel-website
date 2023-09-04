@@ -23,6 +23,8 @@ jobs:
       - run: supabase db lint
       - run: supabase test db
 
+      - run: pnpm run test
+
       - name: Verify generated types are checked in
         run: |
           supabase gen types typescript --local > types.gen.ts
