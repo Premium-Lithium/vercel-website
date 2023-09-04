@@ -85,11 +85,10 @@ onMount(() => {
   </div>
     {#if $stage === 0}
       {#key $allQueryParameters}
-      <Carousel>
+      <Carousel bind:this={carouselEnergyStage}>
         <EnergyStage
         bind:queryParams={$allQueryParameters}/>
       </Carousel>
-      
       {/key}
     {:else if $stage === 1}
    
@@ -101,7 +100,7 @@ onMount(() => {
 	{:else if $stage === 2}
 		{#key $allQueryParameters}
     <!-- Todo make better looking -->
-			<Carousel bind:carouselSavings>
+			<Carousel bind:this={carouselSavings}>
 				<SavingsScreen />
 			</Carousel>
 		{/key}
@@ -109,7 +108,7 @@ onMount(() => {
 	{:else if $stage === 3}
 		{#key $allQueryParameters}
 			<!-- Todo make less bad looking -->
-			<Carousel bind:carouselInvestments>
+			<Carousel bind:this={carouselInvestments}>
 				<Investments {solution} />
 			</Carousel>
 		{/key}
