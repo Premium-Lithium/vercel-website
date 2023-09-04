@@ -9,8 +9,6 @@
     import ChevronDoubleDown from "svelte-material-icons/ChevronDoubleDown.svelte"
 	import { afterNavigate } from "$app/navigation";
 
-    import { priceCalc } from "./priceCalc";
-
     const currency = new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
@@ -28,13 +26,6 @@
     let arr = [];
     function expandClicked() {
         expandOpen = !expandOpen;
-        let dayPrice = rand(0.15, 0.8);
-        let nightPrice = rand(0.05, 0.25);
-        let energyUse = rand(500, 15000);
-        let nightRatio = rand(0.1, 0.8);
-        let price = priceCalc(dayPrice, nightPrice, energyUse, nightRatio);
-        
-        console.log(String([dayPrice, nightPrice, energyUse, nightRatio, price]))
     }
 
 </script>
