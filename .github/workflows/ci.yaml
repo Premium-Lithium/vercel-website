@@ -17,11 +17,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
       - uses: pnpm/action-setup@v2
         with:
           version: 8
@@ -32,6 +27,10 @@ jobs:
           cache: "pnpm"
       - name: run tests?
       - run: npm run test
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
 
       - run: supabase db start
