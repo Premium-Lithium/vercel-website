@@ -26,7 +26,7 @@
   let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
-  let installationDate = new Date().toISOString().slice(0, 10);
+  let installationDate = new Date().toISOString().slice(0, 7);
 
 const allQueryParameters = queryParameters({
     // energy stage params
