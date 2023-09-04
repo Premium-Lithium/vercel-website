@@ -14,7 +14,7 @@
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
 
-	import ExpandBar from "$lib/components/ExpandBar.svelte";
+	import ExpandBar from "./ExpandBar.svelte";
 
   const stage = queryParam("stage", ssp.number())
   let map;
@@ -119,7 +119,7 @@ const allQueryParameters = queryParameters({
     {/if}
       <div class="savings">
         <ExpandBar />
-    </div>
+      </div>
       <div class="footer">
         <NavButtons bind:currentPage={$stage} lastPage={6}/>
     </div>

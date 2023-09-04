@@ -7,6 +7,7 @@
     // import from svelte material icons
     import ChevronDoubleUp from "svelte-material-icons/ChevronDoubleUp.svelte"
     import ChevronDoubleDown from "svelte-material-icons/ChevronDoubleDown.svelte"
+	import { afterNavigate } from "$app/navigation";
 
     const currency = new Intl.NumberFormat('en-GB', {
       style: 'currency',
