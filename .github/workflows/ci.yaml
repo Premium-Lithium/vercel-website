@@ -9,12 +9,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        node-version: [15]
+  bild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "test"
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: run tests?
+        run: pnpm run test
 
+  test:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       
@@ -28,17 +41,7 @@ jobs:
       - run: supabase db lint
       - run: supabase test db
       
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - name: Use node
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
-      - name: run tests?
-        run: pnpm run test
+      -
 
       - name: Verify generated types are checked in
         run: |
