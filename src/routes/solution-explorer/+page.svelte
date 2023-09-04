@@ -15,7 +15,6 @@
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
   import  InstallationDate  from "./InstallationDate.svelte";
-	import { GetDealsSummaryDataWeightedValuesTotal, Stage } from "pipedrive";
 	import { onMount } from "svelte";
 
 	import ExpandBar from "./ExpandBar.svelte";
@@ -127,7 +126,7 @@ onMount(() => {
         </div>
 
     {:else if $stage === 2}
-        <SampleComponents />
+        <SavingsScreen />
 
     {:else if $stage === 4}
         <PurchaseDeposit 
