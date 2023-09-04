@@ -8,11 +8,16 @@
 
   import Solution3DView from './Solution3DView.svelte'
   import ProgressHeader from "./ProgressHeader.svelte"
-  import SampleComponents from "./SampleComponents.svelte"
+  
   import EnergyStage from "./EnergyStage.svelte"
+	  import PurchaseDeposit from "./PurchaseDeposit.svelte";
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+  import  InstallationDate  from "./InstallationDate.svelte";
+	import { onMount } from "svelte";
+
+	import ExpandBar from "./ExpandBar.svelte";
 
   const stage = queryParam("stage", ssp.number())
   let map;
@@ -23,8 +28,10 @@
   let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
+  let installationDate = new Date().toISOString().slice(0, 7);
 
 const allQueryParameters = queryParameters({
+    // energy stage params
     battery: ssp.boolean(),
     solar: ssp.boolean(),
     ev: ssp.boolean(),
@@ -34,20 +41,39 @@ const allQueryParameters = queryParameters({
     moreWinterUsage: ssp.boolean(),
     workFromHome: ssp.boolean(),
     oilAndGas: ssp.boolean(),
-    highConsumptionDevices: ssp.boolean()
+    highConsumptionDevices: ssp.boolean(),
+    // solar stage params
+    peakSolarPower: ssp.number(8.8),
+    solarLoss: ssp.number(15),
+    solarAngle: ssp.number(45),
+    solarAzimuth: ssp.number(0),
+    monthlySolarGenerationValues: ssp.array(),
+    mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558}),
+    installationDate: ssp.string()
+});
 
-  });
-
-  let termsOfServiceAccepted;
+// prevent negative pages
+onMount(() => {
+    if ($stage == null) {
+        $stage = 0;
+    }
+    if($stage < 0) {
+        $stage = 0;
+    }
+});
 
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
+    let purchaseClick = false;
+
 </script>  
 <body>
-    <ProgressHeader
-        titles={["Energy", "Solar", "Savings", "Investment"]}
-        bind:selectedIndex={$stage}
-    />
+  <div class="progressHeader">
+      <ProgressHeader
+          titles={["Energy", "Solar", "Savings", "Investment"]}
+          bind:selectedIndex={$stage}
+      />
+  </div>
     {#if $stage === 0}
         <EnergyStage
             bind:queryParams={$allQueryParameters}
@@ -100,17 +126,36 @@ const allQueryParameters = queryParameters({
         </div>
 
     {:else if $stage === 2}
-      <SavingsScreen/>
+        <SavingsScreen />
+
     {:else if $stage === 4}
-        <Investments solution={solution}/>  
+        <PurchaseDeposit 
+            
+        />
+
     {:else}
-        <Solution3DView />
-        REVIEW
+        <div class="modelView">
+            3d model goes here
+        </div>
+        <div class="questions">
+          <InstallationDate bind:installationDate={installationDate}/>
+        </div>
+        <!-- <Solution3DView /> -->
+        <!-- REVIEW -->
     {/if}
-    <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
-    <NavButtons bind:currentPage={$stage} lastPage={6}/>
+      <div class="savings">
+        <ExpandBar />
+      </div>
+      <div class="footer">
+        <NavButtons bind:currentPage={$stage} lastPage={6}/>
+    </div>
 </body>
+
 <style>
+
+  .progressHeader{
+    height: 5%;
+  }
   .map-view {
     width: 100vw;
     height: 40vh;
@@ -124,4 +169,35 @@ const allQueryParameters = queryParameters({
     
     position: relative;
   }
+
+  .modelView{
+    overflow-y: hidden;
+    background-color: var(--plblue);
+    height: 30%;
+  }
+
+  .questions{
+    overflow-y: hidden;
+    align-items: center;
+    flex-direction: column;
+    background-color: rgb(224, 224, 224);
+    height: 45%
+  }
+  .savings{
+    height: 10%;
+    display: flex;
+    overflow-y: visible;
+    background-color: chartreuse;
+  }
+
+  .footer{
+    height: 10%;
+    width: 100%;
+    position: absolute;
+    background-color: aliceblue;
+    bottom: 0;
+    overflow: hidden;
+  }
+
+
 </style>

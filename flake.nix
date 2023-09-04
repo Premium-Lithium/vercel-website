@@ -11,7 +11,7 @@
         nativeBuildInputs = [ pkgs.bashInteractive ];
         buildInputs = with pkgs; [
           nodePackages.pnpm
-          nodejs-slim
+          nodejs_18
           postgresql_15
           supabase-cli
         ];
