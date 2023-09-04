@@ -9,7 +9,6 @@
 
 	let monthlySolarGenerationValues = [];
 
-	console.log(allQueryParameters.monthlySolarGenerationValues);
 </script>
 
 <div class="solar-api">
