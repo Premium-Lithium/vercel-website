@@ -21,11 +21,6 @@
     let barHeight;
 
     function expandClicked() {
-        if (expandOpen) {
-            // close
-        } else {
-            // open
-        }
         expandOpen = !expandOpen;
     }
 
