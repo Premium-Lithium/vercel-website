@@ -4,11 +4,16 @@
     import { onMount, tick, afterUpdate } from 'svelte';
     import { writable } from 'svelte/store';
     import Scene from './Scene.svelte'
+    import { T } from '@threlte/core'
     import { Canvas } from '@threlte/core'
+    import { Theatre, SheetObject } from '@threlte/theatre'
 	import Accordian from '$lib/components/Accordian.svelte';
 
     export let model;
     export let camera;
+    export let solarVisible;
+    export let batteryVisible;
+    export let evVisible;
 
     let scenePanel;
     let canvasInner;
@@ -36,11 +41,32 @@
 <div class="canvas-container" bind:this={scenePanel}>
     <div class="canvas-inner" bind:this={canvasInner}>
         <Canvas>
-            <Scene
-                canvasSize={canvasSize}
-                bind:model={model}
-                bind:camera={camera}
-            />
+            <Theatre>
+                <SheetObject
+                  key="Camera"
+                  let:Sync
+                >
+                    <T.OrthographicCamera
+                      makeDefault
+                      manualCamera
+                    >
+                        <Sync
+                            zoom
+                            position
+                            rotation
+                        />
+                    </T.OrthographicCamera>
+                    <Scene
+                        canvasSize={canvasSize}
+                        bind:model={model}
+                        bind:camera={camera}
+                        bind:solarVisible
+                        bind:batteryVisible
+                        bind:evVisible
+                    >
+                    </Scene>
+                </SheetObject>
+            </Theatre>
         </Canvas>
     </div>
 </div>

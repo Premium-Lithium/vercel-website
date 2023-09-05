@@ -34,6 +34,10 @@
     let model = new SolutionModel();
     model.focusSolar();
 
+    let solarVisible
+    let batteryVisible
+    let evVisible
+
 </script>
 
 <body>
@@ -86,7 +90,13 @@
 
     {:else}
         <div style="height: 1000px">
-          <ModelVisualisation bind:model bind:camera/>
+            <ModelVisualisation
+                bind:model
+                bind:camera
+                bind:solarVisible
+                bind:batteryVisible
+                bind:evVisible
+            />
         </div>
         <div>
           <button on:click={() => {
@@ -94,6 +104,7 @@
                   }}
           >Main View</button>
           <button on:click={model.focusSolar}>Focus Solar</button>
+          <input type="checkbox" bind:value={batteryVisible}/>Battery
         </div>
         REVIEW
     {/if}

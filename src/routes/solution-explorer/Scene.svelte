@@ -9,6 +9,11 @@
     export let canvasSize;
     export let camera;
 
+    export let batteryVisible = false;
+    export let evVisible = false;
+    export let solarVisible = false;
+    export let groundSolarVisible = false;
+
     let batteryModel;
     const plBlue = "#28AAE2";
 
@@ -26,7 +31,6 @@
 <T.FogExp2 attach="fog" args={['white', 0.015]} />
 
 <T.OrthographicCamera
-    makeDefault
     zoom={canvasSize * camZoomToSizeRatio}
     position={[0, 6, 10]}
     on:create={({ ref }) => {
@@ -54,7 +58,7 @@
 
 <!-- Battery -->
 <T.Mesh geometry={model.battery} castShadow receiveShadow>
-    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={batteryVisible}/>
 </T.Mesh>
 
 <!-- <CustomRenderer selectedMesh={batteryModel} /> -->
@@ -66,7 +70,7 @@
 
 <!-- Solar Panel on roof -->
 <T.Mesh geometry={model.solar} castShadow receiveShadow>
-    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={solarVisible}/>
 </T.Mesh>
 
 <!-- outside wall -->
@@ -76,12 +80,12 @@
 
 <!-- ev charger -->
 <T.Mesh geometry={model.evCharger} castShadow receiveShadow>
-    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={evVisible}/>
 </T.Mesh>
 
 <!-- ev charger -->
 <T.Mesh geometry={model.groundSolar} castShadow receiveShadow>
-    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
+    <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={groundSolarVisible}/>
 </T.Mesh>
 
 <!-- Floor -->
