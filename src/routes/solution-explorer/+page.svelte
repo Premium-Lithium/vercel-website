@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ssp, queryParam, queryParameters} from "sveltekit-search-params"
 
+  import mapboxgl from "mapbox-gl";
   import Map from '$lib/components/Map.svelte';
   import Savings from "$lib/components/Savings.svelte";
   import NavButtons from "$lib/components/NavButtons.svelte";
@@ -10,7 +11,7 @@
   import ProgressHeader from "./ProgressHeader.svelte"
   
   import EnergyStage from "./EnergyStage.svelte"
-	  import PurchaseDeposit from "./PurchaseDeposit.svelte";
+	import PurchaseDeposit from "./PurchaseDeposit.svelte";
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
@@ -20,7 +21,7 @@
 	import ExpandBar from "./ExpandBar.svelte";
 
   const stage = queryParam("stage", ssp.number())
-  let map;
+  let map, draw;
   let peakSolarPower = 8.8;
   let solarLoss = 14;
   let solarAngle = 45;
@@ -96,7 +97,7 @@ onMount(() => {
           <input type="submit" value="Submit" on:click={async () => {
             monthlySolarGenerationValues = [];
             loadingSolarValues = true;
-            let res = await fetch('solution-explorer/', {
+            let pvgisRes = await fetch('solution-explorer/', {
               method: "POST",
               headers: {
                   'Content-Type': 'application/json'
@@ -111,12 +112,35 @@ onMount(() => {
                 'azimuth': solarAzimuth,
               })
             });
-            res = await res.json();
+            console.log(pvgisRes);
+            pvgisRes = await pvgisRes.json();
             loadingSolarValues = false;
-            console.log(res);
-            res.outputs.monthly.fixed.forEach((x) => {
-              monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
+            console.log(pvgisRes);
+            pvgisRes.outputs.monthly.fixed.forEach((x) => {
+                monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
             })
+            loadingSolarValues = true;
+            let googleSolarRes = await fetch('solution-explorer/', {
+              method: "POST",
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                'requestType': 'GoogleSolar',
+                'lat': mapboxSearchResult.latitude,
+                'lon': mapboxSearchResult.longitude,
+              })
+            });
+            googleSolarRes = await googleSolarRes.json();
+            console.log(googleSolarRes);
+            googleSolarRes.solarPotential.roofSegmentStats.forEach((roofSegment) => {
+              const marker = new mapboxgl.Marker({
+                color:"red"
+              }).setLngLat([roofSegment.center.longitude, roofSegment.center.latitude])
+                .addTo(map);
+            });
+            console.log(googleSolarRes.solarPotential)
+            loadingSolarValues = false;
           }}> 
           {#if loadingSolarValues}
           <Loading/>
