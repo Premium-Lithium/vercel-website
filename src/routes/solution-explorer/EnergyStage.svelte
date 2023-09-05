@@ -5,6 +5,12 @@
     import HomeLightningBolt from "svelte-material-icons/HomeLightningBolt.svelte"
     import AccountQuestion from "svelte-material-icons/AccountQuestion.svelte"
 	import Accordian from "../../lib/components/Accordian.svelte";
+
+    import BatteryCharging10 from "svelte-material-icons/BatteryCharging10.svelte"
+    import BatteryCharging50 from "svelte-material-icons/BatteryCharging50.svelte"
+    import BatteryCharging90 from "svelte-material-icons/BatteryCharging90.svelte"
+    import BatteryUnknown from "svelte-material-icons/BatteryUnknown.svelte"
+
     export let queryParams;
 
     let iconHeight;
@@ -31,7 +37,7 @@
 
 
 </script>
-<!--
+
 <div class="inner-div">
     <h2>I'm looking for ...</h2>
     <table class="choice-options">
@@ -86,11 +92,12 @@
         </tr>
     </table>
 </div>
--->
+
 <div class="inner-div">
     <h2>My energy use ...</h2>
 
     <div>
+
         <input
             type="range"
             min=0
@@ -98,42 +105,71 @@
             bind:value={queryParams.energyUsage}
             on:change={exact}
             class="slider"
+            on:touchstart|preventDefault={() => console.log("touchstart")}
+            on:touchend|preventDefault={() => console.log("touchend")}
+            on:touchmove={() => console.log("move")}
+
         />
         <br>
     {queryParams.energyUsage}kWh / year
     </div>
-
-    <label for="low">Low</label>
+    <table class="choice-options">
+        <tr>
+            <td>
+    <label>Low<br>
     <input
+        class="check-icon"
         id="low"
         type="radio"
         name="energy"
         value={lowEnergyEstimate}
         bind:group={queryParams.energyUsage}
         on:change={nonExact}
-    >
-    <label for="medium">Medium</label>
+    ><div class="{queryParams.energyUsage == lowEnergyEstimate ? "radio-selected-div" : "radio-div"}">
+        <BatteryCharging10 size="100%"/>
+    </div>
+    </label>
+</td><td>
+    <label>Medium<br>
     <input
+        class="check-icon"
         id="medium"
         type="radio"
         name="energy"
         value={mediumEnergyEstimate}
         bind:group={queryParams.energyUsage}
         on:change={nonExact}
-    >
-    <label for="high">High</label>
+    ><div class="{queryParams.energyUsage == mediumEnergyEstimate ? "radio-selected-div" : "radio-div"}">
+        <BatteryCharging50 size="100%"/>
+    </div>
+</label>
+</td><td>
+    <label>High<br>
     <input
+        class="check-icon"
         id="high"
         type="radio"
         name="energy"
         value={highEnergyEstimate}
         bind:group={queryParams.energyUsage}
         on:change={nonExact}
-    >
-
+    ><div class="{queryParams.energyUsage == highEnergyEstimate ? "radio-selected-div" : "radio-div"}">
+        <BatteryCharging90 size="100%"/>
+    </div>
+</label>
+</td></tr></table>
     <!-- TODO: add not sure -->
 </div>
 <style>
+    .usage-select {
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: center;
+        justify-items: center;
+        align-content: space-between;
+        width: 90%;
+    }
     div {
         text-align: center;
     }
@@ -193,6 +229,26 @@
     .check-div {
         margin: auto;
         width: 35%;
+        background-color: var(--plblue);
+        border-radius: 10%;
+        box-shadow: 0px 3px 3px 2px rgba(0, 0, 0, 0.2);
+        transition-property: box-shadow;
+        transition: 0.1s;
+    }
+
+    .radio-selected-div {
+        margin: auto;
+        width: 70%;
+        background-color: greenyellow;
+        border-radius: 10%;
+        box-shadow: inset 0 3px 5px 5px rgba(0, 0, 0, 0.4);
+        transition-property: box-shadow;
+        transition: 0.1s;
+    }
+
+    .radio-div {
+        margin: auto;
+        width: 70%;
         background-color: var(--plblue);
         border-radius: 10%;
         box-shadow: 0px 3px 3px 2px rgba(0, 0, 0, 0.2);
