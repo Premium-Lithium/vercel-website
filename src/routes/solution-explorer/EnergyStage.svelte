@@ -27,11 +27,13 @@
     const lowEnergyEstimate = 1800
     const mediumEnergyEstimate = 2900
     const highEnergyEstimate = 4300
+    
 
 
 </script>
+<!--
 <div class="inner-div">
-    <h2>I'm looking for</h2>
+    <h2>I'm looking for ...</h2>
     <table class="choice-options">
         <tr>
             <td>
@@ -84,8 +86,9 @@
         </tr>
     </table>
 </div>
+-->
 <div class="inner-div">
-    <h2>2. How much energy do you use?</h2>
+    <h2>My energy use ...</h2>
 
     <div>
         <input
@@ -94,7 +97,9 @@
             max=10000
             bind:value={queryParams.energyUsage}
             on:change={exact}
+            class="slider"
         />
+        <br>
     {queryParams.energyUsage}kWh / year
     </div>
 
@@ -129,6 +134,39 @@
     <!-- TODO: add not sure -->
 </div>
 <style>
+    div {
+        text-align: center;
+    }
+    .slider {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 80%;
+        height: 5em;
+        margin: auto;
+        border: 1px solid black;
+        border-radius: 10px;
+    
+        overflow: hidden;    }
+
+    .slider::-webkit-slider-runnable-track {
+        background-color: red;
+        height: 100%;
+    }
+
+    .slider::-moz-range-progress {
+        background-color: red;
+        height: 100%
+    }
+    .slider::-moz-range-track {  
+        background-color: #9a905d;
+        height: 100%;
+    }
+
+    .slider::-moz-range-thumb {
+        height: 5em;
+        width: 3em;
+        background-color: var(--plblue);
+    }
     .unsure-div {
         margin: auto;
         width: 60%;
