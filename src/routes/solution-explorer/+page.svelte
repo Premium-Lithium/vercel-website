@@ -138,7 +138,7 @@
 		</div>
 	{:else if $stage === 2}
 		<SavingsScreen />
-	{:else if $stage === 4}{:else}
+	{:else}
 		<div class="modelView">3d model goes here</div>
 		<div class="questions">
 			<InstallationDate bind:installationDate />

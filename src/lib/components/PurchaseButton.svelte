@@ -9,17 +9,25 @@
 
 		/**
 		 * body: requires person_id or organization_id (or both)
+		 * 
+		 * fields:
+		 * Address/Post Code/Grid reference
+		 * Currently have solar panels
+		 * Daily energy usage
+		 * New battery size
+		 * Tariff Rate
+		 * 
 		 */
 		let res = await fetch('solution-explorer/submit/', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', accept: 'application/json' },
 			body: JSON.stringify({
 				title: 'test-lead',
-				owner_id: 0
+				person_id: 0
 			})
 		});
 		res = await res.json();
-		
+		// console.log(res);
 	}
 </script>
 
