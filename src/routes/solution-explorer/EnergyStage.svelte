@@ -73,7 +73,7 @@
             <td colspan="2">
                 <label>
                     I'm not sure<br>
-                    <input class="check-icon" type="checkbox" name="UPS" bind:checked={queryParams.epsups}>
+                    <input class="check-icon" type="checkbox" name="UPS" checked={!(queryParams.battery || queryParams.solar || queryParams.ev || queryParams.epsups)}>
                     <div class={queryParams.epsups ? "checked-div" : "check-div"}>
                         <HomeLightningBolt size="100%"/>
                     </div>
