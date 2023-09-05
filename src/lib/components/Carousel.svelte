@@ -26,7 +26,7 @@
             else if (index == totalSlides-1) slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}*2) calc(${slidePadding}/4) calc(${slidePadding}/2)`
             else                             slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}/2) calc(${slidePadding}/4) calc(${slidePadding}/2)`
 
-            slide.style.boxShadow = `0px 2px 8px rgba(180,180,180,.9)`;
+            slide.style.boxShadow = `0px 5px 5px rgba(180,180,180,.9)`;
             slide.style.borderRadius = `10px`;
 		});
 
@@ -89,13 +89,14 @@
 		overflow: hidden;
 		width: 100%;
 		position: relative;
-		margin: 0 auto;
+		margin: 1rem;
 	}
 
 	.slide-container {
 		display: flex;
         position: relative;
         transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 1rem;
 	}
 
     .dots-container {
@@ -107,16 +108,18 @@
         justify-content: center;
     }
 
-    .highlighted {
-        background-color: var(--plblue);
-        transition: background-color 0.2s ease;
-    }
-
     .dot {
         height: 10px;
         width: 10px;
+        background-color: #e5e5e5;
         border-radius: 50%;
-        border: 1px solid rgba(0,0,0,0.3);
+        border: 0px solid rgba(0,0,0,0.3);
+        transition: background-color 0.2s ease;
+        margin: .2rem;
+    }
+
+    .highlighted {
+        background-color: var(--plblue);
         transition: background-color 0.2s ease;
     }
 
@@ -127,5 +130,9 @@
     .prev-button {
         position: absolute;
         left: 25vw;
+    }
+    
+    .slide-container > div {
+        color: red;
     }
 </style>
