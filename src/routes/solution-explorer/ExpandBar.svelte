@@ -17,7 +17,7 @@
     });
 
     let expandOpen;
-    $: expandOpen = false;
+    $: expandOpen = true;
 
     let barHeight;
     
@@ -42,6 +42,7 @@
             <p>{currency.format(yearlySavings)} / yr</p>
         </div>
     </div>
+
     <div class=expand-icon-spacing>
 
     </div>
@@ -70,12 +71,17 @@
             <p class="bottom-text">May 2025</p>
         </div>
         
-    </div><p>Assuming:<br>
+    </div>
+    <div class="expand-assumptions">
+        <h2>Based on ..</h2>
+        <p class="assumption-text">
             £0.30 / kwh average energy cost
             Maximum delivery discount
             £0.08 solar energy tariff
 
         </p>
+    </div>
+   
     <div class=bottom-div>
         <div>
             <p>These are estimates based on national averages
@@ -97,6 +103,24 @@
 </button>
 </div>
 <style>
+    .assumption-text {
+        opacity: 0.8;
+    }
+    .expand-assumptions {
+        width: 100%;
+        text-align: center;
+    }
+    h2 {
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        border-bottom: 1px solid var(--divider-shadow-color);
+        font-size: 1em;
+        font-weight: normal;
+        color: var(--text-color);
+        text-align: center;
+
+    }
     .bottom-div {
         width: 100%;
         position: relative;
