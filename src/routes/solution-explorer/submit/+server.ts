@@ -14,6 +14,5 @@ export async function POST({ request }) {
     let submitDeposit = await request.json();
     let res = await fetch(companyDomain, submitDeposit);
     console.log(res.status);
-    console.log(res.ok);
     return res;
 }

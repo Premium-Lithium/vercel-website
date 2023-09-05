@@ -30,6 +30,7 @@
 	let monthlySolarGenerationValues = [];
 	let loadingSolarValues = false;
 	let installationDate = new Date().toISOString().slice(0, 7);
+	let selectedIndex;
 
 	const allQueryParameters = queryParameters({
 		// energy stage params
