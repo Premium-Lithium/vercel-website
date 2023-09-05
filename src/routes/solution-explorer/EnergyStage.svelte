@@ -2,6 +2,7 @@
     export let queryParams;
 
 
+
     function notSure() {
         queryParams.battery = false;
         queryParams.solar = false;
