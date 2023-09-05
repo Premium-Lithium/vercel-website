@@ -11,6 +11,7 @@
                     displayControlsDefault: false,
                     controls: {
                         polygon: true,
+                        point: true,
                         trash: true,
                     },
                 });

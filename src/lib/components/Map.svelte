@@ -8,6 +8,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 export let search = true;
 export let map = undefined;
+let prevMarker = null;
 export let searchResult = {'latitude': undefined, 'longitude': undefined};
 const styles = [
     'mapbox://styles/mapbox/streets-v12',           // 0
@@ -36,13 +37,24 @@ onMount(() => {
             const search = new MapboxGeocoder({
                 accessToken: mapboxGlAccessToken,
                 mapboxgl: mapboxgl,
+                marker: false,
                 flyTo: {
                     speed: 2.5,
                 },
             });
             search.on('result', (e) => {
+                prevMarker?.remove();
                 searchResult.latitude = e.result.geometry.coordinates[1];
                 searchResult.longitude = e.result.geometry.coordinates[0];
+                const marker = new mapboxgl.Marker({draggable: true, color: 'blue'})
+                .setLngLat([searchResult.longitude, searchResult.latitude])
+                .addTo(map);
+                prevMarker = marker;
+                marker.on('dragend', () => {
+                    let lngLat = marker.getLngLat();
+                    searchResult.latitude = lngLat.lat;
+                    searchResult.longitude = lngLat.lng;
+                })
             })
             map.addControl(
                 search,

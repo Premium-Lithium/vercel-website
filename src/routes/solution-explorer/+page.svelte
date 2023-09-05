@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
+	import { browser } from "$app/environment";
 
 	import Map from '$lib/components/Map.svelte';
 	import Savings from '$lib/components/Savings.svelte';
@@ -8,7 +9,7 @@
 	import Loading from '$lib/components/Loading.svelte';
 	import Carousel from '$lib/components/Carousel.svelte';
 	import nextSlide from '$lib/components/Carousel.svelte';
-     
+
 	import Solution3DView from './Solution3DView.svelte';
 	import ProgressHeader from './ProgressHeader.svelte';
 	import EnergyStage from './EnergyStage.svelte';
@@ -17,25 +18,12 @@
 	import SolarApi from './SolarApi.svelte';
 	import SolarQuestions from './SolarQuestions.svelte';
   import InstallationDate  from "./InstallationDate.svelte";
-  import Map from '$lib/components/Map.svelte';
-  import Savings from "$lib/components/Savings.svelte";
-  import NavButtons from "$lib/components/NavButtons.svelte";
-  import Loading from "$lib/components/Loading.svelte";
+  import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
 
-  import Solution3DView from './Solution3DView.svelte'
-  import ProgressHeader from "./ProgressHeader.svelte"
-  
-  import EnergyStage from "./EnergyStage.svelte"
 	import PurchaseDeposit from "./PurchaseDeposit.svelte";
-  import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
-  import Investments from "./Investments.svelte";
-  import SavingsScreen from "./SavingsScreen.svelte";
-  import  InstallationDate  from "./InstallationDate.svelte";
-	import { onMount } from "svelte";
-
 	import ExpandBar from "./ExpandBar.svelte";
 
-	import { browser } from "$app/environment";
+
 
 	let map;
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
@@ -122,7 +110,7 @@
           <SolarPanelEstimator bind:map/>
 				</div>
 				<div>
-					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
+					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues bind:map bind:mapboxSearchResult/>
 				</div>
 			</Carousel>
 		{:else if $stage === 2}

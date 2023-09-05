@@ -2,10 +2,14 @@
 	import mapboxgl from 'mapbox-gl';
 	import SolarGenerationBreakdown from './SolarGenerationBreakdown.svelte';
 	import Loading from '$lib/components/Loading.svelte';
-	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
     
+	export let mapboxSearchResult;
+	export let map;
 	export let loadingSolarValues = false;
 	export let allQueryParameters;
+	let markersForPrevRoof = [];
+	
+	const JINKO_PANEL_SIZE = 1.762 * 1.134; // m^2 
 
 	let monthlySolarGenerationValues = [];
 
@@ -21,70 +25,68 @@
 	<label for="solarAzimuth">Solar Panel Azimuth</label>
 	<input type="number" id="solarAzimuth" name="solarAzimuth" bind:value={allQueryParameters.solarAzimuth}/>
 	<input type="submit" value="Submit" on:click={async () => {
-	  monthlySolarGenerationValues = [];
-	  loadingSolarValues = true;
-	  let pvgisRes = await fetch('solution-explorer/', {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-		  'requestType': 'PVGIS',
-		  'lat': mapboxSearchResult.latitude,
-		  'lon': mapboxSearchResult.longitude,
-		  'peakPower': allQueryParameters.peakSolarPower,
-		  'loss': allQueryParameters.solarLoss,
-		  'angle': allQueryParameters.solarAngle,
-		  'azimuth': allQueryParameters.solarAzimuth,
+		markersForPrevRoof.forEach((m) => {m.remove()});
+		markersForPrevRoof = [];
+	  	monthlySolarGenerationValues = [];
+		loadingSolarValues = true;
+		let pvgisRes = await fetch('solution-explorer/', {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+			'requestType': 'PVGIS',
+			'lat': mapboxSearchResult.latitude,
+			'lon': mapboxSearchResult.longitude,
+			'peakPower': allQueryParameters.peakSolarPower,
+			'loss': allQueryParameters.solarLoss,
+			'angle': allQueryParameters.solarAngle,
+			'azimuth': allQueryParameters.solarAzimuth,
+			})
+		});
+		pvgisRes = await pvgisRes.json();
+		loadingSolarValues = false;
+		console.log(pvgisRes);
+		pvgisRes.outputs.monthly.fixed.forEach((x) => {
+			monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
 		})
-	  });
-	  console.log(pvgisRes);
-	  pvgisRes = await pvgisRes.json();
-	  loadingSolarValues = false;
-	  console.log(pvgisRes);
-	  pvgisRes.outputs.monthly.fixed.forEach((x) => {
-		  monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
-	  })
-	  loadingSolarValues = true;
-	  let googleSolarRes = await fetch('solution-explorer/', {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-		  'requestType': 'GoogleSolar',
-		  'lat': mapboxSearchResult.latitude,
-		  'lon': mapboxSearchResult.longitude,
-		})
-	  });
-	  googleSolarRes = await googleSolarRes.json();
-	  console.log(googleSolarRes);
-	  googleSolarRes.solarPotential.roofSegmentStats.forEach((roofSegment) => {
-		const marker = new mapboxgl.Marker({
-		  color:"red"
-		}).setLngLat([roofSegment.center.longitude, roofSegment.center.latitude])
-		  .addTo(map);
-	  });
-	  console.log(googleSolarRes.solarPotential)
-	  loadingSolarValues = false;
-	}}> 
-	{#if loadingSolarValues}
-	<Loading/>
-	{:else}
-	<SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues}/>
-	{/if}
-  </div>
+		loadingSolarValues = true;
+		let googleSolarRes = await fetch('solution-explorer/', {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+			'requestType': 'GoogleSolar',
+			'lat': mapboxSearchResult.latitude,
+			'lon': mapboxSearchResult.longitude,
+			})
+		});
+		googleSolarRes = await googleSolarRes.json();
+		console.log(googleSolarRes);
+		googleSolarRes.solarPotential.roofSegmentStats.forEach((roofSegment) => {
+			const marker = new mapboxgl.Marker({
+			color:"red"
+			}).setLngLat([roofSegment.center.longitude, roofSegment.center.latitude])
+			.addTo(map);
+			
+			const popup = new mapboxgl.Popup({ offset: 25 })
+			.setText(`Max ${Math.floor(roofSegment.stats.areaMeters2 / JINKO_PANEL_SIZE)} panels`)
+			.setLngLat([roofSegment.center.longitude, roofSegment.center.latitude]);
 
-<div>
-	{#if monthlySolarGenerationValues.length != 0}
-		<!-- Replace this with "fill in previous form" or block user from swiping until submitted -->
-		<SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues} />
-	{:else if loadingSolarValues}
-	<div class="loading">
+			marker.setPopup(popup);
+			marker.getElement().addEventListener('mouseenter', () => marker.togglePopup());
+			marker.getElement().addEventListener('mouseleave', () => marker.togglePopup());;
+			markersForPrevRoof.push(marker);
+		});
+		loadingSolarValues = false;
+		}}> 
+		{#if loadingSolarValues}
 		<Loading/>
-	</div>
-	{/if}
-</div>
+		{:else}
+		<SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues}/>
+		{/if}
+  </div>
 
 <style>
 	.solar-api {
@@ -93,7 +95,6 @@
 		align-items: center;
 		width: 90vw;
 		margin: 20px 5vw;
-
 		position: relative;
 	}
 
@@ -103,4 +104,5 @@
 		justify-content: center;
 		width: 100%;
 	}
+
 </style>
