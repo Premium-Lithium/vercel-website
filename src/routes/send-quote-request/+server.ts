@@ -1,5 +1,4 @@
 import { json } from '@sveltejs/kit';
-import prisma from '../../lib/prisma.js';
 import pipedrive from 'pipedrive';
 import validate from '../../lib/validation-utils.js'
 
@@ -100,21 +99,15 @@ async function removeAlreadyResponded(targetRecipients, dealId) {
 
 
 async function getUnsubscribed() {
-    const unsubscribed = await prisma.unsubscribedEmails.findMany();
-    const emails = unsubscribed.map(unsubscription => unsubscription["email"]);
+    // TODO: reimplement for supabase
 
-    return emails;
+    return undefined;
 }
 
 
 async function getAlreadyQuoted(dealId) {
-    const allQuotes = await prisma.quote.findMany();
-    const quotesForDeal = allQuotes.filter(quote => quote["dealId"] == dealId);
-    const installerIds = quotesForDeal.map(quote => quote["installerId"]);
-
-    const installerEmails = await Promise.all(installerIds.map(id => getInstallerEmailFrom(id)));
-
-    return installerEmails;
+    // TODO: reimplement for supabase
+    return undefined;
 }
 
 

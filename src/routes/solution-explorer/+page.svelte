@@ -1,9 +1,5 @@
-<script>
-  import { ssp, queryParam} from "sveltekit-search-params";
-  import MapboxDraw from "@mapbox/mapbox-gl-draw";
-  import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-  import area from '@turf/area';
-  import { onMount } from "svelte";
+<script lang="ts">
+  import { ssp, queryParam, queryParameters} from "sveltekit-search-params"
 
   import Map from '$lib/components/Map.svelte';
   import Savings from "$lib/components/Savings.svelte";
@@ -12,11 +8,17 @@
 
   import Solution3DView from './Solution3DView.svelte';
   import ProgressHeader from "./ProgressHeader.svelte";
-  import SampleComponents from "./SampleComponents.svelte";
+  ;
   import EnergyStage from "./EnergyStage.svelte";
+	  import PurchaseDeposit from "./PurchaseDeposit.svelte";
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+  import  InstallationDate  from "./InstallationDate.svelte";
+	import { onMount } from "svelte";
+
+	import ExpandBar from "./ExpandBar.svelte";
+
 	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
 	import { browser } from "$app/environment";
 
@@ -29,39 +31,58 @@
   let mapboxSearchResult = {"latitude": 53.95924825020342, "longitude":-1.0772513524147558};
   let monthlySolarGenerationValues = [];
   let loadingSolarValues = false;
+  let installationDate = new Date().toISOString().slice(0, 7);
 
-  const battery = queryParam("battery", ssp.boolean())
-  const solar = queryParam("solar", ssp.boolean())
-  const ev = queryParam("ev", ssp.boolean())
-  const epsups = queryParam("epsups", ssp.boolean())
-  const energyUsage = queryParam("energyusage", ssp.number())
-  const isEnergyUsageExact = queryParam("isenergyusageexact", ssp.boolean())
-  const moreWinterUsage = queryParam("morewinterusage", ssp.boolean())
-  const workFromHome = queryParam("workfromhome", ssp.boolean())
-  const oilAndGas = queryParam("oilandgas", ssp.boolean())
-  const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
+const allQueryParameters = queryParameters({
+    // energy stage params
+    battery: ssp.boolean(),
+    solar: ssp.boolean(),
+    ev: ssp.boolean(),
+    epsups: ssp.boolean(),
+    energyUsage: ssp.number(),
+    isEnergyUsageExact: ssp.boolean(),
+    moreWinterUsage: ssp.boolean(),
+    workFromHome: ssp.boolean(),
+    oilAndGas: ssp.boolean(),
+    highConsumptionDevices: ssp.boolean(),
+    // solar stage params
+    peakSolarPower: ssp.number(8.8),
+    solarLoss: ssp.number(15),
+    solarAngle: ssp.number(45),
+    solarAzimuth: ssp.number(0),
+    monthlySolarGenerationValues: ssp.array(),
+    mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558}),
+    installationDate: ssp.string()
+});
+
+// prevent negative pages
+onMount(() => {
+    if ($stage == null) {
+        $stage = 0;
+    }
+    if($stage < 0) {
+        $stage = 0;
+    }
+});
+
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
+    let purchaseClick = false;
+
 
 </script>  
 {#if browser}
 <body>
-    <ProgressHeader
-        titles={["Energy", "Solar", "Savings", "Investment"]}
-        bind:selectedIndex={$stage}
-    />
+  <div class="progressHeader">
+      <ProgressHeader
+          titles={["Energy", "Solar", "Savings", "Investment"]}
+          bind:selectedIndex={$stage}
+      />
+  </div>
     {#if $stage === 0}
         <EnergyStage
-            bind:battery={$battery}
-            bind:solar={$solar}
-            bind:ev={$ev}
-            bind:epsups={$epsups}
-            bind:energyUsage={$energyUsage}
-            bind:isEnergyUsageExact={$isEnergyUsageExact}
-            bind:moreWinterUsage={$moreWinterUsage}
-            bind:workFromHome={$workFromHome}
-            bind:oilAndGas={$oilAndGas}
-            bind:highConsumptionDevices={$highConsumptionDevices}
+            bind:queryParams={$allQueryParameters}
+           
         />
     {:else if $stage === 1}
    
@@ -111,20 +132,32 @@
         </div>
 
     {:else if $stage === 2}
-      <SavingsScreen/>
-    {:else if $stage === 4}
-        <SampleComponents />
-    {:else if $stage ===4}
-      <Investments solution={solution}/>    
+        <SavingsScreen />
+
     {:else}
-        <Solution3DView />
-        REVIEW
+        <div class="modelView">
+            3d model goes here
+        </div>
+        <div class="questions">
+          <InstallationDate bind:installationDate={installationDate}/>
+        </div>
+        <!-- <Solution3DView /> -->
+        <!-- REVIEW -->
     {/if}
-    <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
-    <NavButtons bind:currentPage={$stage} lastPage={6}/>
+      <div class="savings">
+        <ExpandBar />
+      </div>
+      <div class="footer">
+        <NavButtons bind:currentPage={$stage} lastPage={3}/>
+    </div>
 </body>
+
 {/if}
 <style>
+
+  .progressHeader{
+    height: 5%;
+  }
   .map-view {
     width: 100vw;
     height: 40vh;
@@ -138,4 +171,35 @@
     
     position: relative;
   }
+
+  .modelView{
+    overflow-y: hidden;
+    background-color: var(--plblue);
+    height: 30%;
+  }
+
+  .questions{
+    overflow-y: hidden;
+    align-items: center;
+    flex-direction: column;
+    background-color: rgb(224, 224, 224);
+    height: 45%
+  }
+  .savings{
+    height: 10%;
+    display: flex;
+    overflow-y: visible;
+    background-color: chartreuse;
+  }
+
+  .footer{
+    height: 10%;
+    width: 100%;
+    position: absolute;
+    background-color: aliceblue;
+    bottom: 0;
+    overflow: hidden;
+  }
+
+
 </style>

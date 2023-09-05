@@ -9,15 +9,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  vitest-tests:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - run: pnpm install --no-frozen-lockfile
+      - name: vitest tests
+        run: pnpm run test
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
 
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+
 
       - run: supabase db start
       - run: supabase db lint

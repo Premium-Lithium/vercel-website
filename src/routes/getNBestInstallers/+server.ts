@@ -1,10 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { getNBestInstallersForJob } from '$lib/services/installerMatching.js'
 
-const prisma = new PrismaClient();
-
 export async function GET(request, response) {
-    const installers = await prisma.installer.findMany();
+    // TODO: reimplement for supabase
 
     const jobPostcode = request.body.postcode;
     const jobLatLon = await getLatLonFromPostcode(request.body.postcode);
@@ -15,7 +12,7 @@ export async function GET(request, response) {
         numOffersPerJob, installers
     );
     
-    response.status(200).json(bestInstallers);
+    response.status(500).json(undefined);
 }
 
 async function getLatLonFromPostcode(postcode) {

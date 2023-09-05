@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     export let currentPage = 0;
     export let lastPage = 0;
 
@@ -35,25 +35,18 @@
 
 <style>
     .body {
-        margin: 0;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
     }
 
     button{
-        background-color: var(--plblue);
-        color: white;
+        background-color: rgb(229, 229, 229);
+        color: black;
         border: none; 
         font-size: 20px;
-        height:auto; 
-        width:100px; 
-        padding:10px 5px; 
-        margin:30px; 
+        padding:10px 10px; 
+        margin:0.5em;
         border-radius:5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        
     }
 </style>
