@@ -3,11 +3,13 @@
     import SolarPowerVariantOutline from "svelte-material-icons/SolarPowerVariantOutline.svelte"
     import EvStation from "svelte-material-icons/EvStation.svelte"
     import HomeLightningBolt from "svelte-material-icons/HomeLightningBolt.svelte"
-    
+    import AccountQuestion from "svelte-material-icons/AccountQuestion.svelte"
+	import Accordian from "../../lib/components/Accordian.svelte";
     export let queryParams;
 
+    let iconHeight;
 
-    function notSure() {
+    function selectedNotSure() {
         queryParams.battery = false;
         queryParams.solar = false;
         queryParams.ev = false;
@@ -35,7 +37,7 @@
             <td>
                 <label>Battery<br>
                     <input class="check-icon" type="checkbox" name="Battery" bind:checked={queryParams.battery}>
-                    <div class={queryParams.battery ? "checked-div" : "check-div"}>
+                    <div bind:clientHeight={iconHeight} class={queryParams.battery ? "checked-div" : "check-div"}>
                         <BatteryChargingOutline size="100%" color={queryParams.battery ? "var(--plblue)": "black"}/>
                     </div>
                 </label>
@@ -44,7 +46,7 @@
                 <label>Solar<br>
                     <input class="check-icon" type="checkbox" name="Solar" bind:checked={queryParams.solar}>
                     <div class={queryParams.solar ? "checked-div" : "check-div"}>
-                        <SolarPowerVariantOutline size="100%"/>
+                        <SolarPowerVariantOutline size="100%" color={queryParams.solar ? "var(--plblue)": "black"}/>
                     </div>
                 </label>
             </td>
@@ -55,7 +57,7 @@
                 EV charger<br>
                 <input class="check-icon" type="checkbox" name="EV charger" bind:checked={queryParams.ev}>
                     <div class={queryParams.ev ? "checked-div" : "check-div"}>
-                        <EvStation size="100%"/>
+                        <EvStation size="100%" color={queryParams.ev ? "var(--plblue)": "black"}/>
                     </div>
                 </label>
             </td>
@@ -63,8 +65,8 @@
                 <label>
                 UPS<br>
                 <input class="check-icon" type="checkbox" name="UPS" bind:checked={queryParams.epsups}>
-                <div class={queryParams.epsups ? "checked-div" : "check-div"}>
-                    <HomeLightningBolt size="100%"/>
+                <div class="{queryParams.epsups ? "checked-div" : "check-div"}">
+                    <HomeLightningBolt size="100%" color={queryParams.epsups ? "var(--plblue)": "black"}/>
                 </div>
                 </label>
             </td>
@@ -73,9 +75,9 @@
             <td colspan="2">
                 <label>
                     I'm not sure<br>
-                    <input class="check-icon" type="checkbox" name="UPS" checked={!(queryParams.battery || queryParams.solar || queryParams.ev || queryParams.epsups)}>
-                    <div class={queryParams.epsups ? "checked-div" : "check-div"}>
-                        <HomeLightningBolt size="100%"/>
+                    <input class="check-icon" on:click={selectedNotSure}>
+                    <div class="unsure-div" style="height: {iconHeight}px">
+                        <AccountQuestion size="100%"/>
                     </div>
                     </label>
             </td>
@@ -127,6 +129,20 @@
     <!-- TODO: add not sure -->
 </div>
 <style>
+    .unsure-div {
+        margin: auto;
+        width: 60%;
+        height: 4em;
+        background-color: var(--plblue);
+        border-radius: 10px;
+        box-shadow: 0px 3px 3px 2px rgba(0, 0, 0, 0.2);
+        transition-property: box-shadow;
+        transition: 0.1s;
+    }
+    .unsure-div:active {
+        background-color: greenyellow;
+        box-shadow: inset 0 3px 5px 5px rgba(0, 0, 0, 0.4);
+    }
     .checked-div {
         margin: auto;
         width: 35%;
