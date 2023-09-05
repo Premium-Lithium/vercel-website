@@ -4,7 +4,7 @@
     import Map from '$lib/components/Map.svelte';
     import Savings from "$lib/components/Savings.svelte";
     import NavButtons from "$lib/components/NavButtons.svelte";
-    import SolutionModel from './solutionModel.js';
+    import { SolutionModel } from './solutionModel.js';
 
     import ModelVisualisation from './ModelVisualisation.svelte'
     import ProgressHeader from "./ProgressHeader.svelte"
@@ -30,10 +30,9 @@
     const highConsumptionDevices = queryParam("highconsumptiondevices", ssp.boolean())
 
     // This is the object that exposes an API for interacting
+    let camera;
     let model = new SolutionModel();
-    // model.focus_on("solar");
-    // model.remove_product("battery");
-    // model.reset();
+    model.focusSolar();
 
 </script>
 
@@ -87,11 +86,14 @@
 
     {:else}
         <div style="height: 1000px">
-          <ModelVisualisation bind:model/>
+          <ModelVisualisation bind:model bind:camera/>
         </div>
         <div>
-          <button on:click={focusMain}>Main View</button>
-          <button on:click={focusSolar}>Focus Solar</button>
+          <button on:click={() => {
+                  console.log(camera)
+                  }}
+          >Main View</button>
+          <button on:click={model.focusSolar}>Focus Solar</button>
         </div>
         REVIEW
     {/if}

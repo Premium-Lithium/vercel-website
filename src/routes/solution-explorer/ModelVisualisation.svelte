@@ -8,6 +8,8 @@
 	import Accordian from '$lib/components/Accordian.svelte';
 
     export let model;
+    export let camera;
+
     let scenePanel;
     let canvasInner;
 
@@ -34,7 +36,11 @@
 <div class="canvas-container" bind:this={scenePanel}>
     <div class="canvas-inner" bind:this={canvasInner}>
         <Canvas>
-            <Scene canvasSize={canvasSize} bind:model={model}/>
+            <Scene
+                canvasSize={canvasSize}
+                bind:model={model}
+                bind:camera={camera}
+            />
         </Canvas>
     </div>
 </div>

@@ -7,6 +7,7 @@
 
     export let model;
     export let canvasSize;
+    export let camera;
 
     let batteryModel;
     const plBlue = "#28AAE2";
@@ -24,9 +25,15 @@
 
 <T.FogExp2 attach="fog" args={['white', 0.015]} />
 
-<T.OrthographicCamera makeDefault zoom={canvasSize * camZoomToSizeRatio} position={[0, 6, 10]} on:create={({ ref }) => {
-    ref.lookAt(0, 1, 0)
-}}></T.OrthographicCamera>
+<T.OrthographicCamera
+    makeDefault
+    zoom={canvasSize * camZoomToSizeRatio}
+    position={[0, 6, 10]}
+    on:create={({ ref }) => {
+        ref.lookAt(0, 1, 0)
+    }}
+    bind:ref={camera}
+></T.OrthographicCamera>
 
 <!-- todo: move these into a json configuration file -->
 <T.DirectionalLight position={[10, 10, -4]} castShadow intensity={1.5} scale={20.0}/>

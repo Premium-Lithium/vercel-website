@@ -39,7 +39,7 @@ class SolutionModel {
         // temp
     }
 
-    focusMainView() {
+    focusMain() {
         // todo: move cameras
         console.log("Focusing on main view...");
         this.camPos = 10;
