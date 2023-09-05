@@ -17,9 +17,11 @@
   import SolarGenerationBreakdown from "./SolarGenerationBreakdown.svelte";
   import Investments from "./Investments.svelte";
   import SavingsScreen from "./SavingsScreen.svelte";
+	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+	import { browser } from "$app/environment";
 
   const stage = queryParam("stage", ssp.number())
-  let map, draw;
+  let map;
   let peakSolarPower = 8.8;
   let solarLoss = 14;
   let solarAngle = 45;
@@ -41,35 +43,8 @@
 
   const solution = {houseType: "detatched", solar: {selected: true, minPannels: 0, maxPannels:20, selectedPannels: 0}, battery: true, batterySize_kWh: 5, evCharger: {selected: true}, usage: "unknown", peopleInHouse: 4, wfh: 0, postcode: "",  addOns: {ups: true, evCharger: false, smartBattery: false, birdGuard: false}};
 
-  onMount(() => {
-    map.on('load', () => {
-      // Add drawing component.
-      draw = new MapboxDraw({
-              displayControlsDefault: false,
-              controls: {
-                  polygon: true,
-                  trash: true,
-              },
-          });
-      map.addControl(draw, 'top-left');
-      
-      map.on('draw.modechange', function(event) {
-      // Only allow one polygon to be displayed.
-      if(event.mode === "draw_polygon"){
-          const allFeatures = draw.getAll();
-          if (allFeatures.features.length > 1) {
-              const firstPolygonId = allFeatures.features[0].id;
-              draw.delete(firstPolygonId);
-          }
-      }
-      });
-      map.on('draw.create', function(event){
-          console.log(area(draw.getAll().features[0]));
-      });
-    });
-  });
-
 </script>  
+{#if browser}
 <body>
     <ProgressHeader
         titles={["Energy", "Solar", "Savings", "Investment"]}
@@ -92,6 +67,7 @@
    
         <div class="map-view"> 
           <Map search={true} style=5 bind:map bind:searchResult={mapboxSearchResult}/>
+          <SolarPanelEstimator bind:map/>
         </div>
         <div class="solar-api">
           <label for="peakSolarPower">Peak Solar Power</label>
@@ -128,9 +104,9 @@
             })
           }}> 
           {#if loadingSolarValues}
-          <Loading/>
+            <Loading/>
           {:else}
-          <SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues}/>
+            <SolarGenerationBreakdown bind:monthlyValues={monthlySolarGenerationValues}/>
           {/if}
         </div>
 
@@ -139,7 +115,7 @@
     {:else if $stage === 4}
         <SampleComponents />
     {:else if $stage ===4}
-    <Investments solution={solution}/>    
+      <Investments solution={solution}/>    
     {:else}
         <Solution3DView />
         REVIEW
@@ -147,6 +123,7 @@
     <Savings totalSavings={10000} paybackTime={5} energySavings={20000}/>
     <NavButtons bind:currentPage={$stage} lastPage={6}/>
 </body>
+{/if}
 <style>
   .map-view {
     width: 100vw;
