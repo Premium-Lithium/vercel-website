@@ -3,10 +3,6 @@
 
 	export let queryParams;
 
-	const apiToken = 'f3bf98ccd22e57bbc7f2693e52e32faf89b91e44';
-	const companyDomain =
-		'https://premiumlithium.pipedrive.com/v1/leads?api_token=f3bf98ccd22e57bbc7f2693e52e32faf89b91e44';
-
 	/**
 	 * Creates new lead on pipedrive
 	 */
@@ -16,13 +12,22 @@
 		/**
 		 * body: requires person_id or organization_id (or both)
 		 */
-		let res = await fetch(companyDomain+'/leads', {
+		let res = await fetch('solution-explorer/submit/', {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json', 'api_token' : apiToken},
+			headers: { 'Content-Type': 'application/json'},
 			body: JSON.stringify({
-				"title": 'Deposit Test',
-				"owner_id": 'Peter',
-				"person_id": 'Test Person',
+				title: 'test-lead',
+				owner_id: 0,
+				label_ids: ['test-label'],
+				person_id: 0,
+				organization_id: 0,
+				value: {
+					amount: 4532789,
+					currency: 'test'
+				},
+				expected_close_date: '2023-09-05',
+				visible_to: '1',
+				was_seen: true
 			})
 		});
 		res = await res.json();
