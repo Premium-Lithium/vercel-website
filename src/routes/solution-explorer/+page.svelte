@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-    import { browser } from '$app/environment';
 	import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
 
 	import Map from '$lib/components/Map.svelte';
@@ -17,7 +16,7 @@
 	import SavingsScreen from './SavingsScreen.svelte';
 	import SolarApi from './SolarApi.svelte';
 	import SolarQuestions from './SolarQuestions.svelte';
-    import  InstallationDate  from "./InstallationDate.svelte";
+  import InstallationDate  from "./InstallationDate.svelte";
 	import ExpandBar from "./ExpandBar.svelte";
 
 	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
