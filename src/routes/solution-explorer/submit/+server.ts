@@ -1,6 +1,7 @@
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 
-const companyDomain = 'https://premiumlithium.pipedrive.com/v1/leads?api_key='+PIPEDRIVE_API_TOKEN;
+// TODO implement OAuth instead of using token
+const companyDomain = 'https://premiumlithium.pipedrive.com/v1/leads?api_token='+PIPEDRIVE_API_TOKEN;
 
 /**
  * TODO implement some form of validation
@@ -12,5 +13,7 @@ const companyDomain = 'https://premiumlithium.pipedrive.com/v1/leads?api_key='+P
 export async function POST({ request }) {
     let submitDeposit = await request.json();
     let res = await fetch(companyDomain, submitDeposit);
+    console.log(res.status);
+    console.log(res.ok);
     return res;
 }
