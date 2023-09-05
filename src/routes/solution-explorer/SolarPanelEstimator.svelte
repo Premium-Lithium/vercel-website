@@ -28,10 +28,13 @@
             }
         }
         });
-        map.on('draw.create', function(event){
-        console.log(area(draw.getAll().features[0]));
-        });
+        map.on('draw.create', logRoofArea());
+        map.on('draw.update', logRoofArea());
     });
 });
+
+const logRoofArea = () => {
+    console.log(`Area of selected roof ${area(draw.getAll().features[0])}m²`);
+}
 </script>
 
