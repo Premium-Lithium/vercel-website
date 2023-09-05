@@ -115,44 +115,6 @@
 
     <!-- TODO: add not sure -->
 </div>
-<div>
-    <h2>3. What are your energy usage habits?</h2>
-
-    <table>
-        <tr>
-            <td>
-                <label for="winter" >Do you use more energy in winter?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="winter" bind:checked={queryParams.moreWinterUsage}>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="workfromhome" >Does anyone in your household work from home?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="winter" bind:checked={queryParams.workFromHome}>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="gasusage" >Do you use oil and gas?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="gasusage" bind:checked={queryParams.oilAndGas}>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="highconsumptiondevices" >Do you have any high consumption devices (eg EV Charger, Immersion Heater)?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="highconsumptiondevices" bind:checked={queryParams.highConsumptionDevices}>
-            </td>
-        </tr>
-    </table>
-</div>
 <style>
     .container {
         padding: 1rem;
