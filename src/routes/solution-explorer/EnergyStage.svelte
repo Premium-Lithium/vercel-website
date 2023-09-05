@@ -26,8 +26,8 @@
 
 
 </script>
-<div>
-    <h2>1. What are you looking for?</h2>
+<div class="container">
+    <h2>What are you looking for?</h2>
     <table>
         <tr>
             <td>
@@ -154,5 +154,8 @@
     </table>
 </div>
 <style>
+    .container {
+        padding: 1rem;
+    }
     table td:nth-child(1) { text-align: end; }
 </style>

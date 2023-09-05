@@ -72,30 +72,28 @@
     }
 </script>
 
-<div class="container">
-<div class="overlay">
-    <div class="carousel"
-        on:touchstart={handleTouchStart} 
-        on:touchend={handleTouchEnd}
-    >
-        <div class="slide-container" bind:this={slideContainer}>
-            <slot />
+    <div class="overlay">
+        <div class="carousel"
+            on:touchstart={handleTouchStart} 
+            on:touchend={handleTouchEnd}
+        >
+            <div class="slide-container" bind:this={slideContainer}>
+                <slot />
+            </div>
         </div>
-    </div>
 
-    <button class="prev-button" on:click={prevSlide}>
-        <ChevronLeft size="4rem"/>
-    </button>
-    <button class="next-button" on:click={nextSlide}>
-        <ChevronRight size="4rem"/>
-    </button>
-</div>
-        <div class="dots-container">
-            {#each [...Array(slides.length)].keys() as s}
-            <span class={`${s == currentIndex ? "dot highlighted" : "dot"}`}></span>
-            {/each}
-        </div>
-</div>
+        <button class="prev-button" on:click={prevSlide}>
+            <ChevronLeft size="4rem"/>
+        </button>
+        <button class="next-button" on:click={nextSlide}>
+            <ChevronRight size="4rem"/>
+        </button>
+    </div>
+    <div class="dots-container">
+        {#each [...Array(slides.length)].keys() as s}
+        <span class={`${s == currentIndex ? "dot highlighted" : "dot"}`}></span>
+        {/each}
+    </div>
 
 <style>
     .overlay {
@@ -106,14 +104,13 @@
 		overflow: hidden;
 		width: 100%;
 		position: relative;
-		margin: 1rem;
+		margin: 0 auto;
 	}
 
 	.slide-container {
 		display: flex;
         position: relative;
         transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 1rem;
 	}
 
     .dots-container {
@@ -153,9 +150,10 @@
         border-radius: 100%;
         height: 4rem;
         width: 4rem;
-        transform: translate(25%, -50%);
+        transform: translate(0, -50%);
         box-shadow: 0px 3px 3px 3px rgba(0,0,0,0.3);
     }
+
     .prev-button {
         position: absolute;
         top: 50%;
@@ -169,7 +167,7 @@
         border-radius: 100%;
         height: 4rem;
         width: 4rem;
-        transform: translate(25%, -50%);
+        transform: translate(0, -50%);
         box-shadow: 0px 3px 3px 3px rgba(0,0,0,0.3);
     }
     
