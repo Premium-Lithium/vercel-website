@@ -131,9 +131,10 @@
 {/if}
 
 <style>
-	.progressHeader {
-		height: 5%;
-	}
+    body {
+        display: flex;
+        flex-direction: column;
+    }
 
 	.map-view {
 		width: 100vw;
