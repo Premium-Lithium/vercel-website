@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     export let currentPage = 0;
     export let lastPage = 0;
 

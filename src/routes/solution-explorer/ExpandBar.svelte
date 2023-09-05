@@ -20,7 +20,7 @@
     $: expandOpen = false;
 
     let barHeight;
-
+    
     function expandClicked() {
         expandOpen = !expandOpen;
     }
