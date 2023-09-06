@@ -3,6 +3,7 @@ import { onMount } from 'svelte';
 import Map from '$lib/components/Map.svelte';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
+import mapboxgl from 'mapbox-gl';
 import pointsWithinPolygon from '@turf/points-within-polygon';
 import { featureCollection, point, points, polygon } from '@turf/helpers';
 import { supabase } from '$lib/supabase';
