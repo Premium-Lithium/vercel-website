@@ -1,5 +1,6 @@
 import pipedrive from 'pipedrive';
 import { pd } from '../../lib/pipedrive-utils.js'
+import { get } from 'http';
 
 
 const questions = {
@@ -49,6 +50,7 @@ async function createPipedriveLeadFrom(batteryFinderAnswers) {
     try {
         const name = answers.NAME;
         const personId = await addPerson(answers.EMAIL_ADDRESS, name, answers.PHONE_NUMBER);
+        // const personId = 1;
         await addLead(answers.SOURCE, answers.ENERGY_USAGE, answers.BUILDING_TYPE, name, personId);
     }
     catch(error) {
@@ -74,7 +76,6 @@ async function addPerson(emailAddress, name, phone) {
             name: name,
             email: emailAddress,
             phone: phone,
-            // temp
             ownerId: 15215441 // Lewis
         });
     }
@@ -91,16 +92,35 @@ async function addLead(source, energyUsage, buildingType, personName, personId) 
 
     const leads = new pipedrive.LeadsApi(pd);
 
+    const labelId = await getLeadLabelId("Battery Finder");
+
     try {
         await leads.addLead({
             title: `Battery Finder: ${personName}`,
             personId: personId,
-            // todo: add custom fields like energy usage here
+            ownerId: 15215441, // Lewis
+            // todo: set custom fields for: daily energy usage, source
+            labelIds: [ labelId ], // Battery Finder
         });
     }
     catch(error) {
         console.log(`Error adding lead: ${error}`);
     }
+}
+
+
+async function getLeadLabelId(labelName) {
+    const api = new pipedrive.LeadLabelsApi(pd);
+
+    const allLabels = await api.getLeadLabels();
+    const label = allLabels.data.find(l => l.name === labelName);
+
+    if(label === undefined) {
+        console.log(`Could not find label with name ${labelName}. Is this spelled correctly?`);
+        return null;
+    }
+
+    return label.id;
 }
 
 
