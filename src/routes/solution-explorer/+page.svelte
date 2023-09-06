@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
 	import { onMount } from 'svelte';
-	import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
 
 	import Map from '$lib/components/Map.svelte';
 	import Savings from '$lib/components/Savings.svelte';
