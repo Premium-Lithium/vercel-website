@@ -28,7 +28,7 @@
 		$markersOnMap.filter((m) => m._color == 'blue');
 	  	monthlySolarGenerationValues = [];
 		loadingSolarValues = true;
-		let pvgisRes = await fetch('solution-explorer/', {
+		let pvgisRes = await fetch('solution-explorer/endpoints/solar/', {
 			method: "POST",
 			headers: {
 				'Content-Type': 'application/json'
@@ -50,7 +50,7 @@
 			monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
 		})
 		loadingSolarValues = true;
-		let googleSolarRes = await fetch('solution-explorer/', {
+		let googleSolarRes = await fetch('solution-explorer/endpoints/solar', {
 			method: "POST",
 			headers: {
 				'Content-Type': 'application/json'
@@ -63,6 +63,11 @@
 		});
 		googleSolarRes = await googleSolarRes.json();
 		console.log(googleSolarRes);
+		if(googleSolarRes.error) {
+			console.log("No building found here");
+			loadingSolarValues = false;
+			return;
+		}
 		googleSolarRes.solarPotential.roofSegmentStats.forEach((roofSegment) => {
 			const marker = new mapboxgl.Marker({
 			color:"red"
