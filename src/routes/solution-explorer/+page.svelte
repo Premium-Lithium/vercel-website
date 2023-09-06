@@ -17,15 +17,19 @@
     import SavingsScreen from './SavingsScreen.svelte';
 	import SolarApi from './SolarApi.svelte';
 	import SolarQuestions from './SolarQuestions.svelte';
+
     import  InstallationDate  from "./InstallationDate.svelte";
     import SavingsBar from "./SavingsExpandBar.svelte";
+	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+	import { browser } from "$app/environment";
 
-    let map;
-    let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
-    let monthlySolarGenerationValues = [];
-    let loadingSolarValues = false;
+	let map;
+	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
+	let monthlySolarGenerationValues = [];
+	let loadingSolarValues = false;
     let installationDate = new Date().toISOString().slice(0, 7);
-    let carouselEnergyStage;
+	let carouselEnergyStage;
+
 	let carouselSolar;
 	let carouselSavings;
 	let carouselInvestments;
@@ -110,15 +114,16 @@ const solution = {
 				<div>
 					<SolarQuestions bind:queryParams={$allQueryParameters} />
 				</div>
-        <div class="map-view"> 
-          <Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
-        </div>
-        <div>
-          <SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
-        </div>
-</Carousel>
-    {:else if $stage === 2}
-{#key $allQueryParameters}
+				<div class="map-view">
+					<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
+          <SolarPanelEstimator bind:map/>
+				</div>
+				<div>
+					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
+				</div>
+			</Carousel>
+		{:else if $stage === 2}
+			{#key $allQueryParameters}
 				<!-- Todo make better looking -->
 				<Carousel bind:this={carouselSavings}>
         <SavingsScreen />
@@ -143,9 +148,14 @@ const solution = {
 {/if}
 
 <style>
-.progressHeader {
-    height: 5%;
-  }
+    .progressHeader {
+        height: 5%;
+    }
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+
 
   .map-view {
     width: 100vw;

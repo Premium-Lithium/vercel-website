@@ -26,50 +26,50 @@
 
 
 </script>
-<div>
-<h2>1. What are you looking for?</h2>
-<table>
-    <tr>
-        <td>
-            <label for="battery" >Battery</label>
-        </td>
-        <td>
-            <input type="checkbox" id="battery" bind:checked={queryParams.battery}>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label for="solar">Solar</label>
-        </td>
-        <td>
-            <input type="checkbox" id="solar" bind:checked={queryParams.solar}>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label for="ev">Electric Vehicle Charger</label>
-        </td>
-        <td>
-            <input type="checkbox" id="ev" bind:checked={queryParams.ev}>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label for="epsups">EPS / UPS</label>
-        </td>
-        <td>
-            <input type="checkbox" id="epsups" bind:checked={queryParams.epsups}>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label for="notsure">Not sure</label>
-        </td>
-        <td>
-            <input type="checkbox" id="notsure" on:change={notSure} checked={!(queryParams.battery || queryParams.solar || queryParams.ev || queryParams.epsups)}>
-        </td>
-    </tr>
-</table>
+<div class="container">
+    <h2>What are you looking for?</h2>
+    <table>
+        <tr>
+            <td>
+                <label for="battery" >Battery</label>
+            </td>
+            <td>
+                <input type="checkbox" id="battery" bind:checked={queryParams.battery}>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="solar">Solar</label>
+            </td>
+            <td>
+                <input type="checkbox" id="solar" bind:checked={queryParams.solar}>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="ev">Electric Vehicle Charger</label>
+            </td>
+            <td>
+                <input type="checkbox" id="ev" bind:checked={queryParams.ev}>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="epsups">EPS / UPS</label>
+            </td>
+            <td>
+                <input type="checkbox" id="epsups" bind:checked={queryParams.epsups}>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="notsure">Not sure</label>
+            </td>
+            <td>
+                <input type="checkbox" id="notsure" on:change={notSure} checked={!(queryParams.battery || queryParams.solar || queryParams.ev || queryParams.epsups)}>
+            </td>
+        </tr>
+    </table>
 </div>
 <div>
 <h2>2. How much energy do you use?</h2>
@@ -154,5 +154,8 @@
 </table>
 </div>
 <style>
+    .container {
+        padding: 1rem;
+    }
     table td:nth-child(1) { text-align: end; }
 </style>
