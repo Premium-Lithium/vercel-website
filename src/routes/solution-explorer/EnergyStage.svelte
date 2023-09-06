@@ -1,5 +1,8 @@
 <script>
+    import Carousel from "$lib/components/Carousel.svelte";
+
     export let queryParams;
+    let carousel;
 
 
     function notSure() {
@@ -23,7 +26,7 @@
 
 
 </script>
-
+<div>
 <h2>1. What are you looking for?</h2>
 <table>
     <tr>
@@ -67,7 +70,8 @@
         </td>
     </tr>
 </table>
-
+</div>
+<div>
 <h2>2. How much energy do you use?</h2>
 
 <div>
@@ -80,7 +84,6 @@
     />
 {queryParams.energyUsage}kWh / year
 </div>
-
 
 <label for="low">Low</label>
 <input
@@ -111,7 +114,8 @@
 >
 
 <!-- TODO: add not sure -->
-
+</div>
+<div>
 <h2>3. What are your energy usage habits?</h2>
 
 <table>
@@ -148,7 +152,7 @@
         </td>
     </tr>
 </table>
-
+</div>
 <style>
     table td:nth-child(1) { text-align: end; }
 </style>
