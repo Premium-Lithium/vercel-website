@@ -10,7 +10,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', accept: 'application/json' },
 				body: JSON.stringify({
-					title: 'Test Lead Please Ignore',
+					title: 'Configurator Purchase',
 					owner_id: 15800718,
 					person_id: 0
 				})
