@@ -44,6 +44,7 @@ onMount(() => {
                 flyTo: {
                     speed: 2.5,
                 },
+                collapsed: true,
             });
             search.on('result', (e) => {
                 $markersOnMap.forEach((m) => m.remove());
