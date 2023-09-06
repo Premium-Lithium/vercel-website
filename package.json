@@ -63,7 +63,7 @@
 		"mjml": "^4.14.1",
 		"nunjucks": "^3.2.4",
 		"openai": "4.0.0-beta.12",
-		"pipedrive": "^21.1.0",
+		"pipedrive": "^21.2.0",
 		"postprocessing": "^6.33.0",
 		"shopify-token": "^4.1.0",
 		"svelte-material-icons": "^3.0.5",
