@@ -21,7 +21,6 @@
     import  InstallationDate  from "./InstallationDate.svelte";
     import SavingsBar from "./SavingsExpandBar.svelte";
 	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
-	import { browser } from "$app/environment";
 
 	let map;
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
