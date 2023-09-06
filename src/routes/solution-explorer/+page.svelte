@@ -30,7 +30,6 @@
 	let monthlySolarGenerationValues = [];
 	let loadingSolarValues = false;
 	let installationDate = new Date().toISOString().slice(0, 7);
-	let selectedIndex;
 
 	const allQueryParameters = queryParameters({
 		// energy stage params
@@ -76,7 +75,6 @@
 		postcode: '',
 		addOns: { ups: true, evCharger: false, smartBattery: false, birdGuard: false }
 	};
-	let purchaseClick = false;
 </script>
 
 <body>
@@ -143,16 +141,16 @@
 		<div class="questions">
 			<InstallationDate bind:installationDate />
 		</div>
+		<div>
+			<PurchaseButton bind:queryParams={$allQueryParameters} />
+		</div>
 		<Solution3DView />
 		<!-- REVIEW -->
-    <div>
-      <PurchaseButton bind:queryParams={$allQueryParameters}/>
-    </div>
 	{/if}
 	<div class="savings">
 		<ExpandBar />
 	</div>
-  
+
 	<div class="footer">
 		<NavButtons bind:currentPage={$stage} lastPage={4} />
 	</div>
