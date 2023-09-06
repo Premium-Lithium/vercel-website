@@ -1,8 +1,11 @@
 <script>
+    import { latLongOfMarker, markersOnMap } from '$lib/MapStores.js';
     import MapboxDraw from "@mapbox/mapbox-gl-draw";
     import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
     import area from '@turf/area';
+	import mapboxgl from "mapbox-gl";
 	import { onMount } from "svelte";
+
     export let map;
     let draw;
     $: {
@@ -29,13 +32,39 @@
                     }
                 }
             });
-            map.on('draw.create', logRoofArea);
-            map.on('draw.update', logRoofArea);
+            map.on('draw.create', drawCreate);
+            map.on('draw.update', drawUpdate);
         });
+}
+
+function drawCreate(event) {
+    let features = draw.getAll().features;
+    if (features[features.length-1].geometry.type == 'Polygon') logRoofArea();
+    else if (features[features.length-1].geometry.type == 'Point') createMarkerFromPoint(features[features.length-1]);
+}
+
+function drawUpdate(event) {
+    let features = draw.getAll().features;
+    if (features[features.length-1].geometry.type == 'Polygon') logRoofArea();
 }
 
 function logRoofArea() {
     console.log(`Area of selected roof ${(area(draw.getAll().features[0])).toFixed(2)}m²`);
+}
+
+function createMarkerFromPoint(point) {
+    $markersOnMap.forEach((m) => m.remove())
+    $markersOnMap = [];
+    const marker = new mapboxgl.Marker({color: "blue", draggable: true})
+    .setLngLat([point.geometry.coordinates[0], point.geometry.coordinates[1]])
+    .addTo(map);
+    $latLongOfMarker = {"latitude": point.geometry.coordinates[1], "longitude": point.geometry.coordinates[0]};
+    draw.delete(point.id);
+    $markersOnMap.push(marker);
+    marker.on('dragend', () => {
+        let lngLat = marker.getLngLat();
+        $latLongOfMarker = {"latitude": lngLat.lat, "longitude": lngLat.lng};
+    })
 }
 </script>
 

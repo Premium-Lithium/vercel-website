@@ -4,12 +4,15 @@
 </svelte:head>
 
 <script>
+
+import { latLongOfMarker, markersOnMap } from '$lib/MapStores.js';
+
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 export let search = true;
 export let map = undefined;
-let prevMarker = null;
-export let searchResult = {'latitude': undefined, 'longitude': undefined};
+$latLongOfMarker = {"latitude": null, "longitude": null};
+$markersOnMap = [];
 const styles = [
     'mapbox://styles/mapbox/streets-v12',           // 0
     'mapbox://styles/mapbox/outdoors-v12',          // 1
@@ -43,17 +46,17 @@ onMount(() => {
                 },
             });
             search.on('result', (e) => {
-                prevMarker?.remove();
-                searchResult.latitude = e.result.geometry.coordinates[1];
-                searchResult.longitude = e.result.geometry.coordinates[0];
+                $markersOnMap.forEach((m) => m.remove());
+                $latLongOfMarker.latitude = e.result.geometry.coordinates[1];
+                $latLongOfMarker.longitude = e.result.geometry.coordinates[0];
                 const marker = new mapboxgl.Marker({draggable: true, color: 'blue'})
-                .setLngLat([searchResult.longitude, searchResult.latitude])
+                .setLngLat([$latLongOfMarker.longitude, $latLongOfMarker.latitude])
                 .addTo(map);
-                prevMarker = marker;
+                $markersOnMap = [marker];
                 marker.on('dragend', () => {
                     let lngLat = marker.getLngLat();
-                    searchResult.latitude = lngLat.lat;
-                    searchResult.longitude = lngLat.lng;
+                    $latLongOfMarker.latitude = lngLat.lat;
+                    $latLongOfMarker.longitude = lngLat.lng;
                 })
             })
             map.addControl(

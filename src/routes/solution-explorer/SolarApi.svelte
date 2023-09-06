@@ -1,13 +1,12 @@
 <script lang="ts">
+	import { latLongOfMarker, markersOnMap } from '$lib/MapStores.js';
 	import mapboxgl from 'mapbox-gl';
 	import SolarGenerationBreakdown from './SolarGenerationBreakdown.svelte';
 	import Loading from '$lib/components/Loading.svelte';
     
-	export let mapboxSearchResult;
 	export let map;
 	export let loadingSolarValues = false;
 	export let allQueryParameters;
-	let markersForPrevRoof = [];
 	
 	const JINKO_PANEL_SIZE = 1.762 * 1.134; // m^2 
 
@@ -25,8 +24,8 @@
 	<label for="solarAzimuth">Solar Panel Azimuth</label>
 	<input type="number" id="solarAzimuth" name="solarAzimuth" bind:value={allQueryParameters.solarAzimuth}/>
 	<input type="submit" value="Submit" on:click={async () => {
-		markersForPrevRoof.forEach((m) => {m.remove()});
-		markersForPrevRoof = [];
+		$markersOnMap.forEach((m) => {if(m._color != 'blue') m.remove()});
+		$markersOnMap.filter((m) => m._color == 'blue');
 	  	monthlySolarGenerationValues = [];
 		loadingSolarValues = true;
 		let pvgisRes = await fetch('solution-explorer/', {
@@ -36,8 +35,8 @@
 			},
 			body: JSON.stringify({
 			'requestType': 'PVGIS',
-			'lat': mapboxSearchResult.latitude,
-			'lon': mapboxSearchResult.longitude,
+			'lat': $latLongOfMarker.latitude,
+			'lon': $latLongOfMarker.longitude,
 			'peakPower': allQueryParameters.peakSolarPower,
 			'loss': allQueryParameters.solarLoss,
 			'angle': allQueryParameters.solarAngle,
@@ -58,8 +57,8 @@
 			},
 			body: JSON.stringify({
 			'requestType': 'GoogleSolar',
-			'lat': mapboxSearchResult.latitude,
-			'lon': mapboxSearchResult.longitude,
+			'lat': $latLongOfMarker.latitude,
+			'lon': $latLongOfMarker.longitude,
 			})
 		});
 		googleSolarRes = await googleSolarRes.json();
@@ -77,7 +76,7 @@
 			marker.setPopup(popup);
 			marker.getElement().addEventListener('mouseenter', () => marker.togglePopup());
 			marker.getElement().addEventListener('mouseleave', () => marker.togglePopup());;
-			markersForPrevRoof.push(marker);
+			$markersOnMap.push(marker);
 		});
 		loadingSolarValues = false;
 		}}> 

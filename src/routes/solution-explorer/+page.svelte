@@ -26,8 +26,6 @@
 
 
 	let map;
-	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
-	let monthlySolarGenerationValues = [];
 	let loadingSolarValues = false;
   let installationDate = new Date().toISOString().slice(0, 7);
 	let carouselEnergyStage;
@@ -62,7 +60,6 @@
 		solarLoss: ssp.number(15),
 		solarAngle: ssp.number(45),
 		solarAzimuth: ssp.number(0),
-		mapboxSearchParams: ssp.object({ latitude: 53.95924825020342, longitude: -1.0772513524147558 })
 	});
 	// prevent negative pages
 	onMount(() => {
@@ -106,11 +103,11 @@
 					<SolarQuestions bind:queryParams={$allQueryParameters} />
 				</div>
 				<div class="map-view">
-					<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
+					<Map search={true} style="5" bind:map/>
           <SolarPanelEstimator bind:map/>
 				</div>
 				<div>
-					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues bind:map bind:mapboxSearchResult/>
+					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues bind:map/>
 				</div>
 			</Carousel>
 		{:else if $stage === 2}
