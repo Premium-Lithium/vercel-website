@@ -16,7 +16,7 @@
 	import SavingsScreen from './SavingsScreen.svelte';
 	import SolarApi from './SolarApi.svelte';
 	import SolarQuestions from './SolarQuestions.svelte';
-  import InstallationDate  from "./InstallationDate.svelte";
+  	import InstallationDate  from "./InstallationDate.svelte";
 	import ExpandBar from "./ExpandBar.svelte";
 
 	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
@@ -84,20 +84,25 @@
 		addOns: { ups: true, evCharger: false, smartBattery: false, birdGuard: false }
 	};
 </script>
-
+<body>
 {#if browser}
-	<body>
 		<div class="progressHeader">
 			<ProgressHeader
 				titles={['Energy', 'Solar', 'Savings', 'Investment']}
 				bind:selectedIndex={$stage}
 			/>
 		</div>
+		<div class="modelView">
+			<Solution3DView />
+		</div>
 		{#if $stage === 0}
+		<div class="questions">
 			<Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
 				<EnergyStage bind:queryParams={$allQueryParameters} />
 			</Carousel>
+		</div>
 		{:else if $stage === 1}
+		<div class="questions">
 			<Carousel bind:this={carouselEnergyStage}>
 				<div>
 					<SolarQuestions bind:queryParams={$allQueryParameters} />
@@ -110,28 +115,34 @@
 					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
 				</div>
 			</Carousel>
+		</div>
 		{:else if $stage === 2}
 			{#key $allQueryParameters}
 				<!-- Todo make better looking -->
-				<Carousel bind:this={carouselSavings}>
-					<SavingsScreen />
-				</Carousel>
+				<div class="questions">
+					<Carousel bind:this={carouselSavings}>
+						<SavingsScreen />
+					</Carousel>
+				</div>
 			{/key}
 		{:else if $stage === 3}
 			{#key $allQueryParameters}
+			<div class="questions">
 				<!-- Todo make less bad looking -->
 				<Carousel bind:this={carouselInvestments}>
 					<Investments {solution} />
 				</Carousel>
+			</div>
 			{/key}
-		{:else}
-			<Solution3DView />
-			REVIEW
 		{/if}
-		<Savings totalSavings={10000} paybackTime={5} energySavings={20000} />
-		<NavButtons bind:currentPage={$stage} lastPage={6} />
-	</body>
 {/if}
+	<div class="savings">
+    	<ExpandBar/>
+	</div>
+	<div class="footer">
+		<NavButtons bind:currentPage={$stage} lastPage={6} />
+	</div>
+	</body>
 
 <style>
     body {
@@ -150,35 +161,30 @@
 		align-items: center;
 		width: 90vw;
 		margin: 20px 5vw;
-
 		position: relative;
 	}
 
 	.modelView {
 		overflow-y: hidden;
 		background-color: var(--plblue);
-		height: 30%;
+		height: 25%;
 	}
 
 	.questions {
 		overflow-y: hidden;
-    align-items: center;
-    flex-direction: column;
-		background-color: rgb(224, 224, 224);
+    	align-items: center;
+    	flex-direction: column;
 		height: 45%;
 	}
 	.savings {
-		height: 10%;
+		height: 15%;
 		display: flex;
-		overflow-y: visible;
-		background-color: chartreuse;
 	}
 
 	.footer {
-		height: 10%;
+		height: 8%;
 		width: 100%;
 		position: absolute;
-		background-color: aliceblue;
 		bottom: 0;
 		overflow: hidden;
 	}
