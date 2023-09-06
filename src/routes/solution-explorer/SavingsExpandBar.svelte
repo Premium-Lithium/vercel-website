@@ -9,11 +9,13 @@
     import ChevronDoubleDown from "svelte-material-icons/ChevronDoubleDown.svelte"
 	import { afterNavigate } from "$app/navigation";
 
+    
+
     // change tariff rates
 	import SavingsRefineParams from "./SavingsRefineParams.svelte";
 
     export let params;
-
+    
     const currency = new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
@@ -22,7 +24,7 @@
     });
 
     let expandOpen;
-    $: expandOpen = true;
+    $: expandOpen = false;
 
     let barHeight;
     

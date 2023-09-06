@@ -2,6 +2,7 @@
     import { slide, fly, scale, fade } from 'svelte/transition';
     
     export let params;
+    $: console.log($params.offPeakTariff);
     
 </script>
 
@@ -16,13 +17,14 @@
         </tr>
         <tr>
             {#if $params.offPeakTariff === true}
+            
                 <td in:fly={{x: "30%"}}>
                     <label>Day rate<br>£<input type="number" step=0.01 bind:value={$params.dayTariffRate}> /kWh</label>
                 </td>
                 <td in:fly={{x: "-30%"}}>
                     <label>Night rate<br>£<input type="number" step=0.01 bind:value={$params.nightTariffRate}> /kWh</label>
                 </td>
-            {:else}
+            {:else if $params.offPeakTariff === false}
                 <td colspan="2" in:scale={{}}>
                     <label>Tariff rate<br>£<input type="number" step=0.01 bind:value={$params.dayTariffRate}> /kWh</label>
                 </td>
@@ -45,7 +47,7 @@
         <tr>
             <td colspan="2">
                 <label>Installation date
-
+                    <input>
                 </label>
                 
             </td>
