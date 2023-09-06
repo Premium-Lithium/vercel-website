@@ -3,7 +3,13 @@ import adapter from '@sveltejs/adapter-vercel';
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
-		adapter: adapter()
+		adapter: adapter(),
+		// todo: fixes cross origin site error when calling `add-battery-finder-lead`, but not ideal
+		// do we already have something to handle this?
+		csrf: {
+			checkOrigin: false,
+		}
+
 	},
 };
 
