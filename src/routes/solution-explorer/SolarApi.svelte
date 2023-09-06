@@ -60,7 +60,7 @@
 
 	export async function getSolarDataFromGoogleSolar() {
 		loadingSolarValues = true;
-		let googleSolarRes = await fetch('solution-explorer/endpoints/solar', {
+		let googleSolarRes = await fetch('solution-explorer/solar', {
 			method: "POST",
 			headers: {
 				'Content-Type': 'application/json'
