@@ -2,7 +2,16 @@
     import { slide, fly, scale, fade } from 'svelte/transition';
     
     export let params;
-    $: console.log($params.offPeakTariff);
+
+    // I don't know why, but this fixes everything
+    let vis;
+    $: vis = $params.offPeakTariff;
+
+    // this is essential because reactivity is borked
+    function updateVis() {
+        vis = $params.offPeakTariff;
+
+    }
     
 </script>
 
@@ -12,11 +21,12 @@
     <table>
         <tr>
             <td colspan="2">
-                <label>Off peak tariff<br><input type="checkbox" bind:checked={$params.offPeakTariff}></label>
+                <label>Off peak tariff<br><input type="checkbox" bind:checked={$params.offPeakTariff}  on:change={updateVis}></label>
             </td>
         </tr>
         <tr>
-            {#if $params.offPeakTariff === true}
+
+            {#if vis === true}
             
                 <td in:fly={{x: "30%"}}>
                     <label>Day rate<br>£<input type="number" step=0.01 bind:value={$params.dayTariffRate}> /kWh</label>
@@ -24,10 +34,13 @@
                 <td in:fly={{x: "-30%"}}>
                     <label>Night rate<br>£<input type="number" step=0.01 bind:value={$params.nightTariffRate}> /kWh</label>
                 </td>
-            {:else if $params.offPeakTariff === false}
+                
+            {:else if vis === false}
+            
                 <td colspan="2" in:scale={{}}>
                     <label>Tariff rate<br>£<input type="number" step=0.01 bind:value={$params.dayTariffRate}> /kWh</label>
                 </td>
+            
             {/if}
         </tr>
         <tr>
@@ -57,6 +70,7 @@
 </div>
 
 <style>
+    
     .refine-body {
         width: 100%;
         height: auto;
