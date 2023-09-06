@@ -12,21 +12,28 @@
 
 	let monthlySolarGenerationValues = [];
 
-</script>
+	$: {
+		if($latLongOfMarker.longitude)  {
+			const markerLocation = {
+				center: [$latLongOfMarker.longitude, $latLongOfMarker.latitude],
+				pitch: 0,
+				bearing: 0,
+				zoom: 18.5
+			};
 
-<div class="solar-api">
-	<label for="peakSolarPower">Peak Solar Power</label>
-	<input type="number" id="peakSolarPower" name="peakSolarPower" bind:value={allQueryParameters.peakSolarPower}>
-	<label for="solarLoss">Solar Loss</label>
-	<input type="number" id="solarLoss" name="solarLoss" bind:value={allQueryParameters.solarLoss}>
-	<label for="solarAngle">Solar Panel Angle</label>
-	<input type="number" id="solarAngle" name="solarAngle" bind:value={allQueryParameters.solarAngle}/>
-	<label for="solarAzimuth">Solar Panel Azimuth</label>
-	<input type="number" id="solarAzimuth" name="solarAzimuth" bind:value={allQueryParameters.solarAzimuth}/>
-	<input type="submit" value="Submit" on:click={async () => {
-		$markersOnMap.forEach((m) => {if(m._color != 'blue') m.remove()});
-		$markersOnMap.filter((m) => m._color == 'blue');
-	  	monthlySolarGenerationValues = [];
+			
+			map?.flyTo({
+				...markerLocation,
+				duration: 3000,
+			})
+			
+			getSolarDataFromGoogleSolar();
+			getSolarDataFromPVGIS();
+		}
+	}
+
+	export async function getSolarDataFromPVGIS() {
+		monthlySolarGenerationValues = [];
 		loadingSolarValues = true;
 		let pvgisRes = await fetch('solution-explorer/endpoints/solar/', {
 			method: "POST",
@@ -49,6 +56,9 @@
 		pvgisRes.outputs.monthly.fixed.forEach((x) => {
 			monthlySolarGenerationValues = [...monthlySolarGenerationValues, x.E_m];
 		})
+	}
+
+	export async function getSolarDataFromGoogleSolar() {
 		loadingSolarValues = true;
 		let googleSolarRes = await fetch('solution-explorer/endpoints/solar', {
 			method: "POST",
@@ -63,9 +73,9 @@
 		});
 		googleSolarRes = await googleSolarRes.json();
 		console.log(googleSolarRes);
+		loadingSolarValues = false;
 		if(googleSolarRes.error) {
 			console.log("No building found here");
-			loadingSolarValues = false;
 			return;
 		}
 		googleSolarRes.solarPotential.roofSegmentStats.forEach((roofSegment) => {
@@ -83,7 +93,24 @@
 			marker.getElement().addEventListener('mouseleave', () => marker.togglePopup());;
 			$markersOnMap.push(marker);
 		});
-		loadingSolarValues = false;
+	}
+
+</script>
+
+<div class="solar-api">
+	<label for="peakSolarPower">Peak Solar Power</label>
+	<input type="number" id="peakSolarPower" name="peakSolarPower" bind:value={allQueryParameters.peakSolarPower}>
+	<label for="solarLoss">Solar Loss</label>
+	<input type="number" id="solarLoss" name="solarLoss" bind:value={allQueryParameters.solarLoss}>
+	<label for="solarAngle">Solar Panel Angle</label>
+	<input type="number" id="solarAngle" name="solarAngle" bind:value={allQueryParameters.solarAngle}/>
+	<label for="solarAzimuth">Solar Panel Azimuth</label>
+	<input type="number" id="solarAzimuth" name="solarAzimuth" bind:value={allQueryParameters.solarAzimuth}/>
+	<input type="submit" value="Submit" on:click={async () => {
+		$markersOnMap.forEach((m) => {if(m._color != 'blue') m.remove()});
+		$markersOnMap.filter((m) => m._color == 'blue');
+		getSolarDataFromGoogleSolar();
+		getSolarDataFromPVGIS();
 		}}> 
 		{#if loadingSolarValues}
 		<Loading/>
