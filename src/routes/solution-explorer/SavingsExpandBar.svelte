@@ -7,6 +7,7 @@
     // import from svelte material icons
     import ChevronDoubleUp from "svelte-material-icons/ChevronDoubleUp.svelte"
     import ChevronDoubleDown from "svelte-material-icons/ChevronDoubleDown.svelte"
+    import ChevronUp from "svelte-material-icons/ChevronUp.svelte"
 	import { afterNavigate } from "$app/navigation";
 
     
@@ -23,13 +24,20 @@
       maximumFractionDigits: 2,
     });
 
+    let refineOpen;
+    $: refineOpen = false;
+
     let expandOpen;
-    $: expandOpen = false;
+    $: expandOpen = true;
 
     let barHeight;
     
     function expandClicked() {
         expandOpen = !expandOpen;
+    }
+
+    function refineClicked() {
+        refineOpen = !refineOpen;
     }
 
 </script>
@@ -89,7 +97,21 @@
         </p>
     </div>
     <div class="adjust-savings">
-        <SavingsRefineParams params={params}/>
+        
+        {#if refineOpen}
+        <div class="refine-div">
+            <SavingsRefineParams params={params}/>
+        </div>
+        {/if}
+        <button class="expand-adjust" on:click={refineClicked}>
+            <ChevronUp width="100px"/><br>
+            Refine my quote
+        </button>
+        
+        
+        <!--
+            <SavingsRefineParams params={params}/>
+        -->
     </div>
    
     <div class=bottom-div>
@@ -113,9 +135,33 @@
 </button>
 </div>
 <style>
-    .adjust-savings {
+    .refine-div {
         width: 100%;
-        height: auto;
+        z-index:1;
+        position: absolute;
+        background: grey;
+        bottom: 100%;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+    .expand-adjust {
+        height: 3em;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        background: none;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+    .adjust-savings {
+        position: relative;
+        margin: auto;
+        width: 90%;
+        text-align: center;
+        height: 3em;
+        overflow: visible;
+
     }
     .disclaimer {
         font-size: 0.8em;
@@ -144,7 +190,8 @@
         position: relative;
         display: flex;
         align-items: center;
-        height: 84px
+        height: 84px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
     .main-bar {
         position: relative;

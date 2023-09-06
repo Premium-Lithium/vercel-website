@@ -141,7 +141,6 @@ input:checked + .slider:before {
         width: 100%;
         height: auto;
         text-align: center;
-        border-top: 1px solid black
     }
 
     p, label {
