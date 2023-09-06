@@ -1,8 +1,9 @@
 <script lang="ts">
     import { slide, fly, scale, fade } from 'svelte/transition';
+    import InstallationDate from './InstallationDate.svelte';
     
     export let params;
-
+    let installDate;
     // I don't know why, but this fixes everything
     let vis;
     $: vis = $params.offPeakTariff;
@@ -55,7 +56,7 @@
             </td>
             <td>
                 <label>Solar tariff rate<br>
-                    £<input type="number" step=0.01 bind:value={$params.solarTariffType}> /kWh
+                    £<input type="number" step=0.01 bind:value={$params.solarTariffRate}> /kWh
 
                 </label>
                 
@@ -63,9 +64,9 @@
             </tr>
         <tr>
             <td colspan="2">
-                <label>Installation date
-                    <input>
-                </label>
+                <label for="installdate">Installation month</label>
+                    <InstallationDate name="installdate" />
+                
                 
             </td>
         </tr>

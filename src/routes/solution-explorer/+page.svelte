@@ -69,7 +69,8 @@ const allQueryParameters = queryParameters({
     nightTariffRate: ssp.number(),
     deliveryMonthOffset: ssp.number(),
     solarTariffRate: ssp.number(),
-    solarTariffSEG: ssp.boolean()  // [true means seg tariff, false means fit
+    solarTariffSEG: ssp.boolean(),  // [true means seg tariff, false means fit
+    installMonth: ssp.string()
 
 });
 // prevent negative pages

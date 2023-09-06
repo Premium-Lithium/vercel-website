@@ -25,8 +25,6 @@
 </script>
 
 <body>
-    <h1> When do you want this installed </h1>
-        <label for="month">Installation Month:</label>
         <select bind:value={installationDate} name="month" id="month">
         {#each installationMonths as month}
             <option value={month}>{month.toISOString().slice(0, 7)}</option>
