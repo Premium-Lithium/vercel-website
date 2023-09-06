@@ -9,6 +9,11 @@
     import ChevronDoubleDown from "svelte-material-icons/ChevronDoubleDown.svelte"
 	import { afterNavigate } from "$app/navigation";
 
+    // change tariff rates
+	import SavingsRefineParams from "./SavingsRefineParams.svelte";
+
+    export let params;
+
     const currency = new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
@@ -75,17 +80,20 @@
     <div class="expand-assumptions">
         <h2>Based on ..</h2>
         <p class="assumption-text">
-            £0.30 / kwh average energy cost
+            £0.30 / kwh average energy cost<br>
+            £0.08 solar energy tariff<br>
             Maximum delivery discount
-            £0.08 solar energy tariff
 
         </p>
+    </div>
+    <div class="adjust-savings">
+        <SavingsRefineParams params={params}/>
     </div>
    
     <div class=bottom-div>
         <div>
-            <p>These are estimates based on national averages
-                To get a more detailed estimate, change the values
+            <p class="disclaimer">Estimates are dependent on the accuracy of information supplied,
+                and are subject to change based on a thorough survey of your property
             </p>
         </div>
         <div class=expand-icon-spacing></div>
@@ -103,6 +111,14 @@
 </button>
 </div>
 <style>
+    .adjust-savings {
+        width: 100%;
+        height: auto;
+    }
+    .disclaimer {
+        font-size: 0.8em;
+        text-align: center;
+    }
     .assumption-text {
         opacity: 0.8;
     }
@@ -164,7 +180,7 @@
 
     .expand-icon {
         background-color: var(--plblue);
-        width: 5rem;
+        width: 10vh;
         height: 100%;
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
@@ -181,7 +197,7 @@
         box-shadow: inset 0 0 2px 2px var(--expand-active-shadow);
     }
     .expand-icon-spacing {
-        flex: 0 0 5rem;
+        flex: 0 0 10vh;
         display: inline;
     }
 

@@ -17,7 +17,7 @@
   import  InstallationDate  from "./InstallationDate.svelte";
 	import { onMount } from "svelte";
 
-	import ExpandBar from "./ExpandBar.svelte";
+	import SavingsBar from "./SavingsExpandBar.svelte";
 
   const stage = queryParam("stage", ssp.number())
   let map;
@@ -49,7 +49,15 @@ const allQueryParameters = queryParameters({
     solarAzimuth: ssp.number(0),
     monthlySolarGenerationValues: ssp.array(),
     mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558}),
-    installationDate: ssp.string()
+    installationDate: ssp.string(),
+    // savings info
+    offPeakTariff: ssp.boolean(false),
+    dayTariffRate: ssp.number(0.34),
+    nightTariffRate: ssp.number(),
+    deliveryMonthOffset: ssp.number(),
+    solarTariffRate: ssp.number(),
+    solarTariffSEG: ssp.boolean()  // [true means seg tariff, false means fit
+
 });
 
 // prevent negative pages
@@ -139,7 +147,7 @@ onMount(() => {
         <!-- REVIEW -->
     {/if}
       <div class="savings">
-        <ExpandBar />
+        <SavingsBar params={allQueryParameters}/>
       </div>
       <div class="footer">
         <NavButtons bind:currentPage={$stage} lastPage={3}/>
@@ -180,9 +188,13 @@ onMount(() => {
   }
   .savings{
     height: 10%;
+    width: 100%;
+    position: absolute;
+    bottom: 10%;
     display: flex;
     overflow-y: visible;
     background-color: chartreuse;
+    margin-top: auto;
   }
 
   .footer{
