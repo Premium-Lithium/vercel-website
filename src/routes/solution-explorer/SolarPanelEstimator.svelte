@@ -34,8 +34,10 @@
             });
             map.on('draw.create', drawCreate);
             map.on('draw.update', drawUpdate);
+            map.doubleClickZoom.disable();
         });
-}
+    }
+
 
 function drawCreate(event) {
     let features = draw.getAll().features;
@@ -62,9 +64,12 @@ function createMarkerFromPoint(point) {
     draw.delete(point.id);
     $markersOnMap.push(marker);
     marker.on('dragend', () => {
+        $markersOnMap.forEach((m) => {if(m._color != 'blue') m.remove()});
+		$markersOnMap.filter((m) => m._color == 'blue');
         let lngLat = marker.getLngLat();
         $latLongOfMarker = {"latitude": lngLat.lat, "longitude": lngLat.lng};
     })
 }
 </script>
+
 

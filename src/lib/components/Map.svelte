@@ -53,10 +53,12 @@ onMount(() => {
                 .setLngLat([$latLongOfMarker.longitude, $latLongOfMarker.latitude])
                 .addTo(map);
                 $markersOnMap = [marker];
-                marker.on('dragend', () => {
+                marker.on('dragend', (marker) => {
                     let lngLat = marker.getLngLat();
                     $latLongOfMarker.latitude = lngLat.lat;
                     $latLongOfMarker.longitude = lngLat.lng;
+                    $markersOnMap.forEach((m) => m.remove());
+                    $markersOnMap = [marker];
                 })
             })
             map.addControl(
