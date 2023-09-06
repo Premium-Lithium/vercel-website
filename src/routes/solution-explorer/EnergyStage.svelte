@@ -155,7 +155,6 @@
 </div>
 <style>
     .container {
-        padding: 1rem;
+        margin: .5rem
     }
-    table td:nth-child(1) { text-align: end; }
 </style>
