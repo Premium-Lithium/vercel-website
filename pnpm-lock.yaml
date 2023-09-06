@@ -75,8 +75,8 @@ dependencies:
     specifier: 4.0.0-beta.12
     version: 4.0.0-beta.12
   pipedrive:
-    specifier: ^21.1.0
-    version: 21.1.0
+    specifier: ^21.2.0
+    version: 21.2.0
   postprocessing:
     specifier: ^6.33.0
     version: 6.33.0(three@0.155.0)
@@ -4141,8 +4141,8 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
 
-  /pipedrive@21.1.0:
-    resolution: {integrity: sha512-2WB1DUU6LRMvFgGNj1nR3EExc0L3mOhb7I+OwuBrF3uwU6JAepXEXjE7Q7JeKqZwlCyzIU9U1emxmehtmLQW5g==}
+  /pipedrive@21.2.0:
+    resolution: {integrity: sha512-fUHyxMn29uUcSCLMNA98wGzn+MykLvCcAHl3nIQE3uw6CLvAdOw5j4KZLN4LdKEbwREZU8ZsRGgygNsO1UYgGA==}
     dependencies:
       '@babel/runtime': 7.22.6
       lodash: 4.17.21
