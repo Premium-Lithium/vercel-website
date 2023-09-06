@@ -5,33 +5,43 @@
 	 * Creates new lead on pipedrive
 	 */
 	async function addNewLead() {
-		console.log('is this thing on');
+		if (JSON.stringify(queryParams) !== undefined) {
+			let request = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', accept: 'application/json' },
+				body: JSON.stringify({
+					title: 'Test Lead Please Ignore',
+					owner_id: 15800718,
+					person_id: 0
+				})
+			};
+			let res = await fetch('solution-explorer/submit/', request);
+			res = await res.json();
+			addLeadData(res);
+		}
+	}
 
-		/**
-		 * body: requires person_id or organization_id (or both)
-		 *
-		 * fields:
-		 * Address/Post Code/Grid reference
-		 * Currently have solar panels
-		 * Daily energy usage
-		 * New battery size
-		 * Tariff Rate
-		 *
-		 */
+	/**
+	 * Adds data to the lead on pipedrive
+	 * 	- adds query params to the notes page for now
+	 */
+	async function addLeadData(leadResponse) {
+		console.log(leadResponse);
 		let request = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', accept: 'application/json' },
 			body: JSON.stringify({
-				title: 'string',
-				owner_id: 0,
-				person_id: 0
+				content: JSON.stringify(queryParams), // will fail the POST request if queryParams is empty, but won't crash horribly
+				lead_id: leadResponse.data.id,
+				add_time: leadResponse.data.update_time,
+				person_id: leadResponse.data.person_id
 			})
 		};
-		let res = await fetch('solution-explorer/submit/', request);
+		console.log(request);
+		let res = await fetch('solution-explorer/leadNotes/', request);
 		res = await res.json();
 		console.log(res);
 	}
-
 </script>
 
 <div class="body">

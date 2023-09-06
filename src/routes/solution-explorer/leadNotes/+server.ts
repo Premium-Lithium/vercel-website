@@ -1,8 +1,7 @@
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 
 // TODO implement OAuth instead of using token
-const companyDomain = 'https://api.pipedrive.com/v1/leads?api_token='+PIPEDRIVE_API_TOKEN;
-
+const companyDomain = 'https://api.pipedrive.com/v1/notes?api_token='+PIPEDRIVE_API_TOKEN;
 
 /**
  * TODO implement some form of validation
