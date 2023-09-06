@@ -34,8 +34,8 @@
             slide.style.borderRadius = `10px`;
 		});
 
-        slideContainer.style.transform = `translateX(calc(${currentIndex} * -1 * ${slideWidth} + ${currentIndex} * -0.5 * ${slidePadding}))`;
-        slideContainer.style.width = `calc(${totalSlides} * ${slideWidth} + (${totalSlides} + 1) * ${slidePadding})`;
+        slideContainer.style.transform = `translateX(calc(${currentIndex} * -1 * ${slideWidth} - ${currentIndex} * ${slidePadding}))`;
+        slideContainer.style.width = `calc(${totalSlides} * ${slideWidth} + (${totalSlides} + 3) * ${slidePadding})`;
 
 	}
 
