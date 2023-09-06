@@ -94,6 +94,7 @@ async function addLead(source, energyUsage, buildingType, personName, personId) 
     const labelId = await getLeadLabelId("Battery Finder");
 
     const dailyEnergyUsageFieldId = getFieldId("Daily Energy Usage (kWh)");
+    // const leadSourceOtherFieldId = getFieldId("Lead Source - Other");
 
     try {
         await leads.addLead({
@@ -102,7 +103,8 @@ async function addLead(source, energyUsage, buildingType, personName, personId) 
             ownerId: 15215441, // Lewis
             labelIds: [ labelId ], // Battery Finder
             [dailyEnergyUsageFieldId]: energyUsage,
-            // todo: set custom fields for: daily energy usage, and "where did you hear about us?"
+            // todo: set custom field for "where did you hear about us?"
+            // [leadSourceOtherFieldId]: source
         });
     }
     catch(error) {
