@@ -10,6 +10,7 @@
     import BatteryCharging50 from "svelte-material-icons/BatteryCharging50.svelte"
     import BatteryCharging90 from "svelte-material-icons/BatteryCharging90.svelte"
     import BatteryUnknown from "svelte-material-icons/BatteryUnknown.svelte"
+	import { onMount } from "svelte";
 
     export let queryParams;
 
@@ -33,6 +34,12 @@
     const lowEnergyEstimate = 1800
     const mediumEnergyEstimate = 2900
     const highEnergyEstimate = 4300
+
+    onMount(() => {
+        if (!queryParams.energyUsage) {
+            queryParams.energyUsage = mediumEnergyEstimate;
+        }
+    });
     
 
 
@@ -99,24 +106,21 @@
     <div>
 
         <input
-            type="range"
+            type="number"
             min=0
-            max=10000
             bind:value={queryParams.energyUsage}
             on:change={exact}
-            class="slider"
-            on:touchstart|preventDefault={() => console.log("touchstart")}
-            on:touchend|preventDefault={() => console.log("touchend")}
-            on:touchmove={() => console.log("move")}
+            class="energy-use-input"
 
         />
         <br>
     {queryParams.energyUsage}kWh / year
     </div>
+    <br>
     <table class="choice-options">
         <tr>
             <td>
-    <label>Low<br>
+    <label>
     <input
         class="check-icon"
         id="low"
@@ -128,9 +132,9 @@
     ><div class="{queryParams.energyUsage == lowEnergyEstimate ? "radio-selected-div" : "radio-div"}">
         <BatteryCharging10 size="100%"/>
     </div>
-    </label>
+    </label><br>Low
 </td><td>
-    <label>Medium<br>
+    <label>
     <input
         class="check-icon"
         id="medium"
@@ -142,9 +146,9 @@
     ><div class="{queryParams.energyUsage == mediumEnergyEstimate ? "radio-selected-div" : "radio-div"}">
         <BatteryCharging50 size="100%"/>
     </div>
-</label>
+</label><br>Medium
 </td><td>
-    <label>High<br>
+    <label>
     <input
         class="check-icon"
         id="high"
@@ -156,53 +160,30 @@
     ><div class="{queryParams.energyUsage == highEnergyEstimate ? "radio-selected-div" : "radio-div"}">
         <BatteryCharging90 size="100%"/>
     </div>
-</label>
+    
+</label><br>High
 </td></tr></table>
     <!-- TODO: add not sure -->
 </div>
 <style>
-    .usage-select {
-        margin: auto;
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        align-items: center;
-        justify-items: center;
-        align-content: space-between;
-        width: 90%;
+    .energy-use-input {
+        font-size: 30pt;
+        width: 70%;
+        height: 1.5em;
+        appearance: textfield;
+        text-align: center;
+        border-radius: 0.5em;
+        border: 4px inset ButtonBorder;
+        background-color: var(--plblue);
     }
+    .energy-use-input:focus {
+        background-color: greenyellow;
+    }
+
     div {
         text-align: center;
     }
-    .slider {
-        appearance: none;
-        -webkit-appearance: none;
-        width: 80%;
-        height: 5em;
-        margin: auto;
-        border: 1px solid black;
-        border-radius: 10px;
-    
-        overflow: hidden;    }
 
-    .slider::-webkit-slider-runnable-track {
-        background-color: red;
-        height: 100%;
-    }
-
-    .slider::-moz-range-progress {
-        background-color: red;
-        height: 100%
-    }
-    .slider::-moz-range-track {  
-        background-color: #9a905d;
-        height: 100%;
-    }
-
-    .slider::-moz-range-thumb {
-        height: 5em;
-        width: 3em;
-        background-color: var(--plblue);
-    }
     .unsure-div {
         margin: auto;
         width: 60%;
@@ -259,7 +240,7 @@
         width: 100%;
         text-align: center;
         table-layout: fixed;
-        
+        height: auto;
     }
     td {
         text-align: center;
