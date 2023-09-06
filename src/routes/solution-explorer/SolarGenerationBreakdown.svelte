@@ -36,7 +36,7 @@
       y: 200;
     }
     to {
-      height: calc(value * scaleFactor);
+      height: calc(- value * scaleFactor);
       y: calc(svgHeight - value * scaleFactor);
     }
   }
