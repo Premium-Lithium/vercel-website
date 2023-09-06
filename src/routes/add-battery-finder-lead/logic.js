@@ -1,6 +1,5 @@
 import pipedrive from 'pipedrive';
-import { pd } from '../../lib/pipedrive-utils.js'
-import { get } from 'http';
+import { pd, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 
 
 const questions = {
@@ -94,13 +93,16 @@ async function addLead(source, energyUsage, buildingType, personName, personId) 
 
     const labelId = await getLeadLabelId("Battery Finder");
 
+    const dailyEnergyUsageFieldId = getFieldId("Daily Energy Usage (kWh)");
+
     try {
         await leads.addLead({
             title: `Battery Finder: ${personName}`,
             personId: personId,
             ownerId: 15215441, // Lewis
-            // todo: set custom fields for: daily energy usage, source
             labelIds: [ labelId ], // Battery Finder
+            [dailyEnergyUsageFieldId]: energyUsage,
+            // todo: set custom fields for: daily energy usage, and "where did you hear about us?"
         });
     }
     catch(error) {
@@ -109,6 +111,7 @@ async function addLead(source, energyUsage, buildingType, personName, personId) 
 }
 
 
+// todo: consider whether these could be moved into pipedrive utils somehow - they're not really specific to this route
 async function getLeadLabelId(labelName) {
     const api = new pipedrive.LeadLabelsApi(pd);
 
@@ -121,6 +124,25 @@ async function getLeadLabelId(labelName) {
     }
 
     return label.id;
+}
+
+
+function getFieldId(fieldName) {
+    if(dealFieldsRequest.success === false) {
+        console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
+        return null;
+    }
+
+    const allFields = dealFieldsRequest.data;
+
+    const field = allFields.find(f => f.name === fieldName);
+
+    if(field === undefined) {
+        console.log(`Could not find deal field with name '${fieldName}'. Is this spelled correctly?`);
+        return null;
+    }
+
+    return field.key;
 }
 
 
