@@ -182,7 +182,6 @@
     div {
         text-align: center;
     }
- bind:installationDate={installDate}
     .unsure-div {
         margin: auto;
         width: 60%;
