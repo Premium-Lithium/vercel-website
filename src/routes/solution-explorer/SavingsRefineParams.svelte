@@ -2,9 +2,6 @@
     import { slide, fly, scale, fade } from 'svelte/transition';
     
     export let params;
-
-    function 
-    
     
 </script>
 
@@ -33,13 +30,20 @@
         </tr>
         <tr>
             <td>
-                <label>Solar tariff<br>
+                <label>Solar tariff type
+                    <input type="checkbox" bind:checked={$params.solarTariffSEG}>
+                </label>
+            </td>
+            <td>
+                <label>Solar tariff rate<br>
                     <input type="number" step=0.01 bind:value={$params.solarTariffType}>
 
                 </label>
                 
             </td>
-            <td>
+            </tr>
+        <tr>
+            <td colspan="2">
                 <label>Installation date
 
                 </label>
