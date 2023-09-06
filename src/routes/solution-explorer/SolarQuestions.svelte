@@ -23,8 +23,7 @@
 
 </script>
 
-<div>
-    <h2>Solar Questions Placeholder Text</h2>
+<div class="container">
 	<p>Do you already have Solar?</p>
 	<div id="haveSolar">
 		<label><input name="haveSolarYes" value="haveSolarYes" type="radio" bind:group={queryParams.hasSolarYes} on:click={hasSolarPanels}/>Yes</label>
@@ -68,4 +67,7 @@
 </div>
 
 <style>
+    .container {
+        margin: .5rem
+    }
 </style>

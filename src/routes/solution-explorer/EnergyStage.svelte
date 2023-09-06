@@ -44,7 +44,6 @@
 
 
 </script>
-
 <div class="inner-div">
     <h2>I'm looking for ...</h2>
     <table class="choice-options">
@@ -163,7 +162,7 @@
     
 </label><br>High
 </td></tr></table>
-    <!-- TODO: add not sure -->
+
 </div>
 <style>
     .energy-use-input {

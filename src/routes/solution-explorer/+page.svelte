@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-    import { browser } from '$app/environment';
 	import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
 
 	import Map from '$lib/components/Map.svelte';
@@ -17,8 +16,11 @@
 	import SavingsScreen from './SavingsScreen.svelte';
 	import SolarApi from './SolarApi.svelte';
 	import SolarQuestions from './SolarQuestions.svelte';
-    import  InstallationDate  from "./InstallationDate.svelte";
+  import InstallationDate  from "./InstallationDate.svelte";
 	import ExpandBar from "./ExpandBar.svelte";
+
+	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+	import { browser } from "$app/environment";
 
 	let map;
 	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
@@ -102,6 +104,7 @@
 				</div>
 				<div class="map-view">
 					<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
+          <SolarPanelEstimator bind:map/>
 				</div>
 				<div>
 					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
@@ -131,9 +134,10 @@
 {/if}
 
 <style>
-	.progressHeader {
-		height: 5%;
-	}
+    body {
+        display: flex;
+        flex-direction: column;
+    }
 
 	.map-view {
 		width: 100vw;
