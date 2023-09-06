@@ -29,8 +29,9 @@
 		};
 		let res = await fetch('solution-explorer/submit/', request);
 		res = await res.json();
+		console.log(res);
 	}
-	
+
 </script>
 
 <div class="body">

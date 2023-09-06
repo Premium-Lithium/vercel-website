@@ -11,7 +11,13 @@ const companyDomain = 'https://api.pipedrive.com/v1/leads?api_token='+PIPEDRIVE_
  * @returns The response from pipedrive
  */
 export async function POST({ request }) {
-    let submitDeposit = await request.json();
-    let res = await fetch(companyDomain, submitDeposit);
-    return res;
+    let req = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(await request.json())
+    };
+    // console.log(req);
+    let res = await fetch(companyDomain, req);
+    console.log(res);
+    return (new Response(JSON.stringify(await res.json())));
 }
