@@ -5,7 +5,6 @@
     let carousel;
 
 
-
     function notSure() {
         queryParams.battery = false;
         queryParams.solar = false;
