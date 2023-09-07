@@ -94,12 +94,8 @@
 		</div>
 		{#if $stage === 3}
 			{#key $allQueryParameters}
-			<!-- <div class="questions"> -->
-				<!-- Todo make less bad looking -->
-				<!-- <Carousel bind:this={carouselInvestments}> -->
 					<Investments {solution} />
-				<!-- </Carousel> -->
-			<!-- </div> -->
+				
 			{/key}
 		{:else}
 			<div class="modelView">
@@ -135,19 +131,16 @@
 						</Carousel>
 					</div>
 				{/key}
-			{:else if $stage === 3}
-				{#key $allQueryParameters}
-				<!-- Todo make less bad looking -->
-				<Investments {solution} />
-			{/key}
 		{/if}
 	{/if}
 {/if}
-	<div class="savings">
+	{#if $stage != 3}
+		<div class="savings">
     	<ExpandBar/>
-	</div>
+		</div>
+	{/if}
 	<div class="footer">
-		<NavButtons bind:currentPage={$stage} lastPage={6} />
+		<NavButtons bind:currentPage={$stage} lastPage={3} />
 	</div>
 	</body>
 
@@ -191,7 +184,7 @@
 	.footer {
 		height: 8%;
 		width: 100%;
-		position: absolute;
+		position: relative;
 		bottom: 0;
 		overflow: hidden;
 	}

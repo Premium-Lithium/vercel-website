@@ -1,29 +1,19 @@
 <script>
 	import TermsOfService from './TermsOfService.svelte';
-	import BatteryChargingOutline from "svelte-material-icons/BatteryChargingOutline.svelte"
 	import {getBatteryReccomendation} from './reccomendationsModel.js';
+	import HomeLightningBolt from "svelte-material-icons/HomeLightningBolt.svelte"
 	import SolarPowerVariantOutline from "svelte-material-icons/SolarPowerVariantOutline.svelte";
+	import EvStation from "svelte-material-icons/EvStation.svelte";
+	import Bird from "svelte-material-icons/Bird.svelte";
 	import { earliestInstallMonth, quoteToInstall } from '$lib/services/price-model.js';
-	import BatteryCharging10 from "svelte-material-icons/BatteryCharging10.svelte"
-    import BatteryCharging50 from "svelte-material-icons/BatteryCharging50.svelte"
     import BatteryCharging90 from "svelte-material-icons/BatteryCharging90.svelte"
 	import InstallationDate from './InstallationDate.svelte';
-	export let solution = {
-		houseType: 'detatched',
-		solar: { selected: true, minpanels: 0, maxpanels: 20, selectedpanels: 14 },
-		battery: true,
-		batterySize_kWh: 5,
-		evCharger: { selected: true },
-		usage: 3,
-		peopleInHouse: 4,
-		wfh: 0,
-		postcode: '',
-		addOns: { ups: true, evCharger: false, smartBattery: false, birdGuard: false }
-	};
+	
+	export let solution;
 	let earliestInstall = earliestInstallMonth();
 	let installationDate = earliestInstall;
 	const recommendedBattery = getBatteryReccomendation(solution.usage);
-	let selectedBattery = 'recommended';
+	let selectedBattery = 0;
 	let ups = true;
 	let evCharger = false;
 	let smartBattery = false;
@@ -41,13 +31,7 @@
 	}
 
 	function batteryChange() {
-		if (selectedBattery == 'recommended') {
-			solution.batterySize_kWh = recommendedBattery;
-		} else if (selectedBattery == 'smaller') {
-			solution.batterySize_kWh = 5;
-		} else {
-			solution.batterySize_kWh = 20;
-		}
+		solution.batterySize_kWh = selectedBattery;
 		quote = quoteToInstall(solution, installationDate);
 	}
 
@@ -62,44 +46,71 @@
 
 <body>
 	
-	<h1>Recomended Products</h1>
+	<h2>Recommended Products</h2>
 	<div class="battery">
 		<p>Battery</p>
 		<br/>
 		<form>
-			<BatteryCharging90 size="20%" color={solution.batterySize_kWh===recommendedBattery ? "var(--plblue)": "black"} />
-			<input type="radio" id="recommended" value={recommendedBattery} bind:group={selectedBattery} on:change={batteryChange} />
-			<label for="recommended"> Powerpod {recommendedBattery} kWh </label>
-			<br/>
-			<BatteryCharging90 size="20%" color={solution.batterySize_kWh===recommendedBattery+5 ? "var(--plblue)": "black"}/>
-			<input type="radio" id="larger" value={recommendedBattery+5} bind:group={selectedBattery} on:change={batteryChange} />
-			<label for="larger"> Powerpod {recommendedBattery+5} kWh  </label>
+			<label> Recommended: Powerpod {recommendedBattery} kWh
+			<input type="radio" class="check-icon" id="recommended" value={recommendedBattery} bind:group={selectedBattery} on:change={batteryChange} />
+			<div class={selectedBattery===recommendedBattery ? "checked-div" : "check-div"}>
+				<BatteryCharging90 size="30%" color={selectedBattery===recommendedBattery ? "var(--plblue)": "black"}/>
+			</div>
+		</label>
+		<label> Larger: Powerpod {recommendedBattery+5} kWh
+			<input type="radio" class="check-icon" id="larger" value={recommendedBattery+5} bind:group={selectedBattery} on:change={batteryChange} />
+			<div class={selectedBattery===(recommendedBattery+5) ? "checked-div" : "check-div"}>
+				<BatteryCharging90 size="30%" color={selectedBattery===(recommendedBattery+5) ? "var(--plblue)": "black"}/>
+			</div>
 		</form>
 	</div>
 	<br/>
-	<div class="solar">
+	<div class="battery">
 			<p>Solar</p>
 			<br/>
 			<SolarPowerVariantOutline size="20%" color={"var(--plblue)"}/>
 			<br/>
-			<label for="solar">select how many panels you would like:</label>
+			<label for="solar">How many panels would you like:</label>
 			<input type="number" id="solar" min=0 max={solution.solar.maxpanels} bind:value={solution.solar.selectedpanels} on:change={solarChange}/> 
 	</div>
 	<br/>
-	<div class="addOns">
+	<div class="battery">
 		<p>Add Ons</p>
 		<br/>
-		<input type="checkbox" bind:checked={ups} on:change={addOnChange} />
-		<label for="ups"> Upgrade of EPS to UPS</label>
-		<br />
-		<input type="checkbox" bind:checked={evCharger} on:change={addOnChange} />
-		<label for="evCharger"> EV Charger</label>
-		<br />
-		<input type="checkbox" bind:checked={smartBattery} on:change={addOnChange} />
-		<label for="smartBattery"> Smart battery to existing solar array connection</label>
-		<br />
-		<input type="checkbox" bind:checked={birdGuard} on:change={addOnChange} />
-		<label for="birdGuard"> Bird Guard (Per Solar Pannel)</label>
+		<div class="buttons">
+		<label>
+			<input class="check-icon" type="checkbox" name="EV charger" bind:checked={ups} on:change={addOnChange}>
+				<div class={ups ? "checked-div" : "check-div"}>
+					<HomeLightningBolt size="20%" color={ups ? "var(--plblue)": "black"}/>
+				</div>
+				Upgrade EPS to UPS
+		</label>
+		<label>
+			<input class="check-icon" type="checkbox" name="EV charger" bind:checked={evCharger} on:change={addOnChange}>
+				<div class={evCharger ? "checked-div" : "check-div"}>
+					<EvStation size="20%" color={evCharger ? "var(--plblue)": "black"}/>
+				</div>
+				EV charger
+		</label>
+		</div>
+		
+		<div class="buttons">
+		<label>
+		<input class="check-icon" type="checkbox" bind:checked={smartBattery} on:change={addOnChange} />
+		<div class={smartBattery ? "checked-div" : "check-div"}>
+			<BatteryCharging90 size="20%" color={smartBattery ? "var(--plblue)": "black"}/>
+		</div>
+		Smart Battery to existing solar array connection
+		</label>
+		
+		<label>
+		<input class="check-icon" type="checkbox" bind:checked={birdGuard} on:change={addOnChange} />
+		<div class={birdGuard ? "checked-div" : "check-div"}>
+			<Bird size="25%" color={birdGuard ? "var(--plblue)": "black"}/>
+		</div>
+		Bird Guard (Per Solar Panel)
+		</label>
+	</div>
 		<br />
 	</div>
 <div>
@@ -112,8 +123,8 @@
 		<li>{item.quantity} {item.name} £{item.price}</li>
 	{/each}
 	<li>Discount: -£{quote.discount.value}</li>
-	<InstallationDate installationDate={earliestInstall}/>
 	</ul>
+	<InstallationDate bind:installationDate={installationDate} on:change={solarChange}/>
 	<div class="helptext">
 		These are estimates. We'll arrange a site survey for you for the most accurate information.
 	</div>
@@ -126,36 +137,24 @@
 
 <style>
 	body {
-		margin: 12px;
+		margin-left: 12px;
+		overflow: auto;
+		align-items: center;
 	}
 
+	form{
+		display: flex;
+		align-items: inline;
+	}
 
 	.battery{
+		display: flex;
+		width:90%;
+		height: auto;
 		padding: 12px;
-		flex-direction: row;
-		position: relative;
-		overflow-x: auto;
-		overflow-y: hidden;
-		padding-bottom: 5em;
-		background-color: rgb(237, 237, 237);
-		border-radius: 25px;
-	}
-
-	.solar{
-		padding: 12px;
-		flex-direction: row;
-		position: relative;
-		overflow-x: auto;
-		overflow-y: hidden;
-		padding-bottom: 5em;
-		background-color: rgb(237, 237, 237);
-		border-radius: 25px;
-	}
-
-	.addOns{
-		padding: 12px;
-		flex-direction: row;
-		position: relative;
+		align-items: center;
+		text-align: center;
+		flex-direction: column;
 		overflow-x: auto;
 		overflow-y: hidden;
 		padding-bottom: 5em;
@@ -164,6 +163,7 @@
 	}
 
 	.buttons {
+		padding-top: 20px;
 		display: flex;
 		flex-direction: row;
 		position: relative;
@@ -190,6 +190,11 @@
 		margin: 1rem;
 		color: var(--plblue);
 	}
+
+	.check-icon {
+        display: none;
+    }
+	
 </style>
 
 
