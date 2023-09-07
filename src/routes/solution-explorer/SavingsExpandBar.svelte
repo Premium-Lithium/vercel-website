@@ -28,7 +28,7 @@
     $: refineOpen = false;
 
     let expandOpen;
-    $: expandOpen = true;
+    $: expandOpen = false;
 
     let barHeight;
     
