@@ -16,6 +16,9 @@
 	import SavingsRefineParams from "./SavingsRefineParams.svelte";
 
     export let params;
+    export let fixedOpen = false;
+
+    $: if (fixedOpen) expandOpen = true;
     
     const currency = new Intl.NumberFormat('en-GB', {
       style: 'currency',
@@ -28,7 +31,7 @@
     refineOpen = false;
 
     let expandOpen;
-    expandOpen = false;
+    $: expandOpen = fixedOpen;
 
     let barHeight;
     
@@ -120,19 +123,24 @@
                 and are subject to change based on a thorough survey of your property
             </p>
         </div>
+        {#if !fixedOpen}
         <div class=expand-icon-spacing></div>
+        {/if}
     </div>
    
 </div>
 {/if}
-<button class="expand-icon" on:click={expandClicked}>
-    {#if expandOpen}
-        <ChevronDoubleDown height=100% width=100% color=#e6e6e6/>
-    {:else}
-        <ChevronDoubleUp height=100% width=100% color=#e6e6e6 class=chevron/>
-    {/if}
-    
-</button>
+
+{#if !fixedOpen}
+    <button class="expand-icon" on:click={expandClicked}>
+        {#if expandOpen}
+            <ChevronDoubleDown height=100% width=100% color=#e6e6e6/>
+        {:else}
+            <ChevronDoubleUp height=100% width=100% color=#e6e6e6 class=chevron/>
+        {/if}
+    </button>
+{/if}
+
 </div>
 <style>
     .refine-div {

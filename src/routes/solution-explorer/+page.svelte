@@ -1,7 +1,7 @@
 <script lang="ts">
     import { browser } from '$app/environment';
     import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
-	  import { onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
     import Map from '$lib/components/Map.svelte';
     import Savings from '$lib/components/Savings.svelte';
@@ -11,22 +11,22 @@
     import nextSlide from '$lib/components/Carousel.svelte';
   
     import Solution3DView from './Solution3DView.svelte';
-	  import ProgressHeader from './ProgressHeader.svelte';
+	import ProgressHeader from './ProgressHeader.svelte';
     import EnergyStage from './EnergyStage.svelte';
     import Investments from './Investments.svelte';
     import SavingsScreen from './SavingsScreen.svelte';
-	  import SolarApi from './SolarApi.svelte';
-	  import SolarQuestions from './SolarQuestions.svelte';
+	import SolarApi from './SolarApi.svelte';
+	import SolarQuestions from './SolarQuestions.svelte';
     import InstallationDate  from "./InstallationDate.svelte";
-    import SavingsBar from "./SavingsExpandBar.svelte";
-	  import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+    import SavingsExpandBar from "./SavingsExpandBar.svelte";
+	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
 
     let map;
     let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
     let monthlySolarGenerationValues = [];
     let loadingSolarValues = false;
     let installationDate = new Date().toISOString().slice(0, 7);
-	  let carouselEnergyStage;
+	let carouselEnergyStage;
 
     let carouselSolar;
     let carouselSavings;
@@ -130,12 +130,6 @@
 		</div>
 		{:else if $stage === 2}
 			{#key $allQueryParameters}
-				<!-- Todo make better looking -->
-				<div class="questions">
-					<Carousel bind:this={carouselSavings}>
-						<SavingsScreen />
-					</Carousel>
-				</div>
 			{/key}
 		{:else if $stage === 3}
 			{#key $allQueryParameters}
@@ -147,10 +141,15 @@
 			</div>
 			{/key}
 		{/if}
+        {#if $stage != 3}
+            <div class="savings">
+                <SavingsExpandBar
+                    params={allQueryParameters}
+                    fixedOpen={$stage == 2}
+                />
+            </div>
+		{/if}
 {/if}
-	<div class="savings">
-    	<SavingsBar params={allQueryParameters}/>
-	</div>
 	<div class="footer">
 		<NavButtons bind:currentPage={$stage} lastPage={6} />
 	</div>
