@@ -117,7 +117,7 @@
 				</div>
 				<div class="map-view">
 					<Map search={true} style="5" bind:map/>
-          <SolarPanelEstimator bind:map/>
+          			<SolarPanelEstimator bind:map/>
 				</div>
 				<div>
 					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues bind:map/>

@@ -1,5 +1,5 @@
 <script>
-    import { latLongOfMarker, markersOnMap } from '$lib/MapStores.js';
+    import { latLongOfMarker, markersOnMap, colourOfMapMarker} from '$lib/MapStores.js';
     import MapboxDraw from "@mapbox/mapbox-gl-draw";
     import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
     import area from '@turf/area';
@@ -57,15 +57,15 @@ function logRoofArea() {
 function createMarkerFromPoint(point) {
     $markersOnMap.forEach((m) => m.remove())
     $markersOnMap = [];
-    const marker = new mapboxgl.Marker({color: "blue", draggable: true})
+    const marker = new mapboxgl.Marker({color: $colourOfMapMarker, draggable: true})
     .setLngLat([point.geometry.coordinates[0], point.geometry.coordinates[1]])
     .addTo(map);
     $latLongOfMarker = {"latitude": point.geometry.coordinates[1], "longitude": point.geometry.coordinates[0]};
     draw.delete(point.id);
     $markersOnMap.push(marker);
     marker.on('dragend', () => {
-        $markersOnMap.forEach((m) => {if(m._color != 'blue') m.remove()});
-		$markersOnMap.filter((m) => m._color == 'blue');
+        $markersOnMap.forEach((m) => {if(m._color != $colourOfMapMarker) m.remove()});
+		$markersOnMap.filter((m) => m._color == $colourOfMapMarker);
         let lngLat = marker.getLngLat();
         $latLongOfMarker = {"latitude": lngLat.lat, "longitude": lngLat.lng};
     })

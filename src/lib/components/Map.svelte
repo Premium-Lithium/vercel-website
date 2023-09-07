@@ -5,7 +5,7 @@
 
 <script>
 
-import { latLongOfMarker, markersOnMap } from '$lib/MapStores.js';
+import { latLongOfMarker, markersOnMap, colourOfMapMarker } from '$lib/MapStores.js';
 
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -50,15 +50,15 @@ onMount(() => {
                 $markersOnMap.forEach((m) => m.remove());
                 $latLongOfMarker.latitude = e.result.geometry.coordinates[1];
                 $latLongOfMarker.longitude = e.result.geometry.coordinates[0];
-                const marker = new mapboxgl.Marker({draggable: true, color: 'blue'})
+                const marker = new mapboxgl.Marker({draggable: true, color: $colourOfMapMarker})
                 .setLngLat([$latLongOfMarker.longitude, $latLongOfMarker.latitude])
                 .addTo(map);
                 $markersOnMap = [marker];
-                marker.on('dragend', (marker) => {
+                marker.on('dragend', () => {
                     let lngLat = marker.getLngLat();
                     $latLongOfMarker.latitude = lngLat.lat;
                     $latLongOfMarker.longitude = lngLat.lng;
-                    $markersOnMap.forEach((m) => m.remove());
+                    $markersOnMap.forEach((m) => {if(m != marker) m.remove()});
                     $markersOnMap = [marker];
                 })
             })

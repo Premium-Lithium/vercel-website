@@ -3,14 +3,17 @@
 	import mapboxgl from 'mapbox-gl';
 	import SolarGenerationBreakdown from './SolarGenerationBreakdown.svelte';
 	import Loading from '$lib/components/Loading.svelte';
+	import { colourOfMapMarker } from '../../lib/MapStores';
     
 	export let map;
 	export let loadingSolarValues = false;
 	export let allQueryParameters;
 	
+	
 	const JINKO_PANEL_SIZE = 1.762 * 1.134; // m^2 
 
 	let monthlySolarGenerationValues = [];
+	let selectedRoofSections = [];
 
 	$: {
 		if($latLongOfMarker.longitude)  {
@@ -35,7 +38,7 @@
 	export async function getSolarDataFromPVGIS() {
 		monthlySolarGenerationValues = [];
 		loadingSolarValues = true;
-		let pvgisRes = await fetch('solution-explorer/endpoints/solar/', {
+		let pvgisRes = await fetch('solution-explorer/solar/', {
 			method: "POST",
 			headers: {
 				'Content-Type': 'application/json'
@@ -79,20 +82,45 @@
 			return;
 		}
 		googleSolarRes.solarPotential.roofSegmentStats.forEach((roofSegment) => {
-			const marker = new mapboxgl.Marker({
-			color:"red"
+			addMarker(roofSegment, "grey");
+		});
+	}
+
+	function toggleRoofSection(marker, roofSegment) {
+		marker.remove();
+		if(marker._color == "grey") {
+			// add
+			addMarker(roofSegment,"var(--plblue)");
+			selectedRoofSections = [...selectedRoofSections, roofSegment];
+		} else {
+			// remove
+			addMarker(roofSegment, "grey");
+			selectedRoofSections.splice(selectedRoofSections.findIndex(segment => segment === roofSegment),1);
+		}
+		
+
+		
+		console.log(selectedRoofSections.reduce((p, v, i, a) => {
+			return p + Math.floor(v.stats.areaMeters2 / JINKO_PANEL_SIZE)
+		}, 0)) 
+	}
+
+	function addMarker(roofSegment, colour){
+		const marker = new mapboxgl.Marker({
+			color:colour
 			}).setLngLat([roofSegment.center.longitude, roofSegment.center.latitude])
 			.addTo(map);
-			
-			const popup = new mapboxgl.Popup({ offset: 25 })
-			.setText(`Max ${Math.floor(roofSegment.stats.areaMeters2 / JINKO_PANEL_SIZE)} panels`)
-			.setLngLat([roofSegment.center.longitude, roofSegment.center.latitude]);
 
-			marker.setPopup(popup);
-			marker.getElement().addEventListener('mouseenter', () => marker.togglePopup());
-			marker.getElement().addEventListener('mouseleave', () => marker.togglePopup());;
-			$markersOnMap.push(marker);
-		});
+		const popup = new mapboxgl.Popup({ offset: 25 })
+		.setText(`Max ${Math.floor(roofSegment.stats.areaMeters2 / JINKO_PANEL_SIZE)} panels`)
+		.setLngLat([roofSegment.center.longitude, roofSegment.center.latitude]);
+
+		marker.setPopup(popup);
+		marker.getElement().addEventListener('mouseenter', () => marker.togglePopup());
+		marker.getElement().addEventListener('mouseleave', () => marker.togglePopup());
+		marker.getElement().addEventListener('click', () => toggleRoofSection(marker, roofSegment));
+
+		$markersOnMap.push(marker);
 	}
 
 </script>
@@ -107,8 +135,8 @@
 	<label for="solarAzimuth">Solar Panel Azimuth</label>
 	<input type="number" id="solarAzimuth" name="solarAzimuth" bind:value={allQueryParameters.solarAzimuth}/>
 	<input type="submit" value="Submit" on:click={async () => {
-		$markersOnMap.forEach((m) => {if(m._color != 'blue') m.remove()});
-		$markersOnMap.filter((m) => m._color == 'blue');
+		$markersOnMap.forEach((m) => {if(m._color != $colourOfMapMarker) m.remove()});
+		$markersOnMap.filter((m) => m._color == $colourOfMapMarker);
 		getSolarDataFromGoogleSolar();
 		getSolarDataFromPVGIS();
 		}}> 
