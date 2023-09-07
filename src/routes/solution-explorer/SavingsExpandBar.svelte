@@ -7,8 +7,16 @@
     // import from svelte material icons
     import ChevronDoubleUp from "svelte-material-icons/ChevronDoubleUp.svelte"
     import ChevronDoubleDown from "svelte-material-icons/ChevronDoubleDown.svelte"
+    import ChevronUp from "svelte-material-icons/ChevronUp.svelte"
 	import { afterNavigate } from "$app/navigation";
 
+    
+
+    // change tariff rates
+	import SavingsRefineParams from "./SavingsRefineParams.svelte";
+
+    export let params;
+    
     const currency = new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
@@ -16,8 +24,11 @@
       maximumFractionDigits: 2,
     });
 
+    let refineOpen;
+    refineOpen = false;
+
     let expandOpen;
-    $: expandOpen = false;
+    expandOpen = false;
 
     let barHeight;
     
@@ -25,8 +36,13 @@
         expandOpen = !expandOpen;
     }
 
+    function refineClicked() {
+        refineOpen = !refineOpen;
+    }
+
 </script>
-<div class="main-bar" bind:clientHeight={barHeight}>
+
+<div id="savings-bar"class="main-bar" bind:clientHeight={barHeight}>
 
 {#if !expandOpen}
 <div class=body out:blur={{amount:10, delay:100}}>
@@ -42,6 +58,7 @@
             <p>{currency.format(yearlySavings)} / yr</p>
         </div>
     </div>
+
     <div class=expand-icon-spacing>
 
     </div>
@@ -70,16 +87,38 @@
             <p class="bottom-text">May 2025</p>
         </div>
         
-    </div><p>Assuming:<br>
-            £0.30 / kwh average energy cost
+    </div>
+    <div class="expand-assumptions">
+        <h2>Based on ..</h2>
+        <p class="assumption-text">
+            £0.30 / kwh average energy cost<br>
+            £0.08 solar energy tariff<br>
             Maximum delivery discount
-            £0.08 solar energy tariff
 
         </p>
+    </div>
+    <div class="adjust-savings">
+        
+        {#if refineOpen}
+        <div class="refine-div">
+            <SavingsRefineParams params={params}/>
+        </div>
+        {/if}
+        <button class="expand-adjust" on:click={refineClicked}>
+            <ChevronUp width="100px"/><br>
+            Refine my quote
+        </button>
+        
+        
+        <!--
+            <SavingsRefineParams params={params}/>
+        -->
+    </div>
+   
     <div class=bottom-div>
         <div>
-            <p>These are estimates based on national averages
-                To get a more detailed estimate, change the values
+            <p class="disclaimer">Estimates are dependent on the accuracy of information supplied,
+                and are subject to change based on a thorough survey of your property
             </p>
         </div>
         <div class=expand-icon-spacing></div>
@@ -97,19 +136,70 @@
 </button>
 </div>
 <style>
+    .refine-div {
+        width: 100%;
+        z-index:1;
+        position: absolute;
+        background: grey;
+        bottom: 100%;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+    .expand-adjust {
+        height: 3em;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        background: none;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+    .adjust-savings {
+        position: relative;
+        margin: auto;
+        width: 90%;
+        text-align: center;
+        height: 3em;
+        overflow: visible;
+
+    }
+    .disclaimer {
+        font-size: 0.8em;
+        text-align: center;
+    }
+    .assumption-text {
+        opacity: 0.8;
+    }
+    .expand-assumptions {
+        width: 100%;
+        text-align: center;
+    }
+    h2 {
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        border-bottom: 1px solid var(--divider-shadow-color);
+        font-size: 1em;
+        font-weight: normal;
+        color: var(--text-color);
+        text-align: center;
+
+    }
     .bottom-div {
         width: 100%;
         position: relative;
         display: flex;
         align-items: center;
-        height: 84px
+        height: 84px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
     .main-bar {
         position: relative;
         width: 100%;
     }
 
-    :root {
+    #savings-bar {
         --expand-bg-color: #6d6c6c;
         --infobox-highlight-color: var(--plblue);
         --expand-active-shadow: #6d6c6c;
@@ -140,7 +230,7 @@
 
     .expand-icon {
         background-color: var(--plblue);
-        width: 5rem;
+        width: 10vh;
         height: 100%;
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
@@ -157,7 +247,7 @@
         box-shadow: inset 0 0 2px 2px var(--expand-active-shadow);
     }
     .expand-icon-spacing {
-        flex: 0 0 5rem;
+        flex: 0 0 10vh;
         display: inline;
     }
 

@@ -1,75 +1,93 @@
 <script lang="ts">
-	import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
-	import { onMount } from 'svelte';
+    import { browser } from '$app/environment';
+    import { ssp, queryParam, queryParameters } from 'sveltekit-search-params';
+	  import { onMount } from 'svelte';
 
-	import Map from '$lib/components/Map.svelte';
-	import Savings from '$lib/components/Savings.svelte';
-	import NavButtons from '$lib/components/NavButtons.svelte';
-	import Loading from '$lib/components/Loading.svelte';
-	import Carousel from '$lib/components/Carousel.svelte';
-	import nextSlide from '$lib/components/Carousel.svelte';
-     
-	import Solution3DView from './Solution3DView.svelte';
-	import ProgressHeader from './ProgressHeader.svelte';
-	import EnergyStage from './EnergyStage.svelte';
-	import Investments from './Investments.svelte';
-	import SavingsScreen from './SavingsScreen.svelte';
-	import SolarApi from './SolarApi.svelte';
-	import SolarQuestions from './SolarQuestions.svelte';
-  	import InstallationDate  from "./InstallationDate.svelte";
-	import ExpandBar from "./ExpandBar.svelte";
+    import Map from '$lib/components/Map.svelte';
+    import Savings from '$lib/components/Savings.svelte';
+    import NavButtons from '$lib/components/NavButtons.svelte';
+    import Loading from '$lib/components/Loading.svelte';
+    import Carousel from '$lib/components/Carousel.svelte';
+    import nextSlide from '$lib/components/Carousel.svelte';
 
-	import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
-	import { browser } from "$app/environment";
+    import ModelVisualisation from './ModelVisualisation.svelte';
+	  import ProgressHeader from './ProgressHeader.svelte';
+    import EnergyStage from './EnergyStage.svelte';
+    import Investments from './Investments.svelte';
+    import SavingsScreen from './SavingsScreen.svelte';
+	  import SolarApi from './SolarApi.svelte';
+	  import SolarQuestions from './SolarQuestions.svelte';
+    import InstallationDate  from "./InstallationDate.svelte";
+    import SavingsBar from "./SavingsExpandBar.svelte";
+	  import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+	import { SolutionModel } from './solutionModel';
 
-	let map;
-	let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
-	let monthlySolarGenerationValues = [];
-	let loadingSolarValues = false;
-  let installationDate = new Date().toISOString().slice(0, 7);
-	let carouselEnergyStage;
-	let carouselSolar;
-	let carouselSavings;
-	let carouselInvestments;
-	let carouselStages = [{ energy: 0 }, { solar: 0 }, { savings: 0 }, { investments: 0 }];
-	let termsOfServiceAccepted;
-	const stage = queryParam('stage', ssp.number());
+    let map;
+    let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
+    let monthlySolarGenerationValues = [];
+    let loadingSolarValues = false;
+    let installationDate = new Date().toISOString().slice(0, 7);
+	  let carouselEnergyStage;
 
-	const allQueryParameters = queryParameters({
-		// energy stage params
-		battery: ssp.boolean(),
-		solar: ssp.boolean(),
-		ev: ssp.boolean(),
-		epsups: ssp.boolean(),
-		energyUsage: ssp.number(),
-		isEnergyUsageExact: ssp.boolean(),
-		moreWinterUsage: ssp.boolean(),
-		workFromHome: ssp.boolean(),
-		oilAndGas: ssp.boolean(),
-		highConsumptionDevices: ssp.boolean(),
-		// solar questions params
-		hasSolarYes: ssp.boolean(),
-		hasSolarNo: ssp.boolean(),
-		wantsSolarYes: ssp.boolean(),
-		wantsSolarNo: ssp.boolean(),
-		panelsWanted: ssp.number(),
-		energyGeneration: ssp.number(),
-		// solar stage params
-		peakSolarPower: ssp.number(8.8),
-		solarLoss: ssp.number(15),
-		solarAngle: ssp.number(45),
-		solarAzimuth: ssp.number(0),
-		mapboxSearchParams: ssp.object({ latitude: 53.95924825020342, longitude: -1.0772513524147558 })
-	});
-	// prevent negative pages
-	onMount(() => {
-		if ($stage == null) {
-			$stage = 0;
-		}
-		if ($stage < 0) {
-			$stage = 0;
-		}
-	});
+    let carouselSolar;
+    let carouselSavings;
+    let carouselInvestments;
+    let carouselStages = [{ energy: 0 }, { solar: 0 }, { savings: 0 }, { investments: 0 }];
+    let termsOfServiceAccepted;
+    const stage = queryParam('stage', ssp.number());
+
+    let model = new SolutionModel();
+    // let camera = null;
+    let solarVisible = true;
+    let batteryVisible = true;
+    let evVisible = true;
+
+  const allQueryParameters = queryParameters({
+      // energy stage params
+      battery: ssp.boolean(),
+      solar: ssp.boolean(),
+      ev: ssp.boolean(),
+      epsups: ssp.boolean(),
+      energyUsage: ssp.number(),
+      isEnergyUsageExact: ssp.boolean(),
+      moreWinterUsage: ssp.boolean(),
+      workFromHome: ssp.boolean(),
+      oilAndGas: ssp.boolean(),
+      highConsumptionDevices: ssp.boolean(),
+      // solar questions params
+      hasSolarYes: ssp.boolean(),
+      hasSolarNo: ssp.boolean(),
+      wantsSolarYes: ssp.boolean(),
+      wantsSolarNo: ssp.boolean(),
+      panelsWanted: ssp.number(),
+      energyGeneration: ssp.number(),
+      // solar stage params
+      peakSolarPower: ssp.number(8.8),
+      solarLoss: ssp.number(15),
+      solarAngle: ssp.number(45),
+      solarAzimuth: ssp.number(0),
+      monthlySolarGenerationValues: ssp.array(),
+      mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558}),
+      installationDate: ssp.string(),
+      // savings info
+      offPeakTariff: ssp.boolean(false),
+      dayTariffRate: ssp.number(0.34),
+      nightTariffRate: ssp.number(),
+      deliveryMonthOffset: ssp.number(),
+      solarTariffRate: ssp.number(),
+      solarTariffSEG: ssp.boolean(),  // [true means seg tariff, false means fit
+      installMonth: ssp.string()
+  });
+
+  // prevent negative pages
+  onMount(() => {
+      if ($stage == null) {
+          $stage = 0;
+      }
+      if ($stage < 0) {
+          $stage = 0;
+      }
+  });
 
 	const solution = {
 		houseType: 'detatched',
@@ -84,7 +102,7 @@
 		addOns: { ups: true, evCharger: false, smartBattery: false, birdGuard: false }
 	};
 </script>
-<body>
+
 {#if browser}
 		<div class="progressHeader">
 			<ProgressHeader
@@ -98,9 +116,14 @@
 				
 			{/key}
 		{:else}
-			<div class="modelView">
-				<Solution3DView />
-			</div>
+		<div class="modelView">
+			<ModelVisualisation
+				bind:model
+				bind:solarVisible
+				bind:batteryVisible
+				bind:evVisible
+			/>
+		</div>
 			{#if $stage === 0}
 				<div class="questions">
 				<Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
@@ -134,26 +157,41 @@
 		{/if}
 	{/if}
 {/if}
-	{#if $stage != 3}
-		<div class="savings">
-    	<ExpandBar/>
-		</div>
-	{/if}
-	<div class="footer">
-		<NavButtons bind:currentPage={$stage} lastPage={3} />
+{#if $stage != 3}
+	<div class="savings">
+		<ExpandBar/>
 	</div>
-	</body>
+{/if}
+	<div class="footer">
+	<NavButtons bind:currentPage={$stage} lastPage={3} />
+	</div>
+</body>
 
 <style>
+    .progressHeader {
+        height: 5%;
+    }
     body {
         display: flex;
         flex-direction: column;
     }
 
-	.map-view {
-		width: 100vw;
-		height: 40vh;
-	}
+  .map-view {
+    width: 100vw;
+    height: 40vh;
+  }
+
+  .savings{
+    height: 10%;
+    width: 100%;
+    position: absolute;
+    bottom: 10%;
+    display: flex;
+    overflow-y: visible;
+    background-color: chartreuse;
+    margin-top: auto;
+  }
+
 
 	.solar-api {
 		display: flex;
@@ -175,10 +213,6 @@
     	align-items: center;
     	flex-direction: column;
 		height: 45%;
-	}
-	.savings {
-		height: 15%;
-		display: flex;
 	}
 
 	.footer {

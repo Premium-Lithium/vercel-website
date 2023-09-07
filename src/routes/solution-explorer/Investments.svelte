@@ -20,28 +20,29 @@
 	let birdGuard = false;
 	let quote = quoteToInstall(solution, installationDate);
 
-	let tosAccepted = false;
+    let tosAccepted = false;
 
-	function addOnChange() {
-		solution.addOns.ups = ups;
-		solution.addOns.evCharger = evCharger;
-		solution.addOns.smartBattery = smartBattery;
-		solution.addOns.birdGuard = birdGuard;
-		quote = quoteToInstall(solution, installationDate);
-	}
+    function addOnChange(){
+        solution.addOns.ups = ups;
+        solution.addOns.evCharger = evCharger;
+        solution.addOns.smartBattery = smartBattery;
+        solution.addOns.birdGuard = birdGuard;
+        quote  = quoteToInstall(solution, installationDate);
+    }
 
 	function batteryChange() {
 		solution.batterySize_kWh = selectedBattery;
 		quote = quoteToInstall(solution, installationDate);
 	}
 
-	function solarChange() {
-		quote = quoteToInstall(solution, installationDate);
-	}
+    function solarChange(){
+        quote = quoteToInstall(solution, installationDate);
+    }
 
-	function order() {
-		alert('order button clicked');
-	}
+    function order() {
+        alert("order button clicked");
+    }
+
 </script>
 
 <body>
@@ -181,10 +182,11 @@
 		border-radius: 5px;
 	}
 
-	input {
-		align-items: center;
-		accent-color: var(--plblue);
-	}
+
+    input{
+        align-items: center;
+        accent-color: var(--plblue);
+    }
 
 	.helptext {
 		margin: 1rem;

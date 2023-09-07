@@ -18,24 +18,26 @@
 	});
 
 	function updateSlides() {
-        let slideWidth = '80vw';
-        let slidePadding = `5vw`
+        let maxSlideWidth = `40vh`;
+        let slideWidth = `calc(min(80vw, ${maxSlideWidth}))`;
+        let spaceBetweenSlides = `calc((100vw - ${slideWidth})/4)`
+        let slideTopBottomMargin = '20px';
 		slides.forEach((slide, index) => {
 		    slide.style.opacity = index === currentIndex ? 1 : 0.5;
             slide.style.transition = `opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)`;
             slide.style.width = slideWidth;
             slide.style.height = slideWidth;
 
-            if (index == 0)                  slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}/2) calc(${slidePadding}/4) calc(${slidePadding}*2)`
-            else if (index == totalSlides-1) slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}*2) calc(${slidePadding}/4) calc(${slidePadding}/2)`
-            else                             slide.style.margin = `calc(${slidePadding}/2) calc(${slidePadding}/2) calc(${slidePadding}/4) calc(${slidePadding}/2)`
+            if (index == 0)                  slide.style.margin = `${slideTopBottomMargin} calc(${spaceBetweenSlides}/2) ${slideTopBottomMargin} calc(${spaceBetweenSlides}*2)`
+            else if (index == totalSlides-1) slide.style.margin = `${slideTopBottomMargin} calc(${spaceBetweenSlides}*2) ${slideTopBottomMargin} calc(${spaceBetweenSlides}/2)`
+            else                             slide.style.margin = `${slideTopBottomMargin} calc(${spaceBetweenSlides}/2) ${slideTopBottomMargin} calc(${spaceBetweenSlides}/2)`
 
             slide.style.boxShadow = `0px 5px 5px rgba(180,180,180,.9)`;
             slide.style.borderRadius = `10px`;
 		});
 
-        slideContainer.style.transform = `translateX(calc(${currentIndex} * -1 * ${slideWidth} - ${currentIndex} * ${slidePadding}))`;
-        slideContainer.style.width = `calc(${totalSlides} * ${slideWidth} + (${totalSlides} + 3) * ${slidePadding})`;
+        slideContainer.style.transform = `translateX(calc(${currentIndex} * -1 * ${slideWidth} - ${currentIndex} * ${spaceBetweenSlides}))`;
+        slideContainer.style.width = `calc(${totalSlides} * ${slideWidth} + (${totalSlides} + 3) * ${spaceBetweenSlides})`;
 
 	}
 
