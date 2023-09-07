@@ -28,8 +28,10 @@
 </script>
 <div class="body">
 <div class="tos-div">
-    <button on:click={order} class={tosAccepted ? 'order-acc' : 'order-dec'}>{ tosAccepted ? "Order now": "Please accept terms of service"}</button>
-    <button class="pl-button" on:click={tosClicked}>View and accept terms of service</button>
+    <div class="button-div">
+        <button on:click={order} class={tosAccepted ? 'order-acc' : 'order-dec'}>{ tosAccepted ? "Order now": "Please accept terms of service"}</button>
+        <button on:click={tosClicked}>View and accept terms of service</button>
+    </div>
     <Modal bind:showModal={tosVisible} bind:dialog>
         <h2>Terms of service</h2>
         <p>
@@ -64,6 +66,7 @@
     .button-div {
         grid-template-columns: 1fr 1fr;
         width: 100%;
+        height:auto;
         display: grid;
         gap: 2em;
     }
@@ -72,6 +75,7 @@
         margin:auto;
         color: white;
         border:solid #000 1px; 
+        height: auto;
         font-size: 20px;
         padding: 1rem; 
         border-radius:5px;
@@ -84,6 +88,7 @@
         margin:auto;
         color: white;
         border:solid #000 1px; 
+        height: auto;
         font-size: 20px;
         padding: 1rem; 
         border-radius:5px;
@@ -93,16 +98,5 @@
     }
     .order-dec:hover {
         box-shadow: 0 5px 15px orangered;
-    }
-    .tos-button{
-        display: block;
-        margin: auto;
-        background-color: var(--plblue);
-        color: white;
-        border:solid #000 1px; 
-        font-size: 20px;
-        height:auto; 
-        padding: 1rem; 
-        border-radius:5px;
     }
 </style>
