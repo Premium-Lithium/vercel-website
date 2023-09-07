@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { latLongOfMarker, markersOnMap } from '$lib/MapStores.js';
+	import { latLongOfMarker, markersOnMap, colourOfMapMarker } from '$lib/MapStores.js';
 	import mapboxgl from 'mapbox-gl';
 	import SolarGenerationBreakdown from './SolarGenerationBreakdown.svelte';
 	import Loading from '$lib/components/Loading.svelte';
-	import { colourOfMapMarker } from '../../lib/MapStores';
     
 	export let map;
 	export let loadingSolarValues = false;
