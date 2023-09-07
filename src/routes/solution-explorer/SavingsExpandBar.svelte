@@ -198,14 +198,6 @@
         width: 100%;
     }
 
-    :root {
-        --expand-bg-color: #6d6c6c;
-        --infobox-highlight-color: var(--plblue);
-        --expand-active-shadow: #6d6c6c;
-        --divider-shadow-color: rgba(40, 170, 226, 0.4);
-        --text-color: white;
-    }
-    
     .body {
         display: flex;
         bottom: 0;
