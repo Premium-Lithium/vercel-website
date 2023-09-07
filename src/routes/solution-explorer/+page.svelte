@@ -98,6 +98,7 @@
 	};
 </script>
 
+<body>
 {#if browser}
     <div class="progressHeader">
         <ProgressHeader
@@ -128,18 +129,22 @@
                 <SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
             </div>
         </Carousel>
+    </div>
+    {:else if $stage === 3}
+        <div class="questions">
+            <Investments solution={solution}/>
         </div>
     {/if}
     {#if $stage != 3}
         <div class="savings">
-            <SavingsBar params={allQueryParameters}/>
+            <SavingsBar params={allQueryParameters} />
         </div>
-
     {/if}
 	<div class="footer">
         <NavButtons bind:currentPage={$stage} lastPage={3} />
 	</div>
 {/if}
+</body>
 
 <style>
     .progressHeader {
@@ -192,7 +197,7 @@
 	.footer {
 		height: 8%;
 		width: 100%;
-		position: relative;
+		position: absolute;
 		bottom: 0;
 		overflow: hidden;
 	}
