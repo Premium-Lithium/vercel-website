@@ -1,6 +1,6 @@
 <script>
 	import TermsOfService from './TermsOfService.svelte';
-
+	import {getBatteryReccomendation} from './reccomendationsModel.js';
 	import { earliestInstallMonth, quoteToInstall } from '$lib/services/price-model.js';
 	export let solution = {
 		houseType: 'detatched',
@@ -8,7 +8,7 @@
 		battery: true,
 		batterySize_kWh: 5,
 		evCharger: { selected: true },
-		usage: 'unknown',
+		usage: 3,
 		peopleInHouse: 4,
 		wfh: 0,
 		postcode: '',
@@ -16,7 +16,7 @@
 	};
 	let earliestInstall = earliestInstallMonth();
 	let installationDate = earliestInstall;
-	const recommendedBattery = solution.batterySize_kWh;
+	const recommendedBattery = getBatteryReccomendation(solution.usage);
 	let selectedBattery = 'recommended';
 	let ups = true;
 	let evCharger = false;
@@ -54,51 +54,29 @@
 	}
 </script>
 
-<div class="body">
-	<h1>Your Investment</h1>
-	{#if solution.battery == true}
-		<h2>Which battery would you like ?</h2>
+<body>
+	<p>Reccomended Products</p>
+		<p>Battery</p>
 		<form>
-			<input
-				type="radio"
-				bind:group={selectedBattery}
-				value="recommended"
-				on:change={batteryChange}
-			/>
-			<label for="recommended"> Recommended battery {recommendedBattery} kWh </label>
-			<br />
-			<input type="radio" bind:group={selectedBattery} value="smaller" on:change={batteryChange} />
-			<label for="smaller"> Smaller battery 5 kWh </label>
+			<input type="radio" bind:group={selectedBattery} value="recommended" on:change={batteryChange}/>
+			<label for="recommended"> Powerpod {recommendedBattery} kWh </label>
 			<br />
 			<input type="radio" bind:group={selectedBattery} value="larger" on:change={batteryChange} />
-			<label for="larger"> Larger battery 20 kWh </label>
+			<label for="larger"> Powerpod {recommendedBattery+5} kWh  </label>
 			<br />
 		</form>
-	{/if}
-</div>
-
-<div class="body">
-	{#if solution.solar.selected == true}
-		<div>
-			<h2>Solar</h2>
-			<h3>
-				For your house we recommend between {solution.solar.minpanels} and {solution.solar
-					.maxpanels} panels
-			</h3>
+			<p>Solar</p>
 			<h3>select how many panels you would like:</h3>
 			<input
-				type="range"
-				min={solution.solar.minpanels}
+				type="number"
+				min=0
 				max={solution.solar.maxpanels}
 				bind:value={solution.solar.selectedpanels}
 				on:change={solarChange}
 			/>
-			{solution.solar.selectedpanels} solar panels
-		</div>
-	{/if}
-</div>
-<div>
-	<h2>Interested in any add ons?</h2>
+</body>
+
+	<!-- <h2>Interested in any add ons?</h2>
 	<div class="addOns">
 		<input type="checkbox" bind:checked={ups} on:change={addOnChange} />
 		<label for="ups"> Upgrade of EPS to UPS</label>
@@ -122,7 +100,7 @@
 	{#each quote.price.breakdown as item}
 		<li>{item.quantity} {item.name} £{item.price}</li>
 	{/each}
-	<li>Discount: -£{quote.discount.value}</li>
+	<li>Discount: -£{quote.discount.value}</li> -->
 	<div class="helptext">
 		These are estimates. We'll arrange a site survey for you for the most accurate information.
 	</div>
@@ -131,10 +109,8 @@
 		<button> Book meeting with a consultant </button>
 		<TermsOfService bind:tosAccepted />
 	</div>
-</div>
-
 <style>
-	.body {
+	body {
 		margin: 0;
 		display: flex;
 		flex-direction: column;
@@ -171,3 +147,5 @@
 		color: var(--plblue);
 	}
 </style>
+
+

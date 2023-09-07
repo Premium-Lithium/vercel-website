@@ -77,7 +77,7 @@
 		battery: true,
 		batterySize_kWh: 5,
 		evCharger: { selected: true },
-		usage: 'unknown',
+		usage: 5000,
 		peopleInHouse: 4,
 		wfh: 0,
 		postcode: '',
@@ -92,42 +92,52 @@
 				bind:selectedIndex={$stage}
 			/>
 		</div>
-		<div class="modelView">
-			<Solution3DView />
-		</div>
-		{#if $stage === 0}
-		<div class="questions">
-			<Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
-				<EnergyStage bind:queryParams={$allQueryParameters} />
-			</Carousel>
-		</div>
-		{:else if $stage === 1}
-		<div class="questions">
-			<Carousel bind:this={carouselEnergyStage}>
+		{#if $stage === 3}
+			{#key $allQueryParameters}
+			<!-- <div class="questions"> -->
+				<!-- Todo make less bad looking -->
+				<!-- <Carousel bind:this={carouselInvestments}> -->
+					<Investments {solution} />
+				<!-- </Carousel> -->
+			<!-- </div> -->
+			{/key}
+		{:else}
+			<div class="modelView">
+				<Solution3DView />
+			</div>
+			{#if $stage === 0}
+				<div class="questions">
+				<Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
+					<EnergyStage bind:queryParams={$allQueryParameters} />
+				</Carousel>
+			</div>
+			{:else if $stage === 1}
+				<div class="questions">
+				<Carousel bind:this={carouselEnergyStage}>
 				<div>
 					<SolarQuestions bind:queryParams={$allQueryParameters} />
 				</div>
 				<div class="map-view">
 					<Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
-          <SolarPanelEstimator bind:map/>
+          		<SolarPanelEstimator bind:map/>
 				</div>
 				<div>
 					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
 				</div>
 			</Carousel>
-		</div>
-		{:else if $stage === 2}
-			{#key $allQueryParameters}
-				<!-- Todo make better looking -->
+			</div>
+			{:else if $stage === 2}
+				{#key $allQueryParameters}
+					<!-- Todo make better looking -->
+					<div class="questions">
+						<Carousel bind:this={carouselSavings}>
+							<SavingsScreen />
+						</Carousel>
+					</div>
+				{/key}
+			{:else if $stage === 3}
+				{#key $allQueryParameters}
 				<div class="questions">
-					<Carousel bind:this={carouselSavings}>
-						<SavingsScreen />
-					</Carousel>
-				</div>
-			{/key}
-		{:else if $stage === 3}
-			{#key $allQueryParameters}
-			<div class="questions">
 				<!-- Todo make less bad looking -->
 				<Carousel bind:this={carouselInvestments}>
 					<Investments {solution} />
@@ -135,6 +145,7 @@
 			</div>
 			{/key}
 		{/if}
+	{/if}
 {/if}
 	<div class="savings">
     	<ExpandBar/>
