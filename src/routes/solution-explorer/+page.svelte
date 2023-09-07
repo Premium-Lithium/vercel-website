@@ -125,7 +125,7 @@
             <SolarPanelEstimator bind:map/>
             </div>
             <div>
-                <SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
+                <SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues bind:map/>
             </div>
         </Carousel>
         </div>
