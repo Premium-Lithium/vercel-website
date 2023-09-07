@@ -14,7 +14,6 @@
 	import ProgressHeader from './ProgressHeader.svelte';
     import EnergyStage from './EnergyStage.svelte';
     import Investments from './Investments.svelte';
-    import SavingsScreen from './SavingsScreen.svelte';
 	import SolarApi from './SolarApi.svelte';
 	import SolarQuestions from './SolarQuestions.svelte';
     import InstallationDate  from "./InstallationDate.svelte";
