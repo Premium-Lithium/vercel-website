@@ -52,7 +52,7 @@
 								aria-required="true"
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
-                                autocomplete="one-time-code"
+                                autocomplete="new-password"
                                 bind:value={deal.name}
                                 required
 							/>
