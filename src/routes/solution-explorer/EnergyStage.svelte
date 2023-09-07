@@ -1,16 +1,19 @@
-<script>
-    import BatteryChargingOutline from "svelte-material-icons/BatteryChargingOutline.svelte"
-    import SolarPowerVariantOutline from "svelte-material-icons/SolarPowerVariantOutline.svelte"
-    import EvStation from "svelte-material-icons/EvStation.svelte"
-    import HomeLightningBolt from "svelte-material-icons/HomeLightningBolt.svelte"
-    import AccountQuestion from "svelte-material-icons/AccountQuestion.svelte"
+<script lang="ts">
+    import Carousel from "$lib/components/Carousel.svelte";
+    import BatteryChargingOutline from "svelte-material-icons/BatteryChargingOutline.svelte";
+    import SolarPowerVariantOutline from "svelte-material-icons/SolarPowerVariantOutline.svelte";
+    import EvStation from "svelte-material-icons/EvStation.svelte";
+    import HomeLightningBolt from "svelte-material-icons/HomeLightningBolt.svelte";
+    import AccountQuestion from "svelte-material-icons/AccountQuestion.svelte";
 	import Accordian from "../../lib/components/Accordian.svelte";
 
-    import BatteryCharging10 from "svelte-material-icons/BatteryCharging10.svelte"
-    import BatteryCharging50 from "svelte-material-icons/BatteryCharging50.svelte"
-    import BatteryCharging90 from "svelte-material-icons/BatteryCharging90.svelte"
-    import BatteryUnknown from "svelte-material-icons/BatteryUnknown.svelte"
-	import { onMount } from "svelte";
+    import BatteryCharging10 from "svelte-material-icons/BatteryCharging10.svelte";
+    import BatteryCharging50 from "svelte-material-icons/BatteryCharging50.svelte";
+    import BatteryCharging90 from "svelte-material-icons/BatteryCharging90.svelte";
+    import BatteryUnknown from "svelte-material-icons/BatteryUnknown.svelte";
+
+    import { onMount } from "svelte";
+
 
     export let queryParams;
 
@@ -98,7 +101,6 @@
         </tr>
     </table>
 </div>
-
 <div class="inner-div">
     <h2>My energy use ...</h2>
 
@@ -162,45 +164,44 @@
     
 </label><br>High
 </td></tr></table>
-
 </div>
 <div>
-    <h2>3. What are your energy usage habits?</h2>
+<h2>3. What are your energy usage habits?</h2>
 
-    <table>
-        <tr>
-            <td>
-                <label for="winter" >Do you use more energy in winter?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="winter" bind:checked={queryParams.moreWinterUsage}>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="workfromhome" >Does anyone in your household work from home?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="winter" bind:checked={queryParams.workFromHome}>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="gasusage" >Do you use oil and gas?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="gasusage" bind:checked={queryParams.oilAndGas}>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="highconsumptiondevices" >Do you have any high consumption devices (eg EV Charger, Immersion Heater)?</label>
-            </td>
-            <td>
-                <input type="checkbox" id="highconsumptiondevices" bind:checked={queryParams.highConsumptionDevices}>
-            </td>
-        </tr>
-    </table>
+<table>
+    <tr>
+        <td>
+            <label for="winter" >Do you use more energy in winter?</label>
+        </td>
+        <td>
+            <input type="checkbox" id="winter" bind:checked={queryParams.moreWinterUsage}>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="workfromhome" >Does anyone in your household work from home?</label>
+        </td>
+        <td>
+            <input type="checkbox" id="winter" bind:checked={queryParams.workFromHome}>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="gasusage" >Do you use oil and gas?</label>
+        </td>
+        <td>
+            <input type="checkbox" id="gasusage" bind:checked={queryParams.oilAndGas}>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="highconsumptiondevices" >Do you have any high consumption devices (eg EV Charger, Immersion Heater)?</label>
+        </td>
+        <td>
+            <input type="checkbox" id="highconsumptiondevices" bind:checked={queryParams.highConsumptionDevices}>
+        </td>
+    </tr>
+</table>
 </div>
 <style>
     .energy-use-input {
