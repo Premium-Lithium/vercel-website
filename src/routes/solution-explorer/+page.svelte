@@ -20,6 +20,7 @@
     import InstallationDate  from "./InstallationDate.svelte";
     import SavingsBar from "./SavingsExpandBar.svelte";
 	  import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+	import { SolutionModel } from './solutionModel';
 
     let map;
     let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
@@ -34,6 +35,12 @@
     let carouselStages = [{ energy: 0 }, { solar: 0 }, { savings: 0 }, { investments: 0 }];
     let termsOfServiceAccepted;
     const stage = queryParam('stage', ssp.number());
+
+    let model = new SolutionModel();
+    // let camera = null;
+    let solarVisible = true;
+    let batteryVisible = true;
+    let evVisible = true;
 
   const allQueryParameters = queryParameters({
       // energy stage params
@@ -105,15 +112,12 @@
     </div>
 
     <div class="modelView">
-        <div style="height: 1000px">
-            <ModelVisualisation
-                bind:model
-                bind:camera
-                bind:solarVisible
-                bind:batteryVisible
-                bind:evVisible
-            />
-        </div>
+        <ModelVisualisation
+            bind:model
+            bind:solarVisible
+            bind:batteryVisible
+            bind:evVisible
+        />
     </div>
 
     {#if $stage === 0}

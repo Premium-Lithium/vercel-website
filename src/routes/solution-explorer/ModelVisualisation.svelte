@@ -10,7 +10,7 @@
 	import Accordian from '$lib/components/Accordian.svelte';
 
     export let model;
-    export let camera;
+    // export let camera;
     export let solarVisible;
     export let batteryVisible;
     export let evVisible;
@@ -42,7 +42,7 @@
 <div class="canvas-container" bind:this={scenePanel}>
     <div class="canvas-inner" bind:this={canvasInner}>
         <Canvas>
-            <Scene model={model} canvasSize={canvasSize} bind:camera={camera}/>
+            <Scene model={model} canvasSize={canvasSize}/>
         </Canvas>
     </div>
 </div>

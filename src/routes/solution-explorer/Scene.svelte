@@ -7,7 +7,7 @@
 
     export let model;
     export let canvasSize;
-    export let camera;
+    // export let camera;
 
     export let batteryVisible = true;
     export let evVisible = true;
@@ -30,11 +30,10 @@
 
 <T.OrthographicCamera
     zoom={canvasSize * camZoomToSizeRatio}
-    position={[10, 6, 10]}
+    position={[5, 3, 5]}
     on:create={({ ref }) => {
-        ref.lookAt(0, 2, 0)
+        ref.lookAt(0, 1, 0)
     }}
-    bind:ref={camera}
     makeDefault
 ></T.OrthographicCamera>
 
