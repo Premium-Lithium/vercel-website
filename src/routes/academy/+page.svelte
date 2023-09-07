@@ -36,7 +36,7 @@
 	<div class="sc-kdBSHD iYHVXt">
 		<div class="sc-koXPp gZGbcL">
 			<div class="sc-eeDRCY dTIjiu">
-				<form action="#" name="Academy Registration" on:submit={handleSubmit} autocomplete="off" autosave="off">
+				<form action="#" name="Academy Registration" on:submit={handleSubmit} autocomplete="false" autosave="off">
 					<div class="sc-jlZhew dHgxMY">
 						<label
 							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
