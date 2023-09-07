@@ -262,11 +262,12 @@
     .radio-selected-div {
         margin: auto;
         width: 70%;
-        background-color: greenyellow;
+        background-color: var(--plblue);
         border-radius: 10%;
-        box-shadow: inset 0 3px 5px 5px rgba(0, 0, 0, 0.4);
+        box-shadow: 0px 0px 0px white, inset 1px 1px 2px 2px rgba(41, 76, 91, 0.5);
         transition-property: box-shadow;
-        transition: 0.1s;
+        transition: 0.2s;
+        padding: 2px;
     }
 
     .radio-div {
