@@ -1,15 +1,27 @@
 <script>
+    // This component is responsible for providing a complete visualisation of the solution model.
+
     import { onMount, tick, afterUpdate } from 'svelte';
     import { writable } from 'svelte/store';
     import Scene from './Scene.svelte'
+    import { T } from '@threlte/core'
     import { Canvas } from '@threlte/core'
+    import { Theatre, SheetObject } from '@threlte/theatre'
+	import Accordian from '$lib/components/Accordian.svelte';
+
+    export let model;
+    // export let camera;
+    export let solarVisible;
+    export let batteryVisible;
+    export let evVisible;
+
 
     let scenePanel;
     let canvasInner;
 
     let sizeStore = writable(0);
-    let size;
-    sizeStore.subscribe(value => { size = value; });
+    let canvasSize;
+    sizeStore.subscribe(value => { canvasSize = value; });
 
     function resizeCanvas() {
         const newSize = Math.min(scenePanel.offsetWidth, scenePanel.offsetHeight);
@@ -30,7 +42,7 @@
 <div class="canvas-container" bind:this={scenePanel}>
     <div class="canvas-inner" bind:this={canvasInner}>
         <Canvas>
-            <Scene size={size}/>
+            <Scene model={model} canvasSize={canvasSize}/>
         </Canvas>
     </div>
 </div>

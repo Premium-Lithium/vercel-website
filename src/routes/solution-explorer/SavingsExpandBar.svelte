@@ -44,7 +44,8 @@
     }
 
 </script>
-<div class="main-bar" bind:clientHeight={barHeight}>
+
+<div id="savings-bar"class="main-bar" bind:clientHeight={barHeight}>
 
 {#if !expandOpen}
 <div class=body out:blur={{amount:10, delay:100}}>
@@ -206,7 +207,7 @@
         width: 100%;
     }
 
-    :root {
+    #savings-bar {
         --expand-bg-color: #6d6c6c;
         --infobox-highlight-color: var(--plblue);
         --expand-active-shadow: #6d6c6c;
