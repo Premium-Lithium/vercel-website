@@ -37,6 +37,9 @@
     const lowEnergyEstimate = 1800
     const mediumEnergyEstimate = 2900
     const highEnergyEstimate = 4300
+// queryParams.epsups ? "var(--plblue)": "black"
+    const iconSelectedColor = "white";
+    const iconReleaseColor = "var(--plblue)";
 
     onMount(() => {
         if (!queryParams.energyUsage) {
@@ -55,7 +58,7 @@
                 <label>Battery<br>
                     <input class="check-icon" type="checkbox" name="Battery" bind:checked={queryParams.battery}>
                     <div bind:clientHeight={iconHeight} class={queryParams.battery ? "checked-div" : "check-div"}>
-                        <BatteryChargingOutline size="100%" color={queryParams.battery ? "var(--plblue)": "black"}/>
+                        <BatteryChargingOutline size="100%" color={queryParams.battery ? iconSelectedColor : iconReleaseColor}/>
                     </div>
                 </label>
             </td>
@@ -63,7 +66,7 @@
                 <label>Solar<br>
                     <input class="check-icon" type="checkbox" name="Solar" bind:checked={queryParams.solar}>
                     <div class={queryParams.solar ? "checked-div" : "check-div"}>
-                        <SolarPowerVariantOutline size="100%" color={queryParams.solar ? "var(--plblue)": "black"}/>
+                        <SolarPowerVariantOutline size="100%" color={queryParams.solar ? iconSelectedColor : iconReleaseColor}/>
                     </div>
                 </label>
             </td>
@@ -74,7 +77,7 @@
                 EV charger<br>
                 <input class="check-icon" type="checkbox" name="EV charger" bind:checked={queryParams.ev}>
                     <div class={queryParams.ev ? "checked-div" : "check-div"}>
-                        <EvStation size="100%" color={queryParams.ev ? "var(--plblue)": "black"}/>
+                        <EvStation size="100%" color={queryParams.ev ? iconSelectedColor : iconReleaseColor}/>
                     </div>
                 </label>
             </td>
@@ -83,7 +86,7 @@
                 UPS<br>
                 <input class="check-icon" type="checkbox" name="UPS" bind:checked={queryParams.epsups}>
                 <div class="{queryParams.epsups ? "checked-div" : "check-div"}">
-                    <HomeLightningBolt size="100%" color={queryParams.epsups ? "var(--plblue)": "black"}/>
+                    <HomeLightningBolt size="100%" color={queryParams.epsups ? iconSelectedColor : iconReleaseColor}/>
                 </div>
                 </label>
             </td>
@@ -238,20 +241,22 @@
     .checked-div {
         margin: auto;
         width: 35%;
-        background-color: greenyellow;
+        background-color: var(--plblue);
         border-radius: 10%;
-        box-shadow: inset 0 3px 5px 5px rgba(0, 0, 0, 0.4);
+        box-shadow: 0px 0px 0px white, inset 1px 1px 2px 2px rgba(41, 76, 91, 0.5);
         transition-property: box-shadow;
-        transition: 0.1s;
+        transition: 0.2s;
+        padding: 2px;
     }
     .check-div {
         margin: auto;
         width: 35%;
-        background-color: var(--plblue);
+        background-color: white;
         border-radius: 10%;
-        box-shadow: 0px 3px 3px 2px rgba(0, 0, 0, 0.2);
+        box-shadow: 2px 2px 1px 2px rgba(0, 0, 0, 0.2), inset 0px 0px 0px white;
         transition-property: box-shadow;
-        transition: 0.1s;
+        transition: 0.2s;
+        padding: 2px;
     }
 
     .radio-selected-div {
