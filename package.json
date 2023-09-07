@@ -1,9 +1,6 @@
 {
 	"name": "sveltekit-2",
 	"version": "0.0.1",
-	"prisma": {
-		"seed": "node prisma/seed.js"
-	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -13,7 +10,7 @@
 		"test:unit": "vitest",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
-		"postinstall": "prisma generate"
+		"test": "vitest"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
@@ -28,7 +25,6 @@
 		"eslint-plugin-svelte": "^2.30.0",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",
-		"prisma": "^4.16.2",
 		"svelte": "^4.0.0",
 		"svelte-check": "^3.4.3",
 		"ts-node": "^10.9.1",
@@ -43,9 +39,10 @@
 	"type": "module",
 	"dependencies": {
 		"@auth0/auth0-spa-js": "^2.1.0",
+		"@mapbox/mapbox-gl-draw": "^1.4.2",
 		"@microsoft/microsoft-graph-client": "^3.0.5",
 		"@pipedrive/app-extensions-sdk": "^0.9.0",
-		"@prisma/client": "^4.13.0",
+		"@shopify/shopify-api": "^7.6.0",
 		"@supabase/auth-helpers-sveltekit": "^0.10.2",
 		"@supabase/supabase-js": "^2.32.0",
 		"@theatre/core": "^0.7.0",
@@ -53,6 +50,10 @@
 		"@threlte/core": "^6.0.6",
 		"@threlte/extras": "^5.4.0",
 		"@threlte/theatre": "^2.1.2",
+		"@turf/area": "^6.5.0",
+		"@turf/boolean-point-in-polygon": "^6.5.0",
+		"@turf/helpers": "^6.5.0",
+		"@turf/points-within-polygon": "^6.5.0",
 		"@types/three": "^0.155.1",
 		"@vercel/postgres": "^0.4.0",
 		"ajv": "^8.12.0",
@@ -60,17 +61,19 @@
 		"ajv-formats": "^2.1.1",
 		"cheerio": "1.0.0-rc.12",
 		"langchain": "^0.0.120",
+		"mapbox-gl": "^2.15.0",
 		"mjml": "^4.14.1",
 		"nunjucks": "^3.2.4",
 		"openai": "4.0.0-beta.12",
-		"pipedrive": "^21.1.0",
+		"pipedrive": "^21.2.0",
 		"postprocessing": "^6.33.0",
+		"shopify-token": "^4.1.0",
 		"svelte-material-icons": "^3.0.5",
 		"sveltekit-search-params": "^1.0.14",
 		"three": "^0.155.0",
 		"three.meshline": "^1.4.0",
 		"toastr": "^2.1.4",
-		"vercel": "^31.0.1",
+		"vercel": "^32.1.0",
 		"zod": "^3.21.4"
 	}
 }

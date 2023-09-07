@@ -1,24 +1,23 @@
 <svelte:head>
-    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
 </svelte:head>
 
 <script>
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 export let search = true;
 export let map = undefined;
 export let searchResult = {'latitude': undefined, 'longitude': undefined};
 const styles = [
-    'mapbox://styles/mapbox/streets-v12',
-    'mapbox://styles/mapbox/outdoors-v12',
-    'mapbox://styles/mapbox/light-v11',
-    'mapbox://styles/mapbox/dark-v11',
-    'mapbox://styles/mapbox/satellite-v9',
-    'mapbox://styles/mapbox/satellite-streets-v12',
-    'mapbox://styles/mapbox/navigation-day-v1',
-    'mapbox://styles/mapbox/navigation-day-v1',
-    'mapbox://styles/mapbox/navigation-night-v1']
+    'mapbox://styles/mapbox/streets-v12',           // 0
+    'mapbox://styles/mapbox/outdoors-v12',          // 1
+    'mapbox://styles/mapbox/light-v11',             // 2
+    'mapbox://styles/mapbox/dark-v11',              // 3
+    'mapbox://styles/mapbox/satellite-v9',          // 4
+    'mapbox://styles/mapbox/satellite-streets-v12', // 5
+    'mapbox://styles/mapbox/navigation-day-v1',     // 6
+    'mapbox://styles/mapbox/navigation-night-v1']   // 7
 
 export let style = 5;
 import { onMount } from 'svelte';
