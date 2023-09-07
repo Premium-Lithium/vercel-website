@@ -23,11 +23,9 @@
 	import { SolutionModel } from './solutionModel';
 
     let map;
-    let mapboxSearchResult = { latitude: 53.95924825020342, longitude: -1.0772513524147558 };
-    let monthlySolarGenerationValues = [];
     let loadingSolarValues = false;
     let installationDate = new Date().toISOString().slice(0, 7);
-	  let carouselEnergyStage;
+	let carouselEnergyStage;
 
     let carouselSolar;
     let carouselSavings;
@@ -66,8 +64,6 @@
       solarLoss: ssp.number(15),
       solarAngle: ssp.number(45),
       solarAzimuth: ssp.number(0),
-      monthlySolarGenerationValues: ssp.array(),
-      mapboxSearchParams: ssp.object({"latitude": 53.95924825020342, "longitude":-1.0772513524147558}),
       installationDate: ssp.string(),
       // savings info
       offPeakTariff: ssp.boolean(false),
@@ -104,62 +100,55 @@
 </script>
 
 {#if browser}
-    <div class="progressHeader">
-        <ProgressHeader
-            titles={['Energy', 'Solar', 'Savings', 'Investment']}
-            bind:selectedIndex={$stage}
-        />
-    </div>
-
-    <div class="modelView">
-        <ModelVisualisation
-            bind:model
-            bind:solarVisible
-            bind:batteryVisible
-            bind:evVisible
-        />
-    </div>
-
-    {#if $stage === 0}
-        <div class="questions">
-            <Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
-                <EnergyStage bind:queryParams={$allQueryParameters} />
-            </Carousel>
-        </div>
-    {:else if $stage === 1}
-        <div class="questions">
-            <Carousel bind:this={carouselEnergyStage}>
-                <div>
-                    <SolarQuestions bind:queryParams={$allQueryParameters} />
-                </div>
-                <div class="map-view">
-                    <Map search={true} style="5" bind:map bind:searchResult={mapboxSearchResult} />
-            <SolarPanelEstimator bind:map/>
-                </div>
-                <div>
-                    <SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
-                </div>
-            </Carousel>
-        </div>
-    {:else if $stage === 2}
-        {#key $allQueryParameters}
-            <!-- Todo make better looking -->
-            <div class="questions">
-                <Carousel bind:this={carouselSavings}>
-                    <SavingsScreen />
-                </Carousel>
-            </div>
-        {/key}
-    {:else if $stage === 3}
-        {#key $allQueryParameters}
-            <div class="questions">
-                <!-- Todo make less bad looking -->
-                <Carousel bind:this={carouselInvestments}>
-                    <Investments {solution} />
-                </Carousel>
-            </div>
-        {/key}
-    {/if}
+		<div class="progressHeader">
+			<ProgressHeader
+				titles={['Energy', 'Solar', 'Savings', 'Investment']}
+				bind:selectedIndex={$stage}
+			/>
+		</div>
+		<div class="modelView">
+			<Solution3DView />
+		</div>
+		{#if $stage === 0}
+		<div class="questions">
+			<Carousel bind:this={carouselEnergyStage} bind:currentIndex={carouselStages.energy}>
+				<EnergyStage bind:queryParams={$allQueryParameters} />
+			</Carousel>
+		</div>
+		{:else if $stage === 1}
+		<div class="questions">
+			<Carousel bind:this={carouselEnergyStage}>
+				<div>
+					<SolarQuestions bind:queryParams={$allQueryParameters} />
+				</div>
+				<div class="map-view">
+					<Map search={true} style="5" bind:map/>
+          			<SolarPanelEstimator bind:map/>
+				</div>
+				<div>
+					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
+				</div>
+			</Carousel>
+		</div>
+		{:else if $stage === 2}
+			{#key $allQueryParameters}
+				<!-- Todo make better looking -->
+				<div class="questions">
+					<Carousel bind:this={carouselSavings}>
+						<SavingsScreen />
+					</Carousel>
+				</div>
+			{/key}
+		{:else if $stage === 3}
+			{#key $allQueryParameters}
+			<div class="questions">
+				<!-- Todo make less bad looking -->
+				<Carousel bind:this={carouselInvestments}>
+					<Investments {solution} />
+				</Carousel>
+			</div>
+			{/key}
+		{/if}
 {/if}
 
 <div class="savings">

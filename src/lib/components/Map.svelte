@@ -4,11 +4,15 @@
 </svelte:head>
 
 <script>
+
+import { latLongOfMarker, markersOnMap, colourOfMapMarker } from '$lib/MapStores.js';
+
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 export let search = true;
 export let map = undefined;
-export let searchResult = {'latitude': undefined, 'longitude': undefined};
+$latLongOfMarker = {"latitude": null, "longitude": null};
+$markersOnMap = [];
 const styles = [
     'mapbox://styles/mapbox/streets-v12',           // 0
     'mapbox://styles/mapbox/outdoors-v12',          // 1
@@ -36,13 +40,27 @@ onMount(() => {
             const search = new MapboxGeocoder({
                 accessToken: mapboxGlAccessToken,
                 mapboxgl: mapboxgl,
+                marker: false,
                 flyTo: {
                     speed: 2.5,
                 },
+                collapsed: true,
             });
             search.on('result', (e) => {
-                searchResult.latitude = e.result.geometry.coordinates[1];
-                searchResult.longitude = e.result.geometry.coordinates[0];
+                $markersOnMap.forEach((m) => m.remove());
+                $latLongOfMarker.latitude = e.result.geometry.coordinates[1];
+                $latLongOfMarker.longitude = e.result.geometry.coordinates[0];
+                const marker = new mapboxgl.Marker({draggable: true, color: $colourOfMapMarker})
+                .setLngLat([$latLongOfMarker.longitude, $latLongOfMarker.latitude])
+                .addTo(map);
+                $markersOnMap = [marker];
+                marker.on('dragend', () => {
+                    let lngLat = marker.getLngLat();
+                    $latLongOfMarker.latitude = lngLat.lat;
+                    $latLongOfMarker.longitude = lngLat.lng;
+                    $markersOnMap.forEach((m) => {if(m != marker) m.remove()});
+                    $markersOnMap = [marker];
+                })
             })
             map.addControl(
                 search,
