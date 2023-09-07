@@ -15,6 +15,7 @@
     export let batteryVisible;
     export let evVisible;
 
+
     let scenePanel;
     let canvasInner;
 
@@ -41,32 +42,7 @@
 <div class="canvas-container" bind:this={scenePanel}>
     <div class="canvas-inner" bind:this={canvasInner}>
         <Canvas>
-            <Theatre>
-                <SheetObject
-                  key="Camera"
-                  let:Sync
-                >
-                    <T.OrthographicCamera
-                      makeDefault
-                      manualCamera
-                    >
-                        <Sync
-                            zoom
-                            position
-                            rotation
-                        />
-                    </T.OrthographicCamera>
-                    <Scene
-                        canvasSize={canvasSize}
-                        bind:model={model}
-                        bind:camera={camera}
-                        bind:solarVisible
-                        bind:batteryVisible
-                        bind:evVisible
-                    >
-                    </Scene>
-                </SheetObject>
-            </Theatre>
+            <Scene model={model} canvasSize={canvasSize} bind:camera={camera}/>
         </Canvas>
     </div>
 </div>

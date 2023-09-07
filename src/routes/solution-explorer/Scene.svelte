@@ -9,34 +9,33 @@
     export let canvasSize;
     export let camera;
 
-    export let batteryVisible = false;
-    export let evVisible = false;
-    export let solarVisible = false;
-    export let groundSolarVisible = false;
+    export let batteryVisible = true;
+    export let evVisible = true;
+    export let solarVisible = true;
+    export let groundSolarVisible = true;
 
     let batteryModel;
     const plBlue = "#28AAE2";
 
-    // $: pos = model.camPos;
-    // temp
-
-    let rotation = 0;
+    let rotation = [ 0, 0, 0 ];
     const rotSpeed = 0.2;
     useFrame((state, delta) => {
-        rotation += delta * rotSpeed;
+        rotation[1] += delta * rotSpeed;
         // console.log(model.camPos);
     })
 </script>
 
 <T.FogExp2 attach="fog" args={['white', 0.015]} />
 
+
 <T.OrthographicCamera
     zoom={canvasSize * camZoomToSizeRatio}
-    position={[0, 6, 10]}
+    position={[10, 6, 10]}
     on:create={({ ref }) => {
-        ref.lookAt(0, 1, 0)
+        ref.lookAt(0, 2, 0)
     }}
     bind:ref={camera}
+    makeDefault
 ></T.OrthographicCamera>
 
 <!-- todo: move these into a json configuration file -->
@@ -47,44 +46,44 @@
 <T.AmbientLight intensity={0.5} />
 
 <!-- Stage -->
-<T.Mesh geometry={model.stage} castShadow receiveShadow>
+<T.Mesh rotation={rotation} geometry={model.stage} castShadow receiveShadow>
     <T.MeshStandardMaterial visible={true} color="white" wireframe={false}/>
 </T.Mesh>
 
 <!-- Roof -->
-<T.Mesh geometry={model.roof} castShadow receiveShadow bind:ref={batteryModel}>
+<T.Mesh rotation={rotation} geometry={model.roof} castShadow receiveShadow bind:ref={batteryModel}>
     <T.MeshStandardMaterial color="white" wireframe={false} visible={true}/>
 </T.Mesh>
 
 <!-- Battery -->
-<T.Mesh geometry={model.battery} castShadow receiveShadow>
+<T.Mesh rotation={rotation} geometry={model.battery} castShadow receiveShadow>
     <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={batteryVisible}/>
 </T.Mesh>
 
 <!-- <CustomRenderer selectedMesh={batteryModel} /> -->
 
 <!-- Inverter -->
-<T.Mesh geometry={model.inverter} castShadow receiveShadow>
+<T.Mesh rotation={rotation} geometry={model.inverter} castShadow receiveShadow>
     <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={true}/>
 </T.Mesh>
 
 <!-- Solar Panel on roof -->
-<T.Mesh geometry={model.solar} castShadow receiveShadow>
+<T.Mesh rotation={rotation} geometry={model.solar} castShadow receiveShadow>
     <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={solarVisible}/>
 </T.Mesh>
 
 <!-- outside wall -->
-<T.Mesh geometry={model.outsideWall} castShadow receiveShadow>
+<T.Mesh rotation={rotation} geometry={model.outsideWall} castShadow receiveShadow>
     <T.MeshStandardMaterial color="white" wireframe={false} visible={true}/>
 </T.Mesh>
 
 <!-- ev charger -->
-<T.Mesh geometry={model.evCharger} castShadow receiveShadow>
+<T.Mesh rotation={rotation} geometry={model.evCharger} castShadow receiveShadow>
     <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={evVisible}/>
 </T.Mesh>
 
 <!-- ev charger -->
-<T.Mesh geometry={model.groundSolar} castShadow receiveShadow>
+<T.Mesh rotation={rotation} geometry={model.groundSolar} castShadow receiveShadow>
     <T.MeshStandardMaterial color={plBlue} wireframe={false} visible={groundSolarVisible}/>
 </T.Mesh>
 
