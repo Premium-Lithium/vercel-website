@@ -11,7 +11,7 @@
     import nextSlide from '$lib/components/Carousel.svelte';
 
     import ModelVisualisation from './ModelVisualisation.svelte';
-	  import ProgressHeader from './ProgressHeader.svelte';
+	import ProgressHeader from './ProgressHeader.svelte';
     import EnergyStage from './EnergyStage.svelte';
     import Investments from './Investments.svelte';
     import SavingsScreen from './SavingsScreen.svelte';
@@ -110,6 +110,7 @@
 				bind:selectedIndex={$stage}
 			/>
 		</div>
+	<body>
 		{#if $stage === 3}
 			{#key $allQueryParameters}
 					<Investments {solution} />
@@ -145,27 +146,19 @@
 				</div>
 			</Carousel>
 			</div>
-			{:else if $stage === 2}
-				{#key $allQueryParameters}
-					<!-- Todo make better looking -->
-					<div class="questions">
-						<Carousel bind:this={carouselSavings}>
-							<SavingsScreen />
-						</Carousel>
-					</div>
-				{/key}
 		{/if}
 	{/if}
+</body>
 {/if}
 {#if $stage != 3}
 	<div class="savings">
-		<ExpandBar/>
+		<SavingsBar params={allQueryParameters}/>
 	</div>
 {/if}
+
 	<div class="footer">
 	<NavButtons bind:currentPage={$stage} lastPage={3} />
 	</div>
-</body>
 
 <style>
     .progressHeader {
