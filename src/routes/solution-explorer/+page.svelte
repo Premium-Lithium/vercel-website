@@ -9,8 +9,8 @@
     import Loading from '$lib/components/Loading.svelte';
     import Carousel from '$lib/components/Carousel.svelte';
     import nextSlide from '$lib/components/Carousel.svelte';
-  
-    import Solution3DView from './Solution3DView.svelte';
+
+    import ModelVisualisation from './ModelVisualisation.svelte';
 	  import ProgressHeader from './ProgressHeader.svelte';
     import EnergyStage from './EnergyStage.svelte';
     import Investments from './Investments.svelte';
@@ -20,6 +20,7 @@
     import InstallationDate  from "./InstallationDate.svelte";
     import SavingsBar from "./SavingsExpandBar.svelte";
 	  import SolarPanelEstimator from "./SolarPanelEstimator.svelte";
+	import { SolutionModel } from './solutionModel';
 
     let map;
     let loadingSolarValues = false;
@@ -32,6 +33,12 @@
     let carouselStages = [{ energy: 0 }, { solar: 0 }, { savings: 0 }, { investments: 0 }];
     let termsOfServiceAccepted;
     const stage = queryParam('stage', ssp.number());
+
+    let model = new SolutionModel();
+    // let camera = null;
+    let solarVisible = true;
+    let batteryVisible = true;
+    let evVisible = true;
 
   const allQueryParameters = queryParameters({
       // energy stage params
@@ -66,8 +73,8 @@
       solarTariffRate: ssp.number(),
       solarTariffSEG: ssp.boolean(),  // [true means seg tariff, false means fit
       installMonth: ssp.string()
-
   });
+
   // prevent negative pages
   onMount(() => {
       if ($stage == null) {
@@ -90,8 +97,7 @@
       postcode: '',
       addOns: { ups: true, evCharger: false, smartBattery: false, birdGuard: false }
     };
-
-</script>  
+</script>
 
 {#if browser}
 		<div class="progressHeader">
@@ -120,7 +126,7 @@
           			<SolarPanelEstimator bind:map/>
 				</div>
 				<div>
-					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues bind:map/>
+					<SolarApi bind:allQueryParameters={$allQueryParameters} bind:loadingSolarValues />
 				</div>
 			</Carousel>
 		</div>
@@ -144,12 +150,13 @@
 			{/key}
 		{/if}
 {/if}
-	<div class="savings">
-    	<SavingsBar params={allQueryParameters}/>
-	</div>
-	<div class="footer">
-		<NavButtons bind:currentPage={$stage} lastPage={6} />
-	</div>
+
+<div class="savings">
+    <SavingsBar params={allQueryParameters}/>
+</div>
+<div class="footer">
+    <NavButtons bind:currentPage={$stage} lastPage={6} />
+</div>
 
 <style>
     .progressHeader {
