@@ -25,7 +25,7 @@
 </script>
 
 <body>
-    <h1> When do you want this installed </h1>
+    <p> When do you want this installed </p>
         <label for="month">Installation Month:</label>
         <select bind:value={installationDate} name="month" id="month">
         {#each installationMonths as month}

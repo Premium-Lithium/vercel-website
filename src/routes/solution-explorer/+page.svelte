@@ -137,12 +137,8 @@
 				{/key}
 			{:else if $stage === 3}
 				{#key $allQueryParameters}
-				<div class="questions">
 				<!-- Todo make less bad looking -->
-				<Carousel bind:this={carouselInvestments}>
-					<Investments {solution} />
-				</Carousel>
-			</div>
+				<Investments {solution} />
 			{/key}
 		{/if}
 	{/if}
