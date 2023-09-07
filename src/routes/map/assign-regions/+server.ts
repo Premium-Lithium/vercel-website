@@ -25,7 +25,7 @@ export async function POST ({request}){
             await syncJobOwnersToPipedrive(dealInfo.meta.id, installationManagerDetails[polygonPointIsIn].id);
             return json({message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.`}, {status: 200});
         }
-        return json({message: `Deal with id ${dealInfo.meta.id} not inside a defined region.`}, {status: 202});
+        return json({message: `Deal with id ${dealInfo.meta.id} not inside a defined region.`}, {status: 405});
     } catch (e) {
         try {
             let latlon = (await fetchLatlonFromPostcodesPostcodes([dealInfo.current['5849f39e5668de78c3342074d94a7ed5910e3258']]))[0];
