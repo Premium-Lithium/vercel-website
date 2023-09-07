@@ -36,7 +36,7 @@
 	<div class="sc-kdBSHD iYHVXt">
 		<div class="sc-koXPp gZGbcL">
 			<div class="sc-eeDRCY dTIjiu">
-				<form action="#" name="Academy Registration" on:submit={handleSubmit} autocomplete="off">
+				<form action="#" name="Academy Registration" on:submit={handleSubmit} autocomplete="off" autocorrect="off" autosave="off">
 					<div class="sc-jlZhew dHgxMY">
 						<label
 							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
@@ -52,7 +52,7 @@
 								aria-required="true"
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
-                                autocomplete="one-time-code"
+                                autocomplete="new-password"
                                 bind:value={deal.name}
                                 required
 							/>
@@ -74,7 +74,7 @@
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
 								bind:value={deal.email}
-                                autocomplete="one-time-code"
+                                autocomplete="off"
                                 required
 							/>
 						</div>
@@ -95,7 +95,7 @@
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
 								bind:value={deal.phone}
-                                autocomplete="one-time-code"
+                                autocomplete="nope"
                                 required
 							/>
 						</div>
@@ -116,7 +116,7 @@
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_error V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_helpText"
 								class="sc-aXZVg jXABNp"
 								bind:value={deal.academyName}
-                                autocomplete="one-time-code"
+                                autocomplete="nah"
                                 required
 							/>
 						</div>
@@ -137,7 +137,7 @@
 								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
 								class="sc-aXZVg jXABNp"
 								bind:value={deal.companyName}
-                                autocomplete="one-time-code"
+                                autocomplete="still-no"
                                 required
 							/>
 						</div>
@@ -159,7 +159,7 @@
                                 aria-expanded="false"
 								class="sc-aXZVg jXABNp"
                                 bind:value={deal.companyAddress}
-                                autocomplete="one-time-code"
+                                autocomplete="yes-its-still-no"
                                 required
                             />
 						</div>
