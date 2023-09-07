@@ -25,10 +25,10 @@
     });
 
     let refineOpen;
-    $: refineOpen = false;
+    refineOpen = false;
 
     let expandOpen;
-    $: expandOpen = false;
+    expandOpen = false;
 
     let barHeight;
     
