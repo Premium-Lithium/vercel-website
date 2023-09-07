@@ -1,16 +1,16 @@
-
+<script lang="ts">
     import Carousel from "$lib/components/Carousel.svelte";
-    import BatteryChargingOutline from "svelte-material-icons/BatteryChargingOutline.svelte"
-    import SolarPowerVariantOutline from "svelte-material-icons/SolarPowerVariantOutline.svelte"
-    import EvStation from "svelte-material-icons/EvStation.svelte"
-    import HomeLightningBolt from "svelte-material-icons/HomeLightningBolt.svelte"
-    import AccountQuestion from "svelte-material-icons/AccountQuestion.svelte"
-	  import Accordian from "../../lib/components/Accordian.svelte";
+    import BatteryChargingOutline from "svelte-material-icons/BatteryChargingOutline.svelte";
+    import SolarPowerVariantOutline from "svelte-material-icons/SolarPowerVariantOutline.svelte";
+    import EvStation from "svelte-material-icons/EvStation.svelte";
+    import HomeLightningBolt from "svelte-material-icons/HomeLightningBolt.svelte";
+    import AccountQuestion from "svelte-material-icons/AccountQuestion.svelte";
+	import Accordian from "../../lib/components/Accordian.svelte";
 
-    import BatteryCharging10 from "svelte-material-icons/BatteryCharging10.svelte"
-    import BatteryCharging50 from "svelte-material-icons/BatteryCharging50.svelte"
-    import BatteryCharging90 from "svelte-material-icons/BatteryCharging90.svelte"
-    import BatteryUnknown from "svelte-material-icons/BatteryUnknown.svelte"
+    import BatteryCharging10 from "svelte-material-icons/BatteryCharging10.svelte";
+    import BatteryCharging50 from "svelte-material-icons/BatteryCharging50.svelte";
+    import BatteryCharging90 from "svelte-material-icons/BatteryCharging90.svelte";
+    import BatteryUnknown from "svelte-material-icons/BatteryUnknown.svelte";
 
     import { onMount } from "svelte";
 
