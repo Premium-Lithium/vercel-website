@@ -32,7 +32,7 @@ export default async function quoteCustomer(dealId) {
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
 
-    const templatePath = path.join(process.cwd(), 'customer_quote_template.mjml');
+    const templatePath = path.join('/customer_quote_template.mjml');
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
     const emailData = {
@@ -124,8 +124,10 @@ function extractPLContactFrom(customerData) {
     const bdm = customerData.user_id;
 
     const plContactPerson = {
-        name: bdm.name.split(" ")[0],
-        email: bdm.email
+        // name: bdm.name.split(" ")[0],
+        // email: bdm.email
+        name: "jasmine",
+        email: 'jasmine.potts@premiumlithium.com'
     };
 
     return plContactPerson;
@@ -162,7 +164,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         bccRecipients: [
             {
                 emailAddress: {
-                    address: "lewis.bowes@premiumlithium.com",
+                    address: "jasmine.potts@premiumlithium.com",
                 }
             }
         ]
