@@ -32,7 +32,7 @@ export default async function quoteCustomer(dealId) {
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
 
-    const templatePath = path.join('/customer_quote_template.mjml');
+    const templatePath = path.join(process.cwd(),'/customer_quote_template.mjml');
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
     const emailData = {
