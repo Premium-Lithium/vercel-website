@@ -33,6 +33,8 @@ export default async function quoteCustomer(dealId) {
     };
 
     const templatePath = path.join('/customer_quote_template.mjml');
+    console.log(process.cwd());
+    console.log(templatePath);
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
     const emailData = {
