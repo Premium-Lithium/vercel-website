@@ -14,7 +14,7 @@
 <div class="container">
     <!-- TODO: add search bar to filtering system -->
     {#if open}
-    <div class="filter-container" transition:slide={{axis:'x'}}>
+    <div class="filter-container" transition:slide|global={{axis:'x'}}>
         {#each possibleFilters as filter}  
         <div class="filter">
             <label>
