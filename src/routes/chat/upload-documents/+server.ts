@@ -5,7 +5,7 @@ import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from "$env/static/publi
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import {json} from '@sveltejs/kit';
 
-function uploadDocument(text) {
+async function uploadDocument(text) {
     const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
     let sections = text.split('---');
