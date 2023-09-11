@@ -86,18 +86,16 @@ async function getCustomerInfo(dealId) {
 
 function extractEmailFrom(customerData) {
     const emails = customerData.person_id.email;
-    console.log(customerData.person_id)
-    console.log("email!!!!!!!!!!!!!!!!!!!!!!!!!!!!", emails[0].label, emails[0].value);
 
     // Try to find a home email first
-    const homeEmail = emails.find(email => email.label === 'Home');
+    const homeEmail = emails.find(email => email.label === 'home');
     if(homeEmail !== undefined){
         console.log("homeEmail!!!!!!!!!!!")
         return homeEmail[0].value;
     }
     // Fall back to work email if home email isn't found
     console.log("No home email found, searching for work email...");
-    const workEmail = emails.find(email => email.label === 'Work');
+    const workEmail = emails.find(email => email.label === 'work');
     if(workEmail !== undefined){
         return workEmail[0].value;
     }
