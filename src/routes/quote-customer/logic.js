@@ -129,7 +129,7 @@ function extractSolutionFrom(customerData) {
 function extractPLContactFrom(customerData) {
     // todo: Could there ever be a case where the deal isn't actually linked to someone from premium lithium?
     const bdm = customerData.user_id;
-
+    console.log(bdm);
     const plContactPerson = {
         name: bdm.name.split(" ")[0],
         email: bdm.email,
