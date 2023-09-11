@@ -258,6 +258,7 @@ const agentExecutor = AgentExecutor.fromAgentAndTools(
       verbose: true,
       memory: conversationMemory,
       maxIterations: 6,
+      handleParsingErrors: "Try again, make sure the formatting is correct."
     }
 );
 
