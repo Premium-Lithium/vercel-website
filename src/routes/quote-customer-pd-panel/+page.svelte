@@ -22,9 +22,9 @@
         const response = await fetch('/quote-customer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: {
-               [deal_id: dealId]
-            }
+            body: JSON.stringify({
+                deal_id: dealId
+            })
         });
         if (response.status === 200) {
             toastr.success('Quote sent successfully!', '', {
