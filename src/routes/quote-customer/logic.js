@@ -23,7 +23,7 @@ export default async function quoteCustomer(dealId) {
     }
 
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
-
+    console.log("plContact", customer.pl_contact)
     const emailContentData = {
         pl_bdm_contact_name: customer.pl_contact.name,
         price_calculator_link: priceCalcLink,
