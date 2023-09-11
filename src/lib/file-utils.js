@@ -5,9 +5,7 @@ async function populateEmailTemplateWith(data, mjmlTemplateRelPath, importMetaUr
     const response = await fetch(mjmlTemplateRelPath);
     try {
         const mjmlString = await response.text();
-        console.log(mjmlString)
         const { html } = mjml2html(mjmlString);
-        console.log(mjmlString)
         nunjucks.configure({ autoescape: true });
         const renderedEmail = nunjucks.renderString(html, data);
 
