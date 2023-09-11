@@ -8,7 +8,6 @@ async function populateEmailTemplateWith(data, mjmlTemplateRelPath, importMetaUr
         const { html } = await mjml2html(mjmlString);
         nunjucks.configure({ autoescape: true });
         const renderedEmail = nunjucks.renderString(html, data);
-
         return renderedEmail;
     } catch (err) {
         const message = "Error processing the email template";
