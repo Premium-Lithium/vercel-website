@@ -10,8 +10,7 @@
 
     onMount(async () => {
         dealId = $page.url.searchParams.get('selectedIds');
-        
-
+        console.log(dealId);
         sdk = await new AppExtensionsSDK().initialize();
         await sdk.execute('resize', { height: 100 });
     });
