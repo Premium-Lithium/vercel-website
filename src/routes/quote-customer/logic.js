@@ -85,7 +85,7 @@ async function getCustomerInfo(dealId) {
 
 
 function extractEmailFrom(customerData) {
-    const emails = customerData.person_id.email;
+    const emails = customerData.person_id.email.DealPersonDataEmail;
     console.log(customerData.person_id)
     console.log(emails);
 
