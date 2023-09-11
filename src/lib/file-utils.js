@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 
 
 async function populateEmailTemplateWith(data, mjmlTemplateRelPath, importMetaUrl) {
-    const templateFilePath = getRelativeFilePath(mjmlTemplateRelPath, importMetaUrl);
+    const templateFilePath = mjmlTemplateRelPath;
 
     try {
         const mjmlString = await fs.readFile(templateFilePath, 'utf8');
