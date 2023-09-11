@@ -261,7 +261,7 @@ const formatInstructions = (
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take, should be one of [${toolNames}, None] ** If None, you must provide a Final Answer **
+Action: the action to take, must be one of [${toolNames}, None] ** If None, you must provide a Final Answer **
 Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Input/Observation can repeat N times.)
