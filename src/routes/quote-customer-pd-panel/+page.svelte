@@ -17,7 +17,7 @@
     });
 
     async function sendQuoteEmail() {
-        const dealId = $page.url.split('/').(-1);
+        const dealId = $page.url.toString().split('/').at(-1);
 
         const response = await fetch('/quote-customer', {
             method: 'POST',
