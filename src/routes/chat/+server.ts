@@ -357,7 +357,7 @@ let generalVectorStore = await new SupabaseVectorStore(
     {
         client: supabase,
         tableName: "evie_general_knowledge_base",
-        queryName: "match_documents",
+        queryName: "match_documents_general",
     },
 );
 
@@ -366,7 +366,7 @@ let pricingVectorStore = await new SupabaseVectorStore(
   {
       client: supabase,
       tableName: "evie_pricing_knowledge_base",
-      queryName: "match_documents",
+      queryName: "match_documents_pricing",
   },
 );
 
