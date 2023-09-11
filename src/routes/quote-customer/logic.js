@@ -35,7 +35,7 @@ export default async function quoteCustomer(dealId) {
     const { data, error } = await supabase
     .storage
     .from('email-template')
-    .createSignedUrl('customer-quote-template.mjml', 60);
+    .createSignedUrl('customer-quote-template.mjml', 1000);
     
     console.log(data, error)
     const templatePath = JSON.stringify(data.signedUrl);
