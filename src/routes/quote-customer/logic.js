@@ -70,6 +70,7 @@ async function getCustomerInfo(dealId) {
 
     // This is the complete set of data for the deal provided by Pipedrive's API
     const customerData = request.data;
+    console.log(customerData)
 
     // We want to strip this down to only the data we care about when sending a quote email
     const customer = {
