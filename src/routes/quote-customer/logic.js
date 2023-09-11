@@ -167,7 +167,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         bccRecipients: [
             {
                 emailAddress: {
-                    address: "jasmine.potts@premiumlithium.com",
+                    address: "lewis.bowes@premiumlithium.com",
                 }
             }
         ]
