@@ -113,6 +113,7 @@ function extractEmailFrom(customerData) {
 
 
 function extractSolutionFrom(customerData) {
+    console.log("getting solution")
     const solution = {
         batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
         evCharger: {
