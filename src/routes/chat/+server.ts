@@ -35,8 +35,7 @@ Save up to 55% with a preorder on all products with a 5% discount per month from
 
 The price is not just for the battery but for a complete turnkey solution that includes everything you need to manage and reduce your energy costs. This solution includes full case management and application to the National Grid, your chosen Premium Lithium Smart Home Battery, a grade-A inverter, all wiring and mounting equipment, free delivery and installation by our team of experts as well as onboarding and off-site management. All hardware also comes with 10 years’ warranty for full peace of mind. 
 
-￼
-+ may already have solar panels, significant savings can be made with just a Smart Home Battery on its own. If you are considering solar panels for your home, then a Premium Lithium Smart Home Battery solution will allow you to store any excess solar energy for use after the sun sets. 
+If you already have solar panels, significant savings can be made with just a Smart Home Battery on its own. If you are considering solar panels for your home, then a Premium Lithium Smart Home Battery solution will allow you to store any excess solar energy for use after the sun sets. 
 
 All Smart Home Battery solutions that are purchased include free delivery and installation. 
 
@@ -68,25 +67,16 @@ You should choose Premium Lithium if you want to Expand your capacity over time 
 --- 
 
 Batteries we offer: Powerpod 5kwh, Powerpod 10kwh, Powerpanel 9.5kwh, Powerpod 15kwh, Powerplant 20kwh, Powerplant 30kwh, Powerplant 40kwh,  Powerplant 50kwh.
-
 Powerpod 5kWh Smart Home Battery, Regular price £5,995 (ex. VAT), The 5kWh Powerpod is our small but powerful entry-level home battery. Don’t be fooled by its compact size - it offers a complete all-in-one solution to the home and solar energy storage needs of smaller properties and allows you to save on energy costs by charging off-peak. Inverter and installation are included in the price for complete peace of mind. Product power: 5kWh, Nominal voltage: 51.2V, Nominal capacity: 100Ah 
-
 Powerpod 10kWh Smart Home Battery, Regular price £9,995 (ex .VAT), The 10kWh Powerpod is a small but powerful home battery designed for small to medium homes. Don’t be fooled by its compact size - it offers a complete all-in-one solution to the home and solar energy storage needs and allows you to save on energy costs by charging off-peak. Inverter and installation are included in the price for complete peace of mind. Product power: 10kWh, Nominal voltage: 51.2V, Nominal capacity: 200Ah 
-
 Powerpanel 9.5kWh Smart Home Battery, Regular price £9,995 (ex .VAT), The 9.5kWh Powerpanel is a small but powerful home battery designed for small to medium homes. Don’t be fooled by its compact size - it offers a complete all-in-one solution to the home and solar energy storage needs and allows you to save on energy costs by charging off-peak. Inverter and installation are included in the price for complete peace of mind. Product power: 9.5kWh, Nominal voltage: 51.2V, Nominal capacity: 185Ah 
-
 Powerpod 15kWh Smart Home Battery, Regular price £13,990 (ex .VAT), The 15kWh Powerpod is a powerful wall-mounted LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 15kWh, Nominal voltage: 51.2V, Nominal capacity: 300Ah 
-
 Powerplant 20kWh Smart Home Battery, Regular price £17,985 (ex .VAT), The 20kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 20kWh, Nominal voltage: 51.2V, Nominal capacity: 400Ah 
-
 Powerplant 30kWh Smart Home Battery, Regular price £25,975 (ex .VAT), The 30kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 30kWh, Nominal voltage: 51.2V, Nominal capacity: 600Ah 
-
 Powerplant 40kWh Smart Home Battery, Regular price £32,970 (ex .VAT), The 40kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 40kWh, Nominal voltage: 51.2V, Nominal capacity: 800Ah 
-
 Powerplant 50kWh Smart Home Battery, Regular price £39,965 (ex .VAT), The 50kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 50kWh, Nominal voltage: 51.2V, Nominal capacity: 1000Ah 
 
 `
-
 uploadDocument(text);
 
 async function uploadDocument(text) {
