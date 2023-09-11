@@ -86,7 +86,7 @@ async function getCustomerInfo(dealId) {
 
 function extractEmailFrom(customerData) {
     const emails = customerData.person_id.email;
-    // console.log(customerData.person_id)
+    console.log(customerData.person_id)
     console.log("email!!!!!!!!!!!!!!!!!!!!!!!!!!!!", emails);
 
     // Try to find a home email first
