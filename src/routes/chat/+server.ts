@@ -27,16 +27,7 @@ import { ChainTool } from 'langchain/tools';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 
-var text = `
-
-Save up to 55% with a preorder on all products with a 5% discount per month from now, capped at 55% when installing in 12 months from now. e.g - if it's currently January, a February installation would have a 5% discount, if it's currently March, a July installation would have a 20% discount.  
-
- 
- 
-
----  
-
- 
+var generalKnowledgeBase = ` 
  
 
 The price is not just for the battery but for a complete turnkey solution that includes everything you need to manage and reduce your energy costs. This solution includes full case management and application to the National Grid, your chosen Premium Lithium Smart Home Battery, a grade-A inverter, all wiring and mounting equipment, free delivery and installation by our team of experts as well as onboarding and off-site management. All hardware also comes with 10 years’ warranty for full peace of mind.  
@@ -201,54 +192,43 @@ A Battery Management System (BMS) is integral to the health, efficiency, and saf
 
 Batteries we offer: Powerpod 5kwh, Powerpod 10kwh, Powerpanel 9.5kwh, Powerpod 15kwh, Powerplant 20kwh, Powerplant 30kwh, Powerplant 40kwh, Powerplant 50kwh. 
 
- 
- 
+`
 
-Powerpod 5kWh Smart Home Battery, Regular price £5,995 (ex. VAT), The 5kWh Powerpod is our small but powerful entry-level home battery. Don’t be fooled by its compact size - it offers a complete all-in-one solution to the home and solar energy storage needs of smaller properties and allows you to save on energy costs by charging off-peak. Inverter and installation are included in the price for complete peace of mind. Product power: 5kWh, Nominal voltage: 51.2V, Nominal capacity: 100Ah  
+let pricingKnowledgeBase = `
 
- 
- 
+Preorders: Save up to 55% with a preorder on all products with a 5% discount per month from now, capped at 55% when installing in 12 months from now. e.g - if it's currently January, a February installation would have a 5% discount, if it's currently March, a July installation would have a 20% discount. 
+The pre-ordering model has proved to be an effective approach for both Premium Lithium and our customers. Its success is evident from our customer feedback on Trustpilot which you can see here https://uk.trustpilot.com/review/premiumlithium.com. By pooling payments from multiple pre-orders, we are able to place larger orders with our manufacturing partners. This strategy leads to significant savings on purchasing, shipping, and installation planning.  
+The payment for pre-orders is not insurance-backed. While insurance-backed payments offer certain security, they introduce additional complexities and costs. These costs would inevitably have to be passed onto our customers, which would offset the benefits of our pre-order savings. For additional security, we provide a complimentary credit card payment service. Utilising this service, you can avail full Section 75 payment protection up to £30,000 through your credit card company. It's an effective way to offer our customers peace of mind without the complexities and costs associated with insurance-backed solutions.  
+Premium Lithium give their customers a choice when it comes to their installation. Most installation companies will charge money upfront (sometimes a deposit, sometimes the whole amount) and install whenever equipment is available, often months behind schedule. Premium Lithium work differently. 
+Customers can opt for an installation ASAP, this is typically 4 – 10 weeks depending on whether or not a G99 application is necessary and if it is, the wait times in your local area. (DNOs are regional and have their own processes and wait times). In this instance, the customer pays the list price for their installation, but get attractive MCS standard payment terms: 25% deposit, 35% after survey and report completed, and the remaining 40% after the installation is complete.
+Premium Lithium, as a manufacturer, is also able to offer what it calls pre-order discounts, which give even more attractive and generous discounts to those customers who are able to pay upfront for the system, and chose to defer their installation.
+Currently, we offer two deferment periods, 6 or 12 months. The 6 month deferment period carries a discount of 25%, and the 12 month deferment period carries an extraordinary discount of 50%. Both need to be paid in full to secure the discount.
+This works as Premium Lithium works with key manufacturing partners across the world, but especially in China, where we have to pre-purchase all manufacturing costs and supply costs for materials we do not yet produce, such as solar panels and EV chargers. By pre-ordering, the customer allows Premium Lithium more time to acquire more orders and thus place much larger orders to produce, purchase, and ship equipment back to the UK. The longer the deferment period, the larger the order, and thus the lower the price to Premium Lithium. We think it’s only fair that all of this saving should be passed on the customer, and so that’s exactly what we do. 
 
-Powerpod 10kWh Smart Home Battery, Regular price £9,995 (ex .VAT), The 10kWh Powerpod is a small but powerful home battery designed for small to medium homes. Don’t be fooled by its compact size - it offers a complete all-in-one solution to the home and solar energy storage needs and allows you to save on energy costs by charging off-peak. Inverter and installation are included in the price for complete peace of mind. Product power: 10kWh, Nominal voltage: 51.2V, Nominal capacity: 200Ah  
 
- 
- 
+---
 
-Powerpanel 9.5kWh Smart Home Battery, Regular price £9,995 (ex .VAT), The 9.5kWh Powerpanel is a small but powerful home battery designed for small to medium homes. Don’t be fooled by its compact size - it offers a complete all-in-one solution to the home and solar energy storage needs and allows you to save on energy costs by charging off-peak. Inverter and installation are included in the price for complete peace of mind. Product power: 9.5kWh, Nominal voltage: 51.2V, Nominal capacity: 185Ah  
+Security and Trust in Pre-ordering: Despite our impeccable record and substantial growth, we're cognisant of customers' apprehensions regarding upfront payments. Here's how we ensure peace of mind:
+Company Credibility: Our flawless 5-star Trustpilot reviews and an impressive 3000% company growth within a year are testaments to our dedication and integrity.
+Financial Protection with Section 75: Recognising the concerns some might have due to negative experiences with other companies, we offer the option of credit card payments. This is not just a payment method but a protective measure. Under Section 75 of the Consumer Credit Act, consumers are protected for credit card purchases valued between £100 and £30,000. This means, in the unlikely event of a breach of contract or misrepresentation, your credit card company is jointly liable with the retailer or trader. So, for those pre-ordering with us, this acts as an additional safeguard, ensuring they are covered for any potential discrepancies up to £30,000.
+Conclusion: At Premium Lithium, we believe in passing on the benefits of our efficient business model directly to our customers. With flexible installation schedules, unparalleled discounts, and robust financial protection mechanisms, we're here to make the solar transition smooth, affordable, and worry-free.
 
- 
- 
+---
 
-Powerpod 15kWh Smart Home Battery, Regular price £13,990 (ex .VAT), The 15kWh Powerpod is a powerful wall-mounted LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 15kWh, Nominal voltage: 51.2V, Nominal capacity: 300Ah  
-
- 
- 
-
-Powerplant 20kWh Smart Home Battery, Regular price £17,985 (ex .VAT), The 20kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 20kWh, Nominal voltage: 51.2V, Nominal capacity: 400Ah  
-
- 
- 
-
-Powerplant 30kWh Smart Home Battery, Regular price £25,975 (ex .VAT), The 30kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 30kWh, Nominal voltage: 51.2V, Nominal capacity: 600Ah  
-
- 
- 
-
-Powerplant 40kWh Smart Home Battery, Regular price £32,970 (ex .VAT), The 40kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 40kWh, Nominal voltage: 51.2V, Nominal capacity: 800Ah  
-
- 
- 
-
-Powerplant 50kWh Smart Home Battery, Regular price £39,965 (ex .VAT), The 50kWh Powerplant is a powerful floor-standing LiFePO4 home battery with smart BMS. With installation and inverter included in the price, it offers a complete all-in-one solution to your home and solar energy storage needs. Product power: 50kWh, Nominal voltage: 51.2V, Nominal capacity: 1000Ah  
-
- 
- 
-
+Powerpod 5kWh Smart Home Battery, Regular price £5,995 (ex. VAT)
+Powerpod 10kWh Smart Home Battery, Regular price £9,995 (ex .VAT)
+Powerpanel 9.5kWh Smart Home Battery, Regular price £9,995 (ex .VAT)
+Powerpod 15kWh Smart Home Battery, Regular price £13,990 (ex .VAT)
+Powerplant 20kWh Smart Home Battery, Regular price £17,985 (ex .VAT)
+Powerplant 30kWh Smart Home Battery, Regular price £25,975 (ex .VAT)
+Powerplant 40kWh Smart Home Battery, Regular price £32,970 (ex .VAT)
+Powerplant 50kWh Smart Home Battery, Regular price £39,965 (ex .VAT)
  
 `
-//uploadDocument(text);
+uploadDocument(generalKnowledgeBase, "evie-general-knowledge-base");
+uploadDocument(pricingKnowledgeBase, "evie-pricing-knowledge-base");
 
-async function uploadDocument(text) {
+async function uploadDocument(text, tableName) {
     let sections = text.split('---');
     const textSplitter = new RecursiveCharacterTextSplitter( {
         chunkSize: 500,
@@ -264,7 +244,7 @@ async function uploadDocument(text) {
         new OpenAIEmbeddings(),
         {
             client: supabase,
-            tableName: "documents",
+            tableName: tableName,
             queryName: "match_documents",
         },
     );
@@ -368,31 +348,48 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
 
 // END BOILERPLATE
 
-let model;
-let vectorStore;
+let model
 
 model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 500 });
 
-vectorStore = await new SupabaseVectorStore(
+let generalVectorStore = await new SupabaseVectorStore(
     new OpenAIEmbeddings(),
     {
         client: supabase,
-        tableName: "documents",
+        tableName: "evie-general-knowledge-base",
         queryName: "match_documents",
     },
 );
 
-let vectorStoreChain = VectorDBQAChain.fromLLM(model, vectorStore);
+let pricingVectorStore = await new SupabaseVectorStore(
+  new OpenAIEmbeddings(),
+  {
+      client: supabase,
+      tableName: "evie-pricing-knowledge-base",
+      queryName: "match_documents",
+  },
+);
 
-const qaTool = new ChainTool({
-    name: "premium-lithium-qa",
+let generalVectorStoreChain = VectorDBQAChain.fromLLM(model, generalVectorStore);
+
+let pricingVectorStoreChain = VectorDBQAChain.fromLLM(model, pricingVectorStore);
+
+const generalQATool = new ChainTool({
+    name: "premium-lithium-general-qa",
     description: "Premium Lithium Knowledge Base QA - Useful for answering questions about products we offer, such as batteries, solar panels, inverters and EV chargers",
-    chain: vectorStoreChain,
+    chain: generalVectorStoreChain,
+})
+
+const pricingQATool = new ChainTool({
+  name: "premium-lithium-pricing-qa",
+  description: "Premium Lithium Pricing Knowledge Base QA - Useful for answering questions about prices of our products, and payment queries",
+  chain: pricingVectorStoreChain,
 })
 
 const tools = [
     new Calculator(),
-    qaTool,
+    generalQATool,
+    pricingQATool,
 ];
 const prompt = new CustomPromptTemplate({
     tools: tools,
@@ -427,7 +424,7 @@ const agentExecutor = AgentExecutor.fromAgentAndTools(
       verbose: true,
       memory: conversationMemory,
       maxIterations: 6,
-      handleParsingErrors: "Try again, make sure the formatting is correct."
+      handleParsingErrors: "Are you sure? Try again, making sure the formatting is correct."
     }
 );
 
