@@ -134,7 +134,7 @@ function extractPLContactFrom(customerData) {
     console.log("getting bdm data", bdm);
     const plContactPerson = {
         name: bdm.name.split(" ")[0],
-        email: bdm.email.value,
+        email: bdm.email,
     };
 
     return plContactPerson;
