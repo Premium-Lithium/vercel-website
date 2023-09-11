@@ -17,14 +17,14 @@
     });
 
     async function sendQuoteEmail() {
-        const  dealId = $page.url.searchParams.get('selectedIds');
+        const  dealId = Number($page.url.searchParams.get('selectedIds'));
         console.log(dealId);
         const response = await fetch('/quote-customer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            body: {
                 deal_id: dealId
-            })
+            }
         });
         if (response.status === 200) {
             toastr.success('Quote sent successfully!', '', {
