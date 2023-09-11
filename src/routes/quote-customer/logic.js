@@ -35,10 +35,10 @@ export default async function quoteCustomer(dealId) {
     const { data, error } = await supabase
     .storage
     .from('email-template')
-    .getPublicUrl('customer-quote-template.mjml');
+    .download('customer-quote-template.mjml');
     
     console.log(data, error)
-    const templatePath = data.publicUrl;
+    const templatePath = data;
     
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
