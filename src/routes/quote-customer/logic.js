@@ -38,7 +38,7 @@ export default async function quoteCustomer(dealId) {
     .createSignedUrl('customer-quote-template.mjml', 60);
     
     console.log(data, error)
-    const templatePath = data;
+    const templatePath = data.signedUrl;
     
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
