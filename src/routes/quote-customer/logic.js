@@ -88,16 +88,16 @@ function extractEmailFrom(customerData) {
 
     // Try to find a home email first
     const homeEmail = emails.find(email => email.label === 'Home');
-    if(homeEmail !== undefined)
+    if(homeEmail !== undefined){
         console.log("homeEmail!!!!!!!!!!!")
         return homeEmail.value;
-
+    }
     // Fall back to work email if home email isn't found
     console.log("No home email found, searching for work email...");
     const workEmail = emails.find(email => email.label === 'Work');
-    if(workEmail !== undefined)
+    if(workEmail !== undefined){
         return workEmail.value;
-
+    }
     // Use any other email that's added, if there is one
     console.log("No work email found, searching for any other email...");
     if(emails.length > 0 && emails[0].value !== '') {
