@@ -8,8 +8,9 @@ import { fileURLToPath } from 'url';
 async function populateEmailTemplateWith(data, mjmlTemplateRelPath, importMetaUrl) {
     const templateFilePath = mjmlTemplateRelPath;
     var request = new XMLHttpRequest();
+    const response = await request.open('GET', mjmlTemplateRelPath, true);
     try {
-        const mjmlString = request.open('GET', mjmlTemplateRelPath, true);
+        const mjmlString = await response.text();
         const { html } = mjml2html(mjmlString);
 
         nunjucks.configure({ autoescape: true });
