@@ -17,6 +17,7 @@
 
     async function sendQuoteEmail() {
         const  dealId = $page.url.searchParams.get('selectedIds');
+        console.log(dealId);
         const response = await fetch('/quote-customer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
