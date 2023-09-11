@@ -4,6 +4,7 @@
     import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
+	import { json } from 'stream/consumers';
 
     let sdk;
     let dealId;
@@ -22,7 +23,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: {
-                deal_id: dealId
+               [deal_id: dealId]
             }
         });
         if (response.status === 200) {
