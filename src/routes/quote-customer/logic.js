@@ -114,16 +114,21 @@ function extractEmailFrom(customerData) {
 
 function extractSolutionFrom(customerData) {
     console.log("getting solution")
-    const solution = {
-        batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
-        evCharger: {
-            included: readCustomDealField("EV Charger?", customerData) == "Yes",
-            type: "todo: some charger type"
-        },
-        // todo: Build a complete description of the solution Premium Lithium will provide
-    };
-    console.log(solution);
-    return solution;
+    try{
+        const solution = {
+            batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
+            evCharger: {
+                included: readCustomDealField("EV Charger?", customerData) == "Yes",
+                type: "todo: some charger type"
+            },
+            // todo: Build a complete description of the solution Premium Lithium will provide
+        };
+        console.log(solution);
+        return solution;
+    }catch{
+        const solution = "none"
+        return solution;
+    }
 }
 
 
