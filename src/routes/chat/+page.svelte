@@ -1,16 +1,24 @@
-<script>
+<script lang='ts'>
     import { fly } from 'svelte/transition';
     import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
     let awaitingMessage = false;
-    let previousMessages = [];
-    const initialMessage = `Greet me with a friendly emoji`;
+    let previousMessages: {"role": string, "content": string}[] = [];
+    let  messageToSend = `Greet me with a friendly emoji and ask whether I'm looking for a product or after some help`;
+
+    enum ChatState {
+        ASK_PRODUCT_OR_HELP,
+        ASK_ENERGY_USAGE,
+        ASK_SOLAR_PANELS
+    };
+
+    let currentState = ChatState.ASK_PRODUCT_OR_HELP;
 
     onMount(async () => {
         invalidateAll();
         const response = await fetch('chat/', {
             method: 'POST',
-            body: JSON.stringify({ "prompt" : [{"role": "user", "content": initialMessage}] }),
+            body: JSON.stringify({ "prompt" : [{"role": "user", "content": messageToSend}] }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -19,6 +27,31 @@
         const { message } = await response.json();
         previousMessages = [{"role": "assistant", "content": message.output}];
     });
+
+    function getMessageBasedOnState(input: string){
+        switch(currentState) {
+            case ChatState.ASK_PRODUCT_OR_HELP:
+                if(input.toLowerCase().includes("product")) {
+                    messageToSend = `Send a message like 'Great! Let's find the perfect product for you. How much energy do you use in a year?' with a friendly emoji`;
+                    currentState = ChatState.ASK_ENERGY_USAGE;
+                }
+                else if(input.toLowerCase().includes("help")){
+                     {
+                    messageToSend = `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
+                    currentState = ChatState.ASK_ENERGY_USAGE;
+                }
+                }
+                break;
+            case ChatState.ASK_ENERGY_USAGE:
+                
+                break;
+            case ChatState.ASK_SOLAR_PANELS:
+
+                break;
+        }
+    }
+
+
 </script>
 
 <div class="wrapper">
