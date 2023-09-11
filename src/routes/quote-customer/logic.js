@@ -97,7 +97,7 @@ function extractEmailFrom(customerData) {
     console.log("No home email found, searching for work email...");
     const workEmail = emails.find(email => email.label === 'w ork');
     if(workEmail !== undefined){
-        return workEmail[0].value;
+        return workEmail.value;
     }
     // Use any other email that's added, if there is one
     console.log("No work email found, searching for any other email...");
@@ -121,7 +121,7 @@ function extractSolutionFrom(customerData) {
         },
         // todo: Build a complete description of the solution Premium Lithium will provide
     };
-
+    console.log(solution);
     return solution;
 }
 
