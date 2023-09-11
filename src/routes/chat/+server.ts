@@ -246,7 +246,7 @@ Powerplant 50kWh Smart Home Battery, Regular price £39,965 (ex .VAT), The 50kWh
 
  
 `
-uploadDocument(text);
+//uploadDocument(text);
 
 async function uploadDocument(text) {
     let sections = text.split('---');
