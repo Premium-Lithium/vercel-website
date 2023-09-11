@@ -89,6 +89,7 @@ function extractEmailFrom(customerData) {
     // Try to find a home email first
     const homeEmail = emails.find(email => email.label === 'Home');
     if(homeEmail !== undefined)
+        console.log("homeEmail!!!!!!!!!!!")
         return homeEmail.value;
 
     // Fall back to work email if home email isn't found
