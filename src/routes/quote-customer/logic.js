@@ -67,10 +67,10 @@ async function getCustomerInfo(dealId) {
         console.log(`Error fetching customer data for deal ${dealId} on pipedrive`);
         return null;
     }
-    console.log(request.data)
     // This is the complete set of data for the deal provided by Pipedrive's API
     const customerData = request.data;
     console.log(customerData)
+    console.log(customerData.person_name);
 
     // We want to strip this down to only the data we care about when sending a quote email
     const customer = {
@@ -90,7 +90,7 @@ function extractEmailFrom(customerData) {
     console.log("email!!!!!!!!!!!!!!!!!!!!!!!!!!!!", emails);
 
     // Try to find a home email first
-    const homeEmail = emails.find(email => email.DealPersonDataEmail.label === 'Home');
+    const homeEmail = emails.find(email => email.label === 'Home');
     if(homeEmail !== undefined){
         console.log("homeEmail!!!!!!!!!!!")
         return homeEmail.DealPersonData.value;
