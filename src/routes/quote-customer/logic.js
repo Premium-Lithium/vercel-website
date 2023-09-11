@@ -167,7 +167,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         bccRecipients: [
             {
                 emailAddress: {
-                    address: "lewis.bowes@premiumlithium.com",
+                    address: "development@premiumlithium.com",
                 }
             }
         ]
@@ -190,6 +190,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         .then(res => {
             if (res.status !== 201) {
                 console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
+                return res.status
             }
         })
         .catch(error => {
