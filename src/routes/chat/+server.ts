@@ -350,7 +350,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
 
 let model
 
-model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 500 });
+model = new ChatOpenAI({ modelName: "gpt-4", temperature: 0, maxTokens: 500 });
 
 let generalVectorStore = await new SupabaseVectorStore(
     new OpenAIEmbeddings(),
