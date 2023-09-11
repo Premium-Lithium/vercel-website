@@ -129,10 +129,8 @@ function extractPLContactFrom(customerData) {
     const bdm = customerData.user_id;
 
     const plContactPerson = {
-        // name: bdm.name.split(" ")[0],
-        // email: bdm.email
-        name: "jasmine",
-        email: 'jasmine.potts@premiumlithium.com'
+        name: bdm.name.split(" ")[0],
+        email: bdm.email,
     };
 
     return plContactPerson;
