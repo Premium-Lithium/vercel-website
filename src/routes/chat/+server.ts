@@ -260,8 +260,8 @@ const formatInstructions = (
 ) => `Use the following format in your response:
 
 Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, must be one of [${toolNames}, None] ** If None, you must provide a Final Answer **
+Thought: you should always think about what to do, if you don't need to take an action then provide a Final Answer.
+Action: the action to take, must be one of [${toolNames}]
 Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Input/Observation can repeat N times.)
