@@ -81,7 +81,7 @@
                 let prompt = input.value;
                 if(currentState == ChatState.ASK_PRODUCT_OR_HELP) {
                     let msg = getMessageBasedOnState(prompt);
-                    if(!msg) {
+                    if(msg != null) {
                         prompt = msg;
                     }
                 }
