@@ -21,8 +21,14 @@ export default async function quoteCustomer(dealId) {
         console.log(quoteAttempt.message);
         return quoteAttempt;
     }
-
-    const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
+    if (customer.solution != "none"){
+        const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
+    }else{
+        customer.solution = {
+            batterySize_kWh: 20,
+            evCharger: { included: true, type: 'todo: some charger type' }
+          }
+    }
     console.log("plContact", customer.pl_contact)
     const emailContentData = {
         pl_bdm_contact_name: customer.pl_contact.name,
