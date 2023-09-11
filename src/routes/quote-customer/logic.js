@@ -67,9 +67,10 @@ async function getCustomerInfo(dealId) {
         console.log(`Error fetching customer data for deal ${dealId} on pipedrive`);
         return null;
     }
-
+    const pdPersonApi = new pipedrive.PersonsApi(pd)
+    const personRequest = await pdPersonApi.getPerson(request.data.person_id)
     // This is the complete set of data for the deal provided by Pipedrive's API
-    const customerData = request.data;
+    const customerData = personRequest.data;
     console.log(customerData)
 
     // We want to strip this down to only the data we care about when sending a quote email
