@@ -225,8 +225,8 @@ Powerplant 40kWh Smart Home Battery, Regular price £32,970 (ex .VAT)
 Powerplant 50kWh Smart Home Battery, Regular price £39,965 (ex .VAT)
  
 `
-uploadDocument(generalKnowledgeBase, "evie-general-knowledge-base");
-uploadDocument(pricingKnowledgeBase, "evie-pricing-knowledge-base");
+uploadDocument(generalKnowledgeBase, "evie_general_knowledge_base");
+uploadDocument(pricingKnowledgeBase, "evie_pricing_knowledge_base");
 
 async function uploadDocument(text, tableName) {
     let sections = text.split('---');
@@ -356,7 +356,7 @@ let generalVectorStore = await new SupabaseVectorStore(
     new OpenAIEmbeddings(),
     {
         client: supabase,
-        tableName: "evie-general-knowledge-base",
+        tableName: "evie_general_knowledge_base",
         queryName: "match_documents",
     },
 );
@@ -365,7 +365,7 @@ let pricingVectorStore = await new SupabaseVectorStore(
   new OpenAIEmbeddings(),
   {
       client: supabase,
-      tableName: "evie-pricing-knowledge-base",
+      tableName: "evie_pricing_knowledge_base",
       queryName: "match_documents",
   },
 );
