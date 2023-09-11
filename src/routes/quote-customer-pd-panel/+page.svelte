@@ -9,7 +9,8 @@
     let dealId;
 
     onMount(async () => {
-        dealId = $page.url.searchParams.get('selectedIds');
+        // dealId = $page.url.searchParams.get('selectedIds');
+        dealId = 6592;
 
         sdk = await new AppExtensionsSDK().initialize();
         await sdk.execute('resize', { height: 100 });
