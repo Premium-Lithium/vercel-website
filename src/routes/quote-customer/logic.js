@@ -30,14 +30,31 @@ export default async function quoteCustomer(dealId) {
         relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
-    let supabaseData;
     try{
         console.log("getting email template")
         const { data, error } = await supabase
         .storage
         .from('email-template')
         .createSignedUrl('customer-quote-template.mjml', 1000);
-        supabaseData= data;
+        if (data){
+            const templatePath = data.signedUrl;
+            const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
+
+            const emailData = {
+                sender: customer.pl_contact.email,
+                recipients: [ customer.email ],
+                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+                email_body: emailContent,
+                content_type: "HTML"
+            };
+             // Create a draft email in the BDM's outloo
+            createDraft(...Object.values(emailData));
+
+            if(!markAsQuoteIssued(dealId)){
+                console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+                return quoteAttempt;
+            }
+        }
     }catch(error){
         console.log("error finding email template")
         const emailData = {
@@ -51,24 +68,6 @@ export default async function quoteCustomer(dealId) {
         // Create a draft email in the BDM's outlook
         createDraft(...Object.values(emailData));
         return error;
-    }
-    const templatePath = supabaseData.signedUrl;
-    const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
-
-    const emailData = {
-        sender: customer.pl_contact.email,
-        recipients: [ customer.email ],
-        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-        email_body: emailContent,
-        content_type: "HTML"
-    };
-
-    // Create a draft email in the BDM's outloo
-    createDraft(...Object.values(emailData));
-
-    if(!markAsQuoteIssued(dealId)){
-        console.log(`Failed to update deal ${dealId} as QuoteIssued`);
-        return quoteAttempt;
     }
 }
 
