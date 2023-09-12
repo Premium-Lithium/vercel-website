@@ -4,8 +4,6 @@
     import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
-	import { json } from 'stream/consumers';
-	import { waitForDebugger } from 'inspector';
 
     let sdk;
     let dealId = $page.url.searchParams.get('selectedIds');
@@ -32,7 +30,7 @@
                 });
                 setTimeout(() => {
                     location.reload();
-                }, 5000);
+                }, 1000);
             }
     } catch (error) {
         console.log("error sending quote");
@@ -40,7 +38,6 @@
                     "positionClass": "toast-bottom-center",
                     "timeOut": "5000",
                 })
-                return null;
         return null;
     }
 }
