@@ -1,4 +1,4 @@
-import pipedrive from 'pipedrive';
+import pipedrive from 'pipedrive';e
 import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
 import { supabase } from '$lib/supabase.ts';
@@ -17,7 +17,7 @@ export default async function quoteCustomer(dealId) {
 
     if(customer === null) {
         quoteAttempt.success = false;
-        quoteAttempt.message = `Error: Could not fetch customer data for deal ${dealId}`;
+        quoteAttempt.message = `: Could not fetch customer data for deal ${dealId}`;
         console.log(quoteAttempt.message);
         return quoteAttempt;
     }
