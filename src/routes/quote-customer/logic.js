@@ -55,7 +55,7 @@ export default async function quoteCustomer(dealId) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 return quoteAttempt;
             }
-            json({ message: "success" }, { status: 200 })
+            return json({ message: "success" }, { status: 200 })
         }
     }catch(error){
         console.log("error finding email template")
