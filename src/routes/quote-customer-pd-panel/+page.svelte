@@ -25,7 +25,7 @@
             })
         });
         if (response.status === 200) {
-            toastr.success('Quote sent successfully!', '', {
+            toastr.success('Quote draft generated successfully!', '', {
             "positionClass": "toast-bottom-center",
             "timeOut": "2500",
         });
