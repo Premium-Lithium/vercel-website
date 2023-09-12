@@ -38,9 +38,9 @@
                 }
                 else if(input.toLowerCase().includes("help")){
                      {
-                    return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
-                    currentState = ChatState.GET_HELP;
-                }
+                        return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
+                        currentState = ChatState.GET_HELP;
+                    }
                 }
                 break;
             case ChatState.ASK_ENERGY_USAGE:

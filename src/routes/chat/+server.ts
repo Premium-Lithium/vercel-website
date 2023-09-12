@@ -6,10 +6,11 @@ import {BaseChatPromptTemplate,
         renderTemplate,
         type SerializedBasePromptTemplate} from 'langchain/prompts';
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { BufferWindowMemory } from 'langchain/memory';
+import { BufferMemory, BufferWindowMemory } from 'langchain/memory';
 import { LLMChain, VectorDBQAChain } from 'langchain/chains';
 import { AgentActionOutputParser,
          AgentExecutor,
+         initializeAgentExecutorWithOptions,
          LLMSingleActionAgent,} from "langchain/agents";
 import { HumanMessage, 
          BaseMessage, 
@@ -413,18 +414,19 @@ const agent = new LLMSingleActionAgent(
     }
 )
 
-const conversationMemory = new BufferWindowMemory({
-    k: 2
+const conversationMemory = new BufferMemory({
+    memoryKey: "chat_history",
+    returnMessages: true,
+    inputKey: "input",
+    outputKey: "output",
 });
 
-const agentExecutor = AgentExecutor.fromAgentAndTools(
+const agentExecutor = await initializeAgentExecutorWithOptions(tools, model, 
     {
-      agent,
-      tools,
+      agentType: "chat-conversational-react-description",
       verbose: true,
       memory: conversationMemory,
       maxIterations: 8,
-      handleParsingErrors: "Are you sure? Try again, making sure the formatting is correct."
     }
 );
 
