@@ -35,7 +35,6 @@
                     "positionClass": "toast-bottom-center",
                     "timeOut": "10000",
                 })
-                console.log('Error:', response.status);
                 return null;
         }
     } catch (error) {
