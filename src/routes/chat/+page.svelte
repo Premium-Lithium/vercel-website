@@ -84,7 +84,7 @@
                 if(currentState == ChatState.ASK_PRODUCT_OR_HELP) {
                     let msg = getMessageBasedOnState(prompt);
                     if(msg != null) {
-                        messages = [...previousMessages, {"role": "system", "content": msg}];
+                        messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg}];
                     }
                 }
                 const chatRequestUrl = 'chat/';
