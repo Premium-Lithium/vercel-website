@@ -61,6 +61,7 @@ export default async function quoteCustomer(dealId) {
 
 
 async function getCustomerInfo(dealId) {
+    console.log("getting customer info..............")
     const pdApi = new pipedrive.DealsApi(pd)
     const request = await pdApi.getDeal(dealId);
 
@@ -83,6 +84,7 @@ async function getCustomerInfo(dealId) {
 
 
 function extractEmailFrom(customerData) {
+    console.log("extracting email...........................")
     const emails = customerData.person_id.email;
 
     // Try to find a home email first
@@ -110,6 +112,7 @@ function extractEmailFrom(customerData) {
 
 
 function extractSolutionFrom(customerData) {
+    console.log("extract solution...........")
     try{
         const solution = {
             batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
@@ -131,6 +134,7 @@ function extractSolutionFrom(customerData) {
 
 
 function extractPLContactFrom(customerData) {
+    console.log("pl contact..........................")
     // todo: Could there ever be a case where the deal isn't actually linked to someone from premium lithium?
     const bdm = customerData.user_id;
     const plContactPerson = {
@@ -143,6 +147,7 @@ function extractPLContactFrom(customerData) {
 
 
 function buildPriceCalcLinkFrom(solution, dealId) {
+    console.log("byuilding price calc link ...............")
     const params = {
         batterySize_kWh: solution.batterySize_kWh.toString(),
         evCharger: solution.evCharger.included ? "1" : "0",
@@ -160,6 +165,7 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 
 // todo: add meaningful return statements to this to indicate whether or not it worked, and catch these in quoteCustomer above
 async function createDraft(sender, recipients, subject, mail_body, content_type) {
+    console.log("creating drAFT...................................")
     const apiToken = await getNewAPIToken();
 
     const messagePayload = {
@@ -205,6 +211,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
 
 
 async function markAsQuoteIssued(dealId) {
+    console.log("marking quote as issued ")
     // Update the `Quote Issued` field on pipedrive with todays date
     // todo: this assumes the dealFieldsRequest in pipedrive-utils was successful
     const dealFields = dealFieldsRequest.data;
