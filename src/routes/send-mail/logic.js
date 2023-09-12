@@ -97,10 +97,10 @@ async function getNewAPIToken() {
             return token;
         } else {
             console.log('Error:', data.error_description || 'Unknown error');
-            return null;
+            return data.error;
         }
     } catch (error) {
-        console.error(`Fetch error: ${error.message}`);
+        console.error(`Fetch error: ${error}`);
         return null;
     }
 }
