@@ -3,10 +3,7 @@
 // todo: whenever we're using Typescript, import the `Lead` type here and
 // specify that `extractLeadFrom` should return an instance of this type
 
-async function extractLeadFrom(batteryFinderRequest) {
-    const rawData = await batteryFinderRequest.text();
-    const batteryFinderAnswers = JSON.parse(rawData).answers;
-
+async function extractLeadFrom(batteryFinderAnswers) {
     const questions = {
         BUILDING_TYPE: 'are you looking for a battery for your...',
         ENERGY_USAGE: 'how many kwh',
@@ -15,7 +12,6 @@ async function extractLeadFrom(batteryFinderRequest) {
         NAME: 'what is your name?',
         SOURCE: 'how did you hear about us?'
     }
-
 
     let getAnswerTo = (question) => {
         const answer = batteryFinderAnswers.find(answer => answer.question_title.toLowerCase().includes(question));
@@ -43,9 +39,14 @@ async function extractLeadFrom(batteryFinderRequest) {
         phoneNumber: answers.PHONE_NUMBER,
         source: answers.SOURCE,
         energyUsage: answers.ENERGY_USAGE,
-        buildingType: answers.BUILDING_TYPE
+        buildingType: answers.BUILDING_TYPE,
+
+        // We're not (yet?) collecting this information from the Shopify Battery Finder
+        postcode: null,
+        isHomeOwner: null,
+        ageRange: null,
+        interestedIn: null,
     };
 
     return lead;
 }
-

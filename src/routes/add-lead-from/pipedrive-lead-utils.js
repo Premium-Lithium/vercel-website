@@ -2,7 +2,7 @@ import pipedrive from 'pipedrive';
 import { pd, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 
 
-async function captureLead(lead, labelName) { // `labelName` is the name of a pipedrive label
+async function captureLeadFrom(leadSourceName, lead, labelName=null) { // `labelName` is the name of a pipedrive label
     let result = {
         "success": true,
         "message": `Added new lead to pipedrive.`
@@ -15,9 +15,15 @@ async function captureLead(lead, labelName) { // `labelName` is the name of a pi
     }
 
     try {
-        const name = lead.name || "Unknown";
-        const personId = await addPersonToPipedrive(lead.emailAddress, name, lead.phoneNumber);
-        await addLeadToPipedrive(lead.source, lead.energyUsage, lead.buildingType, name, personId, labelName);
+        const leadTitle = `${leadSourceName}: ${lead.name}`; // e.g. "Battery Finder: John Smith"
+
+        const personId = await addPersonToPipedrive(
+            lead.emailAddress,
+            lead.name,
+            lead.phoneNumber,
+            lead.ageRange
+        );
+        await addLeadToPipedrive(leadTitle, lead.source, lead.energyUsage, lead.buildingType, personId, labelName);
     }
     catch(error) {
         const msg = `Error adding lead: ${error}`;
@@ -30,7 +36,7 @@ async function captureLead(lead, labelName) { // `labelName` is the name of a pi
 }
 
 
-async function addPersonToPipedrive(emailAddress, name, phone) {
+async function addPersonToPipedrive(emailAddress, name, phone, ageRange) {
     console.log(`Adding person ${name} with email ${emailAddress} and phone ${phone} to pipedrive...`);
 
     const persons = new pipedrive.PersonsApi(pd);
@@ -42,8 +48,11 @@ async function addPersonToPipedrive(emailAddress, name, phone) {
             name: name,
             email: emailAddress,
             phone: phone,
-            ownerId: 15215441 // Lewis
+            ownerId: 15215441, // Lewis
+            // age: todo: add age field to pipedrive
         });
+
+        console.log(person);
     }
     catch(error) {
         console.log(`Error adding person: ${error}`);
@@ -53,22 +62,27 @@ async function addPersonToPipedrive(emailAddress, name, phone) {
 }
 
 
-async function addLeadToPipedrive(source, energyUsage, buildingType, personName, personId, labelName) {
+async function addLeadToPipedrive(leadTitle, source, energyUsage, buildingType, personId, labelName) {
     console.log(`Adding lead with source ${source}, energy usage ${energyUsage}, building type ${buildingType}, and person id ${personId} to pipedrive...`);
 
     const leads = new pipedrive.LeadsApi(pd);
-
-    const labelId = await getLeadLabelId(labelName);
 
     const dailyEnergyUsageFieldId = getFieldId("Daily Energy Usage (kWh)");
     // const leadSourceOtherFieldId = getFieldId("Lead Source - Other");
 
     try {
+        let labels = [];
+
+        if(labelName !== null) {
+            const labelId = await getLeadLabelId(labelName);
+            labels.push(labelId);
+        }
+
         await leads.addLead({
-            title: `Battery Finder: ${personName}`,
+            title: leadTitle,
             personId: personId,
             ownerId: 15215441, // Lewis
-            labelIds: [ labelId ], // Battery Finder
+            labelIds: labels,
             [dailyEnergyUsageFieldId]: energyUsage,
             // todo: set custom field for "where did you hear about us?"
             // [leadSourceOtherFieldId]: source
@@ -115,4 +129,4 @@ function getFieldId(fieldName) {
 }
 
 
-export { captureLead };
+export { captureLeadFrom };

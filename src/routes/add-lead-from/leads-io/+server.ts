@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import validate from '../../../lib/validation-utils.js';
 import { extractLeadFrom } from './parse-data.js';
-import { captureLead } from '../pipedrive-lead-utils.js';
+import { captureLeadFrom } from '../pipedrive-lead-utils.js';
 
 
 /*
@@ -86,17 +86,17 @@ export async function POST({ request }) {
     if(!request.body)
         return json({ message: "No request body found" }, { status: 400 });
 
-    const requestData = await request.json();
-    const validationErrors = validate(requestData, schema);
+    const leadsIoData = await request.json();
+    const validationErrors = validate(leadsIoData, schema);
 
     if(validationErrors.length) {
         const message = validationErrors.join(", ");
         return json({ message: `${message}` }, { status: 400 })
     }
 
-    //
-    const lead = await extractLeadFrom(requestData);
-    const leadAddAttempt = await captureLead(lead);
+    // If the request was as we expected, then use this to create a lead object
+    const lead = await extractLeadFrom(leadsIoData);
+    const leadAddAttempt = await captureLeadFrom('Leads.IO', lead);
 
     const response = new Response(
         JSON.stringify({ message: leadAddAttempt.message }),
