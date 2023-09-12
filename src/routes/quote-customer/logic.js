@@ -1,4 +1,4 @@
-import pipedrive from 'pipedrive';e
+import pipedrive from 'pipedrive';
 import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
 import { supabase } from '$lib/supabase.ts';
