@@ -11,14 +11,12 @@
 
     onMount(async () => {
         dealId = $page.url.searchParams.get('selectedIds');
-        console.log(dealId);
         sdk = await new AppExtensionsSDK().initialize();
         await sdk.execute('resize', { height: 100 });
     });
 
     async function sendQuoteEmail() {
         const  dealId = $page.url.searchParams.get('selectedIds');
-        console.log(dealId);
         const response = await fetch('/quote-customer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

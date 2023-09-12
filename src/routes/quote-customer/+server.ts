@@ -20,7 +20,6 @@ export async function POST({ request }) {
         return json({ message: "No request body found" }, { status: 400 });
 
     const requestData = await request.json();
-    console.log(requestData)
     const validationErrors = validate(requestData, schema);
 
     if(validationErrors.length) {
