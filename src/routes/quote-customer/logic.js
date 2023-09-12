@@ -37,8 +37,10 @@ export default async function quoteCustomer(dealId) {
     .createSignedUrl('customer-quote-template.mjml', 1000);
 
     if (error){
-        console.log("error with supabase ")
-        return null
+        quoteAttempt.success = false;
+        quoteAttempt.message = `: Could not fetch email-template`;
+        console.log(quoteAttempt.message);
+        return quoteAttempt;
     }
     const templatePath = data.signedUrl;
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
@@ -123,7 +125,7 @@ function extractSolutionFrom(customerData) {
             // todo: Build a complete description of the solution Premium Lithium will provide
         };
         return solution;
-    }catch{ //default solution for if a deal doesnt have one 
+    }catch(error){ //default solution for if a deal doesnt have one 
         const solution = {
             batterySize_kWh: 15,
             evCharger: { included: true, type: 'todo: some charger type' }
@@ -167,7 +169,10 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 async function createDraft(sender, recipients, subject, mail_body, content_type) {
     console.log("creating drAFT...................................")
     const apiToken = await getNewAPIToken();
-
+    if (apiToken === null){
+        console.log("error creating API token");
+        return null
+    }
     const messagePayload = {
         subject: subject,
         body: {
