@@ -16,6 +16,8 @@ const schema = {
 
 
 export async function POST({ request }) {
+    console.log("1. main request");
+
     if(!request.body)
         return json({ message: "No request body found" }, { status: 400 });
 
