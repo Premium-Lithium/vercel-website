@@ -29,6 +29,7 @@
                 "positionClass": "toast-bottom-center",
                 "timeOut": "5000",
                 });
+                location.reload();
             } else {
                 toastr.error('Failed to send quote draft', '', {
                     "positionClass": "toast-bottom-center",
@@ -44,9 +45,7 @@
 </script>
 
 <div style="padding: 0px 15px;">
-    <nav data-sveltekit-reload>
     <button on:click={sendQuoteEmail} class="quote-button"><b>Generate Quote Draft</b></button>
-</nav>
 </div>
 
 <style>
