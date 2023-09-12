@@ -233,10 +233,13 @@ Powerplant 40kWh Smart Home Battery costs £32,970 (ex .VAT)
 Powerplant 50kWh Smart Home Battery costs £39,965 (ex .VAT)
 
 `
-uploadDocument(generalKnowledgeBase, "evie_general_knowledge_base");
-uploadDocument(pricingKnowledgeBase, "evie_pricing_knowledge_base");
+//uploadDocument(generalKnowledgeBase, "evie_general_knowledge_base");
+//uploadDocument(pricingKnowledgeBase, "evie_pricing_knowledge_base");
 
 async function uploadDocument(text, tableName) {
+    const { error } = await supabase
+    .from(tableName)
+    .delete()
     let sections = text.split('---');
     const textSplitter = new RecursiveCharacterTextSplitter( {
         chunkSize: 500,
