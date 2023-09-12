@@ -3,7 +3,7 @@ import { SupabaseVectorStore } from 'langchain/vectorstores/supabase';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { onMount } from 'svelte';
-
+import { json } from '@sveltejs/kit';
 
 onMount(() => {
     var generalKnowledgeBase = ` 
@@ -241,3 +241,8 @@ onMount(() => {
         );
     }
 })
+
+export async function POST({ request }) {
+    console.log(await request.json());
+    return json({message: "ok"}, {status: 200});
+  }
