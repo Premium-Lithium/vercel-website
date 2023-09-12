@@ -2,6 +2,7 @@ import pipedrive from 'pipedrive';
 import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
 import { supabase } from '$lib/supabase.ts';
+import { json } from '@sveltejs/kit';
 
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
@@ -54,6 +55,7 @@ export default async function quoteCustomer(dealId) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 return quoteAttempt;
             }
+            json({ message: "success" }, { status: 200 })
         }
     }catch(error){
         console.log("error finding email template")
@@ -67,7 +69,7 @@ export default async function quoteCustomer(dealId) {
     
         // Create a draft email in the BDM's outlook
         createDraft(...Object.values(emailData));
-        return error;
+        return json({ message: error }, { status: 400 })
     }
 }
 
