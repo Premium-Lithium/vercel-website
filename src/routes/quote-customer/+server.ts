@@ -8,7 +8,7 @@ const schema = {
     required: [ "deal_id" ],
     properties: {
         deal_id: {
-            type: "number",
+            type: "string",
             errorMessage: "deal_id should be a number (deal id from pipedrive)"
         },
     }
