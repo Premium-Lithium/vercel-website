@@ -31,7 +31,7 @@
                 "timeOut": "5000",
                 });
             } else {
-                toastr.fail('Failed to send quote draft', '', {
+                toastr.rror('Failed to send quote draft', '', {
                     "positionClass": "toast-bottom-center",
                     "timeOut": "5000",
                 })
