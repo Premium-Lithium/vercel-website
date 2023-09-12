@@ -16,6 +16,7 @@
     });
 
     async function sendQuoteEmail() {
+        console.log("sending quote email....");
         try{
             const response = await fetch('/quote-customer', {
             method: 'POST',
