@@ -216,15 +216,22 @@ Conclusion: At Premium Lithium, we believe in passing on the benefits of our eff
 
 ---
 
-Powerpod 5kWh Smart Home Battery, Regular price £5,995 (ex. VAT)
-Powerpod 10kWh Smart Home Battery, Regular price £9,995 (ex .VAT)
-Powerpanel 9.5kWh Smart Home Battery, Regular price £9,995 (ex .VAT)
-Powerpod 15kWh Smart Home Battery, Regular price £13,990 (ex .VAT)
-Powerplant 20kWh Smart Home Battery, Regular price £17,985 (ex .VAT)
-Powerplant 30kWh Smart Home Battery, Regular price £25,975 (ex .VAT)
-Powerplant 40kWh Smart Home Battery, Regular price £32,970 (ex .VAT)
-Powerplant 50kWh Smart Home Battery, Regular price £39,965 (ex .VAT)
- 
+Powerpod 5kWh Smart Home Battery costs £5,995 (ex. VAT)
+
+Powerpod 10kWh Smart Home Battery costs £9,995 (ex .VAT) 
+
+Powerpanel 9.5kWh Smart Home Battery costs £9,995 (ex .VAT)
+
+Powerpod 15kWh Smart Home Battery costs £13,990 (ex .VAT)
+
+Powerplant 20kWh Smart Home Battery costs £17,985 (ex .VAT)
+
+Powerplant 30kWh Smart Home Battery costs £25,975 (ex .VAT)
+
+Powerplant 40kWh Smart Home Battery costs £32,970 (ex .VAT)
+
+Powerplant 50kWh Smart Home Battery costs £39,965 (ex .VAT)
+
 `
 uploadDocument(generalKnowledgeBase, "evie_general_knowledge_base");
 uploadDocument(pricingKnowledgeBase, "evie_pricing_knowledge_base");
