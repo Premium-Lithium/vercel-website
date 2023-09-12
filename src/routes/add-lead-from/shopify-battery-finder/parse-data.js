@@ -3,7 +3,7 @@
 // todo: whenever we're using Typescript, import the `Lead` type here and
 // specify that `extractLeadFrom` should return an instance of this type
 
-async function extractLeadFrom(batteryFinderAnswers) {
+export async function extractLeadFrom(batteryFinderAnswers) {
     const questions = {
         BUILDING_TYPE: 'are you looking for a battery for your...',
         ENERGY_USAGE: 'how many kwh',

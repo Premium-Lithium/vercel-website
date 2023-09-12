@@ -1,4 +1,4 @@
-import { captureLead } from '../pipedrive-lead-utils.js'
+import { captureLeadFrom } from '../pipedrive-lead-utils.js'
 import { extractLeadFrom } from './parse-data.js';
 
 
@@ -7,7 +7,7 @@ export async function POST({ request }) {
     const batteryFinderAnswers = JSON.parse(rawData).answers;
 
     const lead = await extractLeadFrom(batteryFinderAnswers);
-    const leadAddAttempt = await captureLead(lead, 'Battery Finder');
+    const leadAddAttempt = await captureLeadFrom("Battery Finder", lead);
 
     const response = new Response(
         JSON.stringify({ message: leadAddAttempt.message }),
