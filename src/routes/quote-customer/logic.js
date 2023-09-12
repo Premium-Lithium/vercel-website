@@ -52,8 +52,6 @@ export default async function quoteCustomer(dealId) {
 
     if(!markAsQuoteIssued(dealId))
         console.log(`Failed to update deal ${dealId} as QuoteIssued`);
-
-    console.log(quoteAttempt.message);
     return quoteAttempt;
 }
 
@@ -189,7 +187,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
 
     const apiUrl = `/v1.0/users/${sender}/messages`;
 
-    fetch(`https://graph.microsoft.com${apiUrl}`, options)
+    await fetch(`https://graph.microsoft.com${apiUrl}`, options)
         .then(res => {
             if (res.status !== 201) {
                 console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
