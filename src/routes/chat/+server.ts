@@ -165,27 +165,27 @@ const tools = [
     generalQATool,
     pricingQATool,
 ];
-const prompt = new CustomPromptTemplate({
-    tools: tools,
-    inputVariables: ["input", "intermediate_steps", "history"],
-});
+// const prompt = new CustomPromptTemplate({
+//     tools: tools,
+//     inputVariables: ["input", "intermediate_steps", "history"],
+// });
 
-let conversationChain = new LLMChain(
-    {
-        llm: model,
-        prompt: prompt,
-    }
-);
+// let conversationChain = new LLMChain(
+//     {
+//         llm: model,
+//         prompt: prompt,
+//     }
+// );
 
-const outputParser = new CustomOutputParser();
+// const outputParser = new CustomOutputParser();
 
-const agent = new LLMSingleActionAgent(
-    {
-        llmChain: conversationChain,
-        outputParser: outputParser,
-        stop: ['\nObservation:'],
-    }
-)
+// const agent = new LLMSingleActionAgent(
+//     {
+//         llmChain: conversationChain,
+//         outputParser: outputParser,
+//         stop: ['\nObservation:'],
+//     }
+// )
 
 const conversationMemory = new BufferMemory({
     memoryKey: "chat_history",
@@ -203,7 +203,50 @@ const agentExecutor = await initializeAgentExecutorWithOptions(tools, model,
     }
 );
 
+
+// Default prompt
+let defaultPrompt = `Assistant is a large language model trained by OpenAI.
+
+Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations 
+and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, 
+allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+
+Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand 
+large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. 
+Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in 
+discussions and provide explanations and descriptions on a wide range of topics.
+
+Overall, Assistant is a powerful system that can help with a wide range of tasks and provide valuable insights 
+and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation 
+about a particular topic, Assistant is here to assist. However, above all else, all responses must adhere to the format of 
+RESPONSE FORMAT INSTRUCTIONS.`
+
+
+// Modified prompt
+let modifiedPrompt = `Assistant is a large language model trained by OpenAI, being utilised by a company called Premium Lithium to provide 
+customer service through their chatbot named Evie. As a customer service representative, Assistant should respond in a friendly and helpful manner,
+and should always put the customer first, whether that's to guide them to their perfect product, or use a fact lookup tool in order to answer any queries.
+
+Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations 
+and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, 
+allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+
+Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand 
+large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. 
+Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in 
+discussions and provide explanations and descriptions on a wide range of topics.
+
+Overall, Assistant is a powerful system that can help with a wide range of tasks and provide valuable insights 
+and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation 
+about a particular topic, Assistant is here to assist. However, above all else, all responses must adhere to the format of 
+RESPONSE FORMAT INSTRUCTIONS.`
+
+function setTemplate(text) {
+  agentExecutor.agent.llmChain.prompt.promptMessages[0].prompt.template = text;
+}
+
 export async function POST({ request }) {
+  setTemplate(modifiedPrompt);
     try {
         const { prompt } = await request.json();
         const response = await agentExecutor.call({
