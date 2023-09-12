@@ -36,29 +36,6 @@ export default async function quoteCustomer(dealId) {
         .storage
         .from('email-template')
         .createSignedUrl('customer-quote-template.mjml', 1000);
-        if (data){
-            const templatePath = data.signedUrl;
-            const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
-
-            const emailData = {
-                sender: customer.pl_contact.email,
-                recipients: [ customer.email ],
-                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                mail_body: emailContent,
-                content_type: "HTML"
-            };
-
-            // Create a draft email in the BDM's outlook
-            createDraft(...Object.values(emailData));
-
-            if(!markAsQuoteIssued(dealId)){
-                console.log(`Failed to update deal ${dealId} as QuoteIssued`);
-                return quoteAttempt;
-            }
-        }
-        if (error){
-            console.log(error);
-        }
     }catch(error){
         const emailData = {
             sender: customer.pl_contact.email,
@@ -71,6 +48,24 @@ export default async function quoteCustomer(dealId) {
         // Create a draft email in the BDM's outlook
         createDraft(...Object.values(emailData));
         return error;
+    }
+    const templatePath = data.signedUrl;
+    const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
+
+    const emailData = {
+        sender: customer.pl_contact.email,
+        recipients: [ customer.email ],
+        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+        email_body: emailContent,
+        content_type: "HTML"
+    };
+
+    // Create a draft email in the BDM's outloo
+    createDraft(...Object.values(emailData));
+
+    if(!markAsQuoteIssued(dealId)){
+        console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+        return quoteAttempt;
     }
 }
 
