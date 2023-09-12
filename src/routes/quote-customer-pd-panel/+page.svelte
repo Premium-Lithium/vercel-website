@@ -33,15 +33,14 @@
                 setTimeout(() => {
                     location.reload();
                 }, 5000);
-            } else {
-                toastr.error('Failed to send quote draft', '', {
+            }
+    } catch (error) {
+        console.log("error sending quote");
+        toastr.error('Failed to send quote draft', '', {
                     "positionClass": "toast-bottom-center",
                     "timeOut": "5000",
                 })
                 return null;
-        }
-    } catch (error) {
-        console.log("error");
         return null;
     }
 }
