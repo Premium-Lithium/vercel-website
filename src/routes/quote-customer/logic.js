@@ -35,7 +35,11 @@ export default async function quoteCustomer(dealId) {
     .storage
     .from('email-template')
     .createSignedUrl('customer-quote-template.mjml', 1000);
-    
+
+    if (error){
+        console.log("error with supabase ")
+        return null
+    }
     const templatePath = data.signedUrl;
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
