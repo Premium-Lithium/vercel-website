@@ -191,7 +191,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
 
     const apiUrl = `/v1.0/users/${sender}/messages`;
 
-    await fetch(`https://graph.microsoft.com${apiUrl}`, options)
+    fetch(`https://graph.microsoft.com${apiUrl}`, options)
         .then(res => {
             if (res.status !== 201) {
                 console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
