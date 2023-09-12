@@ -4,37 +4,32 @@
     import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
+	import { json } from 'stream/consumers';
 
     let sdk;
     let dealId;
 
     onMount(async () => {
         dealId = $page.url.searchParams.get('selectedIds');
-
         sdk = await new AppExtensionsSDK().initialize();
         await sdk.execute('resize', { height: 100 });
     });
 
     async function sendQuoteEmail() {
-        // REMOVE IN PRODUCTION
-        dealId = 6193;
-        // REMOVE IN PRODUCTION
-
-        // todo: uncomment this and make sure to gracefully handle case where deal is not found
-        // const dealId = $page.url.searchParams.get('selectedIds');
-
-        await fetch('/quote-customer', {
+        const  dealId = $page.url.searchParams.get('selectedIds');
+        const response = await fetch('/quote-customer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 deal_id: dealId
             })
         });
-
-        toastr.success('Quote sent successfully!', '', {
+        if (response.status === 200) {
+            toastr.success('Quote sent successfully!', '', {
             "positionClass": "toast-bottom-center",
             "timeOut": "2500",
         });
+        }
     }
 </script>
 

@@ -1,7 +1,7 @@
 import pipedrive from 'pipedrive';
 import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
-import path from 'path';
+import { supabase } from '$lib/supabase.ts';
 
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
@@ -21,9 +21,8 @@ export default async function quoteCustomer(dealId) {
         console.log(quoteAttempt.message);
         return quoteAttempt;
     }
-
+    
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
-
     const emailContentData = {
         pl_bdm_contact_name: customer.pl_contact.name,
         price_calculator_link: priceCalcLink,
@@ -32,7 +31,12 @@ export default async function quoteCustomer(dealId) {
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
 
-    const templatePath = path.join(process.cwd(), 'customer_quote_template.mjml');
+    const { data, error } = await supabase
+    .storage
+    .from('email-template')
+    .createSignedUrl('customer-quote-template.mjml', 1000);
+    
+    const templatePath = data.signedUrl;
     const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
     const emailData = {
@@ -62,10 +66,8 @@ async function getCustomerInfo(dealId) {
         console.log(`Error fetching customer data for deal ${dealId} on pipedrive`);
         return null;
     }
-
     // This is the complete set of data for the deal provided by Pipedrive's API
     const customerData = request.data;
-
     // We want to strip this down to only the data we care about when sending a quote email
     const customer = {
         name: customerData.person_name,
@@ -83,15 +85,15 @@ function extractEmailFrom(customerData) {
 
     // Try to find a home email first
     const homeEmail = emails.find(email => email.label === 'home');
-    if(homeEmail !== undefined)
+    if(homeEmail !== undefined){
         return homeEmail.value;
-
+    }
     // Fall back to work email if home email isn't found
     console.log("No home email found, searching for work email...");
-    const workEmail = emails.find(email => email.label === 'work');
-    if(workEmail !== undefined)
+    const workEmail = emails.find(email => email.label === 'w ork');
+    if(workEmail !== undefined){
         return workEmail.value;
-
+    }
     // Use any other email that's added, if there is one
     console.log("No work email found, searching for any other email...");
     if(emails.length > 0 && emails[0].value !== '') {
@@ -106,26 +108,32 @@ function extractEmailFrom(customerData) {
 
 
 function extractSolutionFrom(customerData) {
-    const solution = {
-        batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
-        evCharger: {
-            included: readCustomDealField("EV Charger?", customerData) == "Yes",
-            type: "todo: some charger type"
-        },
-        // todo: Build a complete description of the solution Premium Lithium will provide
-    };
-
-    return solution;
+    try{
+        const solution = {
+            batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
+            evCharger: {
+                included: readCustomDealField("EV Charger?", customerData) == "Yes",
+                type: "todo: some charger type"
+            },
+            // todo: Build a complete description of the solution Premium Lithium will provide
+        };
+        return solution;
+    }catch{ //default solution for if a deal doesnt have one 
+        const solution = {
+            batterySize_kWh: 15,
+            evCharger: { included: true, type: 'todo: some charger type' }
+          }
+        return solution;
+    }
 }
 
 
 function extractPLContactFrom(customerData) {
     // todo: Could there ever be a case where the deal isn't actually linked to someone from premium lithium?
     const bdm = customerData.user_id;
-
     const plContactPerson = {
         name: bdm.name.split(" ")[0],
-        email: bdm.email
+        email: bdm.email,
     };
 
     return plContactPerson;
@@ -162,7 +170,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         bccRecipients: [
             {
                 emailAddress: {
-                    address: "lewis.bowes@premiumlithium.com",
+                    address: "development@premiumlithium.com",
                 }
             }
         ]
@@ -185,6 +193,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         .then(res => {
             if (res.status !== 201) {
                 console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
+                return res.status
             }
         })
         .catch(error => {
