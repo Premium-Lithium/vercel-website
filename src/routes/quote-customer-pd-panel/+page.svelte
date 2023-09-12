@@ -17,20 +17,32 @@
 
     async function sendQuoteEmail() {
         const  dealId = $page.url.searchParams.get('selectedIds');
-        const response = await fetch('/quote-customer', {
+        try{
+            const response = await fetch('/quote-customer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 deal_id: dealId
             })
-        });
-        if (response.status === 200) {
-            toastr.success('Quote draft generated successfully!', '', {
-            "positionClass": "toast-bottom-center",
-            "timeOut": "5000",
-        });
+            });
+            if (response.status === 200) {
+                toastr.success('Quote draft generated successfully!', '', {
+                "positionClass": "toast-bottom-center",
+                "timeOut": "5000",
+                });
+            } else {
+                toastr.fail('Failed to send quote draft', '', {
+                    "positionClass": "toast-bottom-center",
+                    "timeOut": "5000",
+                })
+                console.log('Error:', response.status);
+                return null;
         }
+    } catch (error) {
+        console.error(`Fetch error: ${response.status}`);
+        return null;
     }
+}
 </script>
 
 <div style="padding: 0px 15px;">
