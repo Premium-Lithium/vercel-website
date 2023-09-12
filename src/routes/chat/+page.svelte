@@ -4,8 +4,8 @@
 	import { invalidateAll } from '$app/navigation';
     let awaitingMessage = false;
     let previousMessages: {"role": string, "content": string}[] = [];
-    let  messageToSend = `Greet me with a friendly emoji`;
-
+    let messageToSend = `Greet me with a friendly emoji`;
+    let chatInput = "";
     enum ChatState {
         ASK_PRODUCT_OR_HELP,
         ASK_ENERGY_USAGE,
@@ -53,6 +53,41 @@
         return null;
     }
 
+    async function handleChatInput(e) {
+        awaitingMessage = true;
+        let prompt = chatInput;
+        previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
+        let messages = previousMessages;
+        if(currentState == ChatState.ASK_PRODUCT_OR_HELP) {
+            let msg = getMessageBasedOnState(prompt);
+            if(msg != null) {
+                messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg}];
+            }
+        }
+        const chatRequestUrl = 'chat/';
+        chatInput = '';
+        const response = await fetch(chatRequestUrl, {
+            method: 'POST',
+            body: JSON.stringify({ "prompt" : messages }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        awaitingMessage = false;
+        let output;
+        if (!response.ok) {
+            output = "I'm unable to respond to that.";
+        }
+        else {
+            const { message } = await response.json();
+            if (message == 'Agent stopped due to max iterations.') {
+                output = "Request timed out.";
+            }
+            else output = message.output;
+        }
+        previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
+    }
+
 
 </script>
 
@@ -69,49 +104,14 @@
         <h2 in:fly|global={{x:-1000, duration:1000}} class="message-assistant">...</h2>
     {/if}
     </div>
-    <form>
+    <form on:submit|preventDefault={handleChatInput}>
         <input 
         class="chat-input"
         type="text"
         autocomplete="off"
-        on:submit = {async (e) => {
-            awaitingMessage = true;
-            const input = e.currentTarget;
-            let prompt = input.value;
-            previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
-            let messages = previousMessages;
-            if(currentState == ChatState.ASK_PRODUCT_OR_HELP) {
-                let msg = getMessageBasedOnState(prompt);
-                if(msg != null) {
-                    messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg}];
-                }
-            }
-            const chatRequestUrl = 'chat/';
-            input.value = '';
-            const response = await fetch(chatRequestUrl, {
-                method: 'POST',
-                body: JSON.stringify({ "prompt" : messages }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            awaitingMessage = false;
-            let output;
-            if (!response.ok) {
-                output = "I'm unable to respond to that.";
-            }
-            else {
-                const { message } = await response.json();
-                if (message == 'Agent stopped due to max iterations.') {
-                    output = "Request timed out.";
-                }
-                else output = message.output;
-            }
-            previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
-        }}
+        bind:value={chatInput}
         />
     </form>
-    
 </div>
 
 <style>
