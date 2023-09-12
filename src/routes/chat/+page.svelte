@@ -79,14 +79,14 @@
                 awaitingMessage = true;
                 const input = e.currentTarget;
                 let prompt = input.value;
+                previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
+                let messages = previousMessages;
                 if(currentState == ChatState.ASK_PRODUCT_OR_HELP) {
                     let msg = getMessageBasedOnState(prompt);
                     if(msg != null) {
-                        prompt = msg;
+                        messages = [...previousMessages, {"role": "system", "content": msg}];
                     }
                 }
-                previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
-                const messages = previousMessages;
                 const chatRequestUrl = 'chat/';
                 input.value = '';
                 const response = await fetch(chatRequestUrl, {
