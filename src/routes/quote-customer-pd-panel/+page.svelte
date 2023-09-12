@@ -31,9 +31,8 @@
                 "timeOut": "5000",
                 });
                 setTimeout(() => {
-                    console.log(`This is message ${i + 1}`);
+                    location.reload();
                 }, 5000);
-                location.reload();
             } else {
                 toastr.error('Failed to send quote draft', '', {
                     "positionClass": "toast-bottom-center",
