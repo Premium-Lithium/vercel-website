@@ -39,7 +39,7 @@
                 return null;
         }
     } catch (error) {
-        console.error(`Fetch error: ${response.status}`);
+        console.error("error");
         return null;
     }
 }
