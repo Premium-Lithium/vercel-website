@@ -28,12 +28,12 @@
             if (response.status === 200) {
                 toastr.success('Quote draft generated successfully!', '', {
                 "positionClass": "toast-bottom-center",
-                "timeOut": "5000",
+                "timeOut": "10000",
                 });
             } else {
-                toastr.rror('Failed to send quote draft', '', {
+                toastr.error('Failed to send quote draft', '', {
                     "positionClass": "toast-bottom-center",
-                    "timeOut": "5000",
+                    "timeOut": "10000",
                 })
                 console.log('Error:', response.status);
                 return null;
