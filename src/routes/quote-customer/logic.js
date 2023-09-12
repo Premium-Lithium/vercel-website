@@ -30,13 +30,15 @@ export default async function quoteCustomer(dealId) {
         relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
-
     try{
+        console.log("getting email template")
         const { data, error } = await supabase
         .storage
         .from('email-template')
         .createSignedUrl('customer-quote-template.mjml', 1000);
+        
     }catch(error){
+        console.log("error finding email template")
         const emailData = {
             sender: customer.pl_contact.email,
             recipients: [ customer.email ],
