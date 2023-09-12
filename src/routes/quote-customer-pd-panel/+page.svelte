@@ -16,7 +16,6 @@
     });
 
     async function sendQuoteEmail() {
-        const  dealId = $page.url.searchParams.get('selectedIds');
         try{
             const response = await fetch('/quote-customer', {
             method: 'POST',
@@ -28,12 +27,12 @@
             if (response.status === 200) {
                 toastr.success('Quote draft generated successfully!', '', {
                 "positionClass": "toast-bottom-center",
-                "timeOut": "10000",
+                "timeOut": "1000",
                 });
             } else {
                 toastr.error('Failed to send quote draft', '', {
                     "positionClass": "toast-bottom-center",
-                    "timeOut": "10000",
+                    "timeOut": "1000",
                 })
                 return null;
         }
