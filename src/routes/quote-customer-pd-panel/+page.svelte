@@ -1,10 +1,11 @@
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { page } from '$app/stores'
     import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
 	import { json } from 'stream/consumers';
+	import { waitForDebugger } from 'inspector';
 
     let sdk;
     let dealId = $page.url.searchParams.get('selectedIds');
@@ -29,6 +30,9 @@
                 "positionClass": "toast-bottom-center",
                 "timeOut": "5000",
                 });
+                setTimeout(() => {
+                    console.log(`This is message ${i + 1}`);
+                }, 5000);
                 location.reload();
             } else {
                 toastr.error('Failed to send quote draft', '', {
