@@ -23,7 +23,6 @@ export default async function quoteCustomer(dealId) {
     }
     
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
-    console.log("plContact", customer.pl_contact)
     const emailContentData = {
         pl_bdm_contact_name: customer.pl_contact.name,
         price_calculator_link: priceCalcLink,
@@ -69,9 +68,6 @@ async function getCustomerInfo(dealId) {
     }
     // This is the complete set of data for the deal provided by Pipedrive's API
     const customerData = request.data;
-    console.log(customerData)
-    console.log(customerData.person_name);
-
     // We want to strip this down to only the data we care about when sending a quote email
     const customer = {
         name: customerData.person_name,
@@ -90,7 +86,6 @@ function extractEmailFrom(customerData) {
     // Try to find a home email first
     const homeEmail = emails.find(email => email.label === 'home');
     if(homeEmail !== undefined){
-        console.log("homeEmail!!!!!!!!!!!", homeEmail)
         return homeEmail.value;
     }
     // Fall back to work email if home email isn't found
@@ -113,7 +108,6 @@ function extractEmailFrom(customerData) {
 
 
 function extractSolutionFrom(customerData) {
-    console.log("getting solution")
     try{
         const solution = {
             batterySize_kWh: parseInt(readCustomDealField("New Battery size (kWh)", customerData)),
@@ -123,11 +117,10 @@ function extractSolutionFrom(customerData) {
             },
             // todo: Build a complete description of the solution Premium Lithium will provide
         };
-        console.log(solution);
         return solution;
-    }catch{
+    }catch{ //default solution for if a deal doesnt have one 
         const solution = {
-            batterySize_kWh: 20,
+            batterySize_kWh: 15,
             evCharger: { included: true, type: 'todo: some charger type' }
           }
         return solution;
@@ -139,7 +132,6 @@ function extractPLContactFrom(customerData) {
     console.log("bdm")
     // todo: Could there ever be a case where the deal isn't actually linked to someone from premium lithium?
     const bdm = customerData.user_id;
-    console.log("getting bdm data", bdm);
     const plContactPerson = {
         name: bdm.name.split(" ")[0],
         email: bdm.email,
