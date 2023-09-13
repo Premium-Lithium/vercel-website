@@ -9,7 +9,7 @@ import { MICROSOFT_GRAPHS_API_TOKEN } from '$env/static/private';
 
 
 async function sendMail(sender, recipients, subject, mail_body, content_type) {
-    const authProvider: AuthProvider = (callback: AuthProviderCallback) => {
+    const authProvider= (callback) => {
         // Your logic for getting and refreshing accessToken
         const accessToken = await getNewAPIToken();
         // Error should be passed in case of error while authenticating
