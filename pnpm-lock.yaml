@@ -74,6 +74,9 @@ dependencies:
   langchain:
     specifier: ^0.0.120
     version: 0.0.120(@supabase/supabase-js@2.32.0)(cheerio@1.0.0-rc.12)
+  langsmith:
+    specifier: ^0.0.36
+    version: 0.0.36
   mapbox-gl:
     specifier: ^2.15.0
     version: 2.15.0
@@ -3343,7 +3346,7 @@ packages:
       js-tiktoken: 1.0.7
       js-yaml: 4.1.0
       jsonpointer: 5.0.1
-      langsmith: 0.0.15
+      langsmith: 0.0.36
       ml-distance: 4.0.1
       object-hash: 3.0.0
       openai: 3.3.0
@@ -3360,8 +3363,8 @@ packages:
       - supports-color
     dev: false
 
-  /langsmith@0.0.15:
-    resolution: {integrity: sha512-SVLJEm94aK9mmqE3z2wlpzLjPNodnPJHp1MZdmXG2ysUWSFsRVuGkd6A/GTzlEZ6OofyJSOg6tcNFJSFOi13QQ==}
+  /langsmith@0.0.36:
+    resolution: {integrity: sha512-hGbp/mMBxH+Tqbx3hP/yN7/ETZc+kA4QlyvyXyQza/sR1xLfmjTPNaVMz2NdwcD5QulMHrSlWxuBTXNF3BSlVg==}
     hasBin: true
     dependencies:
       '@types/uuid': 9.0.2

@@ -22,7 +22,20 @@ import { HumanMessage,
 import type { Tool } from 'langchain/dist/tools/base';
 import { Calculator } from 'langchain/tools/calculator';
 import { ChainTool } from 'langchain/tools';
+import { Client } from 'langsmith';
+import { LangChainTracer } from 'langchain/callbacks';
+import { LANGCHAIN_API_KEY, LANGCHAIN_PROJECT, LANGCHAIN_ENDPOINT, LANGCHAIN_TRACING_V2 } from '$env/static/private';
 
+// LANGSMITH
+const client = new Client({
+  apiUrl: LANGCHAIN_ENDPOINT,
+  apiKey: LANGCHAIN_API_KEY,
+})
+
+const tracer = new LangChainTracer({
+  projectName: LANGCHAIN_PROJECT,
+  client
+})
 
 // BOILERPLATE 
 
@@ -248,13 +261,15 @@ function setTemplate(text) {
   agentExecutor.agent.llmChain.prompt.promptMessages[0].prompt.template = text;
 }
 
+
+
 export async function POST({ request }) {
    //setTemplate(modifiedPrompt);
     try {
         const { prompt } = await request.json();
         const response = await agentExecutor.call({
             input: prompt[prompt.length-1]['content']
-    });
+    }, {callbacks: [tracer]});
         return json({message: response}, {status: 200});
     } catch (error)
     {
