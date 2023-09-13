@@ -6,6 +6,7 @@ import { json } from '@sveltejs/kit';
 
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
+import { error } from 'console';
 
 
 export default async function quoteCustomer(dealId) {
@@ -81,7 +82,7 @@ async function getCustomerInfo(dealId) {
 
     if(request.success === false) {
         console.log(`Error fetching customer data for deal ${dealId} on pipedrive`);
-        return null;
+        return request;
     }
     // This is the complete set of data for the deal provided by Pipedrive's API
     const customerData = request.data;
@@ -121,7 +122,7 @@ function extractEmailFrom(customerData) {
     }
 
     console.log(`Could not find any email address for ${customerData.person_name}.`);
-    return null;
+    return json({status: 500, message: "could not find email"});
 }
 
 
