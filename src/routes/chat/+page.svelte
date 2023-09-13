@@ -4,16 +4,21 @@
 	import { invalidateAll } from '$app/navigation';
     let awaitingMessage = false;
     let previousMessages: {"role": string, "content": string}[] = [];
-    let messageToSend = `Greet me with a friendly emoji, and ask whether I'd like to explore products or just need some help`;
+    let messageToSend = `Greet me with a friendly emoji and introduce yourself, and ask whether I'd like to explore products or just need some help`;
     let chatInput = "";
     enum ChatState {
         ASK_PRODUCT_OR_HELP,
+        ASK_PRODUCTS,
         ASK_ENERGY_USAGE,
         ASK_SOLAR_PANELS,
         GET_HELP
     };
 
     let currentState = ChatState.ASK_PRODUCT_OR_HELP;
+    let presetResponses = [];
+    $: presetResponses = getPresetMessagesBasedOnState(currentState); 
+    $: console.log(presetResponses)
+    
 
     onMount(async () => {
         invalidateAll();
@@ -33,13 +38,20 @@
         switch(currentState) {
             case ChatState.ASK_PRODUCT_OR_HELP:
                 if(input.toLowerCase().includes("product")) {
-                    return `Send a message like 'Great! Let's find the perfect product for you. How much energy do you use in a year?' with a friendly emoji`;
-                    currentState = ChatState.ASK_ENERGY_USAGE;
+                    currentState = ChatState.ASK_PRODUCTS;
+                    return `Send a message like 'Great! Let's find the perfect product for you. What are you looking for?' with a friendly emoji`;
+                    
                 }
                 else if(input.toLowerCase().includes("help")){
-                    return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
                     currentState = ChatState.GET_HELP;
+                    return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
                 }
+                break;
+            case ChatState.ASK_PRODUCTS:
+
+                break;
+            case ChatState.GET_HELP:
+
                 break;
             case ChatState.ASK_ENERGY_USAGE:
                 
@@ -49,6 +61,23 @@
                 break;
         }
         return null;
+    }
+
+    function getPresetMessagesBasedOnState(currentState) {
+        switch(currentState) {
+            case ChatState.ASK_PRODUCT_OR_HELP:
+                return ["Explore Products", "Help"];
+            case ChatState.ASK_PRODUCTS:
+                return ["Solar Panels", "Battery", "Solar and Battery", "Other"];
+            case ChatState.ASK_ENERGY_USAGE:
+                return [];
+            case ChatState.ASK_SOLAR_PANELS:
+                return [];
+            case ChatState.GET_HELP:
+                return ["Speak to a consultant"];
+            default:
+                return [];
+        }
     }
 
     async function handleChatInput(e) {
@@ -89,7 +118,7 @@
 
 </script>
 
-<div class="wrapper">
+<body>
     <div class="messages">
     {#each previousMessages as message}
         {#if message.role==="user"}
@@ -102,6 +131,11 @@
         <h2 in:fly|global={{x:-1000, duration:1000}} class="message-assistant">...</h2>
     {/if}
     </div>
+    <div class="preset-response-wrapper">
+        {#each presetResponses as response}
+            <h3 class="preset-response disable-text-select" on:click={(e) => {chatInput = response; handleChatInput(e)}}>{response}</h3>
+        {/each}
+    </div>
     <form on:submit|preventDefault={handleChatInput}>
         <input 
         class="chat-input"
@@ -110,9 +144,26 @@
         bind:value={chatInput}
         />
     </form>
-</div>
+</body>
 
 <style>
+    .preset-response-wrapper {
+        position: absolute;
+        bottom: 14vh;
+        width: 90%;
+        left: 5%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+    }
+
+    .preset-response {
+        border-radius: 5px;
+        padding: 6px;
+        background-color: var(--plblue);
+        color: white;
+        
+    }
     .messages {
         display: flex;
         flex-direction: column;
@@ -121,7 +172,7 @@
         left: 3vw;
         border: 2px solid black; 
         padding: 1vh 2vw 1vh 2vw;  
-        height: 80vh;
+        height: 75vh;
         top: 3vh;
         border-radius: 20px;
         overflow-y: auto;
