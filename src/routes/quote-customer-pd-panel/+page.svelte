@@ -29,9 +29,9 @@
                 "positionClass": "toast-bottom-center",
                 "timeOut": "1000",
                 });
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
+                // setTimeout(() => {
+                //     location.reload();
+                // }, 1000);
             }
     } catch (error) {
         console.log("error sending quote");
