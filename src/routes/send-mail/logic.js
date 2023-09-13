@@ -5,12 +5,22 @@ import { json } from '@sveltejs/kit';
 // todo: at some point we want to ideally use this javascript client provided by microsoft to simplify the logic here slightly
 // See documentation here: https://github.com/microsoftgraph/msgraph-sdk-javascript/tree/dev
 import { Client } from "@microsoft/microsoft-graph-client";
-import { MICROSOFT_GRAPHS_API_TOKEN } from '$env/static/private';
-
 
 async function sendMail(sender, recipients, subject, mail_body, content_type) {
-    const accessToken = await getNewAPIToken();
-    const client = Client.init(accessToken);
+    // Some callback function
+    const authProvider = (callback) => {
+	// Your logic for getting and refreshing accessToken
+        const accessToken = await getNewAPIToken();
+	// Error should be passed in case of error while authenticating
+	// accessToken should be passed upon successful authentication
+	callback(error, accessToken);
+    };
+
+    const options = {
+	    authProvider,
+    };
+
+    const client = Client.init(options);
     let mailAttempt = {
         "success": true,
         "message": `Email sent successfully from ${sender} to ${recipients}`
