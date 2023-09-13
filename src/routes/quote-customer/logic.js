@@ -228,7 +228,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
     } catch (error) {
         console.log(`Error: Failed to create draft: ${error.message}`);
         // Handle the error here or throw it to be caught by the caller.
-        throw error;
+        return error;
     }
 }
 
