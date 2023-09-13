@@ -30,12 +30,6 @@
                 "timeOut": "10000",
             });
             return response;
-        } else {
-            console.log("error sending quote");
-            toastr.error('Failed to send quote draft. Please try again.', '', {
-                "positionClass": "toast-bottom-center",
-                "timeOut": "10000",
-            });
         }
     } catch (error) {
         // Handle the error here, or rethrow it if needed.
