@@ -1,3 +1,4 @@
+import { errorMonitor } from 'events';
 import querystring from 'querystring';
 
 // todo: at some point we want to ideally use this javascript client provided by microsoft to simplify the logic here slightly
@@ -97,12 +98,12 @@ async function getNewAPIToken() {
             return token;
         } else {
             console.log('Error:', data.error_description || 'Unknown error');
-            getNewAPIToken();
+            // getNewAPIToken();
             return data.error;
         }
     } catch (error) {
         console.error(`Fetch error: ${error}`);
-        return null;
+        return errorMonitor;
     }
 }
 
