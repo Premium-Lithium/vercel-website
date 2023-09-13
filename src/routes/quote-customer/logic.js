@@ -248,7 +248,7 @@ async function markAsQuoteIssued(dealId) {
     //     return false;
     // }
     await dealsApi.updateDeal(dealId, {
-        name: "update"
+        title: "update"
     });
 
     // // Move the deal to the quote issued stage
