@@ -238,15 +238,15 @@ async function markAsQuoteIssued(dealId) {
     console.log("marking quote as issued ")
     // Update the `Quote Issued` field on pipedrive with todays date
     // todo: this assumes the dealFieldsRequest in pipedrive-utils was successful
-    // const dealFields = dealFieldsRequest.data;
-    // const dealsApi = new pipedrive.DealsApi(pd);
+    const dealFields = dealFieldsRequest.data;
+    const dealsApi = new pipedrive.DealsApi(pd);
 
-    // // const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
+    const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
 
-    // // // if(quoteIssuedField === undefined) {
-    // // //     console.log(`Could not find the "Quote issued" field on pipedrive`);
-    // // //     return false;
-    // // // }
+    if(quoteIssuedField === undefined) {
+        console.log(`Could not find the "Quote issued" field on pipedrive`);
+        return false;
+    }
 
     // // // await dealsApi.updateDeal(dealId, {
     // // //     [quoteIssuedField.key]: today()
