@@ -43,35 +43,35 @@ export default async function quoteCustomer(dealId) {
 
             const emailData = {
                 sender: customer.pl_contact.email,
-                recipients: [ customer.email ],
+                recipients: [customer.email],
                 subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
                 email_body: "test",
                 content_type: "text"
             };
-             // Create a draft email in the BDM's outlook
-            createDraft(...Object.values(emailData));
-
-            if(!markAsQuoteIssued(dealId)){
+    
+            // Create a draft email in the BDM's outlook
+            await createDraft(...Object.values(emailData));
+    
+            if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 return quoteAttempt;
             }
-            return quoteAttempt
-        // }
-    }catch(error){
-        console.log("error finding email template")
-        const emailData = {
-            sender: customer.pl_contact.email,
-            recipients: [ customer.email ],
-            subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-            mail_body: "error",
-            content_type: "text"
-        };
     
-        // Create a draft email in the BDM's outlook
-        createDraft(...Object.values(emailData));
-        return quoteAttempt = { success: false, message: "error finsing email template"}
-    }
-    return quoteAttempt
+            return quoteAttempt;
+        } catch (error) {
+            console.log("error finding email template");
+            const emailData = {
+                sender: customer.pl_contact.email,
+                recipients: [customer.email],
+                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+                mail_body: "error",
+                content_type: "text"
+            };
+    
+            // Create a draft email in the BDM's outlook
+            await createDraft(...Object.values(emailData));
+            return (quoteAttempt = { success: false, message: "error finding email template" });
+        }
 }
 
 
@@ -180,52 +180,58 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 
 // todo: add meaningful return statements to this to indicate whether or not it worked, and catch these in quoteCustomer above
 async function createDraft(sender, recipients, subject, mail_body, content_type) {
-    console.log("creating drAFT...................................")
-    const apiToken = await getNewAPIToken();
-    if (apiToken === null){
-        console.log("error creating API token");
-        return null
-    }
-    const messagePayload = {
-        subject: subject,
-        body: {
-            contentType: content_type,
-            content: mail_body
-        },
-        toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
-        bccRecipients: [
-            {
-                emailAddress: {
-                    address: "development@premiumlithium.com",
+    try {
+        console.log("creating draft...................................")
+        const apiToken = await getNewAPIToken();
+        if (apiToken === null) {
+            console.log("error creating API token");
+            return null;
+        }
+        const messagePayload = {
+            subject: subject,
+            body: {
+                contentType: content_type,
+                content: mail_body
+            },
+            toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
+            bccRecipients: [
+                {
+                    emailAddress: {
+                        address: "development@premiumlithium.com",
+                    }
                 }
-            }
-        ]
-    };
+            ]
+        };
 
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiToken
-    };
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiToken
+        };
 
-    const options = {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(messagePayload)
-    };
+        const options = {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(messagePayload)
+        };
 
-    const apiUrl = `/v1.0/users/${sender}/messages`;
+        const apiUrl = `/v1.0/users/${sender}/messages`;
 
-    fetch(`https://graph.microsoft.com${apiUrl}`, options)
-        .then(res => {
-            if (res.status !== 201) {
-                console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
-                return res.status
-            }
-        })
-        .catch(error => {
-            console.log(`Error: Failed to create draft: ${error.message}`);
-        });
+        const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
+
+        if (response.status !== 201) {
+            console.log(`Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+            // Handle the error here or throw it to be caught by the caller.
+            throw new Error(`Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+        }
+
+        return response; // You might want to return something meaningful here.
+    } catch (error) {
+        console.log(`Error: Failed to create draft: ${error.message}`);
+        // Handle the error here or throw it to be caught by the caller.
+        throw error;
+    }
 }
+
 
 
 async function markAsQuoteIssued(dealId) {
