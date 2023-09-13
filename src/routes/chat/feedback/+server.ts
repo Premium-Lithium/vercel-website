@@ -18,9 +18,9 @@ export async function POST({request}) {
           score,
         });
         return json({ feedback }, { status: 200 });
-      } catch (e: any) {
-        return json({ error: e.message }, { status: 500 });
-      }
+    } catch (e: any) {
+      return json({ error: e.message }, { status: 500 });
+    }
 }
 
 
@@ -48,7 +48,7 @@ export async function PUT({ request }) {
           correction,
         });
         return json({ feedback }, { status: 200 });
-      } catch (e: any) {
-        return json({ error: e.message }, { status: 500 });
-      }
+    } catch (e: any) {
+      return json({ error: e.message }, { status: 500 });
+    }
 }   

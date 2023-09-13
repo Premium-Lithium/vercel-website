@@ -2,6 +2,8 @@
     import { fly } from 'svelte/transition';
     import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+    import toastr from 'toastr';
+    import 'toastr/build/toastr.min.css';
     import {ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState} from './logic';
 
     let awaitingMessage = false;
@@ -11,29 +13,9 @@
     let presetResponses: Array<string> = [];
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
     let comment = "";
-    let isLoadingFeedback = false;
-
-    async function handleScoreButtonPress(e, score: number){
-        e.preventDefault();
-        comment = "";
-        await sendFeedback(score);
-    }
+    let rating = 0;
+    let currentRunId: number;
     
-    async function sendFeedback(score: number) {
-        if(isLoadingFeedback) return;
-        isLoadingFeedback = true;
-        const response = await fetch("api/feedback", {
-            method: feedback?.id ? "PUT" : "POST",
-            body: JSON.stringify({
-                id: feedback?.id,
-                run_id: runId,
-                score,
-                comment,
-            })
-        });
-        const json = await response.json();
-    }
-
     onMount(async () => {
         invalidateAll();
         const response = await fetch('chat/', {
@@ -47,6 +29,30 @@
         const { message } = await response.json();
         previousMessages = [{"role": "assistant", "content": message.output}];
     });
+
+    async function handleFeedbackComment(score: number) {
+        let response = await fetch('/chat/feedback', {
+            method: "POST",
+            body: JSON.stringify({
+                run_id: currentRunId,
+                score,
+                comment: "",
+            })
+        })
+
+        response = await response.json();
+        if(response.ok) {
+            toastr.success("Feedback sent successfully", "", {
+                timeOut: 1000,
+                progressBar: true,
+            })
+        } else {
+            toastr.error(`Error sending feedback: ${response.error}`, "", {
+                timeOut: 1000,
+                progressBar: true,
+            })
+        }
+    }
 
     async function handleChatInput(e) {
         awaitingMessage = true;
@@ -74,11 +80,14 @@
             output = "I'm unable to respond to that.";
         }
         else {
-            const { message } = await response.json();
+            const { message, runId } = await response.json();
             if (message == 'Agent stopped due to max iterations.') {
                 output = "Request timed out.";
             }
-            else output = message.output;
+            else {
+                output = message.output;
+                currentRunId = runId;
+            }
         }
         previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
     }
@@ -95,8 +104,8 @@
             <div class="message-{message.role}">
                 <h2>{message.content}</h2>
                 <div class="feedback-icons disable-text-select">
-                    <h2>👎</h2>
-                    <h2>👍</h2>
+                    <h2 on:click={() => {handleFeedbackComment(0)}}>👎</h2>
+                    <h2 on:click={() => {handleFeedbackComment(1)}}>👍</h2>
                 </div>
             </div>
             

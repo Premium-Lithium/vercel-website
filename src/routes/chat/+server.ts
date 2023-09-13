@@ -270,7 +270,7 @@ export async function POST({ request }) {
         const response = await agentExecutor.call({
             input: prompt[prompt.length-1]['content']
     }, {callbacks: [tracer]});
-        return json({message: response}, {status: 200});
+        return json({message: response, runId: response.__run}, {status: 200});
     } catch (error)
     {
         return json({message: error}, {status: 400});
