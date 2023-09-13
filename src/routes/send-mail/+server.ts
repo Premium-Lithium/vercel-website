@@ -47,6 +47,6 @@ export async function POST({ request }) {
     } catch (error) {
         // Handle the error here, or log it if needed.
         console.error("Error sending mail:", error);
-        return json({ message: "Internal server error" }, { status: 500 });
+        return json({ message: "error sending mail" }, { status: 500 });
     }
 }
