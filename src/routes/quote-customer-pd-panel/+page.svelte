@@ -23,6 +23,7 @@
                 deal_id: dealId
             })
             });
+            console.log(response);
             if (response.status === 200) {
                 toastr.success('Quote draft generated successfully!', '', {
                 "positionClass": "toast-bottom-center",
