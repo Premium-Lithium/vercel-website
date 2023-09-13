@@ -1,6 +1,5 @@
 import pipedrive from 'pipedrive';
-import Pipedrive from 'pipedrive';
-import { pd, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
+import { pd, dealFieldsRequest } from '$lib/pipedrive-utils.js'
 
 
 async function captureLeadFrom(leadSourceName, lead, labelName=null) { // `labelName` is the name of a pipedrive label
@@ -84,7 +83,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
         const homeownerOptionId = getOptionIdFor(leadData.isHomeOwner ? "Yes" : "No", homeownerField);
 
         // todo: add information about whether the customer is a homeowner
-        let leadOptions = Pipedrive.AddLeadRequest.constructFromObject({
+        let leadOptions = pipedrive.AddLeadRequest.constructFromObject({
             title: title,
             personId: personId,
             ownerId: 15215441, // Lewis
@@ -114,7 +113,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
         // While we don't have fields for these, include them in notes
         const noteContent = `Age: ${leadData.ageRange}\nInterested in: ${leadData.interestedIn}\nSource: ${leadData.source || "Unknown"}\nBuilding type: ${leadData.buildingType || "Unknown"}`;
 
-        let noteOptions = Pipedrive.AddNoteRequest.constructFromObject({
+        let noteOptions = pipedrive.AddNoteRequest.constructFromObject({
             content: noteContent,
             leadId: newLeadId
         });
@@ -144,27 +143,6 @@ async function getLeadLabelId(labelName) {
 
     return label.id;
 }
-
-
-/*
-function getFieldId(fieldName) {
-    if(dealFieldsRequest.success === false) {
-        console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
-        return null;
-    }
-
-    const allFields = dealFieldsRequest.data;
-
-    const field = allFields.find(f => f.name === fieldName);
-
-    if(field === undefined) {
-        console.log(`Could not find deal field with name '${fieldName}'. Is this spelled correctly?`);
-        return null;
-    }
-
-    return field.key;
-}
-*/
 
 
 function getField(fieldName) {
