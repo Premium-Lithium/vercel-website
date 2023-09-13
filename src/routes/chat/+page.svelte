@@ -9,9 +9,30 @@
     let messageToSend = `Greet me with a friendly emoji and introduce yourself, and ask whether I'd like to explore products or just need some help`;
     let chatInput = "";
     let presetResponses: Array<string> = [];
-    $: presetResponses = getPresetMessagesBasedOnState($currentState); 
-    $: console.log(presetResponses)
+    $: presetResponses = getPresetMessagesBasedOnState($currentState);
+    let comment = "";
+    let isLoadingFeedback = false;
+
+    async function handleScoreButtonPress(e, score: number){
+        e.preventDefault();
+        comment = "";
+        await sendFeedback(score);
+    }
     
+    async function sendFeedback(score: number) {
+        if(isLoadingFeedback) return;
+        isLoadingFeedback = true;
+        const response = await fetch("api/feedback", {
+            method: feedback?.id ? "PUT" : "POST",
+            body: JSON.stringify({
+                id: feedback?.id,
+                run_id: runId,
+                score,
+                comment,
+            })
+        });
+        const json = await response.json();
+    }
 
     onMount(async () => {
         invalidateAll();
@@ -71,7 +92,14 @@
         {#if message.role==="user"}
             <h2 in:fly|global={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
         {:else}
-            <h2 class="message-{message.role}">{message.content}</h2>
+            <div class="message-{message.role}">
+                <h2>{message.content}</h2>
+                <div class="feedback-icons disable-text-select">
+                    <h2>👎</h2>
+                    <h2>👍</h2>
+                </div>
+            </div>
+            
         {/if}
     {/each}
     {#if awaitingMessage}
@@ -153,6 +181,16 @@
         align-self: end;
         border-radius: 30px 30px 5px 30px;
         box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .feedback-icons {
+        display: flex;
+        flex-direction: row-reverse;
+    }
+
+    .feedback-icons > h2 {
+        margin-left: 10px;
+        margin-right: 10px;
     }
 
     .chat-input {
