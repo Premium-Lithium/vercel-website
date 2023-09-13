@@ -2,6 +2,7 @@ import mjml2html from 'mjml';
 import nunjucks from 'nunjucks';
 
 async function populateEmailTemplateWith(data, mjmlTemplateRelPath, importMetaUrl) {
+    console.log("populating email template");
     const response = await fetch(mjmlTemplateRelPath);
     try {
         const mjmlString = await response.text();

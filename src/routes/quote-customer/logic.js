@@ -6,8 +6,6 @@ import { json } from '@sveltejs/kit';
 
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
-import { error } from 'console';
-
 
 export default async function quoteCustomer(dealId) {
     let quoteAttempt = {
@@ -37,9 +35,10 @@ export default async function quoteCustomer(dealId) {
         const { data, error } = await supabase
         .storage
         .from('email-template')
-        .createSignedUrl('customer-quote-template.mjml', 1000);
+        .createSignedUrl('customer-quote-template.mjml', 60)
         if (data){
-            const templatePath = data.signedUrl;
+            
+            const templatePath =data.signedUrl;
             const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
             const emailData = {
@@ -49,7 +48,7 @@ export default async function quoteCustomer(dealId) {
                 email_body: emailContent,
                 content_type: "HTML"
             };
-             // Create a draft email in the BDM's outloo
+             // Create a draft email in the BDM's outlook
             createDraft(...Object.values(emailData));
 
             if(!markAsQuoteIssued(dealId)){
@@ -72,6 +71,7 @@ export default async function quoteCustomer(dealId) {
         createDraft(...Object.values(emailData));
         return quoteAttempt = { success: false, message: "error finsing email template"}
     }
+    return quoteAttempt
 }
 
 

@@ -37,6 +37,7 @@ export async function POST({ request }) {
     }
 
     const mailAttempt = await sendMail(...Object.values(requestData));
+    console.log(mailAttempt)
 
     return json(
         { message: mailAttempt.message },

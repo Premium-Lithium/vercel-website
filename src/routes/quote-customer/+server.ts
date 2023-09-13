@@ -30,6 +30,7 @@ export async function POST({ request }) {
     }
 
     const quoteAttempt = await quoteCustomer(requestData.deal_id);
+    console.log(quoteAttempt)
 
     return json(
         { message: quoteAttempt.message },

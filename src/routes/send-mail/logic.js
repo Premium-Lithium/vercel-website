@@ -6,6 +6,7 @@ import querystring from 'querystring';
 
 
 async function sendMail(sender, recipients, subject, mail_body, content_type) {
+    console.log("sending mail")
     let mailAttempt = {
         "success": true,
         "message": `Email sent successfully from ${sender} to ${recipients}`
