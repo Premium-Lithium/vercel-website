@@ -29,13 +29,13 @@
                 "positionClass": "toast-bottom-center",
                 "timeOut": "1000",
                 });
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
                 return response
-                // setTimeout(() => {
-                //     location.reload();
-                // }, 1000);
             } else {
                 console.log("error sending quote");
-                toastr.error('Failed to send quote draft', '', {
+                toastr.error('Failed to send quote draft Please Try again', '', {
                     "positionClass": "toast-bottom-center",
                     "timeOut": "1000",
                 })
