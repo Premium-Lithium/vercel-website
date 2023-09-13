@@ -52,10 +52,10 @@ export default async function quoteCustomer(dealId) {
             // Create a draft email in the BDM's outlook
             await createDraft(...Object.values(emailData));
     
-            if (!markAsQuoteIssued(dealId)) {
-                console.log(`Failed to update deal ${dealId} as QuoteIssued`);
-                return quoteAttempt;
-            }
+            // if (!markAsQuoteIssued(dealId)) {
+            //     console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+            //     return quoteAttempt;
+            // }
     
             return quoteAttempt;
         } catch (error) {
@@ -185,7 +185,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
         const apiToken = await getNewAPIToken();
         if (apiToken === null) {
             console.log("error creating API token");
-            return null;
+            return json({status: 500}, {statusText: "error creating api token"});
         }
         const messagePayload = {
             subject: subject,
@@ -228,7 +228,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
     } catch (error) {
         console.log(`Error: Failed to create draft: ${error.message}`);
         // Handle the error here or throw it to be caught by the caller.
-        return error;
+        return json({status: 500},{statusText: "failed to create draft"});
     }
 }
 
