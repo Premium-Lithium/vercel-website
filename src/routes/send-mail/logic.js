@@ -1,26 +1,11 @@
-
 import querystring from 'querystring';
-import { json } from '@sveltejs/kit';
 
 // todo: at some point we want to ideally use this javascript client provided by microsoft to simplify the logic here slightly
 // See documentation here: https://github.com/microsoftgraph/msgraph-sdk-javascript/tree/dev
-import { Client } from "@microsoft/microsoft-graph-client";
+// import { Client } from "@microsoft/microsoft-graph-client";
+
 
 async function sendMail(sender, recipients, subject, mail_body, content_type) {
-    // Some callback function
-    const authProvider = (callback) => {
-	// Your logic for getting and refreshing accessToken
-        const accessToken = await getNewAPIToken();
-	// Error should be passed in case of error while authenticating
-	// accessToken should be passed upon successful authentication
-	callback(error, accessToken);
-    };
-
-    const options = {
-	    authProvider,
-    };
-
-    const client = Client.init(options);
     let mailAttempt = {
         "success": true,
         "message": `Email sent successfully from ${sender} to ${recipients}`
@@ -44,12 +29,37 @@ async function sendMail(sender, recipients, subject, mail_body, content_type) {
             toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
         }
     };
-    try {
-        let response = await client.api(`/${sender}/sendMail`).post({ message: messagePayload });
-        console.log(response);
-    } catch (error) {
-        throw error;
-    }
+
+    const apiToken = await getNewAPIToken();
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiToken
+    };
+
+    const options = {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(messagePayload)
+    };
+
+    const apiUrl = `/v1.0/users/${sender}/sendMail`;
+
+    fetch(`https://graph.microsoft.com${apiUrl}`, options)
+        .then(res => {
+            if (res.status !== 202) {
+                mailAttempt.success = false;
+                mailAttempt.message = `Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`;
+                console.log(mailAttempt.message);
+            }
+        })
+        .catch(error => {
+            mailAttempt.success = false;
+            mailAttempt.message = `Error: Failed to send email: ${error.message}`;
+            console.log(mailAttempt.message);
+        });
+
+    console.log(mailAttempt.message);
     return mailAttempt;
 }
 
@@ -87,11 +97,11 @@ async function getNewAPIToken() {
             return token;
         } else {
             console.log('Error:', data.error_description || 'Unknown error');
-            return data.error;
+            return null;
         }
     } catch (error) {
-        console.error(`Fetch error: ${error}`);
-        return json({status: 500, message: "error getting api token"});
+        console.error(`Fetch error: ${error.message}`);
+        return null;
     }
 }
 
