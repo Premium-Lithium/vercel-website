@@ -97,6 +97,7 @@ async function getNewAPIToken() {
             return token;
         } else {
             console.log('Error:', data.error_description || 'Unknown error');
+            getNewAPIToken();
             return data.error;
         }
     } catch (error) {
