@@ -69,7 +69,7 @@ export default async function quoteCustomer(dealId) {
     
         // Create a draft email in the BDM's outlook
         createDraft(...Object.values(emailData));
-        return quoteAttempt
+        return quoteAttempt = { success: false, message: "error finsing email template"}
     }
 }
 
