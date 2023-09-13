@@ -29,6 +29,7 @@
                 "positionClass": "toast-bottom-center",
                 "timeOut": "1000",
                 });
+                return response
                 // setTimeout(() => {
                 //     location.reload();
                 // }, 1000);
@@ -39,7 +40,7 @@
                     "positionClass": "toast-bottom-center",
                     "timeOut": "1000",
                 })
-        return null;
+        return error;
     }
 }
 </script>
