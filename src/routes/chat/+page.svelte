@@ -14,7 +14,7 @@
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
     let comment = "";
     let rating = 0;
-    let currentRunId;
+    let currentRunId = 'fcd19082-f7db-465c-aa53-66f05d4c7dd3';
     
     onMount(async () => {
         invalidateAll();
@@ -41,7 +41,7 @@
         })
 
         response = await response.json();
-        if(response.ok) {
+        if(!response.error) {
             toastr.success("Feedback sent successfully", "", {
                 timeOut: 1000,
                 progressBar: true,
@@ -81,8 +81,7 @@
         }
         else {
             const { message, runId } = await response.json();
-            currentRunId = runId;
-            console.log(`message: ${message}\nrunId: ${currentRunId}`);
+            currentRunId = runId.runId;
             if (message == 'Agent stopped due to max iterations.') {
                 output = "Request timed out.";
             }
@@ -98,16 +97,19 @@
 
 <body>
     <div class="messages">
-    {#each previousMessages as message}
+    {#each previousMessages as message, i}
         {#if message.role==="user"}
             <h2 in:fly|global={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
         {:else}
             <div class="message-{message.role}">
                 <h2>{message.content}</h2>
+                <!-- Don't show rating on first message. -->
+                {#if i != 0}
                 <div class="feedback-icons disable-text-select">
                     <h2 on:click={() => {handleFeedbackComment(0)}}>👎</h2>
                     <h2 on:click={() => {handleFeedbackComment(1)}}>👍</h2>
                 </div>
+                {/if}
             </div>
             
         {/if}

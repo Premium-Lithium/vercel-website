@@ -271,7 +271,7 @@ export async function POST({ request }) {
             input: prompt[prompt.length-1]['content']
     }, {callbacks: [tracer]});
       console.log(response.__run)
-        return json({message: response, runId: response.__run.runId}, {status: 200});
+        return json({message: response, runId: response.__run}, {status: 200});
     } catch (error)
     {
         return json({message: error}, {status: 400});
