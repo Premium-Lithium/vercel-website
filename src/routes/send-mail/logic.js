@@ -4,10 +4,13 @@ import { json } from '@sveltejs/kit';
 
 // todo: at some point we want to ideally use this javascript client provided by microsoft to simplify the logic here slightly
 // See documentation here: https://github.com/microsoftgraph/msgraph-sdk-javascript/tree/dev
-// import { Client } from "@microsoft/microsoft-graph-client";
+import { Client } from "@microsoft/microsoft-graph-client";
+import { MICROSOFT_GRAPHS_API_TOKEN } from '$env/static/private';
 
 
 async function sendMail(sender, recipients, subject, mail_body, content_type) {
+    
+    const client = Client.init(MICROSOFT_GRAPHS_API_TOKEN);
     let mailAttempt = {
         "success": true,
         "message": `Email sent successfully from ${sender} to ${recipients}`
@@ -31,37 +34,12 @@ async function sendMail(sender, recipients, subject, mail_body, content_type) {
             toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
         }
     };
-
-    const apiToken = await getNewAPIToken();
-
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiToken
-    };
-
-    const options = {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(messagePayload)
-    };
-
-    const apiUrl = `/v1.0/users/${sender}/sendMail`;
-
-    fetch(`https://graph.microsoft.com${apiUrl}`, options)
-        .then(res => {
-            if (res.status !== 202) {
-                mailAttempt.success = false;
-                mailAttempt.message = `Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`;
-                console.log(mailAttempt.message);
-            }
-        })
-        .catch(error => {
-            mailAttempt.success = false;
-            mailAttempt.message = `Error: Failed to send email: ${error.message}`;
-            console.log(mailAttempt.message);
-        });
-
-    console.log(mailAttempt.message);
+    try {
+        let response = await client.api(`/${sender}/sendMail`).post({ message: messagePayload });
+        console.log(response);
+    } catch (error) {
+        throw error;
+    }
     return mailAttempt;
 }
 
