@@ -85,8 +85,8 @@ export async function POST({ request }) {
     if(!request.body)
         return json({ message: "No request body found" }, { status: 400 });
 
-    const leadsIoData = await request.json();
-    const validationErrors = validate(leadsIoData, schema);
+    const prismData = await request.json();
+    const validationErrors = validate(prismData, schema);
 
     if(validationErrors.length) {
         const message = validationErrors.join(", ");
@@ -94,8 +94,8 @@ export async function POST({ request }) {
     }
 
     // If the request was as we expected, then use this to create a lead object
-    const lead = await extractLeadFrom(leadsIoData);
-    const leadAddAttempt = await captureLeadFrom('Leads.IO', lead);
+    const lead = await extractLeadFrom(prismData);
+    const leadAddAttempt = await captureLeadFrom('Prism', lead);
 
     const response = new Response(
         JSON.stringify({ message: leadAddAttempt.message }),

@@ -1,5 +1,5 @@
 This endpoint is responsible for processing inbound lead data supplied by
-[Leads.io](https://leads.io/) provided in the format below:
+[Prism Marketing](https://prismmarketinggroup.co.uk/) provided in the format below:
 
 ```
 {
