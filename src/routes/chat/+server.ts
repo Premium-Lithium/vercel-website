@@ -1,17 +1,16 @@
 import { json } from '@sveltejs/kit';
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
-import { createClient } from "@supabase/supabase-js";
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { supabase } from '$lib/supabase';
 import {BaseChatPromptTemplate,
         renderTemplate,
         type SerializedBasePromptTemplate} from 'langchain/prompts';
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { BufferWindowMemory } from 'langchain/memory';
+import { BufferMemory, BufferWindowMemory } from 'langchain/memory';
 import { LLMChain, VectorDBQAChain } from 'langchain/chains';
 import { AgentActionOutputParser,
          AgentExecutor,
+         initializeAgentExecutorWithOptions,
          LLMSingleActionAgent,} from "langchain/agents";
 import { HumanMessage, 
          BaseMessage, 
@@ -24,7 +23,6 @@ import type { Tool } from 'langchain/dist/tools/base';
 import { Calculator } from 'langchain/tools/calculator';
 import { ChainTool } from 'langchain/tools';
 
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 // BOILERPLATE 
 
@@ -36,8 +34,8 @@ const formatInstructions = (
 ) => `Use the following format in your response:
 
 Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [${toolNames}, None] ** If None, you must provide a Final Answer **
+Thought: you should always think about what to do, if you don't need to take an action then provide a Final Answer.
+Action: the action to take, must be one of [${toolNames}]
 Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Input/Observation can repeat N times.)
@@ -107,7 +105,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
   
       const match = /Action: (.*)\nInput: (.*)/s.exec(text);
       if (!match) {
-        throw new Error(`Could not parse LLM output: ${text}`);
+        return {log: text, returnValues: {output: text}};
       }
   
       return {
@@ -124,69 +122,131 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
 
 // END BOILERPLATE
 
-let model;
-let vectorStore;
+let model
 
 model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 500 });
 
-vectorStore = await new SupabaseVectorStore(
+let generalVectorStore = await new SupabaseVectorStore(
     new OpenAIEmbeddings(),
     {
         client: supabase,
-        tableName: "documents",
-        queryName: "match_documents",
+        tableName: "evie_general_knowledge_base",
+        queryName: "match_documents_general",
     },
 );
 
-let vectorStoreChain = VectorDBQAChain.fromLLM(model, vectorStore);
+let pricingVectorStore = await new SupabaseVectorStore(
+  new OpenAIEmbeddings(),
+  {
+      client: supabase,
+      tableName: "evie_pricing_knowledge_base",
+      queryName: "match_documents_pricing",
+  },
+);
 
-const qaTool = new ChainTool({
-    name: "premium-lithium-qa",
+let generalVectorStoreChain = VectorDBQAChain.fromLLM(model, generalVectorStore);
+
+let pricingVectorStoreChain = VectorDBQAChain.fromLLM(model, pricingVectorStore);
+
+const generalQATool = new ChainTool({
+    name: "premium-lithium-general-qa",
     description: "Premium Lithium Knowledge Base QA - Useful for answering questions about products we offer, such as batteries, solar panels, inverters and EV chargers",
-    chain: vectorStoreChain,
+    chain: generalVectorStoreChain,
+})
+
+const pricingQATool = new ChainTool({
+  name: "premium-lithium-pricing-qa",
+  description: "Premium Lithium Pricing Knowledge Base QA - Useful for answering questions about prices of our products, and payment queries",
+  chain: pricingVectorStoreChain,
 })
 
 const tools = [
     new Calculator(),
-    qaTool,
+    generalQATool,
+    pricingQATool,
 ];
-const prompt = new CustomPromptTemplate({
-    tools: tools,
-    inputVariables: ["input", "intermediate_steps", "history"],
+// const prompt = new CustomPromptTemplate({
+//     tools: tools,
+//     inputVariables: ["input", "intermediate_steps", "history"],
+// });
+
+// let conversationChain = new LLMChain(
+//     {
+//         llm: model,
+//         prompt: prompt,
+//     }
+// );
+
+// const outputParser = new CustomOutputParser();
+
+// const agent = new LLMSingleActionAgent(
+//     {
+//         llmChain: conversationChain,
+//         outputParser: outputParser,
+//         stop: ['\nObservation:'],
+//     }
+// )
+
+const conversationMemory = new BufferMemory({
+    memoryKey: "chat_history",
+    returnMessages: true,
+    inputKey: "input",
+    outputKey: "output",
 });
 
-let conversationChain = new LLMChain(
+const agentExecutor = await initializeAgentExecutorWithOptions(tools, model, 
     {
-        llm: model,
-        prompt: prompt,
-    }
-);
-
-const outputParser = new CustomOutputParser();
-
-const agent = new LLMSingleActionAgent(
-    {
-        llmChain: conversationChain,
-        outputParser: outputParser,
-        stop: ['\nObservation:'],
-    }
-)
-
-const conversationMemory = new BufferWindowMemory({
-    k: 2
-});
-
-const agentExecutor = AgentExecutor.fromAgentAndTools(
-    {
-      agent,
-      tools,
+      agentType: "chat-conversational-react-description",
       verbose: true,
       memory: conversationMemory,
-      maxIterations: 6,
+      maxIterations: 8,
     }
 );
 
+
+// Default prompt
+let defaultPrompt = `Assistant is a large language model trained by OpenAI.
+
+Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations 
+and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, 
+allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+
+Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand 
+large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. 
+Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in 
+discussions and provide explanations and descriptions on a wide range of topics.
+
+Overall, Assistant is a powerful system that can help with a wide range of tasks and provide valuable insights 
+and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation 
+about a particular topic, Assistant is here to assist. However, above all else, all responses must adhere to the format of 
+RESPONSE FORMAT INSTRUCTIONS.`
+
+
+// Modified prompt
+let modifiedPrompt = `Assistant is a large language model trained by OpenAI, being utilised by a company called Premium Lithium to provide 
+customer service through their chatbot named Evie. As a customer service representative, Assistant should respond in a friendly and helpful manner,
+and should always put the customer first, whether that's to guide them to their perfect product, or use a fact lookup tool in order to answer any queries.
+
+Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations 
+and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, 
+allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+
+Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand 
+large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. 
+Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in 
+discussions and provide explanations and descriptions on a wide range of topics.
+
+Overall, Assistant is a powerful system that can help with a wide range of tasks and provide valuable insights 
+and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation 
+about a particular topic, Assistant is here to assist. However, above all else, all responses must adhere to the format of 
+RESPONSE FORMAT INSTRUCTIONS.`
+
+function setTemplate(text) {
+  agentExecutor.agent.llmChain.prompt.promptMessages[0].prompt.template = text;
+}
+
 export async function POST({ request }) {
+  setTemplate(modifiedPrompt);
     try {
         const { prompt } = await request.json();
         const response = await agentExecutor.call({

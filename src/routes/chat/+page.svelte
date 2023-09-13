@@ -1,16 +1,25 @@
-<script>
+<script lang='ts'>
     import { fly } from 'svelte/transition';
     import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
     let awaitingMessage = false;
-    let previousMessages = [];
-    const initialMessage = `Greet me with a friendly emoji`;
+    let previousMessages: {"role": string, "content": string}[] = [];
+    let messageToSend = `Greet me with a friendly emoji`;
+    let chatInput = "";
+    enum ChatState {
+        ASK_PRODUCT_OR_HELP,
+        ASK_ENERGY_USAGE,
+        ASK_SOLAR_PANELS,
+        GET_HELP
+    };
+
+    let currentState = ChatState.ASK_PRODUCT_OR_HELP;
 
     onMount(async () => {
         invalidateAll();
         const response = await fetch('chat/', {
             method: 'POST',
-            body: JSON.stringify({ "prompt" : [{"role": "user", "content": initialMessage}] }),
+            body: JSON.stringify({ "prompt" : [{"role": "user", "content": messageToSend}] }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -19,6 +28,67 @@
         const { message } = await response.json();
         previousMessages = [{"role": "assistant", "content": message.output}];
     });
+
+    function getMessageBasedOnState(input: string){
+        switch(currentState) {
+            case ChatState.ASK_PRODUCT_OR_HELP:
+                if(input.toLowerCase().includes("product")) {
+                    return `Send a message like 'Great! Let's find the perfect product for you. How much energy do you use in a year?' with a friendly emoji`;
+                    currentState = ChatState.ASK_ENERGY_USAGE;
+                }
+                else if(input.toLowerCase().includes("help")){
+                     {
+                        return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
+                        currentState = ChatState.GET_HELP;
+                    }
+                }
+                break;
+            case ChatState.ASK_ENERGY_USAGE:
+        
+                break;
+            case ChatState.ASK_SOLAR_PANELS:
+
+                break;
+        }
+        return null;
+    }
+
+    async function handleChatInput(e) {
+        awaitingMessage = true;
+        let prompt = chatInput;
+        previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
+        let messages = previousMessages;
+        if(currentState == ChatState.ASK_PRODUCT_OR_HELP) {
+            let msg = getMessageBasedOnState(prompt);
+            if(msg != null) {
+                messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg}];
+            }
+        }
+        const chatRequestUrl = 'chat/';
+        chatInput = '';
+        const response = await fetch(chatRequestUrl, {
+            method: 'POST',
+            body: JSON.stringify({ "prompt" : messages }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        awaitingMessage = false;
+        let output;
+        if (!response.ok) {
+            output = "I'm unable to respond to that.";
+        }
+        else {
+            const { message } = await response.json();
+            if (message == 'Agent stopped due to max iterations.') {
+                output = "Request timed out.";
+            }
+            else output = message.output;
+        }
+        previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
+    }
+
+
 </script>
 
 <div class="wrapper">
@@ -34,45 +104,14 @@
         <h2 in:fly|global={{x:-1000, duration:1000}} class="message-assistant">...</h2>
     {/if}
     </div>
-    <form>
+    <form on:submit|preventDefault={handleChatInput}>
         <input 
         class="chat-input"
         type="text"
         autocomplete="off"
-        on:keydown = {async (e) => {
-            if(e.key === 'Enter'){
-                awaitingMessage = true;
-                const input = e.currentTarget;
-                const prompt = input.value;
-                previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
-                const messages = previousMessages;
-                const chatRequestUrl = 'chat/';
-                input.value = '';
-                const response = await fetch(chatRequestUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ "prompt" : messages }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                awaitingMessage = false;
-                let output;
-                if (!response.ok) {
-                    output = "I'm unable to respond to that.";
-                }
-                else {
-                    const { message } = await response.json();
-                    if (message == 'Agent stopped due to max iterations.') {
-                        output = "Request timed out.";
-                    }
-                    else output = message.output;
-                }
-                previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
-            }
-        }}
+        bind:value={chatInput}
         />
     </form>
-    
 </div>
 
 <style>
