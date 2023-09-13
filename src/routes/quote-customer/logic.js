@@ -52,10 +52,10 @@ export default async function quoteCustomer(dealId) {
             // Create a draft email in the BDM's outlook
             await createDraft(...Object.values(emailData));
     
-            // if (!markAsQuoteIssued(dealId)) {
-            //     console.log(`Failed to update deal ${dealId} as QuoteIssued`);
-            //     return quoteAttempt;
-            // }
+            if (!markAsQuoteIssued(dealId)) {
+                console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+                return quoteAttempt;
+            }
     
             return quoteAttempt;
         } catch (error) {
@@ -252,21 +252,21 @@ async function markAsQuoteIssued(dealId) {
         [quoteIssuedField.key]: today()
     });
 
-    // Move the deal to the quote issued stage
-    const stagesApi = new pipedrive.StagesApi(pd);
-    const B2C_PIPELINE_ID = 23;
-    let opts = {
-        'pipelineId': B2C_PIPELINE_ID,
-        'start': 0,
-        'limit': 56
-    };
-    const stages = await stagesApi.getStages(opts);
+    // // Move the deal to the quote issued stage
+    // const stagesApi = new pipedrive.StagesApi(pd);
+    // const B2C_PIPELINE_ID = 23;
+    // let opts = {
+    //     'pipelineId': B2C_PIPELINE_ID,
+    //     'start': 0,
+    //     'limit': 56
+    // };
+    // const stages = await stagesApi.getStages(opts);
 
-    const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
+    // const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
 
-    await dealsApi.updateDeal(dealId, {
-        stage_id: quoteIssuedStage.id
-    });
+    // await dealsApi.updateDeal(dealId, {
+    //     stage_id: quoteIssuedStage.id
+    // });
 
     return true;
 }
