@@ -9,8 +9,13 @@ import { MICROSOFT_GRAPHS_API_TOKEN } from '$env/static/private';
 
 
 async function sendMail(sender, recipients, subject, mail_body, content_type) {
-    
-    const client = Client.init(MICROSOFT_GRAPHS_API_TOKEN);
+    const authProvider: AuthProvider = (callback: AuthProviderCallback) => {
+        // Your logic for getting and refreshing accessToken
+        const accessToken = await getNewAPIToken();
+        // Error should be passed in case of error while authenticating
+        // accessToken should be passed upon successful authentication
+        callback("error", accessToken);
+    const client = Client.init({authProvider});
     let mailAttempt = {
         "success": true,
         "message": `Email sent successfully from ${sender} to ${recipients}`
