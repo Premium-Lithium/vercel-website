@@ -4,7 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
     let awaitingMessage = false;
     let previousMessages: {"role": string, "content": string}[] = [];
-    let messageToSend = `Greet me with a friendly emoji`;
+    let messageToSend = `Greet me with a friendly emoji, and ask whether I'd like to explore products or just need some help`;
     let chatInput = "";
     enum ChatState {
         ASK_PRODUCT_OR_HELP,
@@ -37,14 +37,12 @@
                     currentState = ChatState.ASK_ENERGY_USAGE;
                 }
                 else if(input.toLowerCase().includes("help")){
-                     {
-                        return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
-                        currentState = ChatState.GET_HELP;
-                    }
+                    return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
+                    currentState = ChatState.GET_HELP;
                 }
                 break;
             case ChatState.ASK_ENERGY_USAGE:
-        
+                
                 break;
             case ChatState.ASK_SOLAR_PANELS:
 
