@@ -1,4 +1,5 @@
 import pipedrive from 'pipedrive';
+import Pipedrive from 'pipedrive';
 import { pd, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 
 
@@ -21,9 +22,14 @@ async function captureLeadFrom(leadSourceName, lead, labelName=null) { // `label
             lead.emailAddress,
             lead.name,
             lead.phoneNumber,
-            lead.ageRange
         );
-        await addLeadToPipedrive(leadTitle, lead.source, lead.energyUsage, lead.buildingType, personId, labelName);
+
+        await addLeadToPipedrive(
+            lead,
+            leadTitle,
+            personId,
+            labelName,
+        );
     }
     catch(error) {
         const msg = `Error adding lead: ${error}`;
@@ -36,7 +42,7 @@ async function captureLeadFrom(leadSourceName, lead, labelName=null) { // `label
 }
 
 
-async function addPersonToPipedrive(emailAddress, name, phone, ageRange) {
+async function addPersonToPipedrive(emailAddress, name, phone) {
     console.log(`Adding person ${name} with email ${emailAddress} and phone ${phone} to pipedrive...`);
 
     const persons = new pipedrive.PersonsApi(pd);
@@ -49,10 +55,7 @@ async function addPersonToPipedrive(emailAddress, name, phone, ageRange) {
             email: emailAddress,
             phone: phone,
             ownerId: 15215441, // Lewis
-            // age: todo: add age field to pipedrive
         });
-
-        console.log(person);
     }
     catch(error) {
         console.log(`Error adding person: ${error}`);
@@ -62,13 +65,12 @@ async function addPersonToPipedrive(emailAddress, name, phone, ageRange) {
 }
 
 
-async function addLeadToPipedrive(leadTitle, source, energyUsage, buildingType, personId, labelName) {
-    console.log(`Adding lead with source ${source}, energy usage ${energyUsage}, building type ${buildingType}, and person id ${personId} to pipedrive...`);
-
+async function addLeadToPipedrive(leadData, title, personId, labelName) {
     const leads = new pipedrive.LeadsApi(pd);
 
-    const dailyEnergyUsageFieldId = getFieldId("Daily Energy Usage (kWh)");
-    // const leadSourceOtherFieldId = getFieldId("Lead Source - Other");
+    const dailyEnergyUsageField = getField("Daily Energy Usage (kWh)");
+    const homeownerField = getField("Are You the Homeowner?");
+    const postcodeField = getField("Post Code")
 
     try {
         let labels = [];
@@ -78,18 +80,52 @@ async function addLeadToPipedrive(leadTitle, source, energyUsage, buildingType, 
             labels.push(labelId);
         }
 
-        await leads.addLead({
-            title: leadTitle,
+        // Work out what to put in the homeowner field - todo: get option id
+        const homeownerOptionId = getOptionIdFor(leadData.isHomeOwner ? "Yes" : "No", homeownerField);
+
+        // todo: add information about whether the customer is a homeowner
+        let leadOptions = Pipedrive.AddLeadRequest.constructFromObject({
+            title: title,
             personId: personId,
             ownerId: 15215441, // Lewis
             labelIds: labels,
-            [dailyEnergyUsageFieldId]: energyUsage,
+            [dailyEnergyUsageField.key]: leadData.energyUsage,
+            [homeownerField.key]: homeownerOptionId,
+            [postcodeField.key]: leadData.postcode
+
             // todo: set custom field for "where did you hear about us?"
-            // [leadSourceOtherFieldId]: source
         });
+
+        // Add the lead
+        console.log("Adding lead...");
+        const newLead = await leads.addLead(leadOptions);
+
+        if(newLead.success === false) {
+            console.log(`Error adding lead: ${JSON.stringify(newLead)}`);
+            return;
+        }
+
+        const newLeadId = newLead.data.id;
+
+        // Add notes to this lead
+        console.log("Adding notes...");
+        const notes = new pipedrive.NotesApi(pd);
+
+        // While we don't have fields for these, include them in notes
+        const noteContent = `Age: ${leadData.ageRange}\nInterested in: ${leadData.interestedIn}\nSource: ${leadData.source || "Unknown"}\nBuilding type: ${leadData.buildingType || "Unknown"}`;
+
+        let noteOptions = Pipedrive.AddNoteRequest.constructFromObject({
+            content: noteContent,
+            leadId: newLeadId
+        });
+
+        const newNote = await notes.addNote(noteOptions);
+        if(newNote.success === false) {
+            console.log("Failed to add note to new lead");
+        }
     }
     catch(error) {
-        console.log(`Error adding lead: ${error}`);
+        console.log(`Error adding lead: ${JSON.stringify(error)}`);
     }
 }
 
@@ -110,6 +146,7 @@ async function getLeadLabelId(labelName) {
 }
 
 
+/*
 function getFieldId(fieldName) {
     if(dealFieldsRequest.success === false) {
         console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
@@ -126,6 +163,39 @@ function getFieldId(fieldName) {
     }
 
     return field.key;
+}
+*/
+
+
+function getField(fieldName) {
+    if(dealFieldsRequest.success === false) {
+        console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
+        return null;
+    }
+
+    const allFields = dealFieldsRequest.data;
+
+    const field = allFields.find(f => f.name === fieldName);
+
+    if(field === undefined) {
+        console.log(`Could not find deal field with name '${fieldName}'. Is this spelled correctly?`);
+        return null;
+    }
+
+    return field;
+}
+
+
+function getOptionIdFor(optionName, fieldObject) {
+    const options = fieldObject.options;
+    const option = options.find(o => o.label === optionName);
+
+    if(option === undefined) {
+        console.log(`Could not find option with name '${optionName}'. Is this spelled correctly?`);
+        return null;
+    }
+
+    return option.id;
 }
 
 
