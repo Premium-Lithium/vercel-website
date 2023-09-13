@@ -55,7 +55,7 @@ export default async function quoteCustomer(dealId) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 return quoteAttempt;
             }
-            return json({ message: "success" }, { status: 200 })
+            return quoteAttempt
         }
     }catch(error){
         console.log("error finding email template")
@@ -69,7 +69,7 @@ export default async function quoteCustomer(dealId) {
     
         // Create a draft email in the BDM's outlook
         createDraft(...Object.values(emailData));
-        return json({ message: error }, { status: 400 })
+        return quoteAttempt
     }
 }
 
