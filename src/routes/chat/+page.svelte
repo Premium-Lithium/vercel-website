@@ -27,10 +27,6 @@
         previousMessages = [{"role": "assistant", "content": message.output}];
     });
 
-    
-
-    
-
     async function handleChatInput(e) {
         awaitingMessage = true;
         let prompt = chatInput;
@@ -84,7 +80,10 @@
     </div>
     <div class="preset-response-wrapper">
         {#each presetResponses as response}
-            <h3 class="preset-response disable-text-select" on:click={(e) => {chatInput = response; handleChatInput(e)}}>{response}</h3>
+            <h3 class="preset-response disable-text-select"
+                on:click={(e) => {chatInput = response; handleChatInput(e)}}>
+                {response}
+            </h3>
         {/each}
     </div>
     <form on:submit|preventDefault={handleChatInput}>
