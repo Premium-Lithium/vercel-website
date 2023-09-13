@@ -196,10 +196,13 @@ const conversationMemory = new BufferMemory({
 
 const agentExecutor = await initializeAgentExecutorWithOptions(tools, model, 
     {
-      agentType: "chat-conversational-react-description",
+      agentType: "openai-functions",
       verbose: true,
       memory: conversationMemory,
       maxIterations: 8,
+      agentArgs: {
+        prefix: 'You are a helpful assistant named Evie for the company Premium Lithium, one of the fastest growing UK smart energy companies.'
+      }
     }
 );
 
