@@ -8,11 +8,17 @@ export async function POST({request}) {
         const body = await request.json();
         const runId = body.run_id;
         const score = body.score;
-        if (!runId || isNaN(score)) {
+        if (!runId) {
           return json(
-            { error: "You must provide a run id and a score." },
+            { error: "You must provide a run id." },
             { status: 400 },
           );
+        }
+        if (isNaN(score)){
+          return json(
+            {error: "You must provide a valid score"},
+            {status: 400},
+            );
         }
         const feedback = await client.createFeedback(runId, "user_score", {
           score,

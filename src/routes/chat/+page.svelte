@@ -14,7 +14,7 @@
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
     let comment = "";
     let rating = 0;
-    let currentRunId: number;
+    let currentRunId;
     
     onMount(async () => {
         invalidateAll();
@@ -31,7 +31,7 @@
     });
 
     async function handleFeedbackComment(score: number) {
-        let response = await fetch('/chat/feedback', {
+        let response = await fetch('chat/feedback', {
             method: "POST",
             body: JSON.stringify({
                 run_id: currentRunId,
@@ -81,12 +81,13 @@
         }
         else {
             const { message, runId } = await response.json();
+            currentRunId = runId;
+            console.log(`message: ${message}\nrunId: ${currentRunId}`);
             if (message == 'Agent stopped due to max iterations.') {
                 output = "Request timed out.";
             }
             else {
                 output = message.output;
-                currentRunId = runId;
             }
         }
         previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
@@ -200,6 +201,9 @@
     .feedback-icons > h2 {
         margin-left: 10px;
         margin-right: 10px;
+        background-color:#53b4de;
+        border-radius: 50%;
+        padding: 10px;
     }
 
     .chat-input {
