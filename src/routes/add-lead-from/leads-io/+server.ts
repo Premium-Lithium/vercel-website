@@ -64,7 +64,6 @@ const schema = {
                     "type": "string",
                     "enum": [ "Yes", "No" ],
                     "errorMessage": "`HomeOwner` should be either 'Yes' or 'No'"
-
                 },
                 InterestedIn: {
                     "type": "string",
