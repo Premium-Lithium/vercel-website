@@ -31,22 +31,22 @@ export default async function quoteCustomer(dealId) {
         schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
     };
     try{
-        console.log("getting email template")
-        const { data, error } = await supabase
-        .storage
-        .from('email-template')
-        .createSignedUrl('customer-quote-template.mjml', 60)
-        if (data){
+        // console.log("getting email template")
+        // const { data, error } = await supabase
+        // .storage
+        // .from('email-template')
+        // .createSignedUrl('customer-quote-template.mjml', 60)
+        // if (data){
             
-            const templatePath =data.signedUrl;
-            const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
+            // const templatePath =data.signedUrl;
+            // const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
             const emailData = {
                 sender: customer.pl_contact.email,
                 recipients: [ customer.email ],
                 subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                email_body: emailContent,
-                content_type: "HTML"
+                email_body: "test",
+                content_type: "text"
             };
              // Create a draft email in the BDM's outlook
             createDraft(...Object.values(emailData));
@@ -56,7 +56,7 @@ export default async function quoteCustomer(dealId) {
                 return quoteAttempt;
             }
             return quoteAttempt
-        }
+        // }
     }catch(error){
         console.log("error finding email template")
         const emailData = {
