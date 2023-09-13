@@ -249,7 +249,7 @@ function setTemplate(text) {
 }
 
 export async function POST({ request }) {
-  setTemplate(modifiedPrompt);
+   //setTemplate(modifiedPrompt);
     try {
         const { prompt } = await request.json();
         const response = await agentExecutor.call({
