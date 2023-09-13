@@ -111,7 +111,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
         const notes = new pipedrive.NotesApi(pd);
 
         // While we don't have fields for these, include them in notes
-        const noteContent = `Age: ${leadData.ageRange}\nInterested in: ${leadData.interestedIn}\nSource: ${leadData.source || "Unknown"}\nBuilding type: ${leadData.buildingType || "Unknown"}`;
+        const noteContent = `Age: ${leadData.ageRange}\nInterested in: ${leadData.interestedIn}\nSource: ${leadData.source || "Unknown"}\nBuilding type: ${leadData.buildingType || "Unknown"}\n Prid: ${leadData.prid || "Unknown"}\n`;
 
         let noteOptions = pipedrive.AddNoteRequest.constructFromObject({
             content: noteContent,

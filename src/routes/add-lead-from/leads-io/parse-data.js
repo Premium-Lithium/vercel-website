@@ -27,6 +27,7 @@ async function extractLeadFrom(leadsIO) {
         isHomeOwner: leadsIO.answers.HomeOwner === 'Yes',
         ageRange: leadsIO.answers.Age,
         interestedIn: leadsIO.answers.InterestedIn,
+        prid: leadsIO.prid,
 
         // We're not (yet?) collecting this information from leadsIO
         source: null,
