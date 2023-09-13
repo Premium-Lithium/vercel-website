@@ -97,7 +97,6 @@ export async function POST({ request }) {
     // If the request was as we expected, then use this to create a lead object
     const lead = await extractLeadFrom(leadsIoData);
     const leadAddAttempt = await captureLeadFrom('Leads.IO', lead);
-    // const leadAddAttempt = { message: "yes", success: true };
 
     const response = new Response(
         JSON.stringify({ message: leadAddAttempt.message }),

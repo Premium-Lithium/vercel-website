@@ -6,7 +6,7 @@ import { pd, dealFieldsRequest } from '../../lib/pipedrive-utils.js'
 async function captureLeadFrom(leadSourceName, lead, labelName=null) { // `labelName` is the name of a pipedrive label
     let result = {
         "success": true,
-        "message": `Added new lead to pipedrive.`
+        "message": `Successfully processed lead.`
     };
 
     // We only want to add users as leads if they provided their phone number
