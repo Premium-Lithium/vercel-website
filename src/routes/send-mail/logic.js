@@ -1,5 +1,6 @@
 
 import querystring from 'querystring';
+import { json } from '@sveltejs/kit';
 
 // todo: at some point we want to ideally use this javascript client provided by microsoft to simplify the logic here slightly
 // See documentation here: https://github.com/microsoftgraph/msgraph-sdk-javascript/tree/dev
@@ -98,12 +99,11 @@ async function getNewAPIToken() {
             return token;
         } else {
             console.log('Error:', data.error_description || 'Unknown error');
-            getNewAPIToken();
             return data.error;
         }
     } catch (error) {
         console.error(`Fetch error: ${error}`);
-        return error;
+        return json({status: 500, message: "error getting api token"});
     }
 }
 
