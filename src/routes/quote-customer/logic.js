@@ -46,8 +46,8 @@ export default async function quoteCustomer(dealId) {
                 sender: customer.pl_contact.email,
                 recipients: [customer.email],
                 subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                email_body: "test",
-                content_type: "text"
+                email_body: emailContent,
+                content_type: "HTML"
             };
     
             // Create a draft email in the BDM's outlook
@@ -264,7 +264,7 @@ async function markAsQuoteIssued(dealId) {
     try{
         let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`, {
             method: 'PUT',
-            body: JSON.stringify({'title': 'testaaaaaaa'}),
+            body: JSON.stringify({'[quoteIssuedField.key]': today()}),
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -289,15 +289,16 @@ async function markAsQuoteIssued(dealId) {
     const stages = await stagesApi.getStages(opts);
     console.log(stages)
     
-    // const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
-    // console.log("finding quote issued stage", quoteIssuedStage)
-    // if (quoteIssuedStage === undefined){
-    //     console.log("failed to find quote issued stage")
-    //     return false;
-    // }
-    // await dealsApi.updateDeal(dealId, {
-    //         stage_id: quoteIssuedStage.id
-    // });
+    const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
+    console.log("finding quote issued stage", quoteIssuedStage)
+    if (quoteIssuedStage === undefined){
+        console.log("failed to find quote issued stage")
+        return false;
+    }
+    await dealsApi.updateDeal(dealId, {
+            stage_id: quoteIssuedStage.id
+    });
+    return true;
 }
 
 
