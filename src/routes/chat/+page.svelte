@@ -153,12 +153,14 @@
                         async () => {
                         message.score = 1;
                         message = await handleFeedbackComment(message)
-                    }}>👍</h2>
+                    }}>👍</h2>  
+                    {#key message.feedbackId}
                     {#if testingMode && message.feedbackId}
                     <form on:submit={async () => {await handleFeedbackComment(message)}}>
                         <input type="text" class="feedback-input" bind:value={message.feedback}/>
                     </form>
                     {/if}
+                    {/key}
                 </div>
                 {/if}
             </div>
