@@ -1,11 +1,12 @@
-
 import { writable, get} from "svelte/store";
 
 export enum ChatState {
     ASK_PRODUCT_OR_HELP,
     ASK_PRODUCTS,
-    ASK_ENERGY_USAGE,
+    ASK_BATTERY,
     ASK_SOLAR_PANELS,
+    ASK_SOLAR_AND_BATTERY,
+    ASK_ENERGY_USAGE,
     GET_HELP,
     NONE
 };
@@ -20,9 +21,14 @@ export function getPresetMessagesBasedOnState(currentState: ChatState) {
         case ChatState.ASK_ENERGY_USAGE:
             return ["Low (below 2000kWh)", "Medium (2000 - 5000kWh)","High (above 5000kWh)"];
         case ChatState.ASK_SOLAR_PANELS:
-            return [];
+            return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
         case ChatState.GET_HELP:
             return ["Book a consultation"];
+        case ChatState.ASK_SOLAR_AND_BATTERY:
+            return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
+        case ChatState.ASK_BATTERY:
+            return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
+
         default:
             return [];
     }
@@ -44,13 +50,16 @@ export function getMessageBasedOnState(input: string){
             break;
         case ChatState.ASK_PRODUCTS:
             if(inputLower.includes("solar") && inputLower.includes("battery")){
-                
+                currentState.set(ChatState.ASK_SOLAR_AND_BATTERY);
+                return `Send a message like 'Great choice! We at Premium Lithium would highly recommend a Solar and Battery package. Do you already have any smart energy solutions?' with a friend emoji`   
             }
             else if(inputLower.includes("solar")){
-
+                currentState.set(ChatState.ASK_SOLAR_PANELS);
+                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`   
             }
             else if(inputLower.includes("battery")){
-
+                currentState.set(ChatState.ASK_BATTERY);
+                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`   
             }
             else {
 
@@ -59,13 +68,21 @@ export function getMessageBasedOnState(input: string){
         case ChatState.GET_HELP:
 
             break;
-        case ChatState.ASK_ENERGY_USAGE:
+        case ChatState.ASK_BATTERY:
             
             break;
         case ChatState.ASK_SOLAR_PANELS:
+            
+            break;
+        case ChatState.ASK_SOLAR_AND_BATTERY:
 
             break;
+        case ChatState.NONE:
+            
+            break;
         default: currentState.set(ChatState.NONE);
+
+            break;
     }
     return null;
 }
