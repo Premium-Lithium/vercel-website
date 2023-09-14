@@ -5,15 +5,20 @@
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
     import {ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState} from './logic';
+	import { page } from '$app/stores';
+
+    let testingMode = false;
+    if($page.url.searchParams.get('testingMode') === 'true'){
+        testingMode = true;
+    }
+    
 
     let awaitingMessage = true;
-    let previousMessages: {"role": string, "content": string}[] = [];
+    let previousMessages: {"role": string, "content": string, "runId": string, "feedbackSent": boolean}[] = [];
     let messageToSend = `Greet me with a friendly emoji and introduce yourself, and ask whether I'd like to explore products or just need some help`;
     let chatInput = "";
     let presetResponses: Array<string> = [];
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
-    let comment = "";
-    let rating = 0;
     let currentRunId = '';
     
     onMount(async () => {
@@ -28,41 +33,45 @@
         });
         awaitingMessage = false;
         const { message } = await response.json();
-        previousMessages = [{"role": "assistant", "content": message.output}];
+        previousMessages = [{"role": "assistant", "content": message.output, "runId": "", "feedbackSent": false}];
     });
 
-    async function handleFeedbackComment(score: number) {
+    async function handleFeedbackComment(score: number, message) {
         let response = await fetch('chat/feedback', {
             method: "POST",
             body: JSON.stringify({
-                run_id: currentRunId,
+                run_id: message.runId,
                 score,
                 comment: "",
             })
         })
 
         response = await response.json();
+        let feedbackId = response.feedback.id;
         if(!response.error) {
             toastr.success("Feedback sent successfully", "", {
                 timeOut: 1000,
                 progressBar: true,
             })
+            message.feedbackSent = true;
         } else {
             toastr.error(`Error sending feedback: ${response.error}`, "", {
                 timeOut: 1000,
                 progressBar: true,
             })
         }
+
+
     }
 
     async function handleChatInput(e) {
         awaitingMessage = true;
         let prompt = chatInput;
-        previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
+        previousMessages = [...previousMessages, {"role": "user", "content": prompt, "runId": "", "feedbackSent": false}];
         let messages = previousMessages;
         let msg = getMessageBasedOnState(prompt);
         if(msg != null) {
-            messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg}];
+            messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg, "runId": "", "feedbackSent": false}];
         }
         const chatRequestUrl = 'chat/';
         chatInput = '';
@@ -88,7 +97,7 @@
                 output = message.output;
             }
         }
-        previousMessages = [...previousMessages, {"role": "assistant", "content": output}];
+        previousMessages = [...previousMessages, {"role": "assistant", "content": output, "runId": currentRunId, "feedbackSent": false}];
     }
 
 
@@ -105,8 +114,13 @@
                 <!-- Don't show rating on first message. -->
                 {#if i != 0}
                 <div class="feedback-icons disable-text-select">
-                    <h2 on:click={() => {handleFeedbackComment(0)}}>👎</h2>
-                    <h2 on:click={() => {handleFeedbackComment(1)}}>👍</h2>
+                    <h2 on:click={() => {handleFeedbackComment(-1, message)}}>👎</h2>
+                    <h2 on:click={() => {handleFeedbackComment(1, message)}}>👍</h2>
+                    {#if testingMode && message.feedbackSent}
+                    <form>
+                        <input type="text"/>
+                    </form>
+                    {/if}
                 </div>
                 {/if}
             </div>
