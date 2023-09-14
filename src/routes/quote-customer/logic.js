@@ -258,12 +258,12 @@ async function markAsQuoteIssued(dealId) {
         console.log(`Could not find the "Quote issued" field on pipedrive`);
         return false;
     }
-    // console.log("updating deal.................................")
-    // // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
-    // const response = await dealsApi.updateDeal(dealId, {
-    //         title: "update"
-    // });   
-    // console.log(response)
+    console.log("updating deal.................................")
+    // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
+    const response = await dealsApi.updateDeal(dealId, {
+            title: "update"
+    });   
+    console.log(response)
     
     // // Move the deal to the quote issued stage
     // const stagesApi = new pipedrive.StagesApi(pd);
