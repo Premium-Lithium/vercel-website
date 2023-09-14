@@ -22,16 +22,14 @@ export function getPresetMessagesBasedOnState(currentState: ChatState) {
             return ["Low (below 2000kWh)", "Medium (2000 - 5000kWh)","High (above 5000kWh)"];
         case ChatState.ASK_SOLAR_PANELS:
             return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
-        case ChatState.GET_HELP:
-            return ["Book a consultation"];
         case ChatState.ASK_SOLAR_AND_BATTERY:
             return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
         case ChatState.ASK_BATTERY:
             return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
-
-        default:
-            return [];
+        case ChatState.GET_HELP:
+            return ["Book a consultation"];
     }
+    return [];
 }
 
 export function getMessageBasedOnState(input: string){
@@ -41,7 +39,6 @@ export function getMessageBasedOnState(input: string){
             if(inputLower.includes("product")) {
                 currentState.set(ChatState.ASK_PRODUCTS);
                 return `Send a message like 'Great! Let's find the perfect product for you. What are you looking for?' with a friendly emoji`;
-                
             }
             else if(inputLower.includes("help")){
                 currentState.set(ChatState.GET_HELP);
@@ -51,37 +48,33 @@ export function getMessageBasedOnState(input: string){
         case ChatState.ASK_PRODUCTS:
             if(inputLower.includes("solar") && inputLower.includes("battery")){
                 currentState.set(ChatState.ASK_SOLAR_AND_BATTERY);
-                return `Send a message like 'Great choice! We at Premium Lithium would highly recommend a Solar and Battery package. Do you already have any smart energy solutions?' with a friend emoji`   
+                return `Send a message like 'Great choice! We at Premium Lithium would highly recommend a Solar and Battery package. Do you already have any smart energy solutions?' with a friend emoji`;
             }
             else if(inputLower.includes("solar")){
                 currentState.set(ChatState.ASK_SOLAR_PANELS);
-                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`   
+                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`;
             }
             else if(inputLower.includes("battery")){
                 currentState.set(ChatState.ASK_BATTERY);
-                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`   
-            }
-            else {
-
+                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`;
             }
             break;
         case ChatState.GET_HELP:
-
+            currentState.set(ChatState.NONE);
             break;
         case ChatState.ASK_BATTERY:
-            
+            currentState.set(ChatState.NONE);
             break;
         case ChatState.ASK_SOLAR_PANELS:
-            
+            currentState.set(ChatState.NONE);
             break;
         case ChatState.ASK_SOLAR_AND_BATTERY:
-
+            currentState.set(ChatState.NONE);
             break;
         case ChatState.NONE:
-            
+            currentState.set(ChatState.NONE);
             break;
-        default: currentState.set(ChatState.NONE);
-
+        default: currentState.set(ChatState.NONE)
             break;
     }
     return null;
