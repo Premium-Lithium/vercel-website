@@ -54,6 +54,10 @@ export default async function quoteCustomer(dealId) {
     
             if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+                quoteAttempt = {
+                    "success": false,
+                    "message": `Failed to update deal ${dealId} as QuoteIssued`
+                };
                 return quoteAttempt;
             }
         }
