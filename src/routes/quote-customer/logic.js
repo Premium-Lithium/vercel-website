@@ -267,8 +267,8 @@ async function markAsQuoteIssued(dealId) {
             console.log("error updating deal")
         }
     }catch(error){
-            return false
-        }
+        return false
+    }
     
     // // Move the deal to the quote issued stage
     const stagesApi = new pipedrive.StagesApi(pd);
@@ -286,13 +286,17 @@ async function markAsQuoteIssued(dealId) {
         console.log("failed to find quote issued stage")
         return false;
     }
-    let response = await dealsApi.updateDeal(dealId, {
+    try{
+        let response = await dealsApi.updateDeal(dealId, {
             stage_id: quoteIssuedStage.id
-    });
-    if (response){
-        return true;
-    }else{
-        console.log("failed to move deal to stage");
+        });
+        if (response){
+            return true;
+        }else{
+            console.log("failed to move deal to stage");
+            return false;
+        }
+    }catch(error){
         return false;
     }
     
