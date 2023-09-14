@@ -157,7 +157,8 @@
                     {#key message.feedbackId}
                     {#if testingMode && message.feedbackId}
                     <form on:submit={async () => {await handleFeedbackComment(message)}}>
-                        <input type="text" class="feedback-input" bind:value={message.feedback}/>
+                        <input type="text" class="feedback-input" bind:value={message.feedback}  placeholder="Enter feedback"/>
+                        <input type="submit"/>
                     </form>
                     {/if}
                     {/key}
@@ -261,11 +262,9 @@
         margin: 0px 5px;
         background-color:#53b4de;
         border-radius: 50%;
+        width: 15px;
+        height: 15px;
         padding: 6px;
-    }
-
-    .feedback-input {
-        justify-content: center;
     }
 
     .chat-input {
