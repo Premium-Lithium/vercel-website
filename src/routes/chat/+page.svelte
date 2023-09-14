@@ -11,10 +11,11 @@
     if($page.url.searchParams.get('testingMode') === 'true'){
         testingMode = true;
     }
-    
+
+    type Message = {"role": string, "content": string, "runId": string, "feedbackId"?: string, "feedback"?: string, "score"?: number};
 
     let awaitingMessage = true;
-    let previousMessages: {"role": string, "content": string, "runId": string, "feedbackSent": boolean}[] = [];
+    let previousMessages: Message[] = [];
     let messageToSend = `Greet me with a friendly emoji and introduce yourself, and ask whether I'd like to explore products or just need some help`;
     let chatInput = "";
     let presetResponses: Array<string> = [];
@@ -33,45 +34,74 @@
         });
         awaitingMessage = false;
         const { message } = await response.json();
-        previousMessages = [{"role": "assistant", "content": message.output, "runId": "", "feedbackSent": false}];
+        previousMessages = [{"role": "assistant", "content": message.output, "runId": ""}];
     });
 
-    async function handleFeedbackComment(score: number, message) {
-        let response = await fetch('chat/feedback', {
-            method: "POST",
-            body: JSON.stringify({
-                run_id: message.runId,
-                score,
-                comment: "",
+    async function handleFeedbackComment(message: Message) {
+        if(!message.feedbackId){
+            let response = await fetch('chat/feedback', {
+                method: "POST",
+                body: JSON.stringify({
+                    run_id: message.runId,
+                    score: message.score,
+                    comment: "",
+                })
             })
-        })
 
-        response = await response.json();
-        let feedbackId = response.feedback.id;
-        if(!response.error) {
-            toastr.success("Feedback sent successfully", "", {
-                timeOut: 1000,
-                progressBar: true,
-            })
-            message.feedbackSent = true;
-        } else {
-            toastr.error(`Error sending feedback: ${response.error}`, "", {
-                timeOut: 1000,
-                progressBar: true,
-            })
+            response = await response.json();
+            let feedbackId: string = response.feedback.id;
+            if(!response.error) {
+                toastr.success("Feedback sent successfully", "", {
+                    timeOut: 1000,
+                    progressBar: true,
+                })
+                message.feedbackId = feedbackId;
+            } else {
+                toastr.error(`Error sending feedback: ${response.error}`, "", {
+                    timeOut: 1000,
+                    progressBar: true,
+                })
+            }
         }
 
+        if(message.feedback) {
+            let response = await fetch('chat/feedback', {
+                method: "PUT",
+                body: JSON.stringify({
+                    run_id: message.runId,
+                    id: message.feedbackId,
+                    score: message.score,
+                    comment: message.feedback,
+                })
+            })
 
+            response = await response.json();
+            let feedbackId: string = response.feedback.id;
+            if(!response.error) {
+                toastr.success("Feedback sent successfully", "", {
+                    timeOut: 1000,
+                    progressBar: true,
+                })
+                message.feedbackId = feedbackId;
+            } else {
+                toastr.error(`Error sending feedback: ${response.error}`, "", {
+                    timeOut: 1000,
+                    progressBar: true,
+                })
+            }
+        }   
+
+        return message;
     }
 
     async function handleChatInput(e) {
         awaitingMessage = true;
         let prompt = chatInput;
-        previousMessages = [...previousMessages, {"role": "user", "content": prompt, "runId": "", "feedbackSent": false}];
+        previousMessages = [...previousMessages, {"role": "user", "content": prompt, "runId": ""}];
         let messages = previousMessages;
         let msg = getMessageBasedOnState(prompt);
         if(msg != null) {
-            messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg, "runId": "", "feedbackSent": false}];
+            messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg, "runId": ""}];
         }
         const chatRequestUrl = 'chat/';
         chatInput = '';
@@ -97,7 +127,7 @@
                 output = message.output;
             }
         }
-        previousMessages = [...previousMessages, {"role": "assistant", "content": output, "runId": currentRunId, "feedbackSent": false}];
+        previousMessages = [...previousMessages, {"role": "assistant", "content": output, "runId": currentRunId}];
     }
 
 
@@ -114,11 +144,19 @@
                 <!-- Don't show rating on first message. -->
                 {#if i != 0}
                 <div class="feedback-icons disable-text-select">
-                    <h2 on:click={() => {handleFeedbackComment(-1, message)}}>👎</h2>
-                    <h2 on:click={() => {handleFeedbackComment(1, message)}}>👍</h2>
-                    {#if testingMode && message.feedbackSent}
-                    <form>
-                        <input type="text"/>
+                    <h2 on:click={
+                        async () => {
+                        message.score = -1;
+                        message = await handleFeedbackComment(message)
+                    }}>👎</h2>
+                    <h2 on:click={
+                        async () => {
+                        message.score = 1;
+                        message = await handleFeedbackComment(message)
+                    }}>👍</h2>
+                    {#if testingMode && message.feedbackId}
+                    <form on:submit={async () => {await handleFeedbackComment(message)}}>
+                        <input type="text" class="feedback-input" bind:value={message.feedback}/>
                     </form>
                     {/if}
                 </div>
@@ -218,10 +256,14 @@
 
     .feedback-icons > h2 {
         font-size: 1.2em;
-        margin: 0px 10px;
+        margin: 0px 5px;
         background-color:#53b4de;
         border-radius: 50%;
         padding: 6px;
+    }
+
+    .feedback-input {
+        justify-content: center;
     }
 
     .chat-input {
