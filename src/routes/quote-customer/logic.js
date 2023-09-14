@@ -13,24 +13,24 @@ export default async function quoteCustomer(dealId) {
         "message": `Quote created for deal ${dealId}`
     };
 
-    const customer = await getCustomerInfo(dealId);
+    // const customer = await getCustomerInfo(dealId);
 
-    if(customer === null) {
-        quoteAttempt.success = false;
-        quoteAttempt.message = `: Could not fetch customer data for deal ${dealId}`;
-        console.log(quoteAttempt.message);
-        return quoteAttempt;
-    }
+    // if(customer === null) {
+    //     quoteAttempt.success = false;
+    //     quoteAttempt.message = `: Could not fetch customer data for deal ${dealId}`;
+    //     console.log(quoteAttempt.message);
+    //     return quoteAttempt;
+    // }
     
-    const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
-    const emailContentData = {
-        pl_bdm_contact_name: customer.pl_contact.name,
-        price_calculator_link: priceCalcLink,
-        customer_name: customer.name.split(" ")[0],
-        relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-        schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-    };
-    try{
+    // const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
+    // const emailContentData = {
+    //     pl_bdm_contact_name: customer.pl_contact.name,
+    //     price_calculator_link: priceCalcLink,
+    //     customer_name: customer.name.split(" ")[0],
+    //     relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
+    //     schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
+    // };
+    // try{
         // console.log("getting email template")
         // const { data, error } = await supabase
         // .storage
