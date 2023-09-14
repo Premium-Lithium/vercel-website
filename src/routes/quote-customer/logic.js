@@ -262,7 +262,11 @@ async function markAsQuoteIssued(dealId) {
     // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
     const response = await dealsApi.updateDeal(dealId, {
             title: "update"
-    });   
+    }); 
+    if (response.success === false){
+        console.log(response.error);
+        return false;
+    }
     console.log(response)
     
     // // Move the deal to the quote issued stage
