@@ -247,6 +247,10 @@ async function markAsQuoteIssued(dealId) {
     // const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
     // const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
     const dealFields = dealFieldsRequest.data;
+    if (dealFieldsRequest.data === undefined){
+        console.log("failed to fetch deals data")
+        return false;
+    }
     console.log(dealFieldsRequest.data)
     const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
     console.log("checking if field exists.....................................")
@@ -270,11 +274,13 @@ async function markAsQuoteIssued(dealId) {
         'limit': 56
     };
     const stages = await stagesApi.getStages(opts);
-    console.log(stages)
-    
     
     const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
     console.log("finding quote issued stage", quoteIssuedStage)
+    if (quoteIssuedStage === undefined){
+        console.log("failed to find quote issued stage")
+        return false;
+    }
     await dealsApi.updateDeal(dealId, {
             stage_id: quoteIssuedStage.id
     });
