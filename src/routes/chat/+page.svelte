@@ -14,10 +14,11 @@
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
     let comment = "";
     let rating = 0;
-    let currentRunId = 'fcd19082-f7db-465c-aa53-66f05d4c7dd3';
+    let currentRunId = '';
     
     onMount(async () => {
         invalidateAll();
+        $currentState = ChatState.ASK_PRODUCT_OR_HELP;
         const response = await fetch('chat/', {
             method: 'POST',
             body: JSON.stringify({ "prompt" : [{"role": "user", "content": messageToSend}] }),
@@ -57,12 +58,11 @@
     async function handleChatInput(e) {
         awaitingMessage = true;
         let prompt = chatInput;
+        previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
         let messages = previousMessages;
-        if($currentState == ChatState.ASK_PRODUCT_OR_HELP) {
-            let msg = getMessageBasedOnState(prompt);
-            if(msg != null) {
-                messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg}];
-            }
+        let msg = getMessageBasedOnState(prompt);
+        if(msg != null) {
+            messages = [...previousMessages.slice(0,-1), {"role": "system", "content": msg}];
         }
         const chatRequestUrl = 'chat/';
         chatInput = '';
@@ -137,13 +137,18 @@
 </body>
 
 <style>
+    body {
+        background-color: black;
+    }
     .messages {
         display: flex;
         flex-direction: column;
         width: 90vw;
         position: absolute;
         left: 3vw;
-        border: 2px solid black; 
+        border: 2px solid white; 
+        background-color: white;
+        box-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
         padding: 1vh 2vw 1vh 2vw;  
         height: 75vh;
         top: 3vh;
@@ -198,13 +203,16 @@
     }
 
     .feedback-icons > h2 {
+        font-size: 1.2em;
         margin: 0px 10px;
         background-color:#53b4de;
         border-radius: 50%;
-        padding: 10px;
+        padding: 6px;
     }
 
     .chat-input {
+        box-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
+        border-color: white;
         position: absolute;
         bottom: 10vh;
         width: 80vw;
