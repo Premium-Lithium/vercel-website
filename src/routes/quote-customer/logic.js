@@ -41,16 +41,16 @@ export default async function quoteCustomer(dealId) {
             // const templatePath =data.signedUrl;
             // const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
-            const emailData = {
-                sender: customer.pl_contact.email,
-                recipients: [customer.email],
-                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                email_body: "test",
-                content_type: "text"
-            };
+            // const emailData = {
+            //     sender: customer.pl_contact.email,
+            //     recipients: [customer.email],
+            //     subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+            //     email_body: "test",
+            //     content_type: "text"
+            // };
     
-            // Create a draft email in the BDM's outlook
-            await createDraft(...Object.values(emailData));
+            // // Create a draft email in the BDM's outlook
+            // await createDraft(...Object.values(emailData));
     
             if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
@@ -58,20 +58,20 @@ export default async function quoteCustomer(dealId) {
             }
     
             return quoteAttempt;
-        } catch (error) {
-            console.log("error finding email template");
-            const emailData = {
-                sender: customer.pl_contact.email,
-                recipients: [customer.email],
-                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                mail_body: "error",
-                content_type: "text"
-            };
+        // } catch (error) {
+        //     console.log("error finding email template");
+        //     const emailData = {
+        //         sender: customer.pl_contact.email,
+        //         recipients: [customer.email],
+        //         subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+        //         mail_body: "error",
+        //         content_type: "text"
+        //     };
     
-            // Create a draft email in the BDM's outlook
-            await createDraft(...Object.values(emailData));
-            return (quoteAttempt = { success: false, message: "error finding email template" });
-        }
+        //     // Create a draft email in the BDM's outlook
+        //     await createDraft(...Object.values(emailData));
+        //     return (quoteAttempt = { success: false, message: "error finding email template" });
+        // }
 }
 
 
@@ -238,34 +238,35 @@ async function markAsQuoteIssued(dealId) {
     console.log("marking quote as issued ")
     // Update the `Quote Issued` field on pipedrive with todays date
     // todo: this assumes the dealFieldsRequest in pipedrive-utils was successful
-    const dealFields = dealFieldsRequest.data;
     const dealsApi = new pipedrive.DealsApi(pd);
+    // const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
+    // const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
+    const dealFields = dealFieldsRequest.data;
+    const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
 
-    // const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
-
-    // if(quoteIssuedField === undefined) {
-    //     console.log(`Could not find the "Quote issued" field on pipedrive`);
-    //     return false;
-    // }
+    if(quoteIssuedField === undefined) {
+        console.log(`Could not find the "Quote issued" field on pipedrive`);
+        return false;
+    }
     await dealsApi.updateDeal(dealId, {
         title: "update"
     });
 
-    // // Move the deal to the quote issued stage
-    // const stagesApi = new pipedrive.StagesApi(pd);
-    // const B2C_PIPELINE_ID = 23;
-    // let opts = {
-    //     'pipelineId': B2C_PIPELINE_ID,
-    //     'start': 0,
-    //     'limit': 56
-    // };
-    // const stages = await stagesApi.getStages(opts);
+    // Move the deal to the quote issued stage
+    const stagesApi = new pipedrive.StagesApi(pd);
+    const B2C_PIPELINE_ID = 23;
+    let opts = {
+        'pipelineId': B2C_PIPELINE_ID,
+        'start': 0,
+        'limit': 56
+    };
+    const stages = await stagesApi.getStages(opts);
 
-    // const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
+    const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
 
-    // await dealsApi.updateDeal(dealId, {
-    //     stage_id: quoteIssuedStage.id
-    // });
+    await dealsApi.updateDeal(dealId, {
+        stage_id: quoteIssuedStage.id
+    });
 
     return true;
 }
