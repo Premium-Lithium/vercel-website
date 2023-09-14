@@ -50,3 +50,4 @@ export async function extractLeadFrom(batteryFinderAnswers) {
 
     return lead;
 }
+
