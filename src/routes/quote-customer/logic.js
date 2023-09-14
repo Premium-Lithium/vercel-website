@@ -261,13 +261,13 @@ async function markAsQuoteIssued(dealId) {
     console.log("updating deal.................................")
     // url = /v1/deals/{id}
     let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`, {
-        method: 'PATCH',
+        method: 'PUT',
         body: JSON.stringify({'title': 'test'}),
         headers: {
             'Content-Type': 'application/json',
         },
     })
-    console.log(res);
+    console.log("updated deal", res);
     // const response = await dealsApi.updateDeal(dealId, {
     //         title: "update"
     // }); 
