@@ -21,7 +21,7 @@
     let presetResponses: Array<string> = [];
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
     let currentRunId = '';
-    
+
     onMount(async () => {
         invalidateAll();
         $currentState = ChatState.ASK_PRODUCT_OR_HELP;
@@ -89,7 +89,7 @@
                     progressBar: true,
                 })
             }
-        }   
+        }
 
         return message;
     }
@@ -153,24 +153,26 @@
                         async () => {
                         message.score = 1;
                         message = await handleFeedbackComment(message)
-                    }}>👍</h2>  
+                    }}>👍</h2>
                     {#key message.feedbackId}
-                    {#if testingMode && message.feedbackId}
-                    <form on:submit={async () => {await handleFeedbackComment(message)}}>
-                        <input type="text" class="feedback-input" bind:value={message.feedback}  placeholder="Enter feedback"/>
-                        <input type="submit"/>
-                    </form>
-                    {/if}
+                        {#if testingMode && message.feedbackId}
+                        <form on:submit={async () => {await handleFeedbackComment(message)}}>
+                            <input type="text" class="feedback-input" bind:value={message.feedback}  placeholder="Enter feedback"/>
+                            <input type="submit"/>
+                        </form>
+                        {/if}
                     {/key}
                 </div>
                 {/if}
             </div>
-            
+
         {/if}
     {/each}
 
     {#if awaitingMessage}
-        <h2 in:fly|global={{x:-1000, duration:1000}} class="message-assistant">...</h2>
+        <div in:fly|global={{x:-1000, duration:1000}} class="message-assistant awaiting-message">
+            <h2>.</h2><h2>.</h2><h2>.</h2>
+        </div>
     {:else}
     {#each presetResponses as response}
         <h2 class="message-user preset-response disable-text-select"
@@ -182,7 +184,7 @@
     {/if}
     </div>
     <form on:submit|preventDefault={handleChatInput}>
-        <input 
+        <input
         class="chat-input"
         type="text"
         autocomplete="off"
@@ -201,10 +203,10 @@
         width: 90vw;
         position: absolute;
         left: 3vw;
-        border: 2px solid white; 
+        border: 2px solid white;
         background-color: white;
         box-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
-        padding: 1vh 2vw 1vh 2vw;  
+        padding: 1vh 2vw 1vh 2vw;
         height: 75vh;
         top: 3vh;
         border-radius: 20px;
@@ -213,13 +215,13 @@
         scroll-behavior: smooth;
     }
 
-    [class^="message-"]{ 
+    [class^="message-"]{
         width:fit-content;
         font-family: 'Roboto', sans-serif;
         font-size: 0.7em;
-        padding: 15px; 
+        padding: 15px;
         border: 3px solid #177ba7;
-        background-color:#53b4de;    
+        background-color:#53b4de;
         color: #FFF;
         max-width: 75%;
     }
@@ -234,7 +236,7 @@
     .message-assistant > h2 {
         font-size: 1.3em;
     }
-    
+
     .preset-response:hover {
         background-color: #50aad1;
     }
@@ -245,7 +247,7 @@
         margin-top: 3px;
         margin-bottom: 3px;
     }
-    
+
     .message-user {
         align-self: end;
         border-radius: 30px 30px 5px 30px;
@@ -277,6 +279,33 @@
         font-size: 2em;
         left: 10vw;
         border-radius: 5px;
+    }
+
+    .awaiting-message{
+        display: flex;
+        flex-direction: row;
+    }
+
+    .awaiting-message > h2 {
+        display: inline-block;
+        animation: bounce-awaiting-message 1.5s infinite;
+    }
+
+    .awaiting-message h2:nth-child(2) {
+        animation-delay: 0.25s;
+    }
+
+    .awaiting-message h2:nth-child(3) {
+        animation-delay: 0.5s;
+    }
+
+    @keyframes bounce-awaiting-message {
+        0%, 70% {
+            transform: translateY(0);
+        }
+        35% {
+            transform: translateY(-4px);
+        }
     }
 
 </style>
