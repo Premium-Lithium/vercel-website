@@ -263,8 +263,8 @@ async function markAsQuoteIssued(dealId) {
     const response = await dealsApi.updateDeal(dealId, {
             title: "update"
     }); 
-    if (response.success === false){
-        console.log(response.error);
+    if (response === undefined){
+        console.log("failed to update deal");
         return false;
     }
     console.log(response)
