@@ -13,65 +13,66 @@ export default async function quoteCustomer(dealId) {
         "message": `Quote created for deal ${dealId}`
     };
 
-    // const customer = await getCustomerInfo(dealId);
+    const customer = await getCustomerInfo(dealId);
 
-    // if(customer === null) {
-    //     quoteAttempt.success = false;
-    //     quoteAttempt.message = `: Could not fetch customer data for deal ${dealId}`;
-    //     console.log(quoteAttempt.message);
-    //     return quoteAttempt;
-    // }
+    if(customer === null) {
+        quoteAttempt.success = false;
+        quoteAttempt.message = `: Could not fetch customer data for deal ${dealId}`;
+        console.log(quoteAttempt.message);
+        return quoteAttempt;
+    }
     
-    // const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
-    // const emailContentData = {
-    //     pl_bdm_contact_name: customer.pl_contact.name,
-    //     price_calculator_link: priceCalcLink,
-    //     customer_name: customer.name.split(" ")[0],
-    //     relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-    //     schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-    // };
-    // try{
-        // console.log("getting email template")
-        // const { data, error } = await supabase
-        // .storage
-        // .from('email-template')
-        // .createSignedUrl('customer-quote-template.mjml', 60)
-        // if (data){
+    const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
+    const emailContentData = {
+        pl_bdm_contact_name: customer.pl_contact.name,
+        price_calculator_link: priceCalcLink,
+        customer_name: customer.name.split(" ")[0],
+        relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
+        schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
+    };
+    try{
+        console.log("getting email template")
+        const { data, error } = await supabase
+        .storage
+        .from('email-template')
+        .createSignedUrl('customer-quote-template.mjml', 60)
+        if (data){
             
-            // const templatePath =data.signedUrl;
-            // const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
+            const templatePath =data.signedUrl;
+            const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
-            // const emailData = {
-            //     sender: customer.pl_contact.email,
-            //     recipients: [customer.email],
-            //     subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-            //     email_body: "test",
-            //     content_type: "text"
-            // };
+            const emailData = {
+                sender: customer.pl_contact.email,
+                recipients: [customer.email],
+                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+                email_body: "test",
+                content_type: "text"
+            };
     
-            // // Create a draft email in the BDM's outlook
-            // await createDraft(...Object.values(emailData));
+            // Create a draft email in the BDM's outlook
+            await createDraft(...Object.values(emailData));
     
             if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 return quoteAttempt;
             }
+        }
     
             return quoteAttempt;
-        // } catch (error) {
-        //     console.log("error finding email template");
-        //     const emailData = {
-        //         sender: customer.pl_contact.email,
-        //         recipients: [customer.email],
-        //         subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-        //         mail_body: "error",
-        //         content_type: "text"
-        //     };
+        } catch (error) {
+            console.log("error finding email template");
+            const emailData = {
+                sender: customer.pl_contact.email,
+                recipients: [customer.email],
+                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+                mail_body: "error",
+                content_type: "text"
+            };
     
-        //     // Create a draft email in the BDM's outlook
-        //     await createDraft(...Object.values(emailData));
-        //     return (quoteAttempt = { success: false, message: "error finding email template" });
-        // }
+            // Create a draft email in the BDM's outlook
+            await createDraft(...Object.values(emailData));
+            return (quoteAttempt = { success: false, message: "error finding email template" });
+        }
 }
 
 
@@ -248,10 +249,13 @@ async function markAsQuoteIssued(dealId) {
         console.log(`Could not find the "Quote issued" field on pipedrive`);
         return false;
     }
-    await dealsApi.updateDeal(dealId, {
-        title: "update"
-    });
 
+    // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
+    const response = await dealsApi.updateDeal(dealId, {
+            title: "update"
+    });   
+    console.log("updating deal", response)
+    
     // Move the deal to the quote issued stage
     const stagesApi = new pipedrive.StagesApi(pd);
     const B2C_PIPELINE_ID = 23;
@@ -261,12 +265,15 @@ async function markAsQuoteIssued(dealId) {
         'limit': 56
     };
     const stages = await stagesApi.getStages(opts);
-
+    console.log("getting stages", stages)
+    
+    
     const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
-
+    console.log("finding quote issued stage", quoteIssuedStage)
     await dealsApi.updateDeal(dealId, {
-        stage_id: quoteIssuedStage.id
+            stage_id: quoteIssuedStage.id
     });
+     
 
     return true;
 }
