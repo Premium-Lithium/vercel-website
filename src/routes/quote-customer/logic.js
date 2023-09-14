@@ -258,7 +258,7 @@ async function markAsQuoteIssued(dealId) {
     const response = await dealsApi.updateDeal(dealId, {
             title: "update"
     });   
-    console.log("updated deal", response)
+    console.log(response)
     
     // Move the deal to the quote issued stage
     const stagesApi = new pipedrive.StagesApi(pd);
@@ -269,7 +269,7 @@ async function markAsQuoteIssued(dealId) {
         'limit': 56
     };
     const stages = await stagesApi.getStages(opts);
-    console.log("getting stages", stages)
+    console.log(stages)
     
     
     const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
