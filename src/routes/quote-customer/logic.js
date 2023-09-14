@@ -252,38 +252,38 @@ async function markAsQuoteIssued(dealId) {
         return false;
     }
     console.log(dealFieldsRequest.data)
-    const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
-    console.log("checking if field exists.....................................")
-    if(quoteIssuedField === undefined) {
-        console.log(`Could not find the "Quote issued" field on pipedrive`);
-        return false;
-    }
-    console.log("updating deal.................................")
-    // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
-    const response = await dealsApi.updateDeal(dealId, {
-            title: "update"
-    });   
-    console.log(response)
+    // const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
+    // console.log("checking if field exists.....................................")
+    // if(quoteIssuedField === undefined) {
+    //     console.log(`Could not find the "Quote issued" field on pipedrive`);
+    //     return false;
+    // }
+    // console.log("updating deal.................................")
+    // // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
+    // const response = await dealsApi.updateDeal(dealId, {
+    //         title: "update"
+    // });   
+    // console.log(response)
     
-    // Move the deal to the quote issued stage
-    const stagesApi = new pipedrive.StagesApi(pd);
-    const B2C_PIPELINE_ID = 23;
-    let opts = {
-        'pipelineId': B2C_PIPELINE_ID,
-        'start': 0,
-        'limit': 56
-    };
-    const stages = await stagesApi.getStages(opts);
+    // // Move the deal to the quote issued stage
+    // const stagesApi = new pipedrive.StagesApi(pd);
+    // const B2C_PIPELINE_ID = 23;
+    // let opts = {
+    //     'pipelineId': B2C_PIPELINE_ID,
+    //     'start': 0,
+    //     'limit': 56
+    // };
+    // const stages = await stagesApi.getStages(opts);
     
-    const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
-    console.log("finding quote issued stage", quoteIssuedStage)
-    if (quoteIssuedStage === undefined){
-        console.log("failed to find quote issued stage")
-        return false;
-    }
-    await dealsApi.updateDeal(dealId, {
-            stage_id: quoteIssuedStage.id
-    });
+    // const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
+    // console.log("finding quote issued stage", quoteIssuedStage)
+    // if (quoteIssuedStage === undefined){
+    //     console.log("failed to find quote issued stage")
+    //     return false;
+    // }
+    // await dealsApi.updateDeal(dealId, {
+    //         stage_id: quoteIssuedStage.id
+    // });
      
 
     return true;
