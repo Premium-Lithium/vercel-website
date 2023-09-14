@@ -23,10 +23,10 @@ const tracer = new LangChainTracer({
   client
 })
 
-let model
+// LANGCHAIN
+let model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 500 });
 
-model = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 500 });
-
+// Vector store for general knowledge base
 let generalVectorStore = await new SupabaseVectorStore(
     new OpenAIEmbeddings(),
     {
@@ -36,6 +36,7 @@ let generalVectorStore = await new SupabaseVectorStore(
     },
 );
 
+// Vector store for pricing knowledge base
 let pricingVectorStore = await new SupabaseVectorStore(
   new OpenAIEmbeddings(),
   {
