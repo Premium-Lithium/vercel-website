@@ -13,13 +13,6 @@ export default async function quoteCustomer(dealId) {
         "success": true,
         "message": `Quote created for deal ${dealId}`
     };
-    let emailData = {
-        sender: customer.pl_contact.email,
-        recipients: [customer.email],
-        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-        email_body: "error",
-        content_type: "text"
-    };
 
     const customer = await getCustomerInfo(dealId);
 
@@ -29,6 +22,14 @@ export default async function quoteCustomer(dealId) {
         console.log(quoteAttempt.message);
         return quoteAttempt;
     }
+    
+    let emailData = {
+        sender: customer.pl_contact.email,
+        recipients: [customer.email],
+        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+        email_body: "error",
+        content_type: "text"
+    };
     
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
     const emailContentData = {
