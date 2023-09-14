@@ -3,6 +3,7 @@ import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
 import { supabase } from '$lib/supabase.ts';
 import { json } from '@sveltejs/kit';
+import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
@@ -259,15 +260,23 @@ async function markAsQuoteIssued(dealId) {
         return false;
     }
     console.log("updating deal.................................")
-    // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
-    const response = await dealsApi.updateDeal(dealId, {
-            title: "update"
-    }); 
-    if (response === undefined){
-        console.log("failed to update deal");
-        return false;
-    }
-    console.log(response)
+    // url = /v1/deals/{id}
+    let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`, {
+        method: 'PATCH',
+        body: JSON.stringify({'title': 'test'}),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    console.log(res);
+    // const response = await dealsApi.updateDeal(dealId, {
+    //         title: "update"
+    // }); 
+    // if (response === undefined){
+    //     console.log("failed to update deal");
+    //     return false;
+    // }
+    // console.log(response)
     
     // // Move the deal to the quote issued stage
     // const stagesApi = new pipedrive.StagesApi(pd);
