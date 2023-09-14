@@ -243,10 +243,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
 async function markAsQuoteIssued(dealId) {
     console.log("marking quote as issued ")
     // Update the `Quote Issued` field on pipedrive with todays date
-    // todo: this assumes the dealFieldsRequest in pipedrive-utils was successful
     const dealsApi = new pipedrive.DealsApi(pd);
-    // const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
-    // const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
     const dealFields = dealFieldsRequest.data;
     if (dealFieldsRequest.data === undefined){
         console.log("failed to fetch deals data")
@@ -259,20 +256,15 @@ async function markAsQuoteIssued(dealId) {
         console.log(`Could not find the "Quote issued" field on pipedrive`);
         return false;
     }
-    console.log("updating deal.................................")
-    // url = /v1/deals/{id}
+    console.log("updating deal.............")
     try{
-        let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`, {
-            method: 'PUT',
-            body: JSON.stringify({'[quoteIssuedField.key]': today()}),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        let res = await dealsApi.updateDeal(dealId, {
+            [quoteIssuedField.key]: today()
+        });
         if (res){
-            console.log("updated deal", res)
+            console.log("updated deal")
         }else{
-            console.log("error")
+            console.log("error updating deal")
         }
     }catch(error){
             return false
@@ -287,10 +279,9 @@ async function markAsQuoteIssued(dealId) {
         'limit': 56
     };
     const stages = await stagesApi.getStages(opts);
-    console.log(stages)
     
     const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
-    console.log("finding quote issued stage", quoteIssuedStage)
+    console.log("finding quote issued stage")
     if (quoteIssuedStage === undefined){
         console.log("failed to find quote issued stage")
         return false;
