@@ -252,6 +252,7 @@ async function markAsQuoteIssued(dealId) {
         console.log("failed to fetch deals data")
         return false;
     }
+    
     const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
     console.log("checking if field exists.....................................")
     if(quoteIssuedField === undefined) {
@@ -268,14 +269,14 @@ async function markAsQuoteIssued(dealId) {
         },
     })
     console.log("updated deal", res);
-    // const response = await dealsApi.updateDeal(dealId, {
-    //         title: "update"
-    // }); 
-    // if (response === undefined){
-    //     console.log("failed to update deal");
-    //     return false;
-    // }
-    // console.log(response)
+    const response = await dealsApi.updateDeal(dealId, {
+            title: "update"
+    }); 
+    if (response === undefined){
+        console.log("failed to update deal");
+        return false;
+    }
+    console.log(response)
     
     // // Move the deal to the quote issued stage
     // const stagesApi = new pipedrive.StagesApi(pd);
