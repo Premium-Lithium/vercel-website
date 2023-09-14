@@ -57,7 +57,7 @@
     async function handleChatInput(e) {
         awaitingMessage = true;
         let prompt = chatInput;
-        previousMessages = [...previousMessages, {"role": "user", "content": prompt}];
+        previousMessages = [...previousMessages, {"role": "user", "content": `${prompt} and send 3 template responses which I can choose to respond with.`}];
         let messages = previousMessages;
         if($currentState == ChatState.ASK_PRODUCT_OR_HELP) {
             let msg = getMessageBasedOnState(prompt);
