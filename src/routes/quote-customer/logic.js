@@ -13,6 +13,13 @@ export default async function quoteCustomer(dealId) {
         "success": true,
         "message": `Quote created for deal ${dealId}`
     };
+    let emailData = {
+        sender: customer.pl_contact.email,
+        recipients: [customer.email],
+        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+        email_body: "error",
+        content_type: "text"
+    };
 
     const customer = await getCustomerInfo(dealId);
 
@@ -29,7 +36,7 @@ export default async function quoteCustomer(dealId) {
         price_calculator_link: priceCalcLink,
         customer_name: customer.name.split(" ")[0],
         relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-        schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
+        schedule_call_link: "https://premiumlithium.com" 
     };
     try{
         console.log("getting email template")
@@ -42,13 +49,8 @@ export default async function quoteCustomer(dealId) {
             const templatePath =data.signedUrl;
             const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
-            const emailData = {
-                sender: customer.pl_contact.email,
-                recipients: [customer.email],
-                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                email_body: emailContent,
-                content_type: "HTML"
-            };
+            emailData.email_body = emailContent;
+            emailData.content_type = "HTML";
     
             // Create a draft email in the BDM's outlook
             await createDraft(...Object.values(emailData));
@@ -66,14 +68,6 @@ export default async function quoteCustomer(dealId) {
             return quoteAttempt;
         } catch (error) {
             console.log("error finding email template");
-            const emailData = {
-                sender: customer.pl_contact.email,
-                recipients: [customer.email],
-                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                mail_body: "error",
-                content_type: "text"
-            };
-    
             // Create a draft email in the BDM's outlook
             await createDraft(...Object.values(emailData));
             return (quoteAttempt = { success: false, message: "error finding email template" });

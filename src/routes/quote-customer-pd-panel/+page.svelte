@@ -30,14 +30,15 @@
                     "timeOut": "10000",
                 });
                 return response;
+            }else{
+                // Handle the error here, or rethrow it if needed.
+                console.error("Error sending quote:", response.status);
+                toastr.error('An error occurred while sending the quote draft. Please try again later.', '', {
+                    "positionClass": "toast-bottom-center",
+                    "timeOut": "10000",
+                });
             }
         } catch (error) {
-            // Handle the error here, or rethrow it if needed.
-            console.error("Error sending quote:", error);
-            toastr.error('An error occurred while sending the quote draft. Please try again later.', '', {
-                "positionClass": "toast-bottom-center",
-                "timeOut": "10000",
-            });
             return error;
         }
     }
