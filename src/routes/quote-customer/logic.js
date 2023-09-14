@@ -247,6 +247,7 @@ async function markAsQuoteIssued(dealId) {
     // const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
     // const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
     const dealFields = dealFieldsRequest.data;
+    console.log(dealFieldsRequest.data)
     const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
     console.log("checking if field exists.....................................")
     if(quoteIssuedField === undefined) {
