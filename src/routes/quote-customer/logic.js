@@ -252,12 +252,12 @@ async function markAsQuoteIssued(dealId) {
         return false;
     }
     console.log(dealFieldsRequest.data)
-    // const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
-    // console.log("checking if field exists.....................................")
-    // if(quoteIssuedField === undefined) {
-    //     console.log(`Could not find the "Quote issued" field on pipedrive`);
-    //     return false;
-    // }
+    const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
+    console.log("checking if field exists.....................................")
+    if(quoteIssuedField === undefined) {
+        console.log(`Could not find the "Quote issued" field on pipedrive`);
+        return false;
+    }
     // console.log("updating deal.................................")
     // // url = 'https://developers.pipedrive.com/docs/api/v1/Deals#updateDeal'
     // const response = await dealsApi.updateDeal(dealId, {
