@@ -6,7 +6,7 @@
     import 'toastr/build/toastr.min.css';
     import {ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState} from './logic';
 
-    let awaitingMessage = false;
+    let awaitingMessage = true;
     let previousMessages: {"role": string, "content": string}[] = [];
     let messageToSend = `Greet me with a friendly emoji and introduce yourself, and ask whether I'd like to explore products or just need some help`;
     let chatInput = "";
@@ -114,17 +114,18 @@
             
         {/if}
     {/each}
+
     {#if awaitingMessage}
         <h2 in:fly|global={{x:-1000, duration:1000}} class="message-assistant">...</h2>
+    {:else}
+    {#each presetResponses as response}
+        <h2 class="message-user preset-response disable-text-select"
+        on:click={(e) => {chatInput = response; handleChatInput(e)}}
+        in:fly|global={{x:1000, duration:1000}}>
+        {response}
+        </h2>
+    {/each}
     {/if}
-    </div>
-    <div class="preset-response-wrapper">
-        {#each presetResponses as response}
-            <h3 class="preset-response disable-text-select"
-                on:click={(e) => {chatInput = response; handleChatInput(e)}}>
-                {response}
-            </h3>
-        {/each}
     </div>
     <form on:submit|preventDefault={handleChatInput}>
         <input 
@@ -137,23 +138,6 @@
 </body>
 
 <style>
-    .preset-response-wrapper {
-        position: absolute;
-        bottom: 14vh;
-        width: 90%;
-        left: 5%;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-evenly;
-    }
-
-    .preset-response {
-        border-radius: 5px;
-        padding: 6px;
-        background-color: var(--plblue);
-        color: white;
-        
-    }
     .messages {
         display: flex;
         flex-direction: column;
@@ -173,7 +157,7 @@
     [class^="message-"]{ 
         width:fit-content;
         font-family: 'Roboto', sans-serif;
-        font-size: 1.3em;
+        font-size: 0.7em;
         padding: 15px; 
         border: 3px solid #177ba7;
         background-color:#53b4de;    
@@ -187,7 +171,21 @@
         background-color: #11a3e2;
         box-shadow: -3px 4px 8px rgba(0, 0, 0, 0.5);
     }
+
+    .message-assistant > h2 {
+        font-size: 1.3em;
+    }
     
+    .preset-response:hover {
+        background-color: #50aad1;
+    }
+
+    .preset-response {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        margin-top: 3px;
+        margin-bottom: 3px;
+    }
     
     .message-user {
         align-self: end;
@@ -201,8 +199,7 @@
     }
 
     .feedback-icons > h2 {
-        margin-left: 10px;
-        margin-right: 10px;
+        margin: 0px 10px;
         background-color:#53b4de;
         border-radius: 50%;
         padding: 10px;
