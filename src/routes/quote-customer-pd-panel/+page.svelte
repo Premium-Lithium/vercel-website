@@ -15,36 +15,33 @@
 
     async function sendQuoteEmail() {
         console.log("sending quote email....");
-        try{
+        try {
             const response = await fetch('/quote-customer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                deal_id: dealId
-            })
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deal_id: dealId
+                })
             });
-            console.log(response);
+
             if (response.status === 200) {
                 toastr.success('Quote draft generated successfully!', '', {
-                "positionClass": "toast-bottom-center",
-                "timeOut": "10000",
-                });
-                // setTimeout(() => {
-                //     location.reload();
-                // }, 50);
-                return response
-            } else {
-                console.log("error sending quote");
-                toastr.error('Failed to send quote draft Please Try again', '', {
                     "positionClass": "toast-bottom-center",
                     "timeOut": "10000",
-                })
+                });
+                return response;
+            }else{
+                // Handle the error here, or rethrow it if needed.
+                console.error("Error sending quote:", response.status);
+                toastr.error('An error occurred while sending the quote draft. Please try again later.', '', {
+                    "positionClass": "toast-bottom-center",
+                    "timeOut": "10000",
+                });
             }
-    } catch (error) {
-       
-        return error;
+        } catch (error) {
+            return error;
+        }
     }
-}
 </script>
 
 <div style="padding: 0px 15px;">
