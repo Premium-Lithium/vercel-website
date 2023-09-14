@@ -22,7 +22,7 @@ export default async function quoteCustomer(dealId) {
         console.log(quoteAttempt.message);
         return quoteAttempt;
     }
-    
+
     let emailData = {
         sender: customer.pl_contact.email,
         recipients: [customer.email],
@@ -179,7 +179,6 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 }
 
 
-// todo: add meaningful return statements to this to indicate whether or not it worked, and catch these in quoteCustomer above
 async function createDraft(sender, recipients, subject, mail_body, content_type) {
     try {
         console.log("creating draft...................................")
@@ -225,7 +224,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
             throw new Error(`Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
         }
 
-        return response; // You might want to return something meaningful here.
+        return response; 
     } catch (error) {
         console.log(`Error: Failed to create draft: ${error.message}`);
         // Handle the error here or throw it to be caught by the caller.
