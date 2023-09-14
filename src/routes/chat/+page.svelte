@@ -171,7 +171,7 @@
 
     {#if awaitingMessage}
         <div in:fly|global={{x:-1000, duration:1000}} class="message-assistant awaiting-message">
-            <h2>.</h2><h2>.</h2><h2>.</h2>
+            <h1>.</h1><h1>.</h1><h1>.</h1>
         </div>
     {:else}
     {#each presetResponses as response}
@@ -284,18 +284,21 @@
     .awaiting-message{
         display: flex;
         flex-direction: row;
+        padding-top: 0px;
+        padding-bottom: 0px;
     }
 
-    .awaiting-message > h2 {
+    .awaiting-message > h1 {
         display: inline-block;
         animation: bounce-awaiting-message 1.5s infinite;
+
     }
 
-    .awaiting-message h2:nth-child(2) {
+    .awaiting-message h1:nth-child(2) {
         animation-delay: 0.25s;
     }
 
-    .awaiting-message h2:nth-child(3) {
+    .awaiting-message h1:nth-child(3) {
         animation-delay: 0.5s;
     }
 
