@@ -261,32 +261,33 @@ async function markAsQuoteIssued(dealId) {
     }
     console.log("updating deal.................................")
     // url = /v1/deals/{id}
-    let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`, {
-        method: 'PUT',
-        body: JSON.stringify({'title': 'test'}),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    console.log("updated deal", res);
-    const response = await dealsApi.updateDeal(dealId, {
-            title: "update"
-    }); 
-    if (response === undefined){
-        console.log("failed to update deal");
-        return false;
-    }
-    console.log(response)
+    try{
+        let res = await fetch(`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`, {
+            method: 'PUT',
+            body: JSON.stringify({'title': 'testaaaaaaa'}),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        if (res){
+            console.log("updated deal", res)
+        }else{
+            console.log("error")
+        }
+    }catch(error){
+            return false
+        }
     
     // // Move the deal to the quote issued stage
-    // const stagesApi = new pipedrive.StagesApi(pd);
-    // const B2C_PIPELINE_ID = 23;
-    // let opts = {
-    //     'pipelineId': B2C_PIPELINE_ID,
-    //     'start': 0,
-    //     'limit': 56
-    // };
-    // const stages = await stagesApi.getStages(opts);
+    const stagesApi = new pipedrive.StagesApi(pd);
+    const B2C_PIPELINE_ID = 23;
+    let opts = {
+        'pipelineId': B2C_PIPELINE_ID,
+        'start': 0,
+        'limit': 56
+    };
+    const stages = await stagesApi.getStages(opts);
+    console.log(stages)
     
     // const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
     // console.log("finding quote issued stage", quoteIssuedStage)
@@ -297,9 +298,6 @@ async function markAsQuoteIssued(dealId) {
     // await dealsApi.updateDeal(dealId, {
     //         stage_id: quoteIssuedStage.id
     // });
-     
-
-    return true;
 }
 
 
