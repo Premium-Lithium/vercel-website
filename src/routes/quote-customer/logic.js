@@ -252,7 +252,6 @@ async function markAsQuoteIssued(dealId) {
         console.log("failed to fetch deals data")
         return false;
     }
-    console.log(dealFieldsRequest.data)
     const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
     console.log("checking if field exists.....................................")
     if(quoteIssuedField === undefined) {
