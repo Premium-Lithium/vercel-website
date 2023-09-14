@@ -286,10 +286,16 @@ async function markAsQuoteIssued(dealId) {
         console.log("failed to find quote issued stage")
         return false;
     }
-    await dealsApi.updateDeal(dealId, {
+    let response = await dealsApi.updateDeal(dealId, {
             stage_id: quoteIssuedStage.id
     });
-    return true;
+    if (response){
+        return true;
+    }else{
+        console.log("failed to move deal to stage");
+        return false;
+    }
+    
 }
 
 
