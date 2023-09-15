@@ -113,21 +113,26 @@
             }
         });
         awaitingMessage = false;
-        let output;
+        let outputs: string[];
         if (!response.ok) {
-            output = "I'm unable to respond to that.";
+            outputs = ["I'm unable to respond to that."];
         }
         else {
             const { message, runId } = await response.json();
             currentRunId = runId.runId;
             if (message == 'Agent stopped due to max iterations.') {
-                output = "Request timed out.";
+                outputs = ["Request timed out."];
             }
             else {
-                output = message.output;
+                outputs = message.output.split('. ');
+                console.log(outputs);
             }
         }
-        previousMessages = [...previousMessages, {"role": "assistant", "content": output, "runId": currentRunId}];
+        outputs.forEach((o) => {
+            if(o.length > 1) {
+                previousMessages = [...previousMessages, {"role": "assistant", "content": o, "runId": currentRunId}];
+            }
+        })
     }
 
 
@@ -231,6 +236,8 @@
         border-radius: 30px 30px 30px 1px;
         background-color: #11a3e2;
         box-shadow: -3px 4px 8px rgba(0, 0, 0, 0.5);
+        padding: 5px 10px;
+        margin-top: 10px;
     }
 
     .message-assistant > h2 {
