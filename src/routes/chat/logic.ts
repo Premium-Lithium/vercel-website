@@ -58,6 +58,7 @@ export function getMessageBasedOnState(input: string){
                 currentState.set(ChatState.ASK_BATTERY);
                 return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`;
             }
+            else currentState.set(ChatState.NONE);
             break;
         case ChatState.GET_HELP:
             currentState.set(ChatState.NONE);
