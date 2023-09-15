@@ -19,8 +19,9 @@
     async function sendBatteryInstruction() {
         // construct package
         const reqBody = JSON.stringify([instruction, batteryTarget]);
+        console.log(reqBody);
         // send request
-        const resp = fetch("/energy-arbitrage/inverter/battery-level", {
+        const resp = fetch("/energy-arbitrage/inverter/battery-operation", {
             method: "POST",
             body: reqBody,
             headers: {
@@ -31,6 +32,7 @@
                 responseBody.json().then(
                     (respVal) => {
                         instructionResponse = respVal;
+                        console.log(respVal);
                     });
         });
     }
