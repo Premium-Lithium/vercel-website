@@ -37,7 +37,7 @@ export default async function quoteCustomer(dealId) {
         price_calculator_link: priceCalcLink,
         customer_name: customer.name.split(" ")[0],
         relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-        schedule_call_link: "https://premiumlithium.com" 
+        schedule_call_link: "https://premiumlithium.pipedrive.com/scheduler/dwXzamsKQ/telephone-consultation-with-renewables-consultant" 
     };
     try{
         console.log("getting email template")
