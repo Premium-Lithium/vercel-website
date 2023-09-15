@@ -13,7 +13,7 @@ async function sendMail(sender, recipients, subject, mail_body, content_type) {
     };
 
     // Make sure we're sending from a Premium Lithium email address
-    if(!sender.endsWith("@premiumlithium.com")) {
+    if (!sender.endsWith("@premiumlithium.com")) {
         mailAttempt.success = false;
         mailAttempt.message = `Error: Sender '${sender}' is not a Premium Lithium email address.`;
         console.log(mailAttempt.message);
@@ -31,34 +31,41 @@ async function sendMail(sender, recipients, subject, mail_body, content_type) {
         }
     };
 
-    const apiToken = await getNewAPIToken();
+    try {
+        const apiToken = await getNewAPIToken();
 
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiToken
-    };
-
-    const options = {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(messagePayload)
-    };
-
-    const apiUrl = `/v1.0/users/${sender}/sendMail`;
-
-    fetch(`https://graph.microsoft.com${apiUrl}`, options)
-        .then(res => {
-            if (res.status !== 202) {
-                mailAttempt.success = false;
-                mailAttempt.message = `Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`;
-                console.log(mailAttempt.message);
-            }
-        })
-        .catch(error => {
+        if (!apiToken) {
             mailAttempt.success = false;
-            mailAttempt.message = `Error: Failed to send email: ${error.message}`;
+            mailAttempt.message = "Error: Failed to obtain API token.";
             console.log(mailAttempt.message);
-        });
+            return mailAttempt;
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiToken
+        };
+
+        const options = {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(messagePayload)
+        };
+
+        const apiUrl = `/v1.0/users/${sender}/sendMail`;
+
+        const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
+
+        if (response.status !== 202) {
+            mailAttempt.success = false;
+            mailAttempt.message = `Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`;
+            console.log(mailAttempt.message);
+        }
+    } catch (error) {
+        mailAttempt.success = false;
+        mailAttempt.message = `Error: Failed to send email: ${error.message}`;
+        console.log(mailAttempt.message);
+    }
 
     console.log(mailAttempt.message);
     return mailAttempt;

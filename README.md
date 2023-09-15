@@ -24,7 +24,25 @@ Get the .env file on your local machine
 pnpx vercel env pull .env
 ```
 
-## Using a local database
+## Using a local database - first time setup
+
+You need docker on your machine
+```
+snap install docker
+```
+
+Docker may need root access
+```
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+You may need to reboot for these changes to take effect
+```
+reboot
+```
+
 Login to Supabase CLI
 ```
 supabase login
@@ -34,9 +52,13 @@ Start the local Supabase instance
 ```
 supabase start
 ```
-
 This may take a while as it needs to download the docker image.
-### Manually interacting with the local DB
+
+## Using a local database - subsequent times
+Start the local Supabase instance
+```
+supabase start
+```
 The local db can be accessed by visiting `http://localhost:54323/`
 
 ## Updating the DB schema

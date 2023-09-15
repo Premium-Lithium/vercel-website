@@ -3,6 +3,7 @@ import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
 import { supabase } from '$lib/supabase.ts';
 import { json } from '@sveltejs/kit';
+import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
@@ -21,6 +22,14 @@ export default async function quoteCustomer(dealId) {
         console.log(quoteAttempt.message);
         return quoteAttempt;
     }
+
+    let emailData = {
+        sender: customer.pl_contact.email,
+        recipients: [customer.email],
+        subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
+        email_body: "error",
+        content_type: "text"
+    };
     
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
     const emailContentData = {
@@ -28,50 +37,42 @@ export default async function quoteCustomer(dealId) {
         price_calculator_link: priceCalcLink,
         customer_name: customer.name.split(" ")[0],
         relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-        schedule_call_link: "https://premiumlithium.com" // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
+        schedule_call_link: "https://premiumlithium.com" 
     };
     try{
-        // console.log("getting email template")
-        // const { data, error } = await supabase
-        // .storage
-        // .from('email-template')
-        // .createSignedUrl('customer-quote-template.mjml', 60)
-        // if (data){
+        console.log("getting email template")
+        const { data, error } = await supabase
+        .storage
+        .from('email-template')
+        .createSignedUrl('customer-quote-template.mjml', 60)
+        if (data){
             
-            // const templatePath =data.signedUrl;
-            // const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
+            const templatePath =data.signedUrl;
+            const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
-            const emailData = {
-                sender: customer.pl_contact.email,
-                recipients: [ customer.email ],
-                subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-                email_body: "test",
-                content_type: "text"
-            };
-             // Create a draft email in the BDM's outlook
-            createDraft(...Object.values(emailData));
-
-            if(!markAsQuoteIssued(dealId)){
+            emailData.email_body = emailContent;
+            emailData.content_type = "HTML";
+    
+            // Create a draft email in the BDM's outlook
+            await createDraft(...Object.values(emailData));
+    
+            if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
+                quoteAttempt = {
+                    "success": false,
+                    "message": `Failed to update deal ${dealId} as QuoteIssued`
+                };
                 return quoteAttempt;
             }
-            return quoteAttempt
-        // }
-    }catch(error){
-        console.log("error finding email template")
-        const emailData = {
-            sender: customer.pl_contact.email,
-            recipients: [ customer.email ],
-            subject: "Your Solar PV and BESS Quotes - Options and Next Steps",
-            mail_body: "error",
-            content_type: "text"
-        };
+        }
     
-        // Create a draft email in the BDM's outlook
-        createDraft(...Object.values(emailData));
-        return quoteAttempt = { success: false, message: "error finsing email template"}
-    }
-    return quoteAttempt
+            return quoteAttempt;
+        } catch (error) {
+            console.log("error finding email template");
+            // Create a draft email in the BDM's outlook
+            await createDraft(...Object.values(emailData));
+            return (quoteAttempt = { success: false, message: "error finding email template" });
+        }
 }
 
 
@@ -178,75 +179,92 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 }
 
 
-// todo: add meaningful return statements to this to indicate whether or not it worked, and catch these in quoteCustomer above
 async function createDraft(sender, recipients, subject, mail_body, content_type) {
-    console.log("creating drAFT...................................")
-    const apiToken = await getNewAPIToken();
-    if (apiToken === null){
-        console.log("error creating API token");
-        return null
-    }
-    const messagePayload = {
-        subject: subject,
-        body: {
-            contentType: content_type,
-            content: mail_body
-        },
-        toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
-        bccRecipients: [
-            {
-                emailAddress: {
-                    address: "development@premiumlithium.com",
+    try {
+        console.log("creating draft...................................")
+        const apiToken = await getNewAPIToken();
+        if (apiToken === null) {
+            console.log("error creating API token");
+            return json({status: 500}, {statusText: "error creating api token"});
+        }
+        const messagePayload = {
+            subject: subject,
+            body: {
+                contentType: content_type,
+                content: mail_body
+            },
+            toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
+            bccRecipients: [
+                {
+                    emailAddress: {
+                        address: "development@premiumlithium.com",
+                    }
                 }
-            }
-        ]
-    };
+            ]
+        };
 
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiToken
-    };
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiToken
+        };
 
-    const options = {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(messagePayload)
-    };
+        const options = {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(messagePayload)
+        };
 
-    const apiUrl = `/v1.0/users/${sender}/messages`;
+        const apiUrl = `/v1.0/users/${sender}/messages`;
 
-    fetch(`https://graph.microsoft.com${apiUrl}`, options)
-        .then(res => {
-            if (res.status !== 201) {
-                console.log(`Error: Microsoft Graph API request failed with status ${res.status} ${res.statusText}`);
-                return res.status
-            }
-        })
-        .catch(error => {
-            console.log(`Error: Failed to create draft: ${error.message}`);
-        });
+        const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
+
+        if (response.status !== 201) {
+            console.log(`Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+            // Handle the error here or throw it to be caught by the caller.
+            throw new Error(`Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+        }
+
+        return response; 
+    } catch (error) {
+        console.log(`Error: Failed to create draft: ${error.message}`);
+        // Handle the error here or throw it to be caught by the caller.
+        return json({status: 500},{statusText: "failed to create draft"});
+    }
 }
+
 
 
 async function markAsQuoteIssued(dealId) {
     console.log("marking quote as issued ")
     // Update the `Quote Issued` field on pipedrive with todays date
-    // todo: this assumes the dealFieldsRequest in pipedrive-utils was successful
-    const dealFields = dealFieldsRequest.data;
     const dealsApi = new pipedrive.DealsApi(pd);
-
+    const dealFields = dealFieldsRequest.data;
+    if (dealFieldsRequest.data === undefined){
+        console.log("failed to fetch deals data")
+        return false;
+    }
+    
     const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
-
+    console.log("checking if field exists.....................................")
     if(quoteIssuedField === undefined) {
         console.log(`Could not find the "Quote issued" field on pipedrive`);
         return false;
     }
-
-    await dealsApi.updateDeal(dealId, {
-        [quoteIssuedField.key]: today()
-    });
-
-    // Move the deal to the quote issued stage
+    console.log("updating deal.............")
+    try{
+        let res = await dealsApi.updateDeal(dealId, {
+            [quoteIssuedField.key]: today()
+        });
+        if (res){
+            console.log("updated deal")
+        }else{
+            console.log("error updating deal")
+        }
+    }catch(error){
+        return false
+    }
+    
+    // // Move the deal to the quote issued stage
     const stagesApi = new pipedrive.StagesApi(pd);
     const B2C_PIPELINE_ID = 23;
     let opts = {
@@ -255,14 +273,27 @@ async function markAsQuoteIssued(dealId) {
         'limit': 56
     };
     const stages = await stagesApi.getStages(opts);
-
+    
     const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
-
-    await dealsApi.updateDeal(dealId, {
-        stage_id: quoteIssuedStage.id
-    });
-
-    return true;
+    console.log("finding quote issued stage")
+    if (quoteIssuedStage === undefined){
+        console.log("failed to find quote issued stage")
+        return false;
+    }
+    try{
+        let response = await dealsApi.updateDeal(dealId, {
+            stage_id: quoteIssuedStage.id
+        });
+        if (response){
+            return true;
+        }else{
+            console.log("failed to move deal to stage");
+            return false;
+        }
+    }catch(error){
+        return false;
+    }
+    
 }
 
 
