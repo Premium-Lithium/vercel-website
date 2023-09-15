@@ -75,14 +75,15 @@ const conversationMemory = new BufferMemory({
     outputKey: "output",
 });
 
-const agentExecutor = await initializeAgentExecutorWithOptions(tools, model, 
+const agentExecutor = await initializeAgentExecutorWithOptions(tools, model,
     {
       agentType: "openai-functions",
       verbose: true,
       memory: conversationMemory,
       maxIterations: 8,
       agentArgs: {
-        prefix: 'You are a helpful assistant named Evie for the company Premium Lithium, one of the fastest growing UK smart energy companies.'
+        prefix: `You are a helpful assistant named Evie for the company Premium Lithium, one of the fastest growing UK smart energy companies.
+        You should aim to provide concise responses.`
       }
     }
 );
