@@ -16,6 +16,8 @@ const schema = {
 
 
 export async function POST({ request }) {
+    console.log("1. main request");
+
     if(!request.body)
         return json({ message: "No request body found" }, { status: 400 });
 
@@ -26,9 +28,8 @@ export async function POST({ request }) {
         const errors = validationErrors.join(", ");
         return json({ message: `${errors}` }, { status: 400 })
     }
-
     const quoteAttempt = await quoteCustomer(requestData.deal_id);
-
+    console.log(quoteAttempt)
     return json(
         { message: quoteAttempt.message },
         { status: quoteAttempt.success ? 200 : 500 }

@@ -1,34 +1,45 @@
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { page } from '$app/stores'
     import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
-	import { json } from 'stream/consumers';
 
     let sdk;
-    let dealId;
+    let dealId = $page.url.searchParams.get('selectedIds');
 
     onMount(async () => {
-        dealId = $page.url.searchParams.get('selectedIds');
         sdk = await new AppExtensionsSDK().initialize();
         await sdk.execute('resize', { height: 100 });
     });
 
     async function sendQuoteEmail() {
-        const  dealId = $page.url.searchParams.get('selectedIds');
-        const response = await fetch('/quote-customer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                deal_id: dealId
-            })
-        });
-        if (response.status === 200) {
-            toastr.success('Quote sent successfully!', '', {
-            "positionClass": "toast-bottom-center",
-            "timeOut": "2500",
-        });
+        console.log("sending quote email....");
+        try {
+            const response = await fetch('/quote-customer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deal_id: dealId
+                })
+            });
+
+            if (response.status === 200) {
+                toastr.success('Quote draft generated successfully!', '', {
+                    "positionClass": "toast-bottom-center",
+                    "timeOut": "10000",
+                });
+                return response;
+            }else{
+                // Handle the error here, or rethrow it if needed.
+                console.error("Error sending quote:", response.status);
+                toastr.error('An error occurred while sending the quote draft. Please try again later.', '', {
+                    "positionClass": "toast-bottom-center",
+                    "timeOut": "10000",
+                });
+            }
+        } catch (error) {
+            return error;
         }
     }
 </script>
