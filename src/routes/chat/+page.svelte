@@ -21,6 +21,7 @@
     let presetResponses: Array<string> = [];
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
     let currentRunId = '';
+    let delays: Array<number> = [];
 
     onMount(async () => {
         invalidateAll();
@@ -34,8 +35,14 @@
         });
         awaitingMessage = false;
         const { message } = await response.json();
-        previousMessages = [{"role": "assistant", "content": message.output, "runId": ""}];
+        addMessage({"role": "assistant", "content": message.output, "runId": ""}, 0);
     });
+
+    function addMessage(message: Message, delay: number) {
+        let delayOffset = 1500;
+        previousMessages = [...previousMessages, message];
+        delays.push(delayOffset * delay);
+    }
 
     async function handleFeedbackComment(message: Message) {
         if(!message.feedbackId){
@@ -97,7 +104,7 @@
     async function handleChatInput(e) {
         awaitingMessage = true;
         let prompt = chatInput;
-        previousMessages = [...previousMessages, {"role": "user", "content": prompt, "runId": ""}];
+        addMessage({"role": "user", "content": prompt, "runId": ""},0);
         let messages = previousMessages;
         let msg = getMessageBasedOnState(prompt);
         if(msg != null) {
@@ -128,9 +135,9 @@
                 console.log(outputs);
             }
         }
-        outputs.forEach((o) => {
+        outputs.forEach((o,i) => {
             if(o.length > 1) {
-                previousMessages = [...previousMessages, {"role": "assistant", "content": o, "runId": currentRunId}];
+                addMessage({"role": "assistant", "content": o, "runId": currentRunId},i);
             }
         })
     }
@@ -144,7 +151,7 @@
         {#if message.role==="user"}
             <h2 in:fly|global={{x:1000, duration:1000}} class="message-{message.role}">{message.content}</h2>
         {:else}
-            <div class="message-{message.role}">
+            <div in:fly|global={{x:-1000, duration:1000, delay:delays[i]}} class="message-{message.role}">
                 <h2>{message.content}</h2>
                 <!-- Don't show rating on first message. -->
                 {#if i != 0}
