@@ -70,6 +70,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
     const dailyEnergyUsageField = getField("Daily Energy Usage (kWh)");
     const homeownerField = getField("Are You the Homeowner?");
     const postcodeField = getField("Post Code")
+    const sourceField = getField("How Did You Hear About Us?")
 
     try {
         let labels = [];
@@ -81,6 +82,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
 
         // Work out what to put in the homeowner field - todo: get option id
         const homeownerOptionId = getOptionIdFor(leadData.isHomeOwner, homeownerField);
+        const sourceOptionId = getOptionIdFor(leadData.source, sourceField);
 
         // todo: add information about whether the customer is a homeowner
         let leadOptions = pipedrive.AddLeadRequest.constructFromObject({
@@ -91,6 +93,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
             [dailyEnergyUsageField.key]: leadData.energyUsage,
             [homeownerField.key]: homeownerOptionId,
             [postcodeField.key]: leadData.postcode
+            [sourceField.key]: sourceOptionId
 
             // todo: set custom field for "where did you hear about us?"
         });
