@@ -4,7 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
-    import {ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState} from './logic';
+    import { ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState } from './logic';
 	import { page } from '$app/stores';
 
     let testingMode = false;
@@ -23,6 +23,7 @@
     let currentRunId = '';
     let delays: Array<number> = [];
 
+
     onMount(async () => {
         invalidateAll();
         $currentState = ChatState.ASK_PRODUCT_OR_HELP;
@@ -38,10 +39,17 @@
         addMessage({"role": "assistant", "content": message.output, "runId": ""}, 0);
     });
 
+    function scrollToBottom() {
+        var scrollContainer = document.getElementsByClassName('messages')[0];
+        console.log(scrollContainer);
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+
     function addMessage(message: Message, delay: number) {
         let delayOffset = 1500;
         previousMessages = [...previousMessages, message];
-        delays.push(delayOffset * delay);
+        delays = [...delays, delayOffset * delay];
+        scrollToBottom();
     }
 
     async function handleFeedbackComment(message: Message) {
@@ -86,13 +94,13 @@
             let feedbackId: string = response.feedback.id;
             if(!response.error) {
                 toastr.success("Feedback sent successfully", "", {
-                    timeOut: 1000,
+                    timeOut: 2000,
                     progressBar: true,
                 })
                 message.feedbackId = feedbackId;
             } else {
                 toastr.error(`Error sending feedback: ${response.error}`, "", {
-                    timeOut: 1000,
+                    timeOut: 2000,
                     progressBar: true,
                 })
             }
@@ -180,21 +188,21 @@
 
         {/if}
     {/each}
-
     {#if awaitingMessage}
         <div in:fly|global={{x:-1000, duration:1000}} class="message-assistant awaiting-message">
             <h1>.</h1><h1>.</h1><h1>.</h1>
         </div>
     {:else}
-    {#each presetResponses as response}
-        <h2 class="message-user preset-response disable-text-select"
-        on:click={(e) => {chatInput = response; handleChatInput(e)}}
-        in:fly|global={{x:1000, duration:1000}}>
-        {response}
-        </h2>
-    {/each}
+        {#each presetResponses as response}
+            <h2 class="message-user preset-response disable-text-select"
+            on:click={(e) => {chatInput = response; handleChatInput(e)}}
+            in:fly|global={{x:1000, duration:1000}}>
+            {response}
+            </h2>
+        {/each}
     {/if}
     </div>
+
     <form on:submit|preventDefault={handleChatInput}>
         <input
         class="chat-input"
@@ -209,6 +217,7 @@
     body {
         background-color: black;
     }
+
     .messages {
         display: flex;
         flex-direction: column;
