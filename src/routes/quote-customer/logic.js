@@ -30,14 +30,13 @@ export default async function quoteCustomer(dealId) {
         email_body: "error",
         content_type: "text"
     };
-    
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
     const emailContentData = {
         pl_bdm_contact_name: customer.pl_contact.name,
         price_calculator_link: priceCalcLink,
         customer_name: customer.name.split(" ")[0],
         relative_call_time: "earlier", // todo: if possible calculate this from pipedrive call logs e.g "last week", "this morning", "yesterday"
-        schedule_call_link: "https://premiumlithium.com" 
+        schedule_call_link: "https://premiumlithium.com"
     };
     try{
         console.log("getting email template")
@@ -46,16 +45,13 @@ export default async function quoteCustomer(dealId) {
         .from('email-template')
         .createSignedUrl('customer-quote-template.mjml', 60)
         if (data){
-            
             const templatePath =data.signedUrl;
             const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
             emailData.email_body = emailContent;
             emailData.content_type = "HTML";
-    
             // Create a draft email in the BDM's outlook
             await createDraft(...Object.values(emailData));
-    
             if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 quoteAttempt = {
@@ -65,7 +61,6 @@ export default async function quoteCustomer(dealId) {
                 return quoteAttempt;
             }
         }
-    
             return quoteAttempt;
         } catch (error) {
             console.log("error finding email template");
@@ -187,12 +182,16 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
             console.log("error creating API token");
             return json({status: 500}, {statusText: "error creating api token"});
         }
+        const attatchments = getAttachments();
         const messagePayload = {
             subject: subject,
             body: {
                 contentType: content_type,
-                content: mail_body
+                content: mail_body,
             },
+            attachments: [{
+                attatchments,
+            }],
             toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
             bccRecipients: [
                 {
@@ -224,7 +223,7 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
             throw new Error(`Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
         }
 
-        return response; 
+        return response;
     } catch (error) {
         console.log(`Error: Failed to create draft: ${error.message}`);
         // Handle the error here or throw it to be caught by the caller.
@@ -232,7 +231,29 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
     }
 }
 
-
+async function getAttachments(){
+    //using the solution get the datasheets for products the customer is interested in
+    // (datasheets stored in bucket on supabase)
+    console.log("getting email attachments")
+        const { data, error } = await supabase
+        .storage
+        .from('email-template/attachments')
+        .createSignedUrl('pd1.pdf', 60)
+    console.log(data, error)
+    if (error != null ){
+        console.log("error geting attachment");
+        return null;
+    }
+    let attachments = {
+        "@odata.type": "#microsoft.graph.fileAttachment",
+        name: "pdf1.pdf", // from supabase
+        contentBytes: "VGhpcyBpcyBhIGZpbGUgdG8gYmUgYXR0YWNoZWQu"
+    } // encoded base 64 file
+    let contentBytes = btoa(data.signedUrl);
+    attachments.name = "example attachment"
+    attachments.contentBytes = contentBytes;
+    return attachments
+}
 
 async function markAsQuoteIssued(dealId) {
     console.log("marking quote as issued ")
@@ -243,7 +264,6 @@ async function markAsQuoteIssued(dealId) {
         console.log("failed to fetch deals data")
         return false;
     }
-    
     const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
     console.log("checking if field exists.....................................")
     if(quoteIssuedField === undefined) {
