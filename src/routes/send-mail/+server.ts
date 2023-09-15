@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import validate from '../../lib/validation-utils.js';
+import validate from '$lib/validation-utils.js';
 import { sendMail } from './logic.js';
 
 
