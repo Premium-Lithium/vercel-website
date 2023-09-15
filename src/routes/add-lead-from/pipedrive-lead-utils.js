@@ -80,7 +80,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
         }
 
         // Work out what to put in the homeowner field - todo: get option id
-        const homeownerOptionId = getOptionIdFor(leadData.isHomeOwner ? "Yes" : "No", homeownerField);
+        const homeownerOptionId = getOptionIdFor(leadData.isHomeOwner, homeownerField);
 
         // todo: add information about whether the customer is a homeowner
         let leadOptions = pipedrive.AddLeadRequest.constructFromObject({
@@ -165,6 +165,8 @@ function getField(fieldName) {
 
 
 function getOptionIdFor(optionName, fieldObject) {
+    if (optionName === null) return null // (None) options are encoded as null
+
     const options = fieldObject.options;
     const option = options.find(o => o.label === optionName);
 
