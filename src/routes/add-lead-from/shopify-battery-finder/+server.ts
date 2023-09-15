@@ -7,7 +7,7 @@ export async function POST({ request }) {
     const batteryFinderAnswers = JSON.parse(rawData).answers;
 
     const lead = await extractLeadFrom(batteryFinderAnswers);
-    const leadAddAttempt = await captureLeadFrom("Battery Finder", lead);
+    const leadAddAttempt = await captureLeadFrom("Battery Finder", lead, "Battery Finder");
 
     const response = new Response(
         JSON.stringify({ message: leadAddAttempt.message }),
