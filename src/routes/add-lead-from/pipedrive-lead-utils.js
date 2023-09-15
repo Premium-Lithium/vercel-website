@@ -92,7 +92,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
             labelIds: labels,
             [dailyEnergyUsageField.key]: leadData.energyUsage,
             [homeownerField.key]: homeownerOptionId,
-            [postcodeField.key]: leadData.postcode
+            [postcodeField.key]: leadData.postcode,
             [sourceField.key]: sourceOptionId
 
             // todo: set custom field for "where did you hear about us?"
