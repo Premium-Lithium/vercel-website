@@ -237,8 +237,8 @@ async function getAttachments(){
     console.log("getting email attachments")
         const { data, error } = await supabase
         .storage
-        .from('email-template/attachments')
-        .createSignedUrl('pd1.pdf', 60)
+        .from('email-template')
+        .createSignedUrl('/attachments/pd1.pdf', 60)
     console.log(data, error)
     if (error != null ){
         console.log("error geting attachment");
