@@ -1,5 +1,7 @@
 // API endpoint for data storage
 
+import { error, json } from "@sveltejs/kit";
+
 // parameters:
 /*
     data type: [usage, generation, price, etc],
@@ -17,6 +19,37 @@ let energyGenPast = [
     3.11, 2.56, 3.94, 3.9, 2.61, 2.28, 3.5, 0.63, 1.39, 3.12, 2.65, 1.85, 1.03, 3.21, 2.78, 2.48, 0.56, 3.16, 1.52, 3.56, 2.22, 1.48, 1.08, 3.55, 3.43, 3.41, 0.74, 1.9, 1.77, 3.63, 2.84, 3.92, 3.09, 3.96, 2.97, 1.82, 2.24, 2.98, 0.98, 3.33, 2.8, 2.82, 0.65, 3.03, 2.09, 0.95, 2.66, 3.33, 2.22, 2.2, 2.74, 2.46, 3.03, 1.86, 0.63
 ]
 
-export function POST () {
-    
+export async function POST ({url, request}) {
+    const requestParams = await request.json();
+    try {
+        const dataRequest = requestParams.field;
+        let steps = requestParams.steps
+        console.log(dataRequest);
+        console.log(steps);
+
+        let dataSelected;
+        // error if not a selectable field
+        switch(dataRequest) {
+            case "usage":
+                dataSelected = energyUsePast;
+                break;
+            case "generation":
+                dataSelected = energyGenPast;
+                break;
+            default:
+                throw new Error("Invalid input");
+        }
+
+        // get last n entries
+        steps = Math.min(steps, dataSelected.length)
+        const start = (dataSelected.length - steps);
+        const returnValues = dataSelected.slice(start);
+        return json(returnValues);
+
+    } catch {
+         throw error(400, {
+            message: "Error 400: Bad Request"
+         });
+    }
+
 }
