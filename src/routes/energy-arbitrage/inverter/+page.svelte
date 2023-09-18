@@ -1,5 +1,5 @@
 <script lang="ts">
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 
     let batteryLevel: String | null= null;
     async function getBatteryLevel() {
