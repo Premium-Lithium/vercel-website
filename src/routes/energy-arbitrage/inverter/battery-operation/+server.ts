@@ -2,7 +2,7 @@
 
 import { json } from '@sveltejs/kit';
 
-export async function POST ({request}) {
+export async function POST ({url, request}) {
     // request structure:
     // [instruction, chargeTarget]
     // instructions: ["charge from grid", "discharge to grid", "all charge from panels", "regular (charge from excess from panels)"]
@@ -16,9 +16,12 @@ export async function POST ({request}) {
     // get current battery level
     let responseString: Array<String> = [];
     let batteryLevel: Number;
-    let response = await fetch("/energy-arbitrage/inverter/battery-level");
-    console.log("getting battery level");
-    batteryLevel = await response.json()
+    // relative calls not allowed server side
+    const batteryLevelDest = "/energy-arbitrage/inverter/battery-level"
+    let targetUrl = url.origin + batteryLevelDest;
+
+    let response = await fetch(targetUrl);
+    batteryLevel = await response.json();
 
                         // echo a response
     if (chargeTarget === null) {
