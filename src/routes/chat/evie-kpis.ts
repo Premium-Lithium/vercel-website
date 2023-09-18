@@ -39,8 +39,7 @@ export async function getAverageMessageCount(){
     let numOfConversations = 0;
     for await(const val of runs) {
         if(val.child_run_ids == null) {
-            let humanMessages = val.inputs.chat_history.filter((x) => {return x.id.includes('HumanMessage')});
-            console.log(humanMessages);
+            let humanMessages = val.inputs.chat_history.filter((x) => {return (x.id.includes('HumanMessage') && !x.kwargs.content.includes("Greet me with a friendly emoji"))});
             totalConversationLength += humanMessages.length;
             numOfConversations++;
         }
