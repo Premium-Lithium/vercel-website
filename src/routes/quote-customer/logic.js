@@ -184,6 +184,18 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
             return json({status: 500}, {statusText: "error creating api token"});
         }
         const contentBytes = await getAttachments();
+        let attachment = [];
+        const addAttachment = false; //  stays false until we get attachments we want to add to emails
+        // todo remove when we have attachments to send .......
+        if (addAttachment === true){
+             attachment = [{
+                        '@odata.type': "#microsoft.graph.fileAttachment",
+                        "name": "attachment.pdf",
+                        "contentType": "application/pdf",
+                        "contentBytes": contentBytes,
+                    }]
+        }
+        //.........................................................
         if (contentBytes){
             const messagePayload = {
                 subject: subject,
@@ -199,14 +211,8 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
                         }
                     }
                 ],
-                attachments: [
-                    {
-                        '@odata.type': "#microsoft.graph.fileAttachment",
-                        "name": "attachment.pdf",
-                        "contentType": "application/pdf",
-                        "contentBytes": contentBytes,
-                    }
-                ]
+                attachments: attachment
+                
             };
 
             const headers = {
