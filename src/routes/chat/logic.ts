@@ -7,10 +7,22 @@ export enum ChatState {
     ASK_SOLAR_PANELS,
     ASK_SOLAR_AND_BATTERY,
     ASK_ENERGY_USAGE,
+    ASK_EXISTING,
     GET_HELP,
+    NO_SOLUTIONS,
+    HAS_SOLAR,
+    HAS_BATTERY,
+    HAS_SOLAR_AND_BATTERY,
     NONE
 };
 export let currentState = writable(ChatState.ASK_PRODUCT_OR_HELP);
+export let stateFlow = writable([currentState]);
+
+export function changeStateWithMessage(state: ChatState = ChatState.NONE, message: string = "") {
+    stateFlow.set([...get(stateFlow), currentState]);
+    currentState.set(state);
+    return `Send a message like '${message}' with a friendly emoji`;
+}
 
 export function getPresetMessagesBasedOnState(currentState: ChatState) {
     switch(currentState) {
@@ -20,16 +32,12 @@ export function getPresetMessagesBasedOnState(currentState: ChatState) {
             return ["Solar Panels", "Battery", "Solar and Battery", "Other"];
         case ChatState.ASK_ENERGY_USAGE:
             return ["Low (below 2000kWh)", "Medium (2000 - 5000kWh)","High (above 5000kWh)"];
-        case ChatState.ASK_SOLAR_PANELS:
-            return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
-        case ChatState.ASK_SOLAR_AND_BATTERY:
-            return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
-        case ChatState.ASK_BATTERY:
+        case ChatState.ASK_EXISTING:
             return ["No existing solutions", "I have solar", "I have a battery", "I have both solar and battery"];
         case ChatState.GET_HELP:
             return ["Book a consultation"];
     }
-    return [];
+    return ["I didn't understand", "Start over"];
 }
 
 export function getMessageBasedOnState(input: string){
@@ -37,45 +45,56 @@ export function getMessageBasedOnState(input: string){
     switch(get(currentState)) {
         case ChatState.ASK_PRODUCT_OR_HELP:
             if(inputLower.includes("product")) {
-                currentState.set(ChatState.ASK_PRODUCTS);
-                return `Send a message like 'Great! Let's find the perfect product for you. What are you looking for?' with a friendly emoji`;
+                return changeStateWithMessage(ChatState.ASK_PRODUCTS, "Great! Let's find the perfect product for you. What are you looking for?");
             }
             else if(inputLower.includes("help")){
-                currentState.set(ChatState.GET_HELP);
-                return `Send a message like 'No problem, what can I help with today?' with a friendly emoji`;
-            }
+                return changeStateWithMessage(ChatState.GET_HELP, "No problem, what can I help with today?");
+            } else currentState.set(ChatState.NONE);
             break;
         case ChatState.ASK_PRODUCTS:
             if(inputLower.includes("solar") && inputLower.includes("battery")){
-                currentState.set(ChatState.ASK_SOLAR_AND_BATTERY);
-                return `Send a message like 'Great choice! We at Premium Lithium would highly recommend a Solar and Battery package. Do you already have any smart energy solutions?' with a friend emoji`;
+                return changeStateWithMessage(ChatState.ASK_EXISTING, "Great choice! We at Premium Lithium would highly recommend a Solar and Battery package. Do you already have any smart energy solutions?");
             }
             else if(inputLower.includes("solar")){
-                currentState.set(ChatState.ASK_SOLAR_PANELS);
-                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`;
+                return changeStateWithMessage(ChatState.ASK_EXISTING, "Great choice! Do you already have any smart energy solutions?");
             }
             else if(inputLower.includes("battery")){
-                currentState.set(ChatState.ASK_BATTERY);
-                return `Send a message like 'Great choice! Do you already have any smart energy solutions?' with a friend emoji`;
+                return changeStateWithMessage(ChatState.ASK_EXISTING, "Great choice! Do you already have any smart energy solutions?");
+            } else changeStateWithMessage();
+        case ChatState.ASK_EXISTING:
+            if(inputLower.includes("solar") && inputLower.includes("battery")) {
+
             }
-            else currentState.set(ChatState.NONE);
-            break;
+            else if(inputLower.includes("solar")) {
+
+            }
+            else if(inputLower.includes("battery")) {
+
+            }
+            else if(inputLower.includes("no existing")) {
+
+            } else changeStateWithMessage();
+        case ChatState.ASK_ENERGY_USAGE:
+            changeStateWithMessage();
         case ChatState.GET_HELP:
-            currentState.set(ChatState.NONE);
-            break;
+            changeStateWithMessage();
+        case ChatState.NO_SOLUTIONS:
+            changeStateWithMessage();
+        case ChatState.HAS_SOLAR:
+            changeStateWithMessage();
+        case ChatState.HAS_BATTERY:
+            changeStateWithMessage();
+        case ChatState.HAS_SOLAR_AND_BATTERY:
+            changeStateWithMessage();
         case ChatState.ASK_BATTERY:
-            currentState.set(ChatState.NONE);
-            break;
+            changeStateWithMessage();
         case ChatState.ASK_SOLAR_PANELS:
-            currentState.set(ChatState.NONE);
-            break;
+            changeStateWithMessage();
         case ChatState.ASK_SOLAR_AND_BATTERY:
-            currentState.set(ChatState.NONE);
-            break;
+            changeStateWithMessage();
         case ChatState.NONE:
-            currentState.set(ChatState.NONE);
-            break;
-        default: currentState.set(ChatState.NONE)
+            changeStateWithMessage();
+        default: changeStateWithMessage()
             break;
     }
     return null;
