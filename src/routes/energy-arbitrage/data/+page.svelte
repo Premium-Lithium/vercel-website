@@ -10,6 +10,7 @@
         const response = await fetch("/energy-arbitrage/data/store", {
             method: "POST",
             body: JSON.stringify({
+                "action": "READ",
                 "field": selectedOption,
                 "steps": timesteps
             }),
@@ -26,6 +27,21 @@
         result.reverse();
         responseString = result.join(", ");
         console.log(result);
+    }
+
+    let valToAdd:number = 1.35;
+    async function apiAdd() {
+        const response = await fetch("/energy-arbitrage/data/store", {
+            method: "POST",
+            body: JSON.stringify({
+                "action": "CREATE",
+                "field": selectedOption,
+                "val": valToAdd
+            }),
+            headers: {
+                "content-type": "application-json"
+            }
+        })
     }
 
 </script>
@@ -57,6 +73,11 @@
     <p>Response<br>
         {responseString}
     </p>
+    <p>
+        Add value via PUT
+    </p>
+    <input bind:value={valToAdd} type="number" step="0.01" min=0 max=10>
+    <button on:click={apiAdd}>Add!</button>
 </body>
 
 <style>

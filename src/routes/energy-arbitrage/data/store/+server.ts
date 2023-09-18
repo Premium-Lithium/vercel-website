@@ -22,34 +22,61 @@ let energyGenPast = [
 export async function POST ({url, request}) {
     const requestParams = await request.json();
     try {
-        const dataRequest = requestParams.field;
-        let steps = requestParams.steps
-        console.log(dataRequest);
-        console.log(steps);
+        // for data retrieval
+        console.log("1");
+        if (requestParams.action === "READ") {
+            const dataRequest = requestParams.field;
+            let steps = requestParams.steps
+            console.log(dataRequest);
+            console.log(steps);
 
-        let dataSelected;
-        // error if not a selectable field
-        switch(dataRequest) {
-            case "usage":
-                dataSelected = energyUsePast;
-                break;
-            case "generation":
-                dataSelected = energyGenPast;
-                break;
-            default:
-                throw new Error("Invalid input");
+            let dataSelected;
+            // error if not a selectable field
+            switch(dataRequest) {
+                case "usage":
+                    dataSelected = energyUsePast;
+                    break;
+                case "generation":
+                    dataSelected = energyGenPast;
+                    break;
+                default:
+                    throw new Error("Invalid input");
+            }
+
+            // get last n entries
+            steps = Math.min(steps, dataSelected.length)
+            const start = (dataSelected.length - steps);
+            const returnValues = dataSelected.slice(start);
+            return json(returnValues);
+
+        } else if (requestParams.action === "CREATE") {
+            // add new value
+            const dataField = requestParams.field;
+            const dataVal = requestParams.val;
+            console.log("adding");
+            addEntry(dataField, dataVal);
+            return json(0);
         }
-
-        // get last n entries
-        steps = Math.min(steps, dataSelected.length)
-        const start = (dataSelected.length - steps);
-        const returnValues = dataSelected.slice(start);
-        return json(returnValues);
-
     } catch {
          throw error(400, {
             message: "Error 400: Bad Request"
          });
+    
+    }
+}
+
+function addEntry(field: string, value: number) {
+    switch(field) {
+        case "usage":
+            energyUsePast.push(value);
+            console.log(energyUsePast);
+            break;
+        case "generation":
+            energyGenPast.push(value);
+            console.log(energyGenPast);
+            break;
+        default:
+            throw new Error("Invalid input");
     }
 
 }
