@@ -4,7 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
-    import { ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState } from './logic';
+    import { ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState, stateFlow } from './logic';
 	import { page } from '$app/stores';
 
     let testingMode = false;
@@ -22,11 +22,13 @@
     $: presetResponses = getPresetMessagesBasedOnState($currentState);
     let currentRunId = '';
     let delays: Array<number> = [];
+    let delayOffset = 1500;
 
 
     onMount(async () => {
         invalidateAll();
         $currentState = ChatState.ASK_PRODUCT_OR_HELP;
+        $stateFlow = [currentState];
         const response = await fetch('chat/', {
             method: 'POST',
             body: JSON.stringify({ "prompt" : [{"role": "user", "content": messageToSend}] }),
@@ -41,12 +43,10 @@
 
     function scrollToBottom() {
         var scrollContainer = document.getElementsByClassName('messages')[0];
-        console.log(scrollContainer);
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
 
     function addMessage(message: Message, delay: number) {
-        let delayOffset = 1500;
         previousMessages = [...previousMessages, message];
         delays = [...delays, delayOffset * delay];
         scrollToBottom();
@@ -67,13 +67,13 @@
             let feedbackId: string = response.feedback.id;
             if(!response.error) {
                 toastr.success("Feedback sent successfully", "", {
-                    timeOut: 1000,
+                    timeOut: 2000,
                     progressBar: true,
                 })
                 message.feedbackId = feedbackId;
             } else {
                 toastr.error(`Error sending feedback: ${response.error}`, "", {
-                    timeOut: 1000,
+                    timeOut: 2000,
                     progressBar: true,
                 })
             }
@@ -140,7 +140,6 @@
             }
             else {
                 outputs = message.output.split('. ');
-                console.log(outputs);
             }
         }
         outputs.forEach((o,i) => {
@@ -196,7 +195,7 @@
         {#each presetResponses as response}
             <h2 class="message-user preset-response disable-text-select"
             on:click={(e) => {chatInput = response; handleChatInput(e)}}
-            in:fly|global={{x:1000, duration:1000}}>
+            in:fly|global={{x:1000, duration:1000, delay:delays[delays.length-1]}}>
             {response}
             </h2>
         {/each}

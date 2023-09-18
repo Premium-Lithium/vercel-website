@@ -52,20 +52,20 @@ let pricingVectorStoreChain = VectorDBQAChain.fromLLM(model, pricingVectorStore)
 
 const generalQATool = new ChainTool({
     name: "premium-lithium-general-qa",
-    description: "Premium Lithium Knowledge Base QA - Useful for answering questions about products we offer, such as batteries, solar panels, inverters and EV chargers",
+    description: "Premium Lithium Knowledge Base QA - Useful for answering questions about products we offer, such as batteries, solar panels, inverters and EV chargers, aswell as general queries",
     chain: generalVectorStoreChain,
 })
 
-const pricingQATool = new ChainTool({
-  name: "premium-lithium-pricing-qa",
-  description: "Premium Lithium Pricing Knowledge Base QA - Useful for answering questions about prices of our products, and payment queries",
+const productsQATool = new ChainTool({
+  name: "premium-lithium-products-qa",
+  description: "Premium Lithium Products Knowledge Base QA - Useful for answering questions about prices and specifications of our products, and payment queries",
   chain: pricingVectorStoreChain,
 })
 
 const tools = [
     new Calculator(),
     generalQATool,
-    pricingQATool,
+    productsQATool,
 ];
 
 const conversationMemory = new BufferMemory({
