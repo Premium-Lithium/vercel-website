@@ -68,8 +68,8 @@ const schema = {
                 },
                 InterestedIn: {
                     "type": "string",
-                    "enum": [ "Solar panels", "Solar panels and battery" ],
-                    "errorMessage": "`InterestedIn` should be either 'Solar panels' or 'Solar panels and battery'"
+                    "pattern": ".",
+                    "errorMessage": "`InterestedIn` should be a string"
                 },
                 Age: {
                     "type": "string",
