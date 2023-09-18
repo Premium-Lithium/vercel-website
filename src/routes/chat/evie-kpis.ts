@@ -1,10 +1,18 @@
 import { LANGCHAIN_API_KEY, LANGCHAIN_ENDPOINT, LANGCHAIN_PROJECT} from "$env/static/private";
 import { Client } from "langsmith";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { HumanMessage, SystemMessage, BaseMessage } from "langchain/schema";
+import { ChatPromptTemplate, SystemMessagePromptTemplate } from "langchain/prompts";
+import { kmeans } from 'ml-kmeans';
+import { LLMChain } from "langchain/chains";
 
 const client = new Client({
     apiUrl: LANGCHAIN_ENDPOINT,
     apiKey: LANGCHAIN_API_KEY,
   })
+
+
 
 export async function getRuns() {
     const runs = topLevelRuns();
@@ -32,8 +40,6 @@ export async function getErrorRate() {
 }
 
 export async function getAverageMessageCount(){
-    // if child_run_ids.length == 0
-    // chat length = inputs.chat_history.length
     const runs = topLevelRuns();
     let totalConversationLength = 0;
     let numOfConversations = 0;
@@ -45,6 +51,44 @@ export async function getAverageMessageCount(){
         }
     }
     return numOfConversations == 0 ? 0 : (totalConversationLength / numOfConversations).toFixed(2);
+}
+
+export async function getFAQ(numFAQs: number) {
+    const asyncRuns = topLevelRuns();
+    let runs = [];
+    for await(const val of asyncRuns) if(val.inputs.input) runs.push(val.inputs.input);
+    let embedder = new OpenAIEmbeddings();
+    let embeddings = await embedder.embedDocuments(runs);
+    let numClusters = Math.min(numFAQs, Math.floor(runs.length / numFAQs));
+    let kmeansResult = kmeans(embeddings, numClusters, {});
+    let llm = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature:0.7});
+    const promptTemplate = ChatPromptTemplate.fromPromptMessages([
+        [ "system", "You are a helpful AI assistant trained to generate insights on how users are using a product. You are given the following query logs:"],
+        SystemMessagePromptTemplate.fromTemplate(`BEGIN LOGS
+        -----
+        {logs}
+        -----
+        END LOGS`),
+        ["human", "Please respond with a single word title capturing the commonalities of these logs. These words should be like 'Solar', 'Energy Usage', 'Consultations' etc."]
+      ]);
+    const chain = new LLMChain({llm, prompt:promptTemplate});
+
+    let summaries = [];
+
+    let clusterGroups = [];
+    [...Array(numFAQs).keys()].forEach((x) => clusterGroups.push([]));
+    kmeansResult.clusters.forEach((x,i) => {
+        clusterGroups[x].push(runs[i]);
+    })
+
+    clusterGroups.forEach(async (x) => {
+        let clusterMembers = runs.filter((v,i) => { return kmeansResult.clusters.includes(i) })
+        let clusterInputs = clusterMembers.join("\n\n");
+        console.log(x);
+        let summary = await chain.run(clusterInputs);
+        summaries.push(summary);
+    });
+    return summaries;
 }
 
 const topLevelRuns = () => {

@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import validate from '$lib/validation-utils.js';
-import { getRuns, getErrorRate, getAverageMessageCount } from '../chat/evie-kpis';
+import { getRuns, getErrorRate, getAverageMessageCount, getFAQ } from '../chat/evie-kpis';
 
 
 const kpis = [
@@ -8,6 +8,7 @@ const kpis = [
     "evie_total_messages",
     "evie_error_rate",
     "evie_average_chat_length",
+    "evie_most_common_topics"
 ]
 
 const schema = {
@@ -50,6 +51,9 @@ export async function POST({ request }) {
                 break
             case kpis[3]:
                 returnData = await getAverageMessageCount();
+                break;
+            case kpis[4]:
+                returnData = await getFAQ(8);
                 break;
         }
 
