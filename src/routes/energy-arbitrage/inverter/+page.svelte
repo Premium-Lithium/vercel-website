@@ -37,14 +37,29 @@
     }
 
     let generatedEnergy: null | number = null;  // energy generated last timestep
-    let timeStep:null|number = null;  // timestep duration in hours
+    let generationTimeStep:null|number = null;  // timestep duration in hours
 
     async function getEnergyGeneration() {
         const resp = fetch("/energy-arbitrage/inverter/energy-generation");
         resp.then((respBody) => {
             respBody.json().then((respVal) => {
                 generatedEnergy = respVal[0];
-                timeStep = respVal[1];
+                generationTimeStep = respVal[1];
+            });
+        });
+    }
+
+
+    let usedEnergy: null | number = null;  // energy used last timestep
+    let usageTimeStep:null|number = null;  // timestep duration in hours
+
+
+    async function getEnergyUse() {
+        const resp = fetch("/energy-arbitrage/inverter/energy-usage");
+        resp.then((respBody) => {
+            respBody.json().then((respVal) => {
+                usedEnergy = respVal[0];
+                usageTimeStep = respVal[1];
             });
         });
     }
@@ -89,8 +104,18 @@
             </td><td>
                 <button on:click={getEnergyGeneration}>Get energy generated</button>
             </td><td>
-                <p>Generated {generatedEnergy === null ? "unknown " : generatedEnergy}kWh over {timeStep === null ? "?" : timeStep} hours<br>
-                Averaging {generatedEnergy && timeStep ? (generatedEnergy / timeStep) : "?"}kW</p>
+                <p>Generated {generatedEnergy === null ? "unknown " : generatedEnergy}kWh over {generationTimeStep === null ? "?" : generationTimeStep} hours<br>
+                Averaging {generatedEnergy && generationTimeStep ? (generatedEnergy / generationTimeStep) : "?"}kW</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Get energy use
+            </td><td>
+                <button on:click={getEnergyUse}>Get energy use</button>
+            </td><td>
+                <p>Generated {usedEnergy === null ? "unknown " : usedEnergy}kWh over {usageTimeStep === null ? "?" : usageTimeStep} hours<br>
+                    Averaging {usedEnergy && usageTimeStep ? (usedEnergy / usageTimeStep) : "?"}kW</p>    
             </td>
         </tr>
     </table>
