@@ -67,9 +67,11 @@ async function addPersonToPipedrive(emailAddress, name, phone) {
 async function addLeadToPipedrive(leadData, title, personId, labelName) {
     const leads = new pipedrive.LeadsApi(pd);
 
+    // todo: make sure that the lead adding system is robust to changes in the field names we have
+    // add everything as notes by default, and if the fields exist then add those afterwards.
     const dailyEnergyUsageField = getField("Daily Energy Usage (kWh)");
     const homeownerField = getField("Are You the Homeowner?");
-    const postcodeField = getField("Post Code")
+    const addressField = getField("Address of Property")
 
     try {
         let labels = [];
@@ -90,7 +92,7 @@ async function addLeadToPipedrive(leadData, title, personId, labelName) {
             labelIds: labels,
             [dailyEnergyUsageField.key]: leadData.energyUsage,
             [homeownerField.key]: homeownerOptionId,
-            [postcodeField.key]: leadData.postcode
+            [addressField.key]: leadData.postcode
 
             // todo: set custom field for "where did you hear about us?"
         });
