@@ -124,7 +124,7 @@ Contributing to the National Grid: Should all local storage and consumption opti
 
 ---
 
-To book a consultation, you can visit https://premiumlithium.pipedrive.com/scheduler/dwXzamsKQ/telephone-consultation-with-renewables-consultant `
+To book a consultation, you can visit https://premiumlithium.pipedrive.com/scheduler/DpLkGBsQ/telephone-consultation-with-renewables-consultant`
 
 let pricingKnowledgeBase = `
 The pre-ordering model has proved to be an effective approach for both Premium Lithium and our customers. Its success is evident from our customer feedback on Trustpilot which you can see here https://uk.trustpilot.com/review/premiumlithium.com. By pooling payments from multiple pre-orders, we are able to place larger orders with our manufacturing partners. This strategy leads to significant savings on purchasing, shipping, and installation planning.
@@ -177,6 +177,7 @@ async function uploadDocument(text, tableName) {
     const { error } = await supabase
     .from(tableName)
     .delete()
+    .neq("id", 0);
     let sections = text.split('---');
     const textSplitter = new RecursiveCharacterTextSplitter( {
         chunkSize: 500,
