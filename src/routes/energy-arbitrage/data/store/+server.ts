@@ -27,8 +27,6 @@ export async function POST ({url, request}) {
         if (requestParams.action === "READ") {
             const dataRequest = requestParams.field;
             let steps = requestParams.steps
-            console.log(dataRequest);
-            console.log(steps);
 
             let dataSelected;
             // error if not a selectable field
@@ -53,7 +51,6 @@ export async function POST ({url, request}) {
             // add new value
             const dataField = requestParams.field;
             const dataVal = requestParams.val;
-            console.log("adding");
             addEntry(dataField, dataVal);
             return json(0);
         }
@@ -69,11 +66,9 @@ function addEntry(field: string, value: number) {
     switch(field) {
         case "usage":
             energyUsePast.push(value);
-            console.log(energyUsePast);
             break;
         case "generation":
             energyGenPast.push(value);
-            console.log(energyGenPast);
             break;
         default:
             throw new Error("Invalid input");
