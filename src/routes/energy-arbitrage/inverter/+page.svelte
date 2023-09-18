@@ -19,7 +19,6 @@
     async function sendBatteryInstruction() {
         // construct package
         const reqBody = JSON.stringify([instruction, batteryTarget]);
-        console.log(reqBody);
         // send request
         const resp = fetch("/energy-arbitrage/inverter/battery-operation", {
             method: "POST",
@@ -34,6 +33,19 @@
                         instructionResponse = respVal;
                         console.log(respVal);
                     });
+        });
+    }
+
+    let generatedEnergy: null | number = null;  // energy generated last timestep
+    let timeStep:null|number = null;  // timestep duration in hours
+
+    async function getEnergyGeneration() {
+        const resp = fetch("/energy-arbitrage/inverter/energy-generation");
+        resp.then((respBody) => {
+            respBody.json().then((respVal) => {
+                generatedEnergy = respVal[0];
+                timeStep = respVal[1];
+            });
         });
     }
 
@@ -69,6 +81,16 @@
                 <br><button on:click={sendBatteryInstruction}>Send instruction</button>
             </td><td>
                 <p>Response: {instructionResponse === null ? "None" : instructionResponse}</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Get energy generation
+            </td><td>
+                <button on:click={getEnergyGeneration}>Get energy generated</button>
+            </td><td>
+                <p>Generated {generatedEnergy === null ? "unknown " : generatedEnergy}kWh over {timeStep === null ? "?" : timeStep} hours<br>
+                Averaging {generatedEnergy && timeStep ? (generatedEnergy / timeStep) : "?"}kW</p>
             </td>
         </tr>
     </table>
