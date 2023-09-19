@@ -1,10 +1,14 @@
 import { json } from '@sveltejs/kit';
 import validate from '$lib/validation-utils.js';
+import { getRuns, getErrorRate, getAverageMessageCount, getFAQ } from '../chat/evie-kpis';
 
 
 const kpis = [
     "total_installs",
-    "another_one_here"
+    "evie_total_messages",
+    "evie_error_rate",
+    "evie_average_chat_length",
+    "evie_most_common_topics"
 ]
 
 const schema = {
@@ -18,7 +22,6 @@ const schema = {
         }
     }
 }
-
 
 export async function POST({ request }) {
     if (!request.body)
@@ -34,16 +37,33 @@ export async function POST({ request }) {
     }
 
     try {
-        // const mailAttempt = await sendMail(...Object.values(requestData));
         console.log(`Reading value of ${requestData.value}`)
+        var returnData = null;
+        switch(requestData.value) {
+            case kpis[0]:
+                // add stuff here
+                break;
+            case kpis[1]:
+                returnData = await getRuns();
+                break;
+            case kpis[2]:
+                returnData = await getErrorRate();
+                break
+            case kpis[3]:
+                returnData = await getAverageMessageCount();
+                break;
+            case kpis[4]:
+                returnData = await getFAQ(8);
+                break;
+        }
 
         // todo: return data as json
         return json(
-            { message: "some value here" },
+            { message: returnData },
             { status: 200 }
         );
     } catch (error) {
-        console.error("Error sending mail:", error);
+        console.error("Error reading KPI data:", error);
         return json({ message: "Error reading KPI data" }, { status: 500 });
     }
 }

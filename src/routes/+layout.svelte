@@ -18,4 +18,11 @@
     :global(.pl-button:hover) {
         box-shadow:  0 0 4px 0px white inset, 0 0 10px var(--plblue), 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
     }
+
+    :global(.disable-text-select) {
+        -webkit-user-select: none;  
+        -moz-user-select: none;    
+        -ms-user-select: none;      
+        user-select: none;
+    }
 </style>
