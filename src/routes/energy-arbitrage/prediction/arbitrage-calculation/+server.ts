@@ -16,11 +16,11 @@ export async function POST({url, request}) {
 
     // Expert User Model goes here
     if (timestep >=7 && timestep <= 10) {
-        return json(JSON.stringify("Charge (buy energy)"))
+        return json("Charge (buy energy)")
     } else if (timestep >= 34 && timestep <= 36) {
-        return json(JSON.stringify("Discharge (Sell energy)"))
+        return json("Discharge (Sell energy)")
     } else {
-        return json(JSON.stringify("Normal Operation"))
+        return json("Normal Operation")
     }
     
 
