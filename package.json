@@ -67,6 +67,7 @@
 		"langsmith": "^0.0.36",
 		"mapbox-gl": "^2.15.0",
 		"mjml": "^4.14.1",
+		"ml-kmeans": "^6.0.0",
 		"nunjucks": "^3.2.4",
 		"openai": "4.0.0-beta.12",
 		"pipedrive": "^21.2.0",
