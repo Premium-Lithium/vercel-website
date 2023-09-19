@@ -79,6 +79,7 @@
 		"sveltekit-search-params": "^1.0.15",
 		"three": "^0.155.0",
 		"three.meshline": "^1.4.0",
+		"tiktoken": "^1.0.10",
 		"toastr": "^2.1.4",
 		"vercel": "^32.2.4",
 		"zod": "^3.22.2"

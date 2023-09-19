@@ -125,6 +125,9 @@ dependencies:
   three.meshline:
     specifier: ^1.4.0
     version: 1.4.0
+  tiktoken:
+    specifier: ^1.0.10
+    version: 1.0.10
   toastr:
     specifier: ^2.1.4
     version: 2.1.4
@@ -5327,6 +5330,10 @@ packages:
   /through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
     dev: true
+
+  /tiktoken@1.0.10:
+    resolution: {integrity: sha512-gF8ndTCNu7WcRFbl1UUWaFIB4CTXmHzS3tRYdyUYF7x3C6YR6Evoao4zhKDmWIwv2PzNbzoQMV8Pxt+17lEDbA==}
+    dev: false
 
   /time-span@4.0.0:
     resolution: {integrity: sha512-MyqZCTGLDZ77u4k+jqg4UlrzPTPZ49NDlaekU6uuFaJLzPIN1woaRXCbGeqOfxwc3Y37ZROGAJ614Rdv7Olt+g==}
