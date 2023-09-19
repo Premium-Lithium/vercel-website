@@ -28,7 +28,7 @@ export async function POST({ request }) {
         const errors = validationErrors.join(", ");
         return json({ message: `${errors}` }, { status: 400 })
     }
-    const quoteAttempt = await quoteCustomer(requestData.deal_id);
+    const quoteAttempt = await quoteCustomer(requestData.deal_id, requestData.addAttachment);
     console.log(quoteAttempt)
     return json(
         { message: quoteAttempt.message },

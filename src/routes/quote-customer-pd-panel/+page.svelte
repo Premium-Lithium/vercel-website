@@ -6,6 +6,7 @@
     import 'toastr/build/toastr.min.css';
 
     let sdk;
+    let addAttachment = false;
     let dealId = $page.url.searchParams.get('selectedIds');
 
     onMount(async () => {
@@ -15,12 +16,14 @@
 
     async function sendQuoteEmail() {
         console.log("sending quote email....");
+        console.log(addAttachment);
         try {
             const response = await fetch('/quote-customer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    deal_id: dealId
+                    deal_id: dealId,
+                    addAttachment: addAttachment
                 })
             });
 
@@ -46,6 +49,13 @@
 
 <div style="padding: 0px 15px;">
     <button on:click={sendQuoteEmail} class="quote-button"><b>Generate Quote Draft</b></button>
+    <form>
+        <p> Add attachment?</p>
+        <lable for="attachment"> Yes </lable>
+        <input type="radio" id="attachment" value={true} bind:group={addAttachment}/>
+        <lable for="no"> No </lable>
+        <input type="radio" id="no" value={false} bind:group={addAttachment}/>
+    </form>
 </div>
 
 <style>

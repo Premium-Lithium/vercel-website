@@ -9,7 +9,7 @@ import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
 
-export default async function quoteCustomer(dealId) {
+export default async function quoteCustomer(dealId, addAttachment) {
     let quoteAttempt = {
         "success": true,
         "message": `Quote created for deal ${dealId}`
@@ -52,7 +52,7 @@ export default async function quoteCustomer(dealId) {
             emailData.email_body = emailContent;
             emailData.content_type = "HTML";
             // Create a draft email in the BDM's outlook
-            await createDraft(...Object.values(emailData));
+            await createDraft(...Object.values(emailData), addAttachment);
             if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 quoteAttempt = {
@@ -66,7 +66,7 @@ export default async function quoteCustomer(dealId) {
         } catch (error) {
             console.log("error finding email template");
             // Create a draft email in the BDM's outlook
-            await createDraft(...Object.values(emailData));
+            await createDraft(...Object.values(emailData), addAttachment);
             return (quoteAttempt = { success: false, message: "error finding email template" });
         }
 }
@@ -175,7 +175,7 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 }
 
 
-async function createDraft(sender, recipients, subject, mail_body, content_type) {
+async function createDraft(sender, recipients, subject, mail_body, content_type, addAttachment) {
     try {
         console.log("creating draft...................................")
         const apiToken = await getNewAPIToken();
@@ -183,21 +183,21 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
             console.log("error creating API token");
             return json({status: 500}, {statusText: "error creating api token"});
         }
-        const contentBytes = await getAttachments();
         let attachment = [];
-        const addAttachment = false; //  stays false until we get attachments we want to add to emails
+        //  stays false until we get attachments we want to add to emails
         // todo remove when we have attachments to send .......
+        const contentBytes = await getAttachments();
+        console.log(addAttachment)
         if (addAttachment === true){
-             attachment = [{
+            console.log("ADD ATTACHMENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            attachment = [{
                         '@odata.type': "#microsoft.graph.fileAttachment",
                         "name": "attachment.pdf",
                         "contentType": "application/pdf",
                         "contentBytes": contentBytes,
                     }]
         }
-        //.........................................................
-        if (contentBytes){
-            const messagePayload = {
+        const messagePayload = {
                 subject: subject,
                 body: {
                     contentType: content_type,
@@ -212,7 +212,6 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
                     }
                 ],
                 attachments: attachment
-                
             };
 
             const headers = {
@@ -240,7 +239,6 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
                 }
             }
             return response;
-        }
     } catch (error) {
         console.log(`Error: Failed to create draft: ${error}`);
         // Handle the error here or throw it to be caught by the caller.
@@ -269,7 +267,6 @@ async function getContentBytes(filePath){
     const res = await fetch(filePath);
     const uint8Array = new Uint8Array(await res.arrayBuffer());
     const contentBytes = Buffer.from(uint8Array).toString('base64');
-    console.log(contentBytes);
     return contentBytes;
 }
 
