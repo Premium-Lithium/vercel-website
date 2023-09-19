@@ -6,7 +6,7 @@
     import 'toastr/build/toastr.min.css';
 
     let sdk;
-    let addAttachment = false;
+    let addAttachment = true;
     let dealId = $page.url.searchParams.get('selectedIds');
 
     onMount(async () => {
