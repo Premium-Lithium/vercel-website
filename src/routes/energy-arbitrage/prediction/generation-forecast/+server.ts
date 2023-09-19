@@ -92,7 +92,7 @@ export async function POST({ request }) {
 
         zenith = 90 - sunAltitudeAngle;
 
-        angleOfIncidence = Math.acos(Math.cos(azimuthAngle)*Math.cos(panelTilt)+Math.sin(zenith)*Math.cos(panelAzimuth - azimuthAngle));
+        angleOfIncidence = Math.acos(Math.cos(azimuthAngle) * Math.cos(panelTilt) + Math.sin(zenith) * Math.cos(panelAzimuth - azimuthAngle));
 
         irradianceIncident = irrad[i][2] - (irrad[i][1] * Math.cos(angleOfIncidence)) + irrad[i][0];
 

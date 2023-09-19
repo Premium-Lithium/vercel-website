@@ -7,6 +7,8 @@
 	let lon = 0;
 	let lat = 0;
 	let area = 0;
+	let tilt = 0;
+	let azimuth = 0;
 	let generationForecast;
 
 	async function sendTimestepGetInstruction() {
@@ -26,7 +28,7 @@
 	}
 
 	async function calculateSolarGeneration() {
-		const body = JSON.stringify([lat, lon]);
+		const body = JSON.stringify([lat, lon, area, tilt, azimuth]);
 		const res = fetch('/energy-arbitrage/prediction/generation-forecast', {
 			method: 'POST',
 			body: body,
@@ -72,6 +74,14 @@
 		<br />
 		<label>
 			Solar Panel Area<input type="number" min=0 bind:value={area} />
+		</label>
+		<br />
+		<label>
+			Solar Panel Tilt<input type="number" min=0 bind:value={tilt} />
+		</label>
+		<br />
+		<label>
+			Solar Panel Azimuth<input type="number" min=0 bind:value={azimuth} />
 		</label>
 		<br />
 		<button on:click={calculateSolarGeneration}> Get Solar Forecast</button>
