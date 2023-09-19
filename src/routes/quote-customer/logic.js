@@ -187,7 +187,6 @@ async function createDraft(sender, recipients, subject, mail_body, content_type,
         //  stays false until we get attachments we want to add to emails
         // todo remove when we have attachments to send .......
         const contentBytes = await getAttachments();
-        console.log(addAttachment)
         if (addAttachment === true){
             console.log("ADD ATTACHMENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             attachment = [{
@@ -232,11 +231,6 @@ async function createDraft(sender, recipients, subject, mail_body, content_type,
                 console.log(`Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
                 // Handle the error here or throw it to be caught by the caller.
                 throw new Error(`Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
-            }else{
-                const responseBody = await response.json()
-                if (responseBody){
-                    console.log(responseBody)
-                }
             }
             return response;
     } catch (error) {
@@ -254,7 +248,6 @@ async function getAttachments(){
         .storage
         .from('email-template')
         .createSignedUrl('/attachments/pdf1.pdf', 100)
-    console.log(data, error)
     if (error != null ){
         console.log("error geting attachment");
         return null;
