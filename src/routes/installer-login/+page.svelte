@@ -1,6 +1,7 @@
 <script>
-    import { supabase } from '$lib/supabase.ts';
 
+    import { supabase } from '$lib/supabase.ts';
+  
     let username = "";
     let password = "";
     let loggedIn = false;
@@ -19,7 +20,8 @@
             loggedIn = true;
         }
      }
-
+    
+     
     async function getUserData(){
         const { data: { user } } = await supabase.auth.getUser()
 
