@@ -64,7 +64,9 @@ export async function POST({ request }) {
     const panelAzimuth = loc[4];
 
     // API calls go here, for now just temp variables
+    // lat lon gets used here
     let cloud; // array of length 24, used in irrad to determine whether to use cloudy or clear model
+    // lat lon gets used here
     let irrad; // 2D array of [[DHI, DNI, GHI]] of length 24
 
     // Calculating day of year and whether it is a leap year
