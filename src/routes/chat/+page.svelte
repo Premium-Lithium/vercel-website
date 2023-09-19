@@ -9,13 +9,14 @@
 	import Loading from '$lib/components/Loading.svelte';
 	import { browser } from '$app/environment';
     import { splashMessages } from './splash';
+    import Send from "svelte-material-icons/Send.svelte";
+    import HeadQuestionOutline from "svelte-material-icons/HeadQuestionOutline.svelte";
+
     let testingMode = false;
     if($page.url.searchParams.get('testingMode') === 'true'){
         testingMode = true;
     }
-
     type Message = {"role": string, "content": string, "runId": string, "feedbackId"?: string, "feedback"?: string, "score"?: number};
-
     let awaitingMessage = true;
     let previousMessages: Message[] = [];
     let messageToSend = `Greet me with a friendly emoji and introduce yourself, and ask whether I'd like to explore products or just need some help`;
@@ -158,12 +159,18 @@
 </script>
 {#if browser}
 <body>
+    <div class="speak-to-consultant" aria-label="Speak to a consultant">
+        <a href="https://premiumlithium.pipedrive.com/scheduler/DpLkGBsQ/telephone-consultation-with-renewables-consultant" target="_blank"><HeadQuestionOutline size={30} color="black"></HeadQuestionOutline></a>
+    </div>
     {#if previousMessages.length == 0}
     <div out:blur={{duration: 2000}} class="loading-screen">
-        <h2 class="splash-text">{@html splashMessages[currentSplashMessageIndex]}</h2>
-        <Loading/>
+        <div class="splash-wrapper">
+            <h2 class="splash-text">{@html splashMessages[currentSplashMessageIndex]}</h2>
+            <Loading/>
+        </div>
     </div>
     {/if}
+
     <div class="messages">
     {#each previousMessages as message, i}
         {#if message.role==="user"}
@@ -213,13 +220,17 @@
     {/if}
     </div>
 
-    <form on:submit|preventDefault={handleChatInput}>
+    <form class="enter-message" on:submit|preventDefault={handleChatInput}>
         <input
         class="chat-input"
         type="text"
         autocomplete="off"
         bind:value={chatInput}
         />
+        <button class="chat-submit">
+            <Send size={30} color="white"/>
+        </button>
+
     </form>
 </body>
 {/if}
@@ -275,6 +286,7 @@
     /* Preset responses */
     .preset-response:hover {
         background-color: #50aad1;
+        cursor: pointer;
     }
 
     .preset-response {
@@ -311,13 +323,27 @@
     .chat-input {
         box-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
         border-color: white;
-        position: absolute;
-        bottom: 10vh;
-        width: 80vw;
-        height: auto;
+        width: 70vw;
+        height: 40px;
         font-size: 2em;
-        left: 10vw;
         border-radius: 5px;
+    }
+
+    .chat-submit {
+        width: 0px;
+        height: auto;
+        padding: 0px !important;
+        margin: 10px;
+        border: none;
+    }
+
+    .enter-message {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        position: absolute;
+        bottom: 8vh;
+        left: 12vw;
     }
 
 
@@ -366,7 +392,24 @@
         z-index: 1;
     }
 
-    .blue-text {
-        color: var(--plblue);
+    .splash-wrapper {
+        width: 60%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* Speak to consultant */
+
+    .speak-to-consultant{
+        position: absolute;
+        top: 4%;
+        right: 4%;
+        z-index: 1;
+    }
+
+    .speak-to-consultant:hover {
+        cursor: pointer;
     }
 </style>
