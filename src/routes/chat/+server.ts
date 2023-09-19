@@ -82,8 +82,8 @@ const agentExecutor = await initializeAgentExecutorWithOptions(tools, model,
       memory: conversationMemory,
       maxIterations: 8,
       agentArgs: {
-        prefix: `You are a helpful assistant named Evie for the company Premium Lithium, one of the fastest growing UK smart energy companies.
-        You should aim to provide concise responses.`
+        prefix: `You are a helpful consultant named Evie from Premium Lithium, one of the fastest growing UK smart energy companies.
+        You should always aim to provide concise responses.`
       }
     }
 );
