@@ -8,8 +8,7 @@
 	import { page } from '$app/stores';
 	import Loading from '$lib/components/Loading.svelte';
 	import { browser } from '$app/environment';
-	import { randInt } from 'three/src/math/MathUtils';
-
+    import { splashMessages } from './splash';
     let testingMode = false;
     if($page.url.searchParams.get('testingMode') === 'true'){
         testingMode = true;
@@ -26,17 +25,12 @@
     let currentRunId = '';
     let delays: Array<number> = [];
     let delayOffset = 1500;
-
-    let splashMessages = ["evie is booting up her neurons...","Assembling conversational frameworks...",
-    "Just a moment, evie is brushing up on her jokes...", "evie's checking her chat calendar. You're up next!",
-    "One moment! evie's feeding her virtual cat...", "evie's soaking up some solar rays for energy. Almost ready...",
-    "Hold tight! evie's topping off her battery for an electrifying chat.", "evie's just checking her energy levels. 100% green and rising!",
-    "evie is plugging in. Just a sec!", "evie's charging up for a chat. Hang tight!", "evie's checking her battery. All set soon!",
-    "evie's feeling sunny today! Ready to chat?", "evie's almost charged up! Let's talk energy!", "Plugging into the grid. Hang tight!"
-    ].map((x) => {return x.replace("evie", "<span style='color: var(--plblue)' >evie</span>")});
-    // Randomise splashMessages
-    splashMessages.sort(() => [-1,1][randInt(0,1)]);
     let currentSplashMessageIndex = 0;
+
+    function getDelayForPresetMessages(nthMessage: number) {
+        if(delays.length == 0) return nthMessage * 125 + 500;
+        return delays[delays.length-1] + nthMessage * 125 + 500;
+    }
 
     onMount(async () => {
         invalidateAll();
@@ -60,8 +54,8 @@
     }
 
     function addMessage(message: Message, delay: number) {
-        previousMessages = [...previousMessages, message];
         delays = [...delays, delayOffset * delay];
+        previousMessages = [...previousMessages, message];
         scrollToBottom();
     }
 
@@ -140,7 +134,6 @@
                 'Content-Type': 'application/json'
             }
         });
-        awaitingMessage = false;
         let outputs: string[];
         if (!response.ok) {
             outputs = ["I'm unable to respond to that."];
@@ -160,8 +153,8 @@
                 addMessage({"role": "assistant", "content": o, "runId": currentRunId},i);
             }
         })
+        awaitingMessage = false;
     }
-
 </script>
 {#if browser}
 <body>
@@ -202,7 +195,6 @@
                 </div>
                 {/if}
             </div>
-
         {/if}
     {/each}
     {#if awaitingMessage}
@@ -210,13 +202,14 @@
             <h1>.</h1><h1>.</h1><h1>.</h1>
         </div>
     {:else}
-        {#each presetResponses as response}
-            <h2 class="message-user preset-response disable-text-select"
-            on:click={(e) => {chatInput = response; handleChatInput(e)}}
-            in:fly|global={{x:1000, duration:1000, delay:delays[delays.length-1]}}>
-            {response}
-            </h2>
-        {/each}
+    {#each presetResponses as response, i}
+        <h2 class="message-user preset-response disable-text-select"
+        on:click={(e) => {chatInput = response; handleChatInput(e)}}
+        in:fly|global={{x:1000, duration:1000,
+        delay:getDelayForPresetMessages(i)}}>
+        {response}
+        </h2>
+    {/each}
     {/if}
     </div>
 
