@@ -45,7 +45,10 @@ export async function POST ({url, request}) {
                 case "pref":
                     // return preferences
                     return json(userPreferences);
-                    
+                    break;
+                case "pref.backup":
+                    return json(userPreferences.backupHours);
+                    break;                    
                 default:
                     throw new Error("Invalid input");
             }

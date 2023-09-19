@@ -19,6 +19,27 @@
             )
         });
 	}
+
+	let energyBackupNeeded: Number|null = null;
+	let backupDuration: Number|null = null;
+	async function getEnergyNeeded () {
+		// make call to backup duration to request the energy information
+		// simple POST
+		energyBackupNeeded = 1;
+		
+		const request = await fetch("/energy-arbitrage/prediction/backup-duration-calculation", {
+			method: "POST",
+			body: JSON.stringify({user: "placeholder"}),
+			headers: {
+				"content-type": "application-json"
+      	  }
+    	});
+		const response = await request.json();
+
+		energyBackupNeeded = response[0];
+		backupDuration = response[1];
+		
+	}
 </script>
 
 <body>
@@ -34,6 +55,23 @@
 	<button on:click={sendTimestepGetInstruction}>Get Instruction for Timestep</button>
 	<br />
 	<p>{batteryInstruction === undefined ? 'No Instruction' : batteryInstruction}</p>
+	<br>
+	<h2>Battery duration calculation</h2>
+	<table>
+		<td>
+			<button on:click={getEnergyNeeded}>Get energy needed</button>
+		</td>
+		<td>
+			<p>
+				{#if energyBackupNeeded === null}
+					No energy calculation yet
+				{:else}
+					{energyBackupNeeded} kWh reserve storage, to last {backupDuration} hours
+				{/if}
+			</p>
+		</td>
+	</table>
+
 </body>
 
 <style>
