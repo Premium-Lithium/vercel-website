@@ -20,13 +20,18 @@ export enum ChatState {
 export let currentState = writable(ChatState.ASK_PRODUCT_OR_HELP);
 export let stateFlow = writable([currentState]);
 
-export function changeStateWithMessage(state: ChatState = ChatState.NONE, message: string = "") {
+
+export function changeStateWithMessage(state: ChatState = ChatState.NONE, message: string = ""): string {
     stateFlow.set([...get(stateFlow), currentState]);
     currentState.set(state);
     return `Send a friendly message like '${message}' with a friendly emoji`;
 }
 
-export function getPresetMessagesBasedOnState(currentState: ChatState) {
+function tryToRecommendAProduct(energyUsage: string) {
+    return `Given my requirements and yearly energy usage (${energyUsage}), which product would you recommend? If you can't recommend a product then ask me some follow up questions`;
+}
+
+export function getPresetMessagesBasedOnState(currentState: ChatState): string[] {
     switch(currentState) {
         case ChatState.ASK_PRODUCT_OR_HELP:
             return ["Explore Products", "Help"];
@@ -40,11 +45,13 @@ export function getPresetMessagesBasedOnState(currentState: ChatState) {
             return ["Book a consultation"];
         case ChatState.ESTIMATE_ENERGY_USAGE_PROPERTY:
             return ["Semi-Detached", "Detached", "Bungalow", "Flat", "Terraced"];
+        case ChatState.ESTIMATE_ENERGY_USAGE_OCCUPANTS:
+            return ["0", "1", "2", "3", "4+"];
     }
     return [];
 }
 
-export function getMessageBasedOnState(input: string){
+export function getMessageBasedOnState(input: string): string | null {
     let inputLower = input.toLowerCase();
     if(inputLower.includes("human") || inputLower.includes("someone") || inputLower.includes("consultation")) {
         return changeStateWithMessage(ChatState.ASK_PRODUCT_OR_HELP, "If you'd prefer to book a free consultation, feel free to click the button at the top! I'm happy to help with any queries in the meantime!")
@@ -84,11 +91,15 @@ export function getMessageBasedOnState(input: string){
         case ChatState.ASK_ENERGY_USAGE:
             if(inputLower.includes("don") && inputLower.includes("know")) {
                 return changeStateWithMessage(ChatState.ESTIMATE_ENERGY_USAGE_PROPERTY, "No problem! To help estimate your energy usage, what kind of property do you live in?")
+            } else {
+                stateFlow.set([...get(stateFlow), currentState]);
+                currentState.set(ChatState.NONE);
+                return tryToRecommendAProduct(inputLower);
             }
-            changeStateWithMessage();
         case ChatState.ESTIMATE_ENERGY_USAGE_PROPERTY:
-
+            return changeStateWithMessage(ChatState.ESTIMATE_ENERGY_USAGE_OCCUPANTS, "Thanks! And how many people are living with you?");
         case ChatState.ESTIMATE_ENERGY_USAGE_OCCUPANTS:
+            changeStateWithMessage();
         case ChatState.GET_HELP:
             changeStateWithMessage();
         case ChatState.NO_SOLUTIONS:
