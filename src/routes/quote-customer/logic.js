@@ -3,7 +3,6 @@ import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-
 import { populateEmailTemplateWith } from '$lib/file-utils.js';
 import { supabase } from '$lib/supabase.ts';
 import { json } from '@sveltejs/kit';
-
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 
 // todo: only used while we don't have an outlook mail client object
@@ -186,15 +185,10 @@ async function createDraft(sender, recipients, subject, mail_body, content_type,
         let attachment = [];
         //  stays false until we get attachments we want to add to emails
         // todo remove when we have attachments to send .......
-        const contentBytes = await getAttachments();
+        const attachments = await getAttachments();
         if (addAttachment === true){
-            console.log("ADD ATTACHMENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            attachment = [{
-                        '@odata.type': "#microsoft.graph.fileAttachment",
-                        "name": "attachment.pdf",
-                        "contentType": "application/pdf",
-                        "contentBytes": contentBytes,
-                    }]
+            console.log("adding attachment ....")
+            attachment = attachments
         }
         const messagePayload = {
                 subject: subject,
@@ -247,20 +241,32 @@ async function getAttachments(){
         const { data, error } = await supabase
         .storage
         .from('email-template')
-        .createSignedUrl('/attachments/pdf1.pdf', 100)
+        .createSignedUrls(['attachments/JINKO430W.pdf', 'attachments/Powerplant10kWhStackableDatasheet.pdf', 'attachments/Powerplant20kWhSpecSheet.pdf', 'attachments/Powerpod10kWh.pdf', 'attachments/Powerpod5kWhStackable51.2VLiFePO4BatteryDatasheet.pdf', 'attachments/SunsynkSinglePhaseHybridInverter.pdf'], 100)
+    console.log(data, error);
     if (error != null ){
         console.log("error geting attachment");
         return null;
     }
-    const contentByte = getContentBytes(data.signedUrl);
-    return contentByte
+    let attachments = [];
+    for await (const item of data){
+        const contentByte = await getContentBytes(item.signedUrl);
+        console.log(contentByte)
+        const attachment = {
+                '@odata.type': "#microsoft.graph.fileAttachment",
+                "name": item.path.split('/')[1],
+                "contentType": "application/pdf",
+                "contentBytes": contentByte,
+            }
+        attachments.push(attachment)
+    };
+    return attachments;
 }
 
 async function getContentBytes(filePath){
     const res = await fetch(filePath);
     const uint8Array = new Uint8Array(await res.arrayBuffer());
-    const contentBytes = Buffer.from(uint8Array).toString('base64');
-    return contentBytes;
+    const contentByte = Buffer.from(uint8Array).toString('base64');
+    return contentByte;
 }
 
 async function markAsQuoteIssued(dealId) {
