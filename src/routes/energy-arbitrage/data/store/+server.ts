@@ -4,6 +4,7 @@ import { error, json } from "@sveltejs/kit";
 
 // parameters:
 /*
+    action: [READ, CREATE]
     data type: [usage, generation, price, etc],
     duration: <number of timesteps>
 */
@@ -23,7 +24,6 @@ export async function POST ({url, request}) {
     const requestParams = await request.json();
     try {
         // for data retrieval
-        console.log("1");
         if (requestParams.action === "READ") {
             const dataRequest = requestParams.field;
             let steps = requestParams.steps

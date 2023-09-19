@@ -44,6 +44,38 @@
         });
     }
 
+    let timestepNum = 10;
+    let pastUsageValues: null|Array<number> = null;
+    let pastGenValues: null|Array<number> = null;
+    
+
+    function getPastData() {
+        // get energy usage and generation over past n timesteps
+        // make API call for energy data
+        const energyBody = {
+            user: "placeholder",
+            steps: timestepNum / 0.5
+        };
+        const response = fetch("/energy-arbitrage/app/view-data", {
+            method: "POST",
+            body: JSON.stringify(energyBody),
+            headers: {
+                "content-type": "application/json"
+            }
+        });
+        response.then((responseBody) => {
+            responseBody.json().then(
+                (respVal) => {
+                    
+                    pastUsageValues = respVal[0];
+                    pastGenValues = respVal[1];
+                }
+            )
+        });
+        
+
+    }
+
 </script>
 
 <body>
@@ -96,12 +128,31 @@
             </td>
         </tr>
         <tr>
-            
+            <th>
+                Get past data
+            </th>
+            <td>
+                <label>Number of hours <input type="number" min=0.5 step=0.5 bind:value={timestepNum}></label>
+            </td>
+            <td>
+                <button on:click={getPastData}>Get past data</button>
+            </td>
+            <td class="dataBox">
+                {#if !(pastUsageValues === null)}
+                <p>Usage over the last {timestepNum} hours: {pastUsageValues.join(", ")}</p>
+                {/if}
+                {#if !(pastGenValues === null)}
+                <p>Generation over the last {timestepNum} hours: {pastGenValues.join(", ")}</p>
+                {/if}
+            </td>
         </tr>
     </table>
 </body>
 
 <style>
+    .dataBox {
+        width: 25%;
+    }
     table {
         border-spacing: 50px;
         width: 100%;
