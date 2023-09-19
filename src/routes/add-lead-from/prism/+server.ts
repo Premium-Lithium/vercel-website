@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { supabase } from '$lib/supabase';
 import validate from '../../../lib/validation-utils.js';
 import { extractLeadFrom } from './parse-data.js';
 import { captureLeadFrom } from '../pipedrive-lead-utils.js';
@@ -67,8 +68,8 @@ const schema = {
                 },
                 InterestedIn: {
                     "type": "string",
-                    "enum": [ "Solar panels", "Solar panels and battery" ],
-                    "errorMessage": "`InterestedIn` should be either 'Solar panels' or 'Solar panels and battery'"
+                    "pattern": ".",
+                    "errorMessage": "`InterestedIn` should be a string"
                 },
                 Age: {
                     "type": "string",
@@ -86,6 +87,11 @@ export async function POST({ request }) {
         return json({ message: "No request body found" }, { status: 400 });
 
     const prismData = await request.json();
+
+    let { data, error } = await supabase.from("prism-leads").upsert({ data: prismData });
+    if(error !== null)
+        console.log(error);
+
     const validationErrors = validate(prismData, schema);
 
     if(validationErrors.length) {
