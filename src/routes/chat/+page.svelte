@@ -401,7 +401,6 @@
     }
 
     /* Speak to consultant */
-
     .speak-to-consultant{
         position: absolute;
         top: 4%;
