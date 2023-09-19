@@ -1,0 +1,1 @@
+// Calls to OpenWeather Solar Irradiance API for getting solar irradiance for each timestep in the next timeframe
