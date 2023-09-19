@@ -2,23 +2,22 @@ import { LANGCHAIN_API_KEY, LANGCHAIN_ENDPOINT, LANGCHAIN_PROJECT} from "$env/st
 import { Client } from "langsmith";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { HumanMessage, SystemMessage, BaseMessage } from "langchain/schema";
 import { ChatPromptTemplate, SystemMessagePromptTemplate } from "langchain/prompts";
 import { kmeans } from 'ml-kmeans';
 import { LLMChain } from "langchain/chains";
+import { get_encoding, encoding_for_model } from "tiktoken"
 
+let summaries = [];
 const client = new Client({
     apiUrl: LANGCHAIN_ENDPOINT,
     apiKey: LANGCHAIN_API_KEY,
   })
 
-
-
 export async function getRuns() {
     const runs = topLevelRuns();
     let count: number = 0;
     for await(const val of runs) {
-        if(val.inputs.chat_history.length != 0){
+        if(val.inputs.input && val.inputs.chat_history.length != 0){
             count++;
             console.log(val);
         }
@@ -31,7 +30,7 @@ export async function getErrorRate() {
     let count: number = 0;
     let errorCount: number = 0;
     for await(const val of runs) {
-        if(val.inputs.chat_history.length != 0){
+        if(val.inputs.input && val.inputs.chat_history.length != 0){
             count++;
             if(val.error) errorCount++;
         }
@@ -44,7 +43,7 @@ export async function getAverageMessageCount(){
     let totalConversationLength = 0;
     let numOfConversations = 0;
     for await(const val of runs) {
-        if(val.child_run_ids == null) {
+        if(val.inputs.input && val.child_run_ids == null) {
             let humanMessages = val.inputs.chat_history.filter((x) => {return (x.id.includes('HumanMessage') && !x.kwargs.content.includes("Greet me with a friendly emoji"))});
             totalConversationLength += humanMessages.length;
             numOfConversations++;
@@ -72,8 +71,7 @@ export async function getFAQ(numFAQs: number) {
         ["human", "Please respond with a single word title capturing the commonalities of these logs. These words should be like 'Solar', 'Energy Usage', 'Consultations' etc."]
       ]);
     const chain = new LLMChain({llm, prompt:promptTemplate});
-
-    let summaries = [];
+    const enc = encoding_for_model("gpt-3.5-turbo-16k");
 
     let clusterGroups = [];
     [...Array(numFAQs).keys()].forEach((x) => clusterGroups.push([]));
@@ -81,14 +79,19 @@ export async function getFAQ(numFAQs: number) {
         clusterGroups[x].push(runs[i]);
     })
 
-    clusterGroups.forEach(async (x) => {
-        let clusterMembers = runs.filter((v,i) => { return kmeansResult.clusters.includes(i) })
-        let clusterInputs = clusterMembers.join("\n\n");
-        console.log(x);
-        let summary = await chain.run(clusterInputs);
+    for (let cluster of clusterGroups) {
+        console.log(cluster);
+        const clusterInputs = cluster.join("\n\n");
+        let truncatedInputs = truncateInputs(clusterInputs, 15000, enc);
+        let summary = await chain.run(truncatedInputs);
         summaries.push(summary);
-    });
-    return summaries;
+    };
+    console.log(summaries);
+    return summaries.join(", ");
+}
+
+function truncateInputs(inputs: string, length: number, encoding) {
+    return inputs.slice(encoding.decode(encoding.encode(inputs)).slice(15000));
 }
 
 const topLevelRuns = () => {
