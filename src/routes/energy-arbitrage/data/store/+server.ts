@@ -4,8 +4,8 @@ import { error, json } from "@sveltejs/kit";
 
 // parameters:
 /*
-    action: [READ, CREATE]
-    data type: [usage, generation, price, etc],
+    action: [READ, CREATE, UPDATE]
+    data type: [usage, generation, preferences, price, etc],
     duration: <number of timesteps>
 */
 
@@ -20,13 +20,18 @@ let energyGenPast = [
     3.11, 2.56, 3.94, 3.9, 2.61, 2.28, 3.5, 0.63, 1.39, 3.12, 2.65, 1.85, 1.03, 3.21, 2.78, 2.48, 0.56, 3.16, 1.52, 3.56, 2.22, 1.48, 1.08, 3.55, 3.43, 3.41, 0.74, 1.9, 1.77, 3.63, 2.84, 3.92, 3.09, 3.96, 2.97, 1.82, 2.24, 2.98, 0.98, 3.33, 2.8, 2.82, 0.65, 3.03, 2.09, 0.95, 2.66, 3.33, 2.22, 2.2, 2.74, 2.46, 3.03, 1.86, 0.63
 ]
 
+let userPreferences = {  // user preferences, statically set for now
+    optimization: "loss",
+    backupHours: 8
+}
+
 export async function POST ({url, request}) {
-    const requestParams = await request.json();
+    const requestParams:API.StoreAction = await request.json();
     try {
         // for data retrieval
         if (requestParams.action === "READ") {
             const dataRequest = requestParams.field;
-            let steps = requestParams.steps
+            let steps = Number(requestParams.val)
 
             let dataSelected;
             // error if not a selectable field
@@ -37,6 +42,10 @@ export async function POST ({url, request}) {
                 case "generation":
                     dataSelected = energyGenPast;
                     break;
+                case "pref":
+                    // return preferences
+                    return json(userPreferences);
+                    
                 default:
                     throw new Error("Invalid input");
             }
@@ -53,8 +62,21 @@ export async function POST ({url, request}) {
             const dataVal = requestParams.val;
             addEntry(dataField, dataVal);
             return json(0);
+        } else if (requestParams.action === "UPDATE") {
+            // change a value, currently user preferences
+
+            // get value to change
+            // send to handler function
+            const fieldParams = requestParams.field.split(".");
+            if (fieldParams.shift() === "pref") {
+                updateUserPreferences(fieldParams, requestParams.val);
+            }
+            return new Response("Preferences updated");
+            
+            
         }
-    } catch {
+    } catch (exception) {
+        console.log(exception);
          throw error(400, {
             message: "Error 400: Bad Request"
          });
@@ -62,12 +84,30 @@ export async function POST ({url, request}) {
     }
 }
 
-function addEntry(field: string, value: number) {
+function updateUserPreferences(preferences: Array<string>, value: string|number) {
+    console.log(preferences);
+    switch (preferences[0]) {
+        case "opt":
+            value = String(value);
+            userPreferences.optimization = value;
+            break;
+        case "backup":
+            value = Number(value);
+            userPreferences.backupHours = value;
+            break;
+        default:
+            throw new Error("Invalid value");
+    }
+}
+
+function addEntry(field: string, value: number|string) {
     switch(field) {
         case "usage":
+            value = Number(value);
             energyUsePast.push(value);
             break;
         case "generation":
+            value = Number(value);
             energyGenPast.push(value);
             break;
         default:

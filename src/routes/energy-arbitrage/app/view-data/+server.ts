@@ -2,7 +2,7 @@
 // get usage and generation data from relevent APIs
 // and process them into viewable form
 
-import { ActionFailure, json } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 
 // makes a request to the data store of past info
 // specifies timeframe to get data from

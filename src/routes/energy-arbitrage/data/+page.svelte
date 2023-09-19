@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from "$app/stores";
 
     let responseString: string;
     let selectedOption: string;
@@ -12,7 +11,7 @@
             body: JSON.stringify({
                 "action": "READ",
                 "field": selectedOption,
-                "steps": timesteps
+                "val": timesteps
             }),
             headers: {
                 "content-type": "application/json"
@@ -42,6 +41,26 @@
                 "content-type": "application-json"
             }
         })
+    }
+
+    async function logSettings() {
+
+        console.log("logging");
+        // get from store
+        const requestData: API.StoreAction = {
+            action: "READ",
+            field: "pref",
+            val: 0
+        }
+        const response = await fetch("/energy-arbitrage/data/store", {
+            method: "POST",
+            body: JSON.stringify(requestData),
+            headers: {
+                "content-type": "application-json"
+            }
+        });
+        let result = await response.json();
+        console.log(result);
     }
 
 </script>
@@ -78,6 +97,9 @@
     </p>
     <input bind:value={valToAdd} type="number" step="0.01" min=0 max=10>
     <button on:click={apiAdd}>Add!</button>
+    <br><br><br>
+    <p>Log current settings to console</p>
+    <button on:click={logSettings}>Log settings!</button>
 </body>
 
 <style>
