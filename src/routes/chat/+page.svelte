@@ -1,11 +1,14 @@
 <script lang='ts'>
-    import { fly } from 'svelte/transition';
+    import { fly, blur } from 'svelte/transition';
     import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
     import toastr from 'toastr';
     import 'toastr/build/toastr.min.css';
     import { ChatState, getMessageBasedOnState, getPresetMessagesBasedOnState, currentState, stateFlow } from './logic';
 	import { page } from '$app/stores';
+	import Loading from '$lib/components/Loading.svelte';
+	import { browser } from '$app/environment';
+	import { randInt } from 'three/src/math/MathUtils';
 
     let testingMode = false;
     if($page.url.searchParams.get('testingMode') === 'true'){
@@ -24,6 +27,16 @@
     let delays: Array<number> = [];
     let delayOffset = 1500;
 
+    let splashMessages = ["evie is booting up her neurons...","Assembling conversational frameworks...",
+    "Just a moment, evie is brushing up on her jokes...", "evie's checking her chat calendar. You're up next!",
+    "One moment! evie's feeding her virtual cat...", "evie's soaking up some solar rays for energy. Almost ready...",
+    "Hold tight! evie's topping off her battery for an electrifying chat.", "evie's just checking her energy levels. 100% green and rising!",
+    "evie is plugging in. Just a sec!", "evie's charging up for a chat. Hang tight!", "evie's checking her battery. All set soon!",
+    "evie's feeling sunny today! Ready to chat?", "evie's almost charged up! Let's talk energy!", "Plugging into the grid. Hang tight!"
+    ].map((x) => {return x.replace("evie", "<span style='color: var(--plblue)' >evie</span>")});
+    // Randomise splashMessages
+    splashMessages.sort(() => [-1,1][randInt(0,1)]);
+    let currentSplashMessageIndex = 0;
 
     onMount(async () => {
         invalidateAll();
@@ -149,10 +162,15 @@
         })
     }
 
-
 </script>
-
+{#if browser}
 <body>
+    {#if previousMessages.length == 0}
+    <div out:blur={{duration: 2000}} class="loading-screen">
+        <h2 class="splash-text">{@html splashMessages[currentSplashMessageIndex]}</h2>
+        <Loading/>
+    </div>
+    {/if}
     <div class="messages">
     {#each previousMessages as message, i}
         {#if message.role==="user"}
@@ -211,12 +229,14 @@
         />
     </form>
 </body>
+{/if}
 
 <style>
     body {
         background-color: black;
     }
 
+    /* Messages */
     .messages {
         display: flex;
         flex-direction: column;
@@ -259,6 +279,7 @@
         font-size: 1.3em;
     }
 
+    /* Preset responses */
     .preset-response:hover {
         background-color: #50aad1;
     }
@@ -276,6 +297,8 @@
         box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.5);
     }
 
+    /* Feedback */
+
     .feedback-icons {
         display: flex;
         flex-direction: row-reverse;
@@ -291,6 +314,7 @@
         padding: 6px;
     }
 
+    /* Input */
     .chat-input {
         box-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
         border-color: white;
@@ -303,19 +327,19 @@
         border-radius: 5px;
     }
 
+
+    /* Loading message */
     .awaiting-message{
         display: flex;
         flex-direction: row;
         padding-top: 0px;
         padding-bottom: 0px;
     }
-
     .awaiting-message > h1 {
         display: inline-block;
         animation: bounce-awaiting-message 1.5s infinite;
 
     }
-
     .awaiting-message h1:nth-child(2) {
         animation-delay: 0.25s;
     }
@@ -333,4 +357,23 @@
         }
     }
 
+    /* Splash screen */
+    .loading-screen {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        background-color: white;
+        opacity: 0.9;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+    }
+
+    .blue-text {
+        color: var(--plblue);
+    }
 </style>
