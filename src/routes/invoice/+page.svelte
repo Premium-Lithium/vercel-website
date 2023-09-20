@@ -33,5 +33,6 @@
 
 <main>
   <h1>Invoice</h1>
+  <p>To:</p> 
   <p>Price: £{price} </p>
 </main>

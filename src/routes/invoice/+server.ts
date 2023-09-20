@@ -3,7 +3,7 @@ import pipedrive from 'pipedrive';
 import validate from '../../lib/validation-utils.js';
 //import type { PageServerLoad } from './$types';
 
-import { pd, readCustomDealField, dealFieldsRequest } from '../../lib/pipedrive-utils.js';
+import { pd, readCustomDealField, dealFieldsRequest, readCustomProductField, productFieldsRequest } from '../../lib/pipedrive-utils.js';
 
 
 async function fetchAllProductsData() {
@@ -13,6 +13,7 @@ async function fetchAllProductsData() {
 
         if(response.success){
             let data = JSON.stringify(response.data);
+            console.log(response.data);
             data = JSON.parse(data);
             return data;
         }else{
@@ -25,20 +26,22 @@ async function fetchAllProductsData() {
     }
 }
 
+function extractNameFrom(productData){
+    const name = productData.name;
+    console.log(name);
+    return name;
+}
 
-function extractPriceValue(products, batteryInfo) {
-    let price_value = "";
+function extractPriceFrom(productData){
+    const price = productData.prices.map(priceObj => priceObj.price);
+    console.log(price);
+    return price;
+}
 
-    products.forEach(product => {
-        const prices = product.prices;
-        if (Array.isArray(prices) && prices.length > 0){
-            prices.forEach(priceObj => {
-                price_value = priceObj.price;
-            });
-        }
-    });
-    console.log(price_value);
-    return price_value;
+function extractWarrantyFrom(productData){
+    const warranty = readCustomProductField("Warranty Period", productData);
+    console.log(warranty);
+    return warranty;
 }
 function extractBatteryInfo(dealData){
     try{
@@ -53,6 +56,14 @@ function extractBatteryInfo(dealData){
     }
 }
 
+function filterProduct(productsData, batteryInfo){
+    const filteredProduct = productsData.find(product =>
+        product.name.includes(String(batteryInfo['batterySize'])) && product.name.includes(String(batteryInfo['batteryName'].toLowerCase()))
+    );
+    return filteredProduct;
+
+}
+
 export async function POST({ request }) {
     try{
         const { dealId } = await request.json();
@@ -62,21 +73,16 @@ export async function POST({ request }) {
             console.log(`Error fetching customer data for deal ${dealId} on pipedrive`);
             return json({ error: 'An error occurred' }, { status: 500 });
         }
-
         const dealData = requestDeal.data
         const batteryInfo = extractBatteryInfo(dealData)
-        let productData = await fetchAllProductsData();
+        let productsData = await fetchAllProductsData();
+        const filteredProductData = filterProduct(productsData, batteryInfo);
+        console.log(filteredProductData)
+        const productName = extractNameFrom(filteredProductData);
+        const priceValues = extractPriceFrom(filteredProductData);
+        const productWarranty = extractWarrantyFrom(filteredProductData);
+        return json(priceValues);
 
-        if(productData){
-            const filteredProducts = productData.filter(obj =>
-                obj.name.includes(String(batteryInfo['batterySize'])) && obj.name.includes(String(batteryInfo['batteryName'].toLowerCase()))
-            );
-
-            const priceValues = extractPriceValue(filteredProducts, batteryInfo);
-            return json(priceValues);
-        }else{
-            return json({error:'Failed to fetch product data'}, {status:500});
-        }
     } catch (error) {
         console.error('Error:', error);
         return json({error : 'An error occurred'}, {status : 500});

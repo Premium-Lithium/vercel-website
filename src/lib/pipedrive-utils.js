@@ -9,6 +9,8 @@ apiToken.apiKey = process.env.PIPEDRIVE_API_TOKEN;
 const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
 const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
 
+const pdProductFieldApi = new pipedrive.ProductFieldsApi(pd);
+const productFieldsRequest = await pdProductFieldApi.getProductFields();
 
 function readCustomDealField(fieldName, dealData) {
     if(dealFieldsRequest.success === false) {
@@ -36,5 +38,31 @@ function readCustomDealField(fieldName, dealData) {
     return value;
 }
 
+function readCustomProductField(fieldName, productData) {
+    if(productFieldsRequest.success === false) {
+        console.log(`Could not read product value for ${fieldName} because product fields request failed.`);
+        return null;
+    }
 
-export { pd, readCustomDealField, dealFieldsRequest };
+    const allFields = productFieldsRequest.data;
+
+    const field = allFields.find(f => f.name === fieldName);
+
+    if(field === undefined) {
+        console.log(`Could not find product field with name '${fieldName}'. Is this spelled correctly?`);
+        return null;
+    }
+
+    // The field exists, now we need to read it
+    const key = field.key;
+    let value = productData[key];
+
+    // If the field type is an enum, we still need to map the field's value to its readable name
+    if(field.field_type === "enum")
+        value = field.options.find(option => option.id === parseInt(value)).label;
+
+    return value;
+}
+
+
+export { pd, readCustomDealField, dealFieldsRequest, readCustomProductField, productFieldsRequest };
