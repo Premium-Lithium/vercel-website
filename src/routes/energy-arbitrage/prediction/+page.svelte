@@ -104,15 +104,6 @@
 		Not a visible component on the final product, but we can use this to play around with sample
 		data
 	</p>
-<<<<<<< HEAD
-	<label>
-		Timestep:<input type="range" min="0" max="48" bind:value={timestep} />{timestep}
-	</label>
-	<br />
-	<button on:click={sendTimestepGetInstruction}>Get Instruction for Timestep</button>
-	<br />
-	<p>{batteryInstruction === undefined ? 'No Instruction' : batteryInstruction}</p>
-	<br>
 	<h2>Battery duration calculation</h2>
 	<table>
 		<td>
@@ -129,7 +120,6 @@
 		</td>
 	</table>
 
-=======
 	<div>
 		<h2>Energy Arbitrage Controller Inputs</h2>
 		<label>
@@ -177,7 +167,6 @@
 		<br />
 		<button on:click={calculateSolarGeneration}> Get Solar Forecast</button>
 	</div> -->
->>>>>>> energy-arbitrage-backend
 </body>
 
 <style>
