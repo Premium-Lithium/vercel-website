@@ -104,8 +104,6 @@ async function addPersonToPipedrive(name, emailAddress, phone, ageRange) {
 
 
 async function addDealToPipedrive(lead, leadSourceName, personId) {
-    const dealsApi = new pipedrive.DealsApi(pd);
-
     // Start by making sure that we always add a deal containing the minimum amount of information
     let data = {
         title: lead.name,
@@ -215,6 +213,7 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
     lead.buildingType
     */
 
+    const dealsApi = new pipedrive.DealsApi(pd);
     const newDeal = await dealsApi.addDeal(data);
 
     if(newDeal.success === false) {
