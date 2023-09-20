@@ -1,0 +1,1 @@
+// Calls to OpenWeather One Call api to get the cloud coverage for each timestep in the next timeframe
