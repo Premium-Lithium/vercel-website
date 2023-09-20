@@ -1,6 +1,15 @@
 <script>
     let submitted = false;
-    let deal = {name: "", email: "", phone: "", academyName: "", companyName: "", companyAddress: ""};
+
+    let deal = {
+		name: "",
+		email: "",
+		phone: "",
+		academyName: "",
+		companyName: "",
+		companyAddress: ""
+	};
+
     function handleSubmit(event) {
         console.log("adding installer.........")
         event.preventDefault();
@@ -9,15 +18,15 @@
     }
 
     async function addNewInstaller() {
-        const response = await fetch('academy/', { 
-                method: "POST",
-                body: JSON.stringify({
-                    deal
-        }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+        const response = await fetch('academy/', {
+			method: "POST",
+			body: JSON.stringify({
+				deal
+			}),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
     }
 </script>
 
@@ -27,152 +36,152 @@
 		src="https://premiumlithium.com/cdn/shop/files/Website_Logo_PNG_8c3726b3-6ebd-489e-9a38-06885f16236b.png?v=1653833196&width=500"
 	/>
     {#if !submitted}
-	<h1>Become an Installation Partner today</h1>
-	<h2>
-		Please complete the form below and one of the team will be in touch to discuss this great
-		opportunity:
-	</h2>
+		<h1>Become an Installation Partner today</h1>
+		<h2>
+			Please complete the form below and one of the team will be in touch to discuss this great
+			opportunity:
+		</h2>
 
-	<div class="sc-kdBSHD iYHVXt">
-		<div class="sc-koXPp gZGbcL">
-			<div class="sc-eeDRCY dTIjiu">
-				<form action="#" name="Academy Registration" on:submit={handleSubmit} autocomplete="off" autocorrect="off" autosave="off">
-					<div class="sc-jlZhew dHgxMY">
-						<label
-							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-							id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
-							class="sc-dAlyuH dWziHy"><span>Name</span></label
-						>
-						<div>
-							<input
-								name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								type="text"
-								id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								aria-invalid="false"
-								aria-required="true"
-								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
-								class="sc-aXZVg jXABNp"
-                                autocomplete="new-password"
-                                bind:value={deal.name}
-                                required
-							/>
+		<div class="sc-kdBSHD iYHVXt">
+			<div class="sc-koXPp gZGbcL">
+				<div class="sc-eeDRCY dTIjiu">
+					<form action="#" name="Academy Registration" on:submit={handleSubmit} autocomplete="off" autocorrect="off" autosave="off">
+						<div class="sc-jlZhew dHgxMY">
+							<label
+								for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+								id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
+								class="sc-dAlyuH dWziHy"><span>Name</span></label
+							>
+							<div>
+								<input
+									name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									type="text"
+									id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									aria-invalid="false"
+									aria-required="true"
+									aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMS0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
+									class="sc-aXZVg jXABNp"
+									autocomplete="new-password"
+									bind:value={deal.name}
+									required
+								/>
+							</div>
 						</div>
-					</div>
-					<div class="sc-jlZhew dHgxMY">
-						<label
-							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-							id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
-							class="sc-dAlyuH dWziHy"><span>Email</span></label
-						>
-						<div>
-							<input
-								name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								type="email"
-								id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								aria-invalid="false"
-								aria-required="true"
-								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
-								class="sc-aXZVg jXABNp"
-								bind:value={deal.email}
-                                autocomplete="off"
-                                required
-							/>
+						<div class="sc-jlZhew dHgxMY">
+							<label
+								for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+								id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
+								class="sc-dAlyuH dWziHy"><span>Email</span></label
+							>
+							<div>
+								<input
+									name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									type="email"
+									id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									aria-invalid="false"
+									aria-required="true"
+									aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMi0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
+									class="sc-aXZVg jXABNp"
+									bind:value={deal.email}
+									autocomplete="off"
+									required
+								/>
+							</div>
 						</div>
-					</div>
-					<div class="sc-jlZhew dHgxMY">
-						<label
-							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-							id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
-							class="sc-dAlyuH dWziHy"><span>Phone</span></label
-						>
-						<div>
-							<input
-								name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								type="tel"
-								id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								aria-invalid="false"
-								aria-required="true"
-								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
-								class="sc-aXZVg jXABNp"
-								bind:value={deal.phone}
-                                autocomplete="nope"
-                                required
-							/>
+						<div class="sc-jlZhew dHgxMY">
+							<label
+								for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+								id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
+								class="sc-dAlyuH dWziHy"><span>Phone</span></label
+							>
+							<div>
+								<input
+									name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									type="tel"
+									id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									aria-invalid="false"
+									aria-required="true"
+									aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjMy0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
+									class="sc-aXZVg jXABNp"
+									bind:value={deal.phone}
+									autocomplete="nope"
+									required
+								/>
+							</div>
 						</div>
-					</div>
-					<div class="sc-jlZhew dHgxMY">
-						<label
-							for="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I"
-							id="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_label"
-							class="sc-dAlyuH dWziHy"><span>Academy Name <br /></span></label
-						>
-						<div>
-							<input
-								name="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I"
-								type="text"
-								id="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I"
-								aria-invalid="false"
-								aria-required="true"
-								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_error V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_helpText"
-								class="sc-aXZVg jXABNp"
-								bind:value={deal.academyName}
-                                autocomplete="nah"
-                                required
-							/>
+						<div class="sc-jlZhew dHgxMY">
+							<label
+								for="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I"
+								id="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_label"
+								class="sc-dAlyuH dWziHy"><span>Academy Name <br /></span></label
+							>
+							<div>
+								<input
+									name="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I"
+									type="text"
+									id="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I"
+									aria-invalid="false"
+									aria-required="true"
+									aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_error V2ViRm9ybUNhcHR1cmVCbG9jazo1YTFiNDhlMC0zYWEwLTExZWUtODUwZC05NTE1ZWRlMDQ4N2I_helpText"
+									class="sc-aXZVg jXABNp"
+									bind:value={deal.academyName}
+									autocomplete="nah"
+									required
+								/>
+							</div>
 						</div>
-					</div>
-					<div class="sc-jlZhew dHgxMY">
-						<label
-							for="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-							id="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
-							class="sc-dAlyuH dWziHy"><span>Company Name<br /></span></label
-						>
-						<div>
-							<input
-								name="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								type="text"
-								id="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-								aria-invalid="false"
-								aria-required="true"
-								aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
-								class="sc-aXZVg jXABNp"
-								bind:value={deal.companyName}
-                                autocomplete="still-no"
-                                required
-							/>
+						<div class="sc-jlZhew dHgxMY">
+							<label
+								for="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+								id="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
+								class="sc-dAlyuH dWziHy"><span>Company Name<br /></span></label
+							>
+							<div>
+								<input
+									name="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									type="text"
+									id="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									aria-invalid="false"
+									aria-required="true"
+									aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazoxYTEzNWFjMC0zMTFlLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
+									class="sc-aXZVg jXABNp"
+									bind:value={deal.companyName}
+									autocomplete="still-no"
+									required
+								/>
+							</div>
 						</div>
-					</div>
-					<div class="sc-jlZhew dHgxMY">
-						<label
-							for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-							id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
-							class="sc-dAlyuH dWziHy"><span>Company Address<br /></span></label
-						>
-						<div>
-                            <input
-                                name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-                                id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
-                                aria-invalid="false"
-                                aria-required="true"
-                                aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
-                                aria-haspopup="listbox"
-                                aria-expanded="false"
-								class="sc-aXZVg jXABNp"
-                                bind:value={deal.companyAddress}
-                                autocomplete="yes-its-still-no"
-                                required
-                            />
+						<div class="sc-jlZhew dHgxMY">
+							<label
+								for="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+								id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_label"
+								class="sc-dAlyuH dWziHy"><span>Company Address<br /></span></label
+							>
+							<div>
+								<input
+									name="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									id="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM"
+									aria-invalid="false"
+									aria-required="true"
+									aria-describedby="V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_error V2ViRm9ybUNhcHR1cmVCbG9jazpiMDE2ZTVjNC0zMTFjLTExZWUtODAxNC0xNzlmNDMzYmQ5MTM_helpText"
+									aria-haspopup="listbox"
+									aria-expanded="false"
+									class="sc-aXZVg jXABNp"
+									bind:value={deal.companyAddress}
+									autocomplete="yes-its-still-no"
+									required
+								/>
+							</div>
 						</div>
+						<button type="submit" class="sc-cwHptR gTJoxE">Submit</button>
+					</form>
+					<div class="sc-fhzFiK bwjaEz">
+						Never share sensitive information (credit card numbers, social security numbers,
+						passwords) through this form.
 					</div>
-					<button type="submit" class="sc-cwHptR gTJoxE">Submit</button>
-				</form>
-				<div class="sc-fhzFiK bwjaEz">
-					Never share sensitive information (credit card numbers, social security numbers,
-					passwords) through this form.
 				</div>
 			</div>
 		</div>
-	</div>
     {:else}
         <div class="formSent">
             <h1> Thank you for signing up!  </h1>
