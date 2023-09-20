@@ -24,9 +24,9 @@ async function extractLeadFrom(prism) {
         emailAddress: prism.email,
         phoneNumber: prism.phone1,
         postcode: prism.postcode,
-        isHomeOwner: prism.answers.HomeOwner === 'Yes',
+        isHomeOwner: prism.answers.HomeOwner,
         ageRange: prism.answers.Age,
-        interestedIn: prism.answers.InterestedIn,
+        natureOfEnquiry: prism.answers.InterestedIn,
         prid: prism.prid,
 
         // We're not (yet?) collecting this information from prism
