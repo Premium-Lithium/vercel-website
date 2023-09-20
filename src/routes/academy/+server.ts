@@ -10,7 +10,7 @@ export async function POST({ request }) {
 
     // todo: use the return code to work out whether the attempt to add the installer was successful
 
-    return json({}, {status: 200})
+    return json({ message: JSON.stringify(deal) }, { status: 200 });
 }
 
 
@@ -29,8 +29,10 @@ async function addInstaller(deal){
     console.log("Person ID: " + personId);
 
     console.log("Adding deal");
-    const dealId = await addDeal(deal.companyName, orgId, personId);
-    console.log("Deal ID: " + dealId);
+    const newDeal = await addDeal(deal.companyName, orgId, personId);
+    console.log("Deal ID: " + newDeal.data.id);
+
+    return newDeal;
 }
 
 
@@ -79,5 +81,5 @@ async function addDeal(companyName, orgId, personId) {
     const deal = await dealsApi.addDeal(dealData);
 
     // todo: check that the deal was added correctly
-    return deal.data.id;
+    return deal;
 }
