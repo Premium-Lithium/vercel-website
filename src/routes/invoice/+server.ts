@@ -172,6 +172,17 @@ function extractPLContactFrom(customerData) {
     return plContactPerson;
 }
 
+function calculatePricePanel(numOfPanel){
+    const initial = 6594.5;
+    const increment = 550;
+
+    const price = {
+        panel: numOfPanel,
+        price: initial + (numOfPanel - 6) * increment
+    }
+    return price;
+}
+
 export async function POST({ request }) {
     try{
         const { dealId } = await request.json();
@@ -181,8 +192,10 @@ export async function POST({ request }) {
 
         const filteredProductData = filterProduct(productsData, customer.solution);
         const productInfo = extractProductInfo(filteredProductData);
+        const numOfPanel = 14;
+        const panelPrice = calculatePricePanel(numOfPanel);
         console.log(customer);
-        return json({customer, productInfo});
+        return json({customer, productInfo, panelPrice});
 
     } catch (error) {
         console.error('Error:', error);

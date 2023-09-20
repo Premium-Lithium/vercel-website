@@ -5,6 +5,8 @@
   let customer = {};
   let invoice = {};
   let solution = {};
+  let panel = {};
+
   const deal_id = $page.url.searchParams.get('dealId');
   
   onMount(() => {
@@ -26,9 +28,11 @@
         product = invoice.productInfo;
         customer = invoice.customer;
         solution = invoice.customer.solution;
+        panel = invoice.panelPrice;
         console.log("Product:", product);
         console.log("Customer:", customer);
         console.log("Solution:", solution);
+        console.log("Panel Price:", panel)
       }
     } catch (error) {
       console.error('Error', error);
@@ -46,4 +50,5 @@
   <p>Price: £{product.price}</p>
   <p>Warranty: {product.warranty}</p>
   <p>Installation Date: {solution.installMonth}</p>
+  <p>Number of Panels: {panel.panel} | Cost: {panel.price}</p>
 </main>
