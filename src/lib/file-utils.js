@@ -17,5 +17,4 @@ async function populateEmailTemplateWith(data, mjmlTemplateRelPath, importMetaUr
     }
 }
 
-
 export { populateEmailTemplateWith };

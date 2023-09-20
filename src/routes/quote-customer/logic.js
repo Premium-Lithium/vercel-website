@@ -8,7 +8,7 @@ import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 // todo: only used while we don't have an outlook mail client object
 import { getNewAPIToken } from '../send-mail/logic.js';
 
-export default async function quoteCustomer(dealId) {
+export default async function quoteCustomer(dealId, addAttachment) {
     let quoteAttempt = {
         "success": true,
         "message": `Quote created for deal ${dealId}`
@@ -30,7 +30,6 @@ export default async function quoteCustomer(dealId) {
         email_body: "error",
         content_type: "text"
     };
-    
     const priceCalcLink = buildPriceCalcLinkFrom(customer.solution, dealId);
     const emailContentData = {
         pl_bdm_contact_name: customer.pl_contact.name,
@@ -46,16 +45,13 @@ export default async function quoteCustomer(dealId) {
         .from('email-template')
         .createSignedUrl('customer-quote-template.mjml', 60)
         if (data){
-            
             const templatePath =data.signedUrl;
             const emailContent = await populateEmailTemplateWith(emailContentData, templatePath, import.meta.url);
 
             emailData.email_body = emailContent;
             emailData.content_type = "HTML";
-    
             // Create a draft email in the BDM's outlook
-            await createDraft(...Object.values(emailData));
-    
+            await createDraft(...Object.values(emailData), addAttachment);
             if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 quoteAttempt = {
@@ -65,12 +61,11 @@ export default async function quoteCustomer(dealId) {
                 return quoteAttempt;
             }
         }
-    
             return quoteAttempt;
         } catch (error) {
             console.log("error finding email template");
             // Create a draft email in the BDM's outlook
-            await createDraft(...Object.values(emailData));
+            await createDraft(...Object.values(emailData), addAttachment);
             return (quoteAttempt = { success: false, message: "error finding email template" });
         }
 }
@@ -110,7 +105,7 @@ function extractEmailFrom(customerData) {
     }
     // Fall back to work email if home email isn't found
     console.log("No home email found, searching for work email...");
-    const workEmail = emails.find(email => email.label === 'w ork');
+    const workEmail = emails.find(email => email.label === 'work');
     if(workEmail !== undefined){
         return workEmail.value;
     }
@@ -179,7 +174,7 @@ function buildPriceCalcLinkFrom(solution, dealId) {
 }
 
 
-async function createDraft(sender, recipients, subject, mail_body, content_type) {
+async function createDraft(sender, recipients, subject, mail_body, content_type, addAttachment) {
     try {
         console.log("creating draft...................................")
         const apiToken = await getNewAPIToken();
@@ -187,52 +182,92 @@ async function createDraft(sender, recipients, subject, mail_body, content_type)
             console.log("error creating API token");
             return json({status: 500}, {statusText: "error creating api token"});
         }
-        const messagePayload = {
-            subject: subject,
-            body: {
-                contentType: content_type,
-                content: mail_body
-            },
-            toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
-            bccRecipients: [
-                {
-                    emailAddress: {
-                        address: "development@premiumlithium.com",
-                    }
-                }
-            ]
-        };
-
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiToken
-        };
-
-        const options = {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(messagePayload)
-        };
-
-        const apiUrl = `/v1.0/users/${sender}/messages`;
-
-        const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
-
-        if (response.status !== 201) {
-            console.log(`Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
-            // Handle the error here or throw it to be caught by the caller.
-            throw new Error(`Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+        let attachment = [];
+        //  stays false until we get attachments we want to add to emails
+        // todo remove when we have attachments to send .......
+        const attachments = await getAttachments();
+        if (addAttachment === true){
+            console.log("adding attachment ....")
+            attachment = attachments
         }
+        const messagePayload = {
+                subject: subject,
+                body: {
+                    contentType: content_type,
+                    content: mail_body,
+                },
+                toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
+                bccRecipients: [
+                    {
+                        emailAddress: {
+                        address: "development@premiumlithium.com",
+                        }
+                    }
+                ],
+                attachments: attachment
+            };
 
-        return response; 
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + apiToken,
+            };
+
+            const options = {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(messagePayload),
+            };
+
+            const apiUrl = `/v1.0/users/${sender}/messages`;
+
+            const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
+            if (response.status !== 201) {
+                console.log(`Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+                // Handle the error here or throw it to be caught by the caller.
+                throw new Error(`Microsoft Graph API request failed with status ${response.status} ${response.statusText}`);
+            }
+            return response;
     } catch (error) {
-        console.log(`Error: Failed to create draft: ${error.message}`);
+        console.log(`Error: Failed to create draft: ${error}`);
         // Handle the error here or throw it to be caught by the caller.
         return json({status: 500},{statusText: "failed to create draft"});
     }
 }
 
+async function getAttachments(){
+    //using the solution get the datasheets for products the customer is interested in
+    // (datasheets stored in bucket on supabase)
+    console.log("getting email attachments")
+        const { data, error } = await supabase
+        .storage
+        .from('email-template')
+        .createSignedUrls(['attachments/JINKO430W.pdf', 'attachments/Powerplant10kWhStackableDatasheet.pdf', 'attachments/Powerplant20kWhSpecSheet.pdf', 'attachments/Powerpod10kWh.pdf', 'attachments/Powerpod5kWhStackable51.2VLiFePO4BatteryDatasheet.pdf', 'attachments/SunsynkSinglePhaseHybridInverter.pdf'], 100)
+    console.log(data, error);
+    if (error != null ){
+        console.log("error geting attachment");
+        return null;
+    }
+    let attachments = [];
+    for await (const item of data){
+        const contentByte = await getContentBytes(item.signedUrl);
+        console.log(contentByte)
+        const attachment = {
+                '@odata.type': "#microsoft.graph.fileAttachment",
+                "name": item.path.split('/')[1],
+                "contentType": "application/pdf",
+                "contentBytes": contentByte,
+            }
+        attachments.push(attachment)
+    };
+    return attachments;
+}
 
+async function getContentBytes(filePath){
+    const res = await fetch(filePath);
+    const uint8Array = new Uint8Array(await res.arrayBuffer());
+    const contentByte = Buffer.from(uint8Array).toString('base64');
+    return contentByte;
+}
 
 async function markAsQuoteIssued(dealId) {
     console.log("marking quote as issued ")
@@ -243,7 +278,6 @@ async function markAsQuoteIssued(dealId) {
         console.log("failed to fetch deals data")
         return false;
     }
-    
     const quoteIssuedField = dealFields.find(f => f.name === "Quote issued");
     console.log("checking if field exists.....................................")
     if(quoteIssuedField === undefined) {
@@ -263,7 +297,6 @@ async function markAsQuoteIssued(dealId) {
     }catch(error){
         return false
     }
-    
     // // Move the deal to the quote issued stage
     const stagesApi = new pipedrive.StagesApi(pd);
     const B2C_PIPELINE_ID = 23;
@@ -273,7 +306,6 @@ async function markAsQuoteIssued(dealId) {
         'limit': 56
     };
     const stages = await stagesApi.getStages(opts);
-    
     const quoteIssuedStage = stages.data.find(s => s.name === "Quote Issued");
     console.log("finding quote issued stage")
     if (quoteIssuedStage === undefined){
@@ -293,7 +325,6 @@ async function markAsQuoteIssued(dealId) {
     }catch(error){
         return false;
     }
-    
 }
 
 
