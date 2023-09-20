@@ -9,8 +9,7 @@ import { json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
     const timestep = await request.json();
-    console.log(timestep)
-
+    
     // Expert User Model (basically just a lookup table)
     if (timestep >= 7 && timestep <= 10) {
         return json("Charge (buy energy)")

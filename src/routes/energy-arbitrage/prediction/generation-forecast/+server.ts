@@ -30,7 +30,7 @@ import { json } from "@sveltejs/kit";
 
 const nominalPowerOutput = 0;
 const efficiency = 0;
-let forecast = [];
+let forecast : number[] = [];
 let solarDeclination; // del
 let solarAngle; // H
 let sunAltitudeAngle; // alpha
@@ -46,7 +46,6 @@ function getDay(now) {
     var diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);;
     var oneDay = 1000 * 60 * 60 * 24;
     return Math.floor(diff / oneDay);
-
 }
 
 function getLeapYear(now) {

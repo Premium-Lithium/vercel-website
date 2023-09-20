@@ -29,6 +29,7 @@
 
 	async function calculateSolarGeneration() {
 		const body = JSON.stringify([lat, lon, area, tilt, azimuth]);
+		console.log(body)
 		const res = fetch('/energy-arbitrage/prediction/generation-forecast', {
 			method: 'POST',
 			body: body,
@@ -42,6 +43,7 @@
 			});
 		});
 	}
+
 </script>
 
 <body>
