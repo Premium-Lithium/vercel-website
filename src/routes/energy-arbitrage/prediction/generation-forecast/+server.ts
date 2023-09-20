@@ -28,6 +28,8 @@
 
 import { json } from "@sveltejs/kit";
 
+const genArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.014837899, 0.014837899, 0.080921501, 0.080921501, 0.160362401, 0.160362401, 0.248834299, 0.248834299, 0.292833199, 0.292833199, 0.231734801, 0.231734801, 0.177966799, 0.177966799, 0.041184, 0.041184, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 const nominalPowerOutput = 0;
 const efficiency = 0;
 let forecast : number[] = [];
@@ -53,6 +55,13 @@ function getLeapYear(now) {
     return year % 100 === 0 ? year % 400 === 0 : year % 4 === 0;
 }
 
+export async function POST({ request }) {
+    // request is just timestep
+    const timestep = await request.json();
+    return json(genArr[timestep])
+}
+
+/* TODO make this work with the OpenWeather APIs
 export async function POST({ request }) {
     // array of [lat, lon, area]
     const loc = await request.json();
@@ -104,3 +113,4 @@ export async function POST({ request }) {
 
     return json(forecast)
 }
+*/
