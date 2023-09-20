@@ -27,6 +27,8 @@ export async function POST ({url, request}) {
 
     const backupNeeded = await storeRequest.json();
 
+
+    //TODO: insert actual calculation
     // assume use of 0.8 kWh per hour
     let nrgPerHour = 0.8;
     const nrgNeeded = backupNeeded * nrgPerHour;
