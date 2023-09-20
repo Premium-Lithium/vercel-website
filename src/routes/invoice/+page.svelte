@@ -1,19 +1,20 @@
 <script>
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-
-
-  let price = "";
+  let product = {};
+  let customer = {};
+  let invoice = {};
+  let solution = {};
   const deal_id = $page.url.searchParams.get('dealId');
   
   onMount(() => {
     //if deal_id is present in the URL, set that as initial value
     if (deal_id) {
-      retrieveProductPrice();
+      retrieveProductInfo();
     }
   });
 
-  async function retrieveProductPrice(){
+  async function retrieveProductInfo(){
     try {
       const response = await fetch('/invoice', {
                 method: 'POST',
@@ -21,8 +22,13 @@
                 body: JSON.stringify({dealId: deal_id})
             });
       if(response.ok){
-        price = await response.json();
-        console.log("Price:", price);
+        invoice = await response.json();
+        product = invoice.productInfo;
+        customer = invoice.customer;
+        solution = invoice.customer.solution;
+        console.log("Product:", product);
+        console.log("Customer:", customer);
+        console.log("Solution:", solution);
       }
     } catch (error) {
       console.error('Error', error);
@@ -34,5 +40,10 @@
 <main>
   <h1>Invoice</h1>
   <p>To:</p> 
-  <p>Price: £{price} </p>
+  <p>{customer.name}</p>
+  <p>{customer.email}</p>
+  <p>Name: {product.name}</p>
+  <p>Price: £{product.price}</p>
+  <p>Warranty: {product.warranty}</p>
+  <p>Installation Date: {solution.installMonth}</p>
 </main>
