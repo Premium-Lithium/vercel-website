@@ -130,7 +130,7 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
     }
 
     // 2. Lead Source ID
-    fieldName = "Lead Source Identity";
+    fieldName = "Lead Source ID";
     leadKeyName = "prid";
     if(lead[leadKeyName] !== null) {
         const field = getField(fieldName);
@@ -191,8 +191,10 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
                 let pdOptionName = pdOptionNameFromLeadInfo[lead[leadKeyName]];
 
                 // If the info provided in the lead data doesn't map to a pipedrive option, then use "Unknown"
-                if(pdOptionName === undefined)
+                if(pdOptionName === undefined) {
                     pdOptionName = "Unknown";
+                    noteContent += `Could not recognise "Nature of Enquiry" option called "${lead[leadKeyName]}", using "Unknown".<br>`;
+                }
 
                 // Then work out the option id for the name we found above
                 const optionId = getOptionIdFor(pdOptionName, field);
