@@ -42,7 +42,7 @@ export async function POST({ request }) {
 
         return json(
             { message: mailAttempt.message },
-            { status: mailAttempt.success ? 200 : 500 }
+            { status: mailAttempt.success ? 200 : 500 },
         );
     } catch (error) {
         // Handle the error here, or log it if needed.

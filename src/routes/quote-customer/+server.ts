@@ -30,8 +30,16 @@ export async function POST({ request }) {
     }
     const quoteAttempt = await quoteCustomer(requestData.deal_id, requestData.addAttachment);
     console.log(quoteAttempt)
-    return json(
+    if (quoteAttempt.webLink !== "none"){
+        return json({body:{
+            weblink: quoteAttempt.webLink,
+            message: quoteAttempt.message,
+        }},
+        {status: quoteAttempt.success ? 200 : 500},
+        );
+    }
+        return json(
         { message: quoteAttempt.message },
-        { status: quoteAttempt.success ? 200 : 500 }
+        { status: quoteAttempt.success ? 200 : 500 },
     );
 }

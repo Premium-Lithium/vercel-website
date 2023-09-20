@@ -11,7 +11,8 @@ import { getNewAPIToken } from '../send-mail/logic.js';
 export default async function quoteCustomer(dealId, addAttachment) {
     let quoteAttempt = {
         "success": true,
-        "message": `Quote created for deal ${dealId}`
+        "message": `Quote created for deal ${dealId}`,
+        "webLink": "none",
     };
 
     const customer = await getCustomerInfo(dealId);
@@ -51,12 +52,16 @@ export default async function quoteCustomer(dealId, addAttachment) {
             emailData.email_body = emailContent;
             emailData.content_type = "HTML";
             // Create a draft email in the BDM's outlook
-            await createDraft(...Object.values(emailData), addAttachment);
+            const draft = await createDraft(...Object.values(emailData), addAttachment);
+            const draftBody = await draft.json();
+            console.log(draftBody.webLink);
+            quoteAttempt.webLink = draftBody.webLink;
             if (!markAsQuoteIssued(dealId)) {
                 console.log(`Failed to update deal ${dealId} as QuoteIssued`);
                 quoteAttempt = {
                     "success": false,
-                    "message": `Failed to update deal ${dealId} as QuoteIssued`
+                    "message": `Failed to update deal ${dealId} as QuoteIssued`,
+                    "webLink": "none"
                 };
                 return quoteAttempt;
             }
@@ -66,7 +71,7 @@ export default async function quoteCustomer(dealId, addAttachment) {
             console.log("error finding email template");
             // Create a draft email in the BDM's outlook
             await createDraft(...Object.values(emailData), addAttachment);
-            return (quoteAttempt = { success: false, message: "error finding email template" });
+            return (quoteAttempt = { success: false, message: "error finding email template", "webLink": "none" });
         }
 }
 
@@ -242,7 +247,6 @@ async function getAttachments(){
         .storage
         .from('email-template')
         .createSignedUrls(['attachments/JINKO430W.pdf', 'attachments/Powerplant10kWhStackableDatasheet.pdf', 'attachments/Powerplant20kWhSpecSheet.pdf', 'attachments/Powerpod10kWh.pdf', 'attachments/Powerpod5kWhStackable51.2VLiFePO4BatteryDatasheet.pdf', 'attachments/SunsynkSinglePhaseHybridInverter.pdf'], 100)
-    console.log(data, error);
     if (error != null ){
         console.log("error geting attachment");
         return null;
@@ -250,7 +254,6 @@ async function getAttachments(){
     let attachments = [];
     for await (const item of data){
         const contentByte = await getContentBytes(item.signedUrl);
-        console.log(contentByte)
         const attachment = {
                 '@odata.type': "#microsoft.graph.fileAttachment",
                 "name": item.path.split('/')[1],

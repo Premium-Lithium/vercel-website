@@ -8,6 +8,7 @@
     let sdk;
     let addAttachment = true;
     let dealId = $page.url.searchParams.get('selectedIds');
+    let draftURL;
 
     onMount(async () => {
         sdk = await new AppExtensionsSDK().initialize();
@@ -32,6 +33,7 @@
                     "positionClass": "toast-bottom-center",
                     "timeOut": "10000",
                 });
+                draftURL =  (await response.json()).body.weblink;
                 return response;
             }else{
                 // Handle the error here, or rethrow it if needed.
@@ -56,6 +58,9 @@
         <lable for="no"> No </lable>
         <input type="radio" id="no" value={false} bind:group={addAttachment}/>
     </form>
+    {#if draftURL}
+        <a href={draftURL}>Click here to view the draft</a>
+    {/if}
 </div>
 
 <style>
