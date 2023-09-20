@@ -6,7 +6,7 @@ import { pd } from '$lib/pipedrive-utils.js'
 export async function POST({ request }) {
     const { deal } = await request.json();
 
-    const success = addInstaller(deal);
+    const success = await addInstaller(deal);
 
     // todo: use the return code to work out whether the attempt to add the installer was successful
 
