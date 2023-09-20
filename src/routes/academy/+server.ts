@@ -1,94 +1,83 @@
 import { json } from '@sveltejs/kit';
 import pipedrive from 'pipedrive';
-import { pd } from '../../lib/pipedrive-utils.js'
+import { pd } from '$lib/pipedrive-utils.js'
+
 
 export async function POST({ request }) {
-    
     const { deal } = await request.json();
-    console.log("deal :", deal);
-    addInstaller(deal);
+
+    const success = addInstaller(deal);
+
+    // todo: use the return code to work out whether the attempt to add the installer was successful
+
     return json({}, {status: 200})
 }
 
 
 async function addInstaller(deal){
-    const orgId = await addOrganisation(deal);
+    let addInstallerAttempt = {
+        success: true, // todo: adjust the return code based on whether the attempt to add the installer was successful
+        message: "Successfully added installer to Pipedrive"
+    }
+
+    console.log("Adding organisation");
+    const orgId = await addOrganisation(deal.companyName, deal.companyAddress);
+    console.log("Organisation ID: " + orgId);
+
+    console.log("Adding person");
+    const personId = await addPerson(deal.name, deal.emailAddress, deal.phoneNumber);
+    console.log("Person ID: " + personId);
+
+    console.log("Adding deal");
+    const dealId = await addDeal(deal.companyName, orgId, personId);
+    console.log("Deal ID: " + dealId);
 }
 
+
+async function addOrganisation(companyName, companyAddress) {
+    const orgData = {
+        name: companyName,
+        owner_id: 14071067,
+        address: companyAddress,
+        visible_to: "3"
+    }
+
+    const orgApi = new pipedrive.OrganizationsApi(pd);
+    const response = await orgApi.addOrganization(orgData);
+
+    return response.data.id;
+}
+
+
+async function addPerson(name, emailAddress, phoneNumber){
+    const personData = {
+        name: name,
+        owner_id: 14071067, // Rodney
+        email: emailAddress,
+        phone: phoneNumber,
+        visible_to: "3"
+    }
+
+    const personApi = new pipedrive.PersonsApi(pd);
+    const person = await personApi.addPerson(personData);
+
+    return person.data.id;
+}
 
 
 async function addDeal(companyName, orgId, personId) {
-    try {
-        console.log('Sending request...');
-
-        const data = {
-            title: companyName,
-            user_id: 14071067,
-            person_id: personId,
-            org_id: orgId,
-            stage_id: 159,
-            visible_to: 3,
-            add_time: new Date().toLocaleString(),
-        }
-        const dealsApi = new pipedrive.DealsApi(pd);
-        const deal = await dealsApi.addDeal(data);
-        console.log("dealAdded: ", deal);
-    } catch (err) {
-        const errorToLog = err.context?.body || err;
-
-        console.log('Adding failed', errorToLog);
+    const dealData = {
+        title: companyName,
+        user_id: 14071067,
+        person_id: personId,
+        org_id: orgId,
+        stage_id: 159,
+        visible_to: 3
     }
-        
+
+    const dealsApi = new pipedrive.DealsApi(pd);
+    const deal = await dealsApi.addDeal(dealData);
+
+    // todo: check that the deal was added correctly
+    return deal.data.id;
 }
-
-async function addOrganisation(deal){
-    try {
-        console.log('Sending request...');
-        //required field(s): name
-        const data = {
-            name: deal.companyName,
-            owner_id: 14071067,
-            address: deal.companyAddress,
-            visible_to: "3",
-            add_time: new Date().toLocaleString()
-        }
-        const orgApi = new pipedrive.OrganizationsApi(pd);
-        const response = await orgApi.addOrganization(data);
-
-        console.log('Organisation was added successfully', response);
-        const orgId = response.data.id;
-        console.log("orgId = :", orgId);
-        await addPerson(deal, orgId);
-    } catch (err) {
-        const errorToLog = err.context?.body || err;
-
-        console.log('Adding failed', errorToLog);
-    }
-}
-
-async function addPerson(deal, orgId){
-    console.log('Sending request...');
-    try{
-        //required field(s): name
-        const data = {
-            name: deal.name,
-            owner_id: 14071067,
-            email: deal.email,
-            phone: deal.phone,
-            visible_to: "3",
-            add_time: new Date().toLocaleString()
-        }
-        const personApi = new pipedrive.PersonsApi(pd);
-        const response = await personApi.addPerson(data);
-
-        console.log('person was added successfully', response);
-        const personId = response.data.id;
-        console.log("person Id = ", personId);
-        await addDeal(deal.companyName, orgId, personId);
-        } catch (err) {
-            const errorToLog = err.context?.body || err;
-
-            console.log('Adding failed', errorToLog);
-        } 
-    }
-
