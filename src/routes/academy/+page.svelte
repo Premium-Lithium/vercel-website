@@ -20,12 +20,8 @@
     async function addNewInstaller() {
         const response = await fetch('academy/', {
 			method: "POST",
-			body: JSON.stringify({
-				deal
-			}),
-			headers: {
-				'Content-Type': 'application/json'
-			}
+			body: JSON.stringify({ ...deal }),
+			headers: { 'Content-Type': 'application/json' }
 		});
     }
 </script>

@@ -3,81 +3,115 @@ import pipedrive from 'pipedrive';
 import { pd } from '$lib/pipedrive-utils.js'
 
 
+const ACADEMY_MANAGER_PD_USER_ID = 14071067; // Rodney todo: look up pipedrive user id by name
+const ACADEMY_PIPELINE_ID = 159; // Academy Pipeline tood: look up pipedrive pipeline id by name
+
+
+// todo: add endpoint validation
+
 export async function POST({ request }) {
-    const { deal } = await request.json();
+    const installer = await request.json();
+    console.log("installer :", installer);
 
-    const success = addInstaller(deal);
+    const installerAddAttempt = await addInstaller(installer);
 
-    // todo: use the return code to work out whether the attempt to add the installer was successful
+    const response = new Response(
+        JSON.stringify({ message: installerAddAttempt.message }),
+        { status: installerAddAttempt.success ? 200 : 500 }
+    );
 
-    return json({}, {status: 200})
+    return response;
 }
 
 
-async function addInstaller(deal){
-    let addInstallerAttempt = {
-        success: true, // todo: adjust the return code based on whether the attempt to add the installer was successful
+async function addInstaller(installer) {
+    let installerAddAttempt = {
+        success: true,
         message: "Successfully added installer to Pipedrive"
     }
 
-    console.log("Adding organisation");
-    const orgId = await addOrganisation(deal.companyName, deal.companyAddress);
-    console.log("Organisation ID: " + orgId);
+    const companyName = installer.companyName;
 
-    console.log("Adding person");
-    const personId = await addPerson(deal.name, deal.emailAddress, deal.phoneNumber);
-    console.log("Person ID: " + personId);
+    const orgId = await addOrganisation(companyName, installer.companyAddress);
+    if (orgId === null)
+        console.log(`Failed to add Organisation for installer ${companyName}`);
 
-    console.log("Adding deal");
-    const dealId = await addDeal(deal.companyName, orgId, personId);
-    console.log("Deal ID: " + dealId);
+    const personId = await addPerson(installer.name, installer.emailAddress, installer.phoneNumber);
+    if (personId === null)
+        console.log(`Failed to add Person for installer ${companyName}`);
+
+    const dealAdded = await addDeal(companyName, orgId, personId);
+
+    if (!dealAdded) {
+        installerAddAttempt.success = false;
+        installerAddAttempt.message = `Failed to add Deal for '${companyName}'`;
+
+        return installerAddAttempt;
+    }
+
+    return installerAddAttempt;
 }
 
 
-async function addOrganisation(companyName, companyAddress) {
+async function addOrganisation(companyName: string, companyAddress: string): Promise<number | null> {
     const orgData = {
         name: companyName,
-        owner_id: 14071067,
-        address: companyAddress,
-        visible_to: "3"
+        owner_id: ACADEMY_MANAGER_PD_USER_ID,
+        address: companyAddress
     }
 
     const orgApi = new pipedrive.OrganizationsApi(pd);
-    const response = await orgApi.addOrganization(orgData);
+    const newOrg = await orgApi.addOrganization(orgData);
 
-    return response.data.id;
+    if(!newOrg.success) {
+        console.log(`Failed to add Organisation '${companyName}' to Pipedrive`);
+        return null;
+    }
+
+    return newOrg.data.id;
 }
 
 
-async function addPerson(name, emailAddress, phoneNumber){
+async function addPerson(name: string, emailAddress: string, phoneNumber: string): Promise<number | null> {
     const personData = {
         name: name,
-        owner_id: 14071067, // Rodney
+        owner_id: ACADEMY_MANAGER_PD_USER_ID, // Rodney
         email: emailAddress,
-        phone: phoneNumber,
-        visible_to: "3"
+        phone: phoneNumber
     }
 
     const personApi = new pipedrive.PersonsApi(pd);
-    const person = await personApi.addPerson(personData);
+    const newPerson = await personApi.addPerson(personData);
 
-    return person.data.id;
+    if(!newPerson.success) {
+        console.log(`Failed to add Person for '${name}' to Pipedrive`);
+        return null;
+    }
+
+    return newPerson.data.id;
 }
 
 
-async function addDeal(companyName, orgId, personId) {
+async function addDeal(companyName: string, orgId: number | null, personId: number | null): Promise<boolean> {
     const dealData = {
         title: companyName,
-        user_id: 14071067,
+        user_id: ACADEMY_MANAGER_PD_USER_ID,
         person_id: personId,
         org_id: orgId,
-        stage_id: 159,
-        visible_to: 3
+        stage_id: ACADEMY_PIPELINE_ID
     }
 
     const dealsApi = new pipedrive.DealsApi(pd);
-    const deal = await dealsApi.addDeal(dealData);
 
-    // todo: check that the deal was added correctly
-    return deal.data.id;
+    let addedSuccessfully = true;
+
+    try {
+        await dealsApi.addDeal(dealData);
+    }
+    catch(err) {
+        console.log(`Error adding Deal: ${err}`);
+        addedSuccessfully = false;
+    }
+
+    return addedSuccessfully;
 }
