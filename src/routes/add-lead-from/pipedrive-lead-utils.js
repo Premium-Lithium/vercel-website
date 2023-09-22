@@ -1,181 +1,243 @@
 import pipedrive from 'pipedrive';
-import { pd, dealFieldsRequest } from '$lib/pipedrive-utils.js'
+import { pd, getField, getOptionIdFor } from '$lib/pipedrive-utils.js'
 
 
-async function captureLeadFrom(leadSourceName, lead, labelName=null) { // `labelName` is the name of a pipedrive label
+async function captureLeadFrom(leadSourceName, leadData) { // `labelName` is the name of a pipedrive label
     let result = {
-        "success": true,
-        "message": `Successfully processed lead.`
+        success: true,
+        message: `Successfully processed lead.`
     };
 
     // We only want to add users as leads if they provided their phone number
-    if (lead.phoneNumber === undefined) {
-        result.message = `Request successfully processed, but no phone number provided so not adding lead.`;
+    if (leadData.phoneNumber === undefined) {
+        result.message = "Request successfully processed, but no phone number provided so not adding lead.";
         return result;
     }
 
-    try {
-        const leadTitle = `${leadSourceName}: ${lead.name}`; // e.g. "Battery Finder: John Smith"
+    // Add a new Person to pipedrive
+    const personId = await addPersonToPipedrive(
+        leadData.name,
+        leadData.emailAddress,
+        leadData.phoneNumber,
+        leadData.ageRange
+    );
 
-        const personId = await addPersonToPipedrive(
-            lead.emailAddress,
-            lead.name,
-            lead.phoneNumber,
-        );
-
-        await addLeadToPipedrive(
-            lead,
-            leadTitle,
-            personId,
-            labelName,
-        );
-    }
-    catch(error) {
-        const msg = `Error adding lead: ${error}`;
+    if(personId === null) {
         result.success = false;
-        result.message = msg;
-        console.log(msg);
+        result.message = "Failed to add Person to Pipedrive.";
+        return result;
+    }
+
+    // Add a new Deal to pipedrive
+    const dealId = await addDealToPipedrive(
+        leadData,
+        leadSourceName,
+        personId,
+    );
+
+    if(dealId === null) {
+        result.success = false;
+        result.message = "Failed to add Deal to Pipedrive.";
+        return result;
     }
 
     return result;
 }
 
 
-async function addPersonToPipedrive(emailAddress, name, phone) {
+async function addPersonToPipedrive(name, emailAddress, phone, ageRange) {
     console.log(`Adding person ${name} with email ${emailAddress} and phone ${phone} to pipedrive...`);
 
     const persons = new pipedrive.PersonsApi(pd);
 
     let person = null;
 
-    try {
-        person = await persons.addPerson({
-            name: name,
-            email: emailAddress,
-            phone: phone,
-            ownerId: 15215441, // Lewis
-        });
-    }
-    catch(error) {
-        console.log(`Error adding person: ${error}`);
-    }
+    let personData = {
+        name: name,
+        email: emailAddress,
+        phone: phone,
+        ownerId: 15215441 // Lewis
+    };
 
-    return person.data.id;
-}
+    // If we have age range information
+    const personFields = new pipedrive.PersonFieldsApi(pd);
+    const allFields = await personFields.getPersonFields();
 
+    let ageFieldExists = false;
+    const ageFieldName = "Age";
+    if(allFields.success === true) {
+        const ageField = allFields.data.find(f => f.name === ageFieldName);
 
-async function addLeadToPipedrive(leadData, title, personId, labelName) {
-    const leads = new pipedrive.LeadsApi(pd);
-
-    // todo: make sure that the lead adding system is robust to changes in the field names we have
-    // add everything as notes by default, and if the fields exist then add those afterwards.
-    const dailyEnergyUsageField = getField("Daily Energy Usage (kWh)");
-    const homeownerField = getField("Are You the Homeowner?");
-    const addressField = getField("Address of Property")
-
-    try {
-        let labels = [];
-
-        if(labelName !== null) {
-            const labelId = await getLeadLabelId(labelName);
-            labels.push(labelId);
+        if(ageField !== undefined) {
+            personData[ageField.key] = ageRange;
+            ageFieldExists = true;
         }
+    }
 
-        // Work out what to put in the homeowner field - todo: get option id
-        const homeownerOptionId = getOptionIdFor(leadData.isHomeOwner ? "Yes" : "No", homeownerField);
+    const addPersonAttempt = await persons.addPerson(personData);
 
-        // todo: add information about whether the customer is a homeowner
-        let leadOptions = pipedrive.AddLeadRequest.constructFromObject({
-            title: title,
-            personId: personId,
-            ownerId: 15215441, // Lewis
-            labelIds: labels,
-            [dailyEnergyUsageField.key]: leadData.energyUsage,
-            [homeownerField.key]: homeownerOptionId,
-            [addressField.key]: leadData.postcode
+    if(addPersonAttempt.success === false) {
+        console.log(`Error adding person: ${JSON.stringify(person)}`);
+        return null;
+    }
 
-            // todo: set custom field for "where did you hear about us?"
-        });
+    const personId = addPersonAttempt.data.id;
 
-        // Add the lead
-        console.log("Adding lead...");
-        const newLead = await leads.addLead(leadOptions);
-
-        if(newLead.success === false) {
-            console.log(`Error adding lead: ${JSON.stringify(newLead)}`);
-            return;
-        }
-
-        const newLeadId = newLead.data.id;
-
-        // Add notes to this lead
-        console.log("Adding notes...");
-        const notes = new pipedrive.NotesApi(pd);
-
-        // While we don't have fields for these, include them in notes
-        const noteContent = `Age: ${leadData.ageRange}\nInterested in: ${leadData.interestedIn}\nSource: ${leadData.source || "Unknown"}\nBuilding type: ${leadData.buildingType || "Unknown"}\n Prid: ${leadData.prid || "Unknown"}\n`;
+    // Add note to Person if the "Age" field is not found
+    if(!ageFieldExists) {
+        const noteContent = `Could not find person field '${ageFieldName}' to store data: '${ageRange}'.`;
 
         let noteOptions = pipedrive.AddNoteRequest.constructFromObject({
             content: noteContent,
-            leadId: newLeadId
+            personId: personId
         });
 
+        const notes = new pipedrive.NotesApi(pd);
         const newNote = await notes.addNote(noteOptions);
-        if(newNote.success === false) {
+
+        if(newNote.success === false)
             console.log("Failed to add note to new lead");
+    }
+
+    return personId;
+}
+
+
+async function addDealToPipedrive(lead, leadSourceName, personId) {
+    // Start by making sure that we always add a deal containing the minimum amount of information
+    let data = {
+        title: lead.name,
+        person_id: personId,
+        pipeline_id: 31 // todo: look up the name of the stage on pipedrive
+    };
+
+    let noteContent = "";
+
+    // Then add as many custom fields as we have
+
+    // 1. Address
+    let fieldName = "Address of Property";
+    let leadKeyName = "postcode";
+    if(lead[leadKeyName] !== null) {
+        const field = getField(fieldName);
+
+        if(field !== null)
+            data[field.key] = lead[leadKeyName];
+        else
+            noteContent += `<b>${fieldName}: ${lead[leadKeyName]}<b><br>`;
+    }
+
+    // 2. Lead Source ID
+    fieldName = "Lead Source ID";
+    leadKeyName = "prid";
+    if(lead[leadKeyName] !== null) {
+        const field = getField(fieldName);
+
+        if(field !== null)
+            data[field.key] = lead[leadKeyName];
+        else
+            noteContent += `<li><b>${fieldName}: ${lead[leadKeyName]}</b></li><br>`;
+    }
+
+    // 3. Lead Source
+    fieldName = "Lead Source";
+    const field = getField(fieldName);
+    if(field !== null)
+        data[field.key] = leadSourceName;
+    else
+        noteContent += `<li><b>${fieldName}: ${leadSourceName}</b></li><br>`;
+
+    // 4. Is homeowner
+    fieldName = "Are You the Homeowner?";
+    leadKeyName = "isHomeOwner";
+    if(lead[leadKeyName] !== null) {
+        const field = getField(fieldName);
+
+        if(field !== null) {
+            if(field.field_type === "enum") {
+                const optionId = getOptionIdFor(lead[leadKeyName], field);
+                if(optionId != null)
+                    data[field.key] = optionId
+                else
+                    noteContent += `Could not find option with name '${lead[leadKeyName]}' for field '${fieldName}'.<br>`;
+            }
+            else
+                data[field.key] = lead[leadKeyName];
         }
+        else
+            noteContent += `<li><b>${fieldName}: ${lead[leadKeyName]}</b><li><br>`;
     }
-    catch(error) {
-        console.log(`Error adding lead: ${JSON.stringify(error)}`);
+
+    // 5. Nature of Enquiry
+    fieldName = "Nature of Enquiry";
+    leadKeyName = "natureOfEnquiry";
+    if(lead[leadKeyName] !== null) {
+        const field = getField(fieldName);
+
+        if(field !== null) {
+            if(field.field_type === "enum") {
+                // map the contents of lead data in lead[leadKeyName] from
+                // Prism, Battery Finder e.g "Battery" onto an option in
+                // Pipedrive "Battery (Home/Commercial)"
+                const pdOptionNameFromLeadInfo = {
+                    "Solar Panels": "Solar",
+                    "Solar panels and battery": "Battery & Solar",
+                    "I'm not sure": "I'm Not Sure"
+                };
+
+                // Try to map the info in the lead to an option in pipedrive
+                let pdOptionName = pdOptionNameFromLeadInfo[lead[leadKeyName]];
+
+                // If the info provided in the lead data doesn't map to a pipedrive option, then use "Unknown"
+                if(pdOptionName === undefined) {
+                    pdOptionName = "Unknown";
+                    noteContent += `Could not recognise "Nature of Enquiry" option called "${lead[leadKeyName]}", using "Unknown".<br>`;
+                }
+
+                // Then work out the option id for the name we found above
+                const optionId = getOptionIdFor(pdOptionName, field);
+                if(optionId != null)
+                    data[field.key] = optionId
+                else
+                    noteContent += `Could not find option with name '${pdOptionName}' for field '${fieldName}'.<br>`;
+            }
+            else
+                data[field.key] = lead[leadKeyName];
+        }
+        else
+            noteContent += `<li><b>${fieldName}: ${lead[leadKeyName]}</b><li><br>`;
     }
-}
 
+    /* todo: add other fields
+    lead.energyUsage
+    lead.buildingType
+    */
 
-// todo: consider whether these could be moved into pipedrive utils somehow - they're not really specific to this route
-async function getLeadLabelId(labelName) {
-    const api = new pipedrive.LeadLabelsApi(pd);
+    const dealsApi = new pipedrive.DealsApi(pd);
+    const newDeal = await dealsApi.addDeal(data);
 
-    const allLabels = await api.getLeadLabels();
-    const label = allLabels.data.find(l => l.name === labelName);
-
-    if(label === undefined) {
-        console.log(`Could not find label with name ${labelName}. Is this spelled correctly?`);
+    if(newDeal.success === false) {
+        console.log(`Error adding deal: ${JSON.stringify(newDeal)}`);
         return null;
     }
 
-    return label.id;
-}
+    // If there were any fields that we couldn't find, then capture this information in a note
+    if(noteContent != "") {
+        noteContent = "The following info could not be added to the deal because fields could not be found:<br>" + noteContent;
 
+        let noteOptions = pipedrive.AddNoteRequest.constructFromObject({
+            content: noteContent,
+            dealId: newDeal.data.id
+        });
 
-function getField(fieldName) {
-    if(dealFieldsRequest.success === false) {
-        console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
-        return null;
+        const notes = new pipedrive.NotesApi(pd);
+        const newNote = await notes.addNote(noteOptions);
+
+        if(newNote.success === false)
+            console.log("Failed to add note to new lead");
     }
 
-    const allFields = dealFieldsRequest.data;
-
-    const field = allFields.find(f => f.name === fieldName);
-
-    if(field === undefined) {
-        console.log(`Could not find deal field with name '${fieldName}'. Is this spelled correctly?`);
-        return null;
-    }
-
-    return field;
-}
-
-
-function getOptionIdFor(optionName, fieldObject) {
-    const options = fieldObject.options;
-    const option = options.find(o => o.label === optionName);
-
-    if(option === undefined) {
-        console.log(`Could not find option with name '${optionName}'. Is this spelled correctly?`);
-        return null;
-    }
-
-    return option.id;
+    return newDeal.data.id;
 }
 
 

@@ -45,7 +45,7 @@ export async function extractLeadFrom(batteryFinderAnswers) {
         postcode: null,
         isHomeOwner: null,
         ageRange: null,
-        interestedIn: null,
+        natureOfEnquiry: null,
     };
 
     return lead;

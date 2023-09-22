@@ -10,6 +10,41 @@ const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
 const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
 
 
+// Just get the field object
+function getField(fieldName) {
+    if(dealFieldsRequest.success === false) {
+        console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
+        return null;
+    }
+
+    const allFields = dealFieldsRequest.data;
+
+    const field = allFields.find(f => f.name === fieldName);
+
+    if(field === undefined) {
+        console.log(`Could not find deal field with name '${fieldName}'. Is this spelled correctly?`);
+        return null;
+    }
+
+    return field;
+}
+
+
+// Return the id of an option for a given field
+function getOptionIdFor(optionName, fieldObject) {
+    const options = fieldObject.options;
+    const option = options.find(o => o.label === optionName);
+
+    if(option === undefined) {
+        console.log(`Could not find option with name '${optionName}'. Is this spelled correctly?`);
+        return null;
+    }
+
+    return option.id;
+}
+
+
+// Get the field and read it's contents
 function readCustomDealField(fieldName, dealData) {
     if(dealFieldsRequest.success === false) {
         console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
@@ -37,4 +72,4 @@ function readCustomDealField(fieldName, dealData) {
 }
 
 
-export { pd, readCustomDealField, dealFieldsRequest };
+export { pd, readCustomDealField, dealFieldsRequest, getField, getOptionIdFor };

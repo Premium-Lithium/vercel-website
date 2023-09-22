@@ -23,7 +23,6 @@ Example request body
 }
 */
 
-
 const schema = {
     type: "object",
     required: [ "firstname", "lastname", "email", "phone1", "postcode", "prid", "answers" ],
