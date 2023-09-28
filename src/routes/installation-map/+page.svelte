@@ -1,7 +1,5 @@
 <script lang="ts">
 	import Map from '$lib/components/Map.svelte';
-	import { latLongOfMarker } from '$lib/MapStores';
-	import { onMount } from 'svelte';
 	let map;
 	let mapZoom = 4;
 	let style = 5;

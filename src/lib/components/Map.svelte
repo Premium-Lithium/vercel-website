@@ -5,7 +5,8 @@
 	import 'mapbox-gl/dist/mapbox-gl.css';
 	export let search = true;
 	export let map = undefined;
-	export let markerArr = [[number, number]]; // Array of {lat/lon}
+	export let markerArr = [[Number, Number]]; // Array of {lat/lon} for map markers
+	export let navArr = [[Number, Number]]; // Array of {lat/lon} for navigation
 	$latLongOfMarker = { latitude: null, longitude: null };
 	$markersOnMap = [];
 	const styles = [
@@ -21,7 +22,6 @@
 
 	export let style = 5;
 	import { onMount } from 'svelte';
-	import { number } from 'zod';
 	onMount(() => {
 		const mapboxGlAccessToken =
 			'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -64,15 +64,55 @@
 				});
 				map.addControl(search);
 			}
-			for (let loc in markerArr) {
-				let marker = new mapboxgl.Marker({ draggable: false, color: $colourOfMapMarker }).setLngLat(
-					[markerArr[loc].longitude, markerArr[loc].latitude]
-				);
-				marker.addTo(map);
+			// Only add markers if markerArr not null
+			if (markerArr) {
+				addMarkers(markerArr);
 			}
 			map.resize();
 		});
 	});
+
+	// Adds markers from an array of locations (lat and lon)
+	export function addMarkers(markerArr) {
+		for (let loc in markerArr) {
+			let marker = new mapboxgl.Marker({
+				draggable: false,
+				color: $colourOfMapMarker
+			}).setLngLat([markerArr[loc][1], markerArr[loc][0]]);
+			marker.addTo(map);
+			$markersOnMap.push(marker);
+		}
+	}
+
+	// Clears all markers from the map
+	function clearMarkers() {
+		for (let marker in $markersOnMap) {
+			$markersOnMap[marker].remove();
+		}
+		$markersOnMap = [];
+	}
+
+	export async function navigation(navArr) {
+		// get optimal route between waypoints of navArr
+		let navReq = {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				profile: 'mapbox/driving-traffic',
+				coordinates: navArr,
+				source: 'first'
+			})
+		};
+		let navRes = await fetch('/installation-map/navigation', navReq);
+		// clear all markers
+		clearMarkers();
+		// parse markers
+		let navMarkers = [];
+		for (let waypoint in navRes.data.waypoints) {
+			navMarkers.push([navRes.data.waypoints[waypoint][1], navRes.data.waypoints[waypoint][0]])
+		}
+		addMarkers(navMarkers);
+	}
 </script>
 
 <svelte:head>
