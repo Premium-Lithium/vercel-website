@@ -6,7 +6,8 @@
 	export let search = true;
 	export let map = undefined;
 	export let markerArr = [[Number, Number]]; // Array of {lat/lon} for map markers
-	export let navArr = [[Number, Number]]; // Array of {lat/lon} for navigation
+	const API_TOKEN =
+		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 	$latLongOfMarker = { latitude: null, longitude: null };
 	$markersOnMap = [];
 	const styles = [
@@ -92,27 +93,6 @@
 		$markersOnMap = [];
 	}
 
-	export async function navigation(navArr) {
-		// get optimal route between waypoints of navArr
-		let navReq = {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				profile: 'mapbox/driving-traffic',
-				coordinates: navArr,
-				source: 'first'
-			})
-		};
-		let navRes = await fetch('/installation-map/navigation', navReq);
-		// clear all markers
-		clearMarkers();
-		// parse markers
-		let navMarkers = [];
-		for (let waypoint in navRes.data.waypoints) {
-			navMarkers.push([navRes.data.waypoints[waypoint][1], navRes.data.waypoints[waypoint][0]])
-		}
-		addMarkers(navMarkers);
-	}
 </script>
 
 <svelte:head>
