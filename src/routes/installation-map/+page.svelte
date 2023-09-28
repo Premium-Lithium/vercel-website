@@ -12,15 +12,17 @@
 		style += 1;
 	}
 	let installations = [
-		{ name: 'House 3', address: '86 Poppleton Road, York, YO26 4UP', status: 'Survey' },
-		{ name: 'House 1', address: '37 Crossways, York, YO10 5JH', status: 'Survey Confirmed' },
-		{ name: 'House 2', address: '18 Malton Avenue, York, YO31 7TT', status: 'Installation' },
+		{ name: 'House 4', address: '86 Poppleton Road, York, YO26 4UP', status: 'Survey' },
+		{ name: 'House 2', address: '37 Crossways, York, YO10 5JH', status: 'Survey Confirmed' },
+		{ name: 'House 3', address: '18 Malton Avenue, York, YO31 7TT', status: 'Installation' },
+        { name: 'House 1', address: '25 Millfield Lane, York, YO10 3AN', status: 'Installed' },
 		{
 			name: 'Work 1',
 			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
 			status: 'DNO Completed'
 		}
 	];
+
 </script>
 
 <body>
