@@ -31,7 +31,7 @@
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', accept: 'application/json' },
 			body: JSON.stringify({
-				content: JSON.stringify(queryParams), // will fail the POST request if queryParams is empty, but won't crash horribly
+				content: JSON.stringify(queryParams), 
 				lead_id: leadResponse.data.id,
 				add_time: leadResponse.data.update_time,
 				person_id: leadResponse.data.person_id
