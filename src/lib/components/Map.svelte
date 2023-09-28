@@ -1,12 +1,11 @@
-<script lang="ts">
+<script>
 	import { latLongOfMarker, markersOnMap, colourOfMapMarker } from '$lib/MapStores.js';
 
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
 	export let search = true;
 	export let map = undefined;
-	export let installationArr;
-	let markers = [];
+	export let markerArr = [[Number, Number]]; // Array of {lat/lon} for map markers
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 	$latLongOfMarker = { latitude: null, longitude: null };
@@ -24,38 +23,6 @@
 
 	export let style = 5;
 	import { onMount } from 'svelte';
-
-	class Installation {
-		name: String;
-		status: String;
-		marker: mapboxgl.Marker;
-		address: String;
-		lat: Number;
-		lon: Number;
-		// Other values ie timeframe etc.
-		constructor(name: String, status: String, address: String, lat:Number, lon: Number) {
-			this.name = name;
-			this.status = status;
-			this.marker = new mapboxgl.Marker({
-				draggable: false
-			}).setLngLat([lon, lat]);
-			this.address = address;
-			this.lat = lat;
-			this.lon = lon;
-		}
-
-		// Set colour of marker based on status
-
-		// Show/hide marker from filter
-	}
-
-	// Filter function
-	/**
-	 * Loop through markers array
-	 * 	if *filter* applicable to MapMarker
-	*/
-
-
 	onMount(() => {
 		const mapboxGlAccessToken =
 			'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -99,64 +66,33 @@
 				map.addControl(search);
 			}
 			// Only add markers if markerArr not null
-			if (installationArr) {
-				createMarkers(installationArr);
+			if (markerArr) {
+				addMarkers(markerArr);
 			}
 			map.resize();
 		});
 	});
 
-	// Creates an array of MapMarker objects from an array of inputs 
-	async function createMarkers(installationArr) {
-		for (let i in installationArr) {
-			let lonLat = await fetchLonLatFromAddress(installationArr[i].address)
-			let install = new Installation(
-				installationArr[i].name,
-				installationArr[i].status,
-				installationArr[i].address,
-				lonLat[1],
-				lonLat[0]
-			);
-			markers.push(install);
-		}
-		addMarkers(markers);
-	}
-
-	// Adds markers from an array of locations (Markers)
-	function addMarkers(markerArr) {
+	// Adds markers from an array of locations (lat and lon)
+	export function addMarkers(markerArr) {
 		for (let loc in markerArr) {
-			console.log(loc);
-			markers[loc].marker.addTo(map);
+			let marker = new mapboxgl.Marker({
+				draggable: false,
+				color: $colourOfMapMarker
+			}).setLngLat([markerArr[loc][1], markerArr[loc][0]]);
+			marker.addTo(map);
+			$markersOnMap.push(marker);
 		}
 	}
 
 	// Clears all markers from the map
 	function clearMarkers() {
-		for (let i in markers) {
-			markers[i].marker.remove();
+		for (let marker in $markersOnMap) {
+			$markersOnMap[marker].remove();
 		}
-		markers = [];
+		$markersOnMap = [];
 	}
 
-	// Returns in form of [lon, lat]
-	async function fetchLonLatFromAddress(address) {
-		const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${API_TOKEN}`;
-		try {
-			const geocodingResponse = await fetch(endpoint);
-			if (geocodingResponse.ok) {
-				const data = await geocodingResponse.json();
-				const longLat = [
-					data.features[0].geometry.coordinates[0],
-					data.features[0].geometry.coordinates[1]
-				];
-				return longLat;
-			} else {
-				console.error('Bad Response');
-			}
-		} catch (error) {
-			console.error('Bad Catch');
-		}
-	}
 </script>
 
 <svelte:head>
