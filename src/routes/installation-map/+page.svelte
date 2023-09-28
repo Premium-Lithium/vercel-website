@@ -11,42 +11,14 @@
 		style = style % 7;
 		style += 1;
 	}
-	let addresses = [
-		'86 Poppleton Road, York, YO26 4UP',
-		'37 Crossways, York, YO10 5JH',
-		'18 Malton Avenue, York, YO31 7TT',
-		'Quartz Point, 13 The Stonebow, York YO1 7NP'
+	let installations = [
+		{name:"House 3", address:'86 Poppleton Road, York, YO26 4UP', status:"Survey"},
+		{name:"House 1", address:'37 Crossways, York, YO10 5JH', status:"Survey Confirmed"},
+		{name:"House 2", address:'18 Malton Avenue, York, YO31 7TT', status:"Installation"},
+		{name:"Work 1", address:'Quartz Point, 13 The Stonebow, York YO1 7NP', status:"DNO Completed"}
 	];
 
-	async function fetchLatlonFromAddress(address) {
-		const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${API_TOKEN}`;
-		try {
-			const geocodingResponse = await fetch(endpoint);
-			if (geocodingResponse.ok) {
-				const data = await geocodingResponse.json();
-				const latLong = [
-					data.features[0].geometry.coordinates[1],
-					data.features[0].geometry.coordinates[0]
-				];
-				return latLong;
-			} else {
-				console.error('Bad Response');
-			}
-		} catch (error) {
-			console.error('Bad Catch');
-		}
-	}
 
-	function GetLatLongsFromAddress(addressArr) {
-		let latLongArr = [];
-		for (let i in addressArr) {
-			let latLongFromAddress = fetchLatlonFromAddress(addressArr[i]);
-			latLongFromAddress.then((value) => {
-				latLongArr.push(value);
-			});
-		}
-		return latLongArr;
-	}
 </script>
 
 <div>
@@ -58,7 +30,7 @@
 				bind:style
 				bind:map
 				--border-radius="10px"
-				markerArr={GetLatLongsFromAddress(addresses)}
+				installationArr={installations}
 			/>
 		{/key}
 	</div>
