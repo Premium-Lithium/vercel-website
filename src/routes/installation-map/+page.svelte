@@ -20,27 +20,88 @@
 
 </script>
 
-<div>
-	<h1>Installation Map</h1>
-	<div class="map-view">
-		{#key style}
-			<Map
-				search={false}
-				bind:style
-				bind:map
-				--border-radius="10px"
-				installationArr={installations}
-			/>
-		{/key}
-	</div>
-	<div id="styleButton">
-		<button on:click={changeStyle}>Change Style</button>
-	</div>
-</div>
-
+<body>
+    <div class="grid-container">
+        <div class="grid-item">
+            <h1>Installation Map</h1>
+            <div class="filter-container">
+                <div>Filters</div>
+                <div>Installation Date</div>
+                <ul>
+                    <li>
+                        <input type="checkbox" id=""><span>Project Handover</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Awaiting Site Survey</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Site Survey Confirmed</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Site Survey Completed</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>DNO Application</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Pre-Installation</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Installation Confirmed</span>
+                    </li>
+                </ul>
+                
+            </div>
+            <div class="details">
+                <div>
+                    <div>
+                        Name
+                    </div>
+                    <div>
+                        etc
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid-item">
+            <div class="map-view">
+                {#key style}
+                    <Map
+                        search={false}
+                        bind:style
+                        bind:map
+                        zoom={mapZoom}
+                        --border-radius="10px"
+                        markerArr={latLongArr}
+                    />
+                {/key}
+            </div>
+            <div id="styleButton">
+                <button on:click={changeStyle}>Change Style</button>
+            </div>
+        </div>
+    </div>
+	
+</body>
 <style>
+    body {
+        color: #fff;
+    }
 	.map-view {
 		width: 100%;
 		height: 80vh;
 	}
+    .grid-container {
+        display: grid;
+        grid-template-columns: auto 70%;
+    }
+    .grid-item {
+        background: #091408;
+        padding: 20px;
+        height: 100vh;
+    }
+    .filter-container ul {
+        list-style: none;
+        float: left;
+    }
 </style>
