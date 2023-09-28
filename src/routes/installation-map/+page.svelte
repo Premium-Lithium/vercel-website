@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Map from '$lib/components/Map.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 	import { latLongOfMarker } from '$lib/MapStores';
 	import { onMount } from 'svelte';
 	let map;
@@ -83,7 +84,8 @@
         <div class="grid-item">
             <h1>Installation Map</h1>
             <div class="filter-container">
-                <span>Filters</span>
+                <div>Filters</div>
+                <div>Installation Date</div>
                 <ul>
                     <li>
                         <input type="checkbox" id=""><span>Project Handover</span>
@@ -107,6 +109,17 @@
                         <input type="checkbox" id=""><span>Installation Confirmed</span>
                     </li>
                 </ul>
+                
+            </div>
+            <div class="details">
+                <div>
+                    <div>
+                        Name
+                    </div>
+                    <div>
+                        etc
+                    </div>
+                </div>
             </div>
         </div>
         <div class="grid-item">
