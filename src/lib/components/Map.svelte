@@ -73,12 +73,12 @@
 	});
 
 	// Adds markers from an array of locations (lat and lon)
-	function addMarkers(markerArr) {
+	export function addMarkers(markerArr) {
 		for (let loc in markerArr) {
 			let marker = new mapboxgl.Marker({
 				draggable: false,
 				color: $colourOfMapMarker
-			}).setLngLat([markerArr[loc].longitude, markerArr[loc].latitude]);
+			}).setLngLat([markerArr[loc][1], markerArr[loc][0]]);
 			marker.addTo(map);
 			$markersOnMap.push(marker);
 		}
@@ -87,14 +87,31 @@
 	// Clears all markers from the map
 	function clearMarkers() {
 		for (let marker in $markersOnMap) {
-			$markersOnMap[marker].remove()
+			$markersOnMap[marker].remove();
 		}
+		$markersOnMap = [];
 	}
 
 	export async function navigation(navArr) {
 		// get optimal route between waypoints of navArr
+		let navReq = {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				profile: 'mapbox/driving-traffic',
+				coordinates: navArr,
+				source: 'first'
+			})
+		};
+		let navRes = await fetch('/installation-map/navigation', navReq);
 		// clear all markers
-		// add markers just for
+		clearMarkers();
+		// parse markers
+		let navMarkers = [];
+		for (let waypoint in navRes.data.waypoints) {
+			navMarkers.push([navRes.data.waypoints[waypoint][1], navRes.data.waypoints[waypoint][0]])
+		}
+		addMarkers(navMarkers);
 	}
 </script>
 
