@@ -1,20 +1,32 @@
 <script lang="ts">
 	import Map from '$lib/components/Map.svelte';
-	import mapboxgl from 'mapbox-gl';
-	import { onMount } from 'svelte';
+    import { latLongOfMarker } from '$lib/MapStores';
 	let map;
 	let mapZoom = 4;
+	let style = 5;
 
-	let postcodes = [['ls1 2fn', 'ls2 8fj']];
+    // Completely necessary function
+	function changeStyle() {
+		console.log(style);
+		style = style % 7;
+		style += 1;
+	}
 
-	let longlats = { 'ls1 2fn': [53.79905, -1.55458], 'ls2 8fj': [53.80119, -1.54205] };
+    let york = [{latitude: 53.9614, longitude: 1.0739},
+                {latitude: 53.8008, longitude: 1.5491}    
+];
 
 </script>
 
 <div>
 	<h1>Installation Map</h1>
 	<div class="map-view">
-		<Map search={false} style={2} bind:map zoom={mapZoom} --border-radius="10px" />
+		{#key style}
+			<Map search={false} bind:style bind:map zoom={mapZoom} --border-radius="10px" markerArr={york}/>
+		{/key}
+	</div>
+	<div id="styleButton">
+		<button on:click={changeStyle}>Change Style</button>
 	</div>
 </div>
 
