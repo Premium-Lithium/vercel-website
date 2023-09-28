@@ -39,40 +39,115 @@
 	}
     
     let latLongArr = [];
-    function GetLatLongsFromAddress(addressArr) {
-        for (let i in addressArr) {
-            let latLongFromAddress = fetchLatlonFromAddress(addressArr[i]);
-            latLongFromAddress.then((value) => {
-                latLongArr.push(value);
-            });
+    const phase = ["Project Handover", "Awaiting Site Survey", "Site Survey Confirmed", "Site Survey Completed", "DNO Application", "Pre-Installation", "Installation Confirmed"]
+    const colorcode = ["red", "orange", "blue", "green", "yellow", "cyan", "purple"]
+    const projectData = [
+        {
+            name: "Bob Powell",
+            phase: "Project Handover",
+            address: "Chewton Mendip, Radstock BA3 4PF, UK", //to get long lat
+        },
+        {
+            name: "Sundip Nagar",
+            phase: "DNO Application",
+            address: "35 St Francis Cl, Penenden Heath, Maidstone, UK",
+        },
+        {
+            name: "Patrick Macintosh",
+            phase: "Pre-Installation",
+            address: "Hillcrest farm, Scottshill, Outwood, Surrey, RH1 5PR",
         }
+    ];
+
+    const markersData = [];
+    console.log(projectData)
+    function GetLatLongsFromData(data){
+        let markers = [];
+        for(let i in data){
+            let latlong = fetchLatlonFromAddress(data[i].address);
+            
+            latlong.then((value) => {
+                markers.push(value)
+            });
+            
+        }
+        console.log(markers)
     }
-    GetLatLongsFromAddress(addresses)
+    GetLatLongsFromData(projectData)
+    
 
 </script>
 
-<div>
-	<h1>Installation Map</h1>
-	<div class="map-view">
-		{#key style}
-			<Map
-				search={false}
-				bind:style
-				bind:map
-				zoom={mapZoom}
-				--border-radius="10px"
-				markerArr={latLongArr}
-			/>
-		{/key}
-	</div>
-	<div id="styleButton">
-		<button on:click={changeStyle}>Change Style</button>
-	</div>
-</div>
-
+<body>
+    <div class="grid-container">
+        <div class="grid-item">
+            <h1>Installation Map</h1>
+            <div class="filter-container">
+                <span>Filters</span>
+                <ul>
+                    <li>
+                        <input type="checkbox" id=""><span>Project Handover</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Awaiting Site Survey</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Site Survey Confirmed</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Site Survey Completed</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>DNO Application</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Pre-Installation</span>
+                    </li>
+                    <li>
+                        <input type="checkbox" id=""><span>Installation Confirmed</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="grid-item">
+            <div class="map-view">
+                {#key style}
+                    <Map
+                        search={false}
+                        bind:style
+                        bind:map
+                        zoom={mapZoom}
+                        --border-radius="10px"
+                        markerArr={latLongArr}
+                    />
+                {/key}
+            </div>
+            <div id="styleButton">
+                <button on:click={changeStyle}>Change Style</button>
+            </div>
+        </div>
+    </div>
+	
+</body>
 <style>
+    body {
+        color: #fff;
+    }
 	.map-view {
 		width: 100%;
 		height: 80vh;
 	}
+    .grid-container {
+        display: grid;
+        grid-template-columns: auto 70%;
+    }
+    .grid-item {
+        background: #091408;
+        padding: 20px;
+        height: 100vh;
+    }
+    .filter-container ul {
+        list-style: none;
+        float: left;
+    }
 </style>
