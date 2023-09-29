@@ -24,13 +24,13 @@
 	]; // 7
 
 	const statusColors = {
-		'Project Handover': 'red',
-		'Awaiting Site Survey': 'blue',
-		'Site Survey Confirmed': 'yellow',
-		'Site Survey Completed': 'orange',
-		'DNO Application': 'pink',
-		'Pre-Installation': 'cyan',
-		'Installation Confirmed': 'green'
+		'Project Handover': 'orange',
+		'Awaiting Site Survey': 'yellow',
+		'Site Survey Confirmed': 'blue',
+		'Site Survey Completed': 'black',
+		'DNO Application': 'green',
+		'Pre-Installation': 'red',
+		'Installation Confirmed': 'purple'
 	};
 
 	export let style = 5;
