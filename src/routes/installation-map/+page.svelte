@@ -28,6 +28,16 @@
 			name: 'Work 1',
 			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
 			status: 'DNO Completed'
+		},
+        {
+			name: 'Paul Long',
+			address: '22 Sunnybank Road, The Royal Town of Sutton Coldfield, Birmingham, Sutton Coldfield, UK',
+			status: 'Installation Confirmed'
+		},
+        {
+			name: 'Mark Durkan',
+			address: 'Fox Hollow Barn West Charlton, Charlton Mackrell Somerset TA11 7AL',
+			status: 'Pre-Installation'
 		}
 	];
     let selectedInstallation = installations[0];

@@ -28,6 +28,16 @@
 		'mapbox://styles/mapbox/navigation-night-v1'
 	]; // 7
 
+	const statusColors = {
+			'Project Handover': 'red',
+			'Awaiting Site Survey': 'blue',
+			'Site Survey Confirmed': 'yellow',
+			'Site Survey Completed': 'orange',
+			'DNO Application': 'pink',
+			'Pre-Installation': 'cyan',
+			'Installation Confirmed': 'green',
+		};
+
 	export let style = 5;
 	import { onMount } from 'svelte';
 
@@ -43,7 +53,7 @@
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
-				color: coloringFunction(status),
+				color: statusColors[status],
 				draggable: false
 			}).setLngLat([lon, lat]);
 			this.address = address;
@@ -113,24 +123,6 @@
 			map.resize();
 		});
 	});
-
-	function coloringFunction(status) {
-		if (status == 'Project Handover') {
-			return 'red';
-		} else if (status == 'Awaiting Site Survey') {
-			return 'blue';
-		} else if (status == 'Site Survey Confirmed') {
-			return 'yellow';
-		} else if (status == 'Site Survey Completed') {
-			return 'orange';
-		} else if (status == 'DNO Application') {
-			return 'purple';
-		} else if (status == 'Pre-Installation') {
-			return 'cyan';
-		} else if (status == 'Installation Confirmed') {
-			return 'green';
-		}
-	}
 	function filterMarkers(filters) {
 		console.log(installations);
 		for (let i in installations) {
