@@ -1,9 +1,12 @@
 <script lang="ts">
+	import Filter from '$lib/components/Filter.svelte';
+
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
 	let selectedFilters = [];
 	let map;
+	let filterUpdate;
 
 	let style = 5;
 	const API_TOKEN =
@@ -14,6 +17,11 @@
 		style = style % 7;
 		style += 1;
 	}
+
+	function submitFilter() {
+		filterUpdate = !filterUpdate;
+	}
+
 	let installations = [
 		{ name: 'House 4', address: '86 Poppleton Road, York, YO26 4UP', status: 'Project Handover' },
 		{ name: 'House 2', address: '37 Crossways, York, YO10 5JH', status: 'Awaiting Site Survey' },
@@ -97,6 +105,9 @@
 						</li>
 					</ul>
 				</div>
+				<div id="filterButton">
+					<button on:click={submitFilter}>Submit Filter</button>
+				</div>
 
 				<div class="details">
 					<div class="installation_info">
@@ -108,12 +119,13 @@
 						</div>
 					</div>
 				</div>
+
 			</div>
 		</div>
 		<div class="grid-item">
 			<div class="map-view">
 				{#key style}
-					{#key selectedFilters}
+					{#key filterUpdate}
 						<Map
 							search={false}
 							bind:style
@@ -125,7 +137,6 @@
 					{/key}
 				{/key}
 			</div>
-
 			<div id="styleButton">
 				<button on:click={changeStyle}>Change Style</button>
 			</div>
