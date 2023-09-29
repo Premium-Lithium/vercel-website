@@ -34,7 +34,14 @@
 		lon: Number;
 		hidden: Boolean;
 		// Other values ie timeframe etc.
-		constructor(name: String, status: String, address: String, lat:Number, lon: Number, hidden:Boolean) {
+		constructor(
+			name: String,
+			status: String,
+			address: String,
+			lat: Number,
+			lon: Number,
+			hidden: Boolean
+		) {
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
@@ -55,8 +62,7 @@
 	/**
 	 * Loop through markers array
 	 * 	if *filter* applicable to MapMarker
-	*/
-
+	 */
 
 	onMount(() => {
 		const mapboxGlAccessToken =
@@ -108,10 +114,10 @@
 		});
 	});
 
-	// Creates an array of MapMarker objects from an array of inputs 
+	// Creates an array of MapMarker objects from an array of inputs
 	async function createMarkers(installationArr) {
 		for (let i in installationArr) {
-			let lonLat = await fetchLonLatFromAddress(installationArr[i].address)
+			let lonLat = await fetchLonLatFromAddress(installationArr[i].address);
 			let install = new Installation(
 				installationArr[i].name,
 				installationArr[i].status,
