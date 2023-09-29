@@ -108,7 +108,7 @@
 						bind:map
 						--border-radius="10px"
 						installationArr={installations}
-						selectedFilters={selectedFilters}
+						selectedFiltersArr={selectedFilters}
 					/>
 				{/key}
 			</div>

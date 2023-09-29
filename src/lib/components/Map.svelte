@@ -6,7 +6,7 @@
 	export let search = true;
 	export let map = undefined;
 	export let installationArr;
-	export let selectedFilters;
+	export let selectedFiltersArr;
 	let markers = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -98,21 +98,21 @@
 				});
 				map.addControl(search);
 			}
+			console.log(selectedFiltersArr);
 			if (installationArr) {
 				createMarkers(installationArr);
-				console.log(markers)
-				filterMarkers();
+				console.log(markers);
+				filterMarkers(markers);
 			}
 
 			map.resize();
 		});
 	});
 
-	function filterMarkers() {
-		$markersOnMap.forEach((marker) => {
+	function filterMarkers(markers) {
+		markers.forEach((marker) => {
 			// Check if the marker's status is in the selected filters
 			const shouldShow = selectedFilters.has(marker.status);
-
 			// Show or hide the marker based on the condition
 			if (shouldShow) {
 				marker.addTo(map);
@@ -141,7 +141,6 @@
 	// Adds markers from an array of locations (Markers)
 	function addMarkers(markers) {
 		for (let loc in markers) {
-			console.log(loc);
 			markers[loc].marker.addTo(map);
 		}
 	}
