@@ -5,7 +5,11 @@
 	import 'mapbox-gl/dist/mapbox-gl.css';
 	export let search = true;
 	export let map = undefined;
-	export let markerArr = [[number, number]]; // Array of {lat/lon}
+	export let installationArr;
+	export let selectedFilters;
+	let markers = [];
+	const API_TOKEN =
+		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 	$latLongOfMarker = { latitude: null, longitude: null };
 	$markersOnMap = [];
 	const styles = [
@@ -64,15 +68,84 @@
 				});
 				map.addControl(search);
 			}
+			createMarkers()
+			/*
 			for (let loc in markerArr) {
 				let marker = new mapboxgl.Marker({ draggable: false, color: $colourOfMapMarker }).setLngLat(
 					[markerArr[loc].longitude, markerArr[loc].latitude]
 				);
 				marker.addTo(map);
-			}
+			}*/
+
 			map.resize();
 		});
 	});
+
+	function filterMarkers() {
+		$markersOnMap.forEach(marker => {
+			// Check if the marker's status is in the selected filters
+			const shouldShow = selectedFilters.has(marker.status);
+
+			// Show or hide the marker based on the condition
+			if (shouldShow) {
+			marker.addTo(map);
+			} else {
+			marker.remove();
+			}
+		});
+		}
+
+	// Creates an array of MapMarker objects from an array of inputs 
+	async function createMarkers(installationArr) {
+		for (let i in installationArr) {
+			let lonLat = await fetchLonLatFromAddress(installationArr[i].address)
+			let install = new Installation(
+				installationArr[i].name,
+				installationArr[i].status,
+				installationArr[i].address,
+				lonLat[1],
+				lonLat[0]
+			);
+			markers.push(install);
+		}
+		addMarkers(markers);
+	}
+
+	// Adds markers from an array of locations (Markers)
+	function addMarkers(markers) {
+		for (let loc in markers) {
+			console.log(loc);
+			markers[loc].marker.addTo(map);
+		}
+	}
+
+	// Clears all markers from the map
+	function clearMarkers() {
+		for (let i in markers) {
+			markers[i].marker.remove();
+		}
+		markers = [];
+	}
+
+	// Returns in form of [lon, lat]
+	async function fetchLonLatFromAddress(address) {
+		const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${API_TOKEN}`;
+		try {
+			const geocodingResponse = await fetch(endpoint);
+			if (geocodingResponse.ok) {
+				const data = await geocodingResponse.json();
+				const longLat = [
+					data.features[0].geometry.coordinates[0],
+					data.features[0].geometry.coordinates[1]
+				];
+				return longLat;
+			} else {
+				console.error('Bad Response');
+			}
+		} catch (error) {
+			console.error('Bad Catch');
+		}
+	}
 </script>
 
 <svelte:head>
