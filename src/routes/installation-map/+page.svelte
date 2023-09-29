@@ -18,13 +18,22 @@
 		style += 1;
 	}
 
+	// Just for use in the key to reload the map
 	function submitFilter() {
 		filterUpdate = !filterUpdate;
 	}
 
 	let installations = [
-		{ name: 'House 4', address: '86 Poppleton Road, York, YO26 4UP', status: 'Project Handover' },
-		{ name: 'House 2', address: '37 Crossways, York, YO10 5JH', status: 'Awaiting Site Survey' },
+		{
+			name: 'House 4',
+			address: '86 Poppleton Road, York, YO26 4UP',
+			status: 'Project Handover'
+		},
+		{
+			name: 'House 2',
+			address: '37 Crossways, York, YO10 5JH',
+			status: 'Awaiting Site Survey'
+		},
 		{
 			name: 'House 3',
 			address: '18 Malton Avenue, York, YO31 7TT',
@@ -35,7 +44,11 @@
 			address: '25 Millfield Lane, York, YO10 3AN',
 			status: 'Site Survey Completed'
 		},
-		{ name: 'House 5', address: '83 Newborough Street, York, YO30 7AS', status: 'DNO Application' },
+		{
+			name: 'House 5',
+			address: '83 Newborough Street, York, YO30 7AS',
+			status: 'DNO Application'
+		},
 		{
 			name: 'Work 1',
 			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
@@ -56,7 +69,7 @@
 			<h1>Installation Map</h1>
 			<div class="side-container">
 				<div class="filters">
-					<p>{selectedFilters}</p>
+					<p>Filters Selected: {selectedFilters}</p>
 					<div>Filters</div>
 					<div>Installation Date</div>
 					<ul>
@@ -119,7 +132,6 @@
 						</div>
 					</div>
 				</div>
-
 			</div>
 		</div>
 		<div class="grid-item">
