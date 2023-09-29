@@ -1,10 +1,11 @@
 <script lang="ts">
+    //import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
+    let selectedFilters = [];
 	let map;
 	let mapZoom = 4;
-	let selectedFilters = []; // Track selected filters
-	let selectedInstallation = [];
+	
 	let style = 5;
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -29,6 +30,8 @@
 			status: 'DNO Completed'
 		}
 	];
+    let selectedInstallation = installations[0];
+
 </script>
 
 <body>
@@ -101,7 +104,7 @@
 		</div>
 		<div class="grid-item">
 			<div class="map-view">
-				{#key style}
+				{#key selectedFilters}
 					<Map
 						search={false}
 						bind:style

@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { latLongOfMarker, markersOnMap, colourOfMapMarker } from '$lib/MapStores.js';
+	import {
+		latLongOfMarker,
+		markersOnMap,
+		colourOfMapMarker,
+		selectedFilters
+	} from '$lib/MapStores.js';
 
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
@@ -7,7 +12,7 @@
 	export let map = undefined;
 	export let installationArr;
 	export let selectedFiltersArr;
-	let markers = [];
+	let installations = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 	$latLongOfMarker = { latitude: null, longitude: null };
@@ -38,6 +43,7 @@
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
+				color: coloringFunction(status),
 				draggable: false
 			}).setLngLat([lon, lat]);
 			this.address = address;
@@ -63,9 +69,10 @@
 		map = new mapboxgl.Map({
 			container: 'map',
 			style: styles[style],
-			center: [-3.435973, 55.378051], // longitude and latitude of the center of the UK
+			center: [-3.435973, 53.378051], // longitude and latitude of the center of the UK
 			zoom: 5 // zoom level
 		});
+		
 
 		map.on('load', async () => {
 			if (search) {
@@ -101,25 +108,40 @@
 			console.log(selectedFiltersArr);
 			if (installationArr) {
 				createMarkers(installationArr);
-				console.log(markers);
-				filterMarkers(markers);
 			}
 
 			map.resize();
 		});
 	});
 
-	function filterMarkers(markers) {
-		markers.forEach((marker) => {
-			// Check if the marker's status is in the selected filters
-			const shouldShow = selectedFilters.has(marker.status);
-			// Show or hide the marker based on the condition
+	function coloringFunction(status) {
+		if (status == 'Project Handover') {
+			return 'red';
+		} else if (status == 'Awaiting Site Survey') {
+			return 'blue';
+		} else if (status == 'Site Survey Confirmed') {
+			return 'yellow';
+		} else if (status == 'Site Survey Completed') {
+			return 'orange';
+		} else if (status == 'DNO Application') {
+			return 'purple';
+		} else if (status == 'Pre-Installation') {
+			return 'cyan';
+		} else if (status == 'Installation Confirmed') {
+			return 'green';
+		}
+	}
+	function filterMarkers(filters) {
+		console.log(installations);
+		for (let i in installations) {
+			const shouldShow = filters.has(installations[i].status);
 			if (shouldShow) {
-				marker.addTo(map);
+				console.log(installations[i].status);
+				installations[i].marker.addTo(map);
 			} else {
-				marker.remove();
+				installations[i].marker.remove();
 			}
-		});
+		}
 	}
 
 	// Creates an array of MapMarker objects from an array of inputs
@@ -133,25 +155,29 @@
 				lonLat[1],
 				lonLat[0]
 			);
-			markers.push(install);
+			installations.push(install);
 		}
-		addMarkers(markers);
+		addMarkers(installations);
 	}
 
 	// Adds markers from an array of locations (Markers)
-	function addMarkers(markers) {
-		for (let loc in markers) {
-			markers[loc].marker.addTo(map);
+	function addMarkers(installations) {
+		for (let i in installations) {
+			let popup = new mapboxgl.Popup({ className: 'pin-popup' })
+				.setLngLat([installations[i].lon, installations[i].lat])
+				.setHTML("<style>.pin-popup .mapboxgl-popup-content { background-color: #091408;}</style>"+ installations[i].name +"<br>"+installations[i].status+"<br>"  + installations[i].address);
+			installations[i].marker.setPopup(popup).addTo(map);
 		}
 	}
 
 	// Clears all markers from the map
 	function clearMarkers() {
-		for (let i in markers) {
-			markers[i].marker.remove();
+		for (let i in installations) {
+			installations[i].marker.remove();
 		}
-		markers = [];
+		installations = [];
 	}
+
 
 	// Returns in form of [lon, lat]
 	async function fetchLonLatFromAddress(address) {
@@ -192,4 +218,5 @@
 		width: 100%;
 		height: 100%;
 	}
+	
 </style>
