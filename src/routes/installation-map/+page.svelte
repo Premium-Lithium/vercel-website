@@ -27,7 +27,7 @@
 		{
 			name: 'Work 1',
 			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
-			status: 'DNO Completed'
+			status: 'DNO Application'
 		},
         {
 			name: 'Paul Long',
