@@ -32,8 +32,9 @@
 		address: String;
 		lat: Number;
 		lon: Number;
+		hidden: Boolean;
 		// Other values ie timeframe etc.
-		constructor(name: String, status: String, address: String, lat:Number, lon: Number) {
+		constructor(name: String, status: String, address: String, lat:Number, lon: Number, hidden:Boolean) {
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
@@ -42,6 +43,7 @@
 			this.address = address;
 			this.lat = lat;
 			this.lon = lon;
+			this.hidden = hidden;
 		}
 
 		// Set colour of marker based on status
@@ -115,7 +117,8 @@
 				installationArr[i].status,
 				installationArr[i].address,
 				lonLat[1],
-				lonLat[0]
+				lonLat[0],
+				true
 			);
 			markers.push(install);
 		}
@@ -125,8 +128,9 @@
 	// Adds markers from an array of locations (Markers)
 	function addMarkers(markerArr) {
 		for (let loc in markerArr) {
-			console.log(loc);
-			markers[loc].marker.addTo(map);
+			if (!markers[loc].hidden) {
+				markers[loc].marker.addTo(map);
+			}
 		}
 	}
 
