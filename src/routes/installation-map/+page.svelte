@@ -114,16 +114,18 @@
 		</div>
 		<div class="grid-item">
 			<div class="map-view">
-				{#key selectedFilters}
-					<Map
-						search={false}
-						bind:style
-						bind:map
-						--border-radius="10px"
-						installationArr={installations}
-						selectedFiltersArr={selectedFilters}
-					/>
-				{/key}
+                {#key style}
+                    {#key selectedFilters}
+                        <Map
+                            search={false}
+                            bind:style
+                            bind:map
+                            --border-radius="10px"
+                            installationArr={installations}
+                            selectedFiltersArr={selectedFilters}
+                        />
+                    {/key}
+                {/key}
 			</div>
 
 			<div id="styleButton">
