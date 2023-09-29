@@ -6,6 +6,7 @@
 	export let search = true;
 	export let map = undefined;
 	export let installationArr;
+	export let filtersArr = [];
 	let markers = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -40,7 +41,6 @@
 			address: String,
 			lat: Number,
 			lon: Number,
-			hidden: Boolean
 		) {
 			this.name = name;
 			this.status = status;
@@ -50,7 +50,13 @@
 			this.address = address;
 			this.lat = lat;
 			this.lon = lon;
-			this.hidden = hidden;
+			console.log(filtersArr);
+			console.log(status)
+			if (filtersArr.includes(this.status)) {
+				this.hidden = false;
+			} else {
+				this.hidden = true;
+			}
 		}
 
 		// Set colour of marker based on status
@@ -124,7 +130,6 @@
 				installationArr[i].address,
 				lonLat[1],
 				lonLat[0],
-				true
 			);
 			markers.push(install);
 		}

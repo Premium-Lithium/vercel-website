@@ -2,6 +2,7 @@
 	import Map from '$lib/components/Map.svelte';
 	let map;
 	let style = 5;
+	let filters = ['Installation Confirmed', 'Awaiting Site Survey', 'DNO Application'];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
@@ -12,14 +13,20 @@
 		style += 1;
 	}
 	let installations = [
-		{ name: 'House 4', address: '86 Poppleton Road, York, YO26 4UP', status: 'Survey' },
-		{ name: 'House 2', address: '37 Crossways, York, YO10 5JH', status: 'Survey Confirmed' },
-		{ name: 'House 3', address: '18 Malton Avenue, York, YO31 7TT', status: 'Installation' },
-        { name: 'House 1', address: '25 Millfield Lane, York, YO10 3AN', status: 'Installed' },
+		{ name: 'House 4', address: '86 Poppleton Road, York, YO26 4UP', status: 'Project Handover' },
+		{ name: 'House 2', address: '37 Crossways, York, YO10 5JH', status: 'Awaiting Site Survey' },
+		{ name: 'House 3', address: '18 Malton Avenue, York, YO31 7TT', status: 'Site Survey Confirmed' },
+        { name: 'House 1', address: '25 Millfield Lane, York, YO10 3AN', status: 'Site Survey Completed' },
+		{ name: 'House 5', address: '83 Newborough Street, York, YO30 7AS', status: 'DNO Application' },
 		{
 			name: 'Work 1',
 			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
-			status: 'DNO Completed'
+			status: 'Pre-Installation'
+		},
+		{
+			name: 'Work 2',
+			address: 'Atlas House, York, YO10 3JB',
+			status: 'Installation Confirmed'
 		}
 	];
 
@@ -72,6 +79,7 @@
 						bind:map
 						--border-radius="10px"
 						installationArr={installations}
+						filtersArr={filters}
 					/>
 				{/key}
 			</div>
