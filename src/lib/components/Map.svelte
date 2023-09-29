@@ -34,7 +34,7 @@
 		lat: Number;
 		lon: Number;
 		// Other values ie timeframe etc.
-		constructor(name: String, status: String, address: String, lat:Number, lon: Number) {
+		constructor(name: String, status: String, address: String, lat: Number, lon: Number) {
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
@@ -54,8 +54,7 @@
 	/**
 	 * Loop through markers array
 	 * 	if *filter* applicable to MapMarker
-	*/
-
+	 */
 
 	onMount(() => {
 		const mapboxGlAccessToken =
@@ -99,39 +98,34 @@
 				});
 				map.addControl(search);
 			}
-			if (installationArr){
+			if (installationArr) {
 				createMarkers(installationArr);
+				console.log(markers)
+				filterMarkers();
 			}
-			/*
-			for (let loc in markerArr) {
-				let marker = new mapboxgl.Marker({ draggable: false, color: $colourOfMapMarker }).setLngLat(
-					[markerArr[loc].longitude, markerArr[loc].latitude]
-				);
-				marker.addTo(map);
-			}*/
 
 			map.resize();
 		});
 	});
 
 	function filterMarkers() {
-		$markersOnMap.forEach(marker => {
+		$markersOnMap.forEach((marker) => {
 			// Check if the marker's status is in the selected filters
 			const shouldShow = selectedFilters.has(marker.status);
 
 			// Show or hide the marker based on the condition
 			if (shouldShow) {
-			marker.addTo(map);
+				marker.addTo(map);
 			} else {
-			marker.remove();
+				marker.remove();
 			}
 		});
-		}
+	}
 
-	// Creates an array of MapMarker objects from an array of inputs 
+	// Creates an array of MapMarker objects from an array of inputs
 	async function createMarkers(installationArr) {
 		for (let i in installationArr) {
-			let lonLat = await fetchLonLatFromAddress(installationArr[i].address)
+			let lonLat = await fetchLonLatFromAddress(installationArr[i].address);
 			let install = new Installation(
 				installationArr[i].name,
 				installationArr[i].status,
