@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { latLongOfMarker, markersOnMap, colourOfMapMarker } from '$lib/MapStores.js';
 
 	import mapboxgl from 'mapbox-gl';
@@ -25,7 +25,38 @@
 
 	export let style = 5;
 	import { onMount } from 'svelte';
-	import { number } from 'zod';
+
+	class Installation {
+		name: String;
+		status: String;
+		marker: mapboxgl.Marker;
+		address: String;
+		lat: Number;
+		lon: Number;
+		// Other values ie timeframe etc.
+		constructor(name: String, status: String, address: String, lat:Number, lon: Number) {
+			this.name = name;
+			this.status = status;
+			this.marker = new mapboxgl.Marker({
+				draggable: false
+			}).setLngLat([lon, lat]);
+			this.address = address;
+			this.lat = lat;
+			this.lon = lon;
+		}
+
+		// Set colour of marker based on status
+
+		// Show/hide marker from filter
+	}
+
+	// Filter function
+	/**
+	 * Loop through markers array
+	 * 	if *filter* applicable to MapMarker
+	*/
+
+
 	onMount(() => {
 		const mapboxGlAccessToken =
 			'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -68,7 +99,9 @@
 				});
 				map.addControl(search);
 			}
-			createMarkers()
+			if (installationArr){
+				createMarkers(installationArr);
+			}
 			/*
 			for (let loc in markerArr) {
 				let marker = new mapboxgl.Marker({ draggable: false, color: $colourOfMapMarker }).setLngLat(

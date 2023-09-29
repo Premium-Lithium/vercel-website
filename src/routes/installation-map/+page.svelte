@@ -1,12 +1,11 @@
 <script lang="ts">
 	import Map from '$lib/components/Map.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import { latLongOfMarker } from '$lib/MapStores';
-	import { onMount } from 'svelte';
 	let map;
 	let mapZoom = 4;
     let selectedFilters = new Set(); // Track selected filters
 	let style = 5;
+	const API_TOKEN =
+		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
 	// Completely necessary function
 	function changeStyle() {
@@ -85,25 +84,26 @@
 	</div>
 	
 </body>
+
 <style>
-    body {
-        color: #fff;
-    }
+	body {
+		color: #fff;
+	}
 	.map-view {
 		width: 100%;
 		height: 80vh;
 	}
-    .grid-container {
-        display: grid;
-        grid-template-columns: auto 70%;
-    }
-    .grid-item {
-        background: #091408;
-        padding: 20px;
-        height: 100vh;
-    }
-    .filter-container ul {
-        list-style: none;
-        float: left;
-    }
+	.grid-container {
+		display: grid;
+		grid-template-columns: auto 70%;
+	}
+	.grid-item {
+		background: #091408;
+		padding: 20px;
+		height: 100vh;
+	}
+	.filter-container ul {
+		list-style: none;
+		float: left;
+	}
 </style>
