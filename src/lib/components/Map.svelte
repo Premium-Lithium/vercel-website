@@ -38,26 +38,6 @@
 		'Installation Confirmed': 'purple'
 	};
 
-	const statusColors = {
-		'Project Handover': 'orange',
-		'Awaiting Site Survey': 'yellow',
-		'Site Survey Confirmed': 'blue',
-		'Site Survey Completed': 'black',
-		'DNO Application': 'green',
-		'Pre-Installation': 'red',
-		'Installation Confirmed': 'purple'
-	};
-
-	const statusColors = {
-			'Project Handover': 'red',
-			'Awaiting Site Survey': 'blue',
-			'Site Survey Confirmed': 'yellow',
-			'Site Survey Completed': 'orange',
-			'DNO Application': 'pink',
-			'Pre-Installation': 'cyan',
-			'Installation Confirmed': 'green',
-		};
-
 	export let style = 5;
 	import { onMount } from 'svelte';
 
@@ -71,11 +51,9 @@
 		hidden: Boolean;
 		// Other values ie timeframe etc.
 		constructor(name: String, status: String, address: String, lat: Number, lon: Number) {
-		constructor(name: String, status: String, address: String, lat: Number, lon: Number) {
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
-				color: statusColors[status],
 				color: statusColors[status],
 				draggable: false
 			}).setLngLat([lon, lat]);
