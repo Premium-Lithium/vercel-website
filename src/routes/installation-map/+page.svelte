@@ -1,47 +1,66 @@
 <script lang="ts">
-    //import { selectedFilters } from '$lib/MapStores.js';
+	import Filter from '$lib/components/Filter.svelte';
+
+	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
-    let selectedFilters = [];
+	let selectedFilters = [];
 	let map;
-	let mapZoom = 4;
-	
+	let filterUpdate;
+
 	let style = 5;
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
 	// Completely necessary function
 	function changeStyle() {
-		//console.log(style);
 		style = style % 7;
 		style += 1;
 	}
+
+	// Just for use in the key to reload the map
+	function submitFilter() {
+		filterUpdate = !filterUpdate;
+	}
+
 	let installations = [
 		{
-			name: 'House 3',
+			name: 'House 4',
 			address: '86 Poppleton Road, York, YO26 4UP',
+			status: 'Project Handover'
+		},
+		{
+			name: 'House 2',
+			address: '37 Crossways, York, YO10 5JH',
 			status: 'Awaiting Site Survey'
 		},
-		{ name: 'House 1', address: '37 Crossways, York, YO10 5JH', status: 'Site Survey Confirmed' },
-		{ name: 'House 2', address: '18 Malton Avenue, York, YO31 7TT', status: 'Pre-Installation' },
+		{
+			name: 'House 3',
+			address: '18 Malton Avenue, York, YO31 7TT',
+			status: 'Site Survey Confirmed'
+		},
+		{
+			name: 'House 1',
+			address: '25 Millfield Lane, York, YO10 3AN',
+			status: 'Site Survey Completed'
+		},
+		{
+			name: 'House 5',
+			address: '83 Newborough Street, York, YO30 7AS',
+			status: 'DNO Application'
+		},
 		{
 			name: 'Work 1',
 			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
-			status: 'DNO Application'
-		},
-        {
-			name: 'Paul Long',
-			address: '22 Sunnybank Road, The Royal Town of Sutton Coldfield, Birmingham, Sutton Coldfield, UK',
-			status: 'Installation Confirmed'
-		},
-        {
-			name: 'Mark Durkan',
-			address: 'Fox Hollow Barn West Charlton, Charlton Mackrell Somerset TA11 7AL',
 			status: 'Pre-Installation'
+		},
+		{
+			name: 'Work 2',
+			address: 'Atlas House, York, YO10 3JB',
+			status: 'Installation Confirmed'
 		}
 	];
-    let selectedInstallation = installations[0];
-
+	let selectedInstallation = installations[0];
 </script>
 
 <body>
@@ -50,7 +69,7 @@
 			<h1>Installation Map</h1>
 			<div class="side-container">
 				<div class="filters">
-					<p>{selectedFilters}</p>
+					<p>Filters Selected: {selectedFilters}</p>
 					<div>Filters</div>
 					<div>Installation Date</div>
 					<ul>
@@ -99,6 +118,9 @@
 						</li>
 					</ul>
 				</div>
+				<div id="filterButton">
+					<button on:click={submitFilter}>Submit Filter</button>
+				</div>
 
 				<div class="details">
 					<div class="installation_info">
@@ -114,20 +136,19 @@
 		</div>
 		<div class="grid-item">
 			<div class="map-view">
-                {#key style}
-                    {#key selectedFilters}
-                        <Map
-                            search={false}
-                            bind:style
-                            bind:map
-                            --border-radius="10px"
-                            installationArr={installations}
-                            selectedFiltersArr={selectedFilters}
-                        />
-                    {/key}
-                {/key}
+				{#key style}
+					{#key filterUpdate}
+						<Map
+							search={false}
+							bind:style
+							bind:map
+							--border-radius="10px"
+							installationArr={installations}
+							filtersArr={selectedFilters}
+						/>
+					{/key}
+				{/key}
 			</div>
-
 			<div id="styleButton">
 				<button on:click={changeStyle}>Change Style</button>
 			</div>
