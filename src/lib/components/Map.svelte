@@ -188,11 +188,17 @@
 					.setLngLat([installations[i].lon, installations[i].lat])
 					.setHTML(
 						'<style>.pin-popup .mapboxgl-popup-content { background-color: #091408;}</style>' +
+							'Title: ' +
 							installations[i].name +
 							'<br>' +
+							'Phase: ' +
 							installations[i].status +
 							'<br>' +
-							installations[i].address
+							'Address: ' +
+							installations[i].address +
+							'<br>' +
+							'Start Date: ' +
+							installations[i].startDate
 					);
 				installations[i].marker.setPopup(popup).addTo(map);
 				// Add an event listener for the click event

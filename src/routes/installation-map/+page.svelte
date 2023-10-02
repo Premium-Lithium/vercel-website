@@ -90,8 +90,7 @@
 			<h1>Installation Map</h1>
 			<div class="side-container">
 				<div class="filters">
-					<div>Filters</div>
-					<div>Installation Date</div>
+					<h2>Filters</h2>
 					<ul>
 						<li>
 							<label
@@ -164,6 +163,9 @@
 						<div class="cards">
 							<button on:click={prevInstall}>Prev</button>
 							<button on:click={nextInstall}>Next</button>
+							<h2>
+								{#if selectedInstallation}Installation Info{/if}
+							</h2>
 							<li>
 								{#if selectedInstallation}Title: {selectedInstallation.name}{/if}
 							</li>
@@ -174,7 +176,7 @@
 								{#if selectedInstallation}Address: {selectedInstallation.address}{/if}
 							</li>
 							<li>
-								{#if selectedInstallation}Start Date{selectedInstallation.startDate}{/if}
+								{#if selectedInstallation}Start Date: {selectedInstallation.startDate}{/if}
 							</li>
 							<li>
 								{#if selectedInstallation}ID: {selectedInstallation.id}{/if}
