@@ -1,12 +1,26 @@
 <script lang="ts">
 	import Filter from '$lib/components/Filter.svelte';
-
+	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
 	let selectedFilters = [];
 	let map;
 	let filterUpdate;
+	let installations = [];
+
+	// Input test data
+	onMount(async () => {
+		getInstallationData();
+	});
+
+	let selectedInstallation = installations[0];
+
+	let sdk;
+    onMount(async () => {
+        sdk = await new AppExtensionsSDK().initialize();
+        await sdk.execute('resize', { height: 700, width: 800 });
+    });
 
 	let style = 5;
 	const API_TOKEN =
@@ -22,49 +36,51 @@
 	function submitFilter() {
 		filterUpdate = !filterUpdate;
 	}
-	// Update selectedInstallation when a marker is clicked
+	function nextInstall() {
+		let currInstall = installations.indexOf(selectedInstallation);
+		selectedInstallation = installations[(currInstall + 1) % installations.length];
+	}
 
-	let installations = [
-		{
-			name: 'House 4',
-			address: '86 Poppleton Road, York, YO26 4UP',
-			status: 'Project Handover'
-		},
-		{
-			name: 'House 2',
-			address: '37 Crossways, York, YO10 5JH',
-			status: 'Awaiting Site Survey'
-		},
-		{
-			name: 'House 3',
-			address: '18 Malton Avenue, York, YO31 7TT',
-			status: 'Site Survey Confirmed'
-		},
-		{
-			name: 'House 1',
-			address: '25 Millfield Lane, York, YO10 3AN',
-			status: 'Site Survey Completed'
-		},
-		{
-			name: 'House 5',
-			address: '83 Newborough Street, York, YO30 7AS',
-			status: 'DNO Application'
-		},
-		{
-			name: 'Work 1',
-			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
-			status: 'Pre-Installation'
-		},
-		{
-			name: 'Work 2',
-			address: 'Atlas House, York, YO10 3JB',
-			status: 'Installation Confirmed'
-		}
-	];
-	let selectedInstallation = installations[0];
+	function prevInstall() {
+		let currInstall = installations.indexOf(selectedInstallation);
+		// Horrible calculation because js cant mod properly: ((value % max) + max) % max
+		selectedInstallation =
+			installations[
+				(((currInstall - 1) % installations.length) + installations.length) % installations.length
+			];
+	}
 
 	function handleMarkerClick(event) {
 		selectedInstallation = event.detail.installation;
+	}
+
+	// Reading from a csv file for now TODO read from deals once they are converted from projects and then remove projects.csv
+	async function getInstallationData() {
+		const file = 'src/routes/installation-map/projects.csv';
+
+		const res = await fetch(file);
+		const data = await res.text();
+
+		const lines = data.split('\n');
+
+		// Construct installation object
+		// Title 1, Status 3, startDate 5, endDate 7, address 9, id 11, createdDate 13
+		for (let line = 2; line < lines.length; line++) {
+			let row = lines[line].split('"');
+			// Only create object if address available
+			if (row[9].length > 0 ) {
+				let install = {
+					name: row[1],
+					status: row[3],
+					address: row[9],
+					startDate: row[5],
+					endDate: row[7],
+					id: row[11],
+					createdDate: row[13]
+				}
+				installations.push(install);
+			}
+		}
 	}
 </script>
 
@@ -78,59 +94,76 @@
 					<div>Installation Date</div>
 					<ul>
 						<li>
-							<input type="checkbox" value={'Project Handover'} bind:group={selectedFilters} /><span
-								>Project Handover</span
+							<label
+								><input
+									type="checkbox"
+									value={'Project Handover'}
+									bind:group={selectedFilters}
+								/>Project Handover</label
 							>
 						</li>
 						<li>
-							<input
-								type="checkbox"
-								value={'Awaiting Site Survey'}
-								bind:group={selectedFilters}
-							/><span>Awaiting Site Survey</span>
+							<label>
+								<input
+									type="checkbox"
+									value={'Awaiting Site Survey'}
+									bind:group={selectedFilters}
+								/>Awaiting Site Survey
+							</label>
 						</li>
 						<li>
-							<input
-								type="checkbox"
-								value={'Site Survey Confirmed'}
-								bind:group={selectedFilters}
-							/><span>Site Survey Confirmed</span>
+							<label>
+								<input
+									type="checkbox"
+									value={'Site Survey Confirmed'}
+									bind:group={selectedFilters}
+								/>Site Survey Confirmed
+							</label>
 						</li>
 						<li>
-							<input
-								type="checkbox"
-								value={'Site Survey Completed'}
-								bind:group={selectedFilters}
-							/><span>Site Survey Completed</span>
+							<label>
+								<input
+									type="checkbox"
+									value={'Site Survey Completed'}
+									bind:group={selectedFilters}
+								/>Site Survey Completed
+							</label>
 						</li>
 						<li>
-							<input type="checkbox" value={'DNO Application'} bind:group={selectedFilters} /><span
-								>DNO Application</span
+							<label>
+								<input type="checkbox" value={'DNO Application'} bind:group={selectedFilters} />DNO
+								Application
+							</label>
+						</li>
+						<li>
+							<label>
+								<input
+									type="checkbox"
+									value={'Pre-Installation'}
+									bind:group={selectedFilters}
+								/>Pre-Installation
+							</label>
+						</li>
+						<li>
+							<label
+								><input
+									type="checkbox"
+									value={'Installation Confirmed'}
+									bind:group={selectedFilters}
+								/>Installation Confirmed</label
 							>
-						</li>
-						<li>
-							<input type="checkbox" value={'Pre-Installation'} bind:group={selectedFilters} /><span
-								>Pre-Installation</span
-							>
-						</li>
-						<li>
-							<input
-								type="checkbox"
-								value={'Installation Confirmed'}
-								bind:group={selectedFilters}
-							/><span>Installation Confirmed</span>
 						</li>
 					</ul>
+					<div id="filterButton">
+						<button on:click={submitFilter}>Submit Filter</button>
+					</div>
 				</div>
-				<div id="filterButton">
-					<button on:click={submitFilter}>Submit Filter</button>
-				</div>
-
+				
 				<div class="details">
 					<div class="installation_info">
 						<div class="cards">
-							<button>left</button>
-							<button>right</button>
+							<button on:click={prevInstall}>Prev</button>
+							<button on:click={nextInstall}>Next</button>
 							<li>
 								{#if selectedInstallation}{selectedInstallation.name}{/if}
 							</li>
@@ -168,24 +201,32 @@
 <style>
 	body {
 		color: #fff;
+		margin: 0;
+		padding: 0;
 	}
 	.map-view {
-		width: 100%;
-		height: 80vh;
+		height: 100%;
 	}
 	.grid-container {
 		display: grid;
 		grid-template-columns: auto 70%;
+		background: #091408;
+		padding: 0 20px;
 	}
 	.grid-item {
-		background: #091408;
-		padding: 20px;
 		height: 100vh;
 	}
 	.side-container ul {
 		list-style: none;
+		padding-inline-start: 0;
+		width: 100%;
 	}
 	.cards li {
 		list-style: none;
+	}
+	#styleButton {
+		position: absolute;
+		top: 25px;
+		right: 40px;
 	}
 </style>
