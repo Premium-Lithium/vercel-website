@@ -9,10 +9,10 @@
 	let filterUpdate;
 
 	let sdk;
-    onMount(async () => {
-        sdk = await new AppExtensionsSDK().initialize();
-        await sdk.execute('resize', { height: 700, width: 800 });
-    });
+	onMount(async () => {
+		sdk = await new AppExtensionsSDK().initialize();
+		await sdk.execute('resize', { height: 700, width: 800 });
+	});
 
 	let style = 5;
 	const API_TOKEN =
@@ -84,54 +84,71 @@
 					<div>Installation Date</div>
 					<ul>
 						<li>
-							<input type="checkbox" value={'Project Handover'} bind:group={selectedFilters} /><span
-								>Project Handover</span
+							<label
+								><input
+									type="checkbox"
+									value={'Project Handover'}
+									bind:group={selectedFilters}
+								/>Project Handover</label
 							>
 						</li>
 						<li>
-							<input
-								type="checkbox"
-								value={'Awaiting Site Survey'}
-								bind:group={selectedFilters}
-							/><span>Awaiting Site Survey</span>
+							<label>
+								<input
+									type="checkbox"
+									value={'Awaiting Site Survey'}
+									bind:group={selectedFilters}
+								/>Awaiting Site Survey
+							</label>
 						</li>
 						<li>
-							<input
-								type="checkbox"
-								value={'Site Survey Confirmed'}
-								bind:group={selectedFilters}
-							/><span>Site Survey Confirmed</span>
+							<label>
+								<input
+									type="checkbox"
+									value={'Site Survey Confirmed'}
+									bind:group={selectedFilters}
+								/>Site Survey Confirmed
+							</label>
 						</li>
 						<li>
-							<input
-								type="checkbox"
-								value={'Site Survey Completed'}
-								bind:group={selectedFilters}
-							/><span>Site Survey Completed</span>
+							<label>
+								<input
+									type="checkbox"
+									value={'Site Survey Completed'}
+									bind:group={selectedFilters}
+								/>Site Survey Completed
+							</label>
 						</li>
 						<li>
-							<input type="checkbox" value={'DNO Application'} bind:group={selectedFilters} /><span
-								>DNO Application</span
+							<label>
+								<input type="checkbox" value={'DNO Application'} bind:group={selectedFilters} />DNO
+								Application
+							</label>
+						</li>
+						<li>
+							<label>
+								<input
+									type="checkbox"
+									value={'Pre-Installation'}
+									bind:group={selectedFilters}
+								/>Pre-Installation
+							</label>
+						</li>
+						<li>
+							<label
+								><input
+									type="checkbox"
+									value={'Installation Confirmed'}
+									bind:group={selectedFilters}
+								/>Installation Confirmed</label
 							>
-						</li>
-						<li>
-							<input type="checkbox" value={'Pre-Installation'} bind:group={selectedFilters} /><span
-								>Pre-Installation</span
-							>
-						</li>
-						<li>
-							<input
-								type="checkbox"
-								value={'Installation Confirmed'}
-								bind:group={selectedFilters}
-							/><span>Installation Confirmed</span>
 						</li>
 					</ul>
+					<div id="filterButton">
+						<button on:click={submitFilter}>Submit Filter</button>
+					</div>
 				</div>
-				<div id="filterButton">
-					<button on:click={submitFilter}>Submit Filter</button>
-				</div>
-
+				
 				<div class="details">
 					<div class="installation_info">
 						<div class="cards">
@@ -174,24 +191,32 @@
 <style>
 	body {
 		color: #fff;
+		margin: 0;
+		padding: 0;
 	}
 	.map-view {
-		width: 100%;
-		height: 80vh;
+		height: 100%;
 	}
 	.grid-container {
 		display: grid;
 		grid-template-columns: auto 70%;
+		background: #091408;
+		padding: 0 20px;
 	}
 	.grid-item {
-		background: #091408;
-		padding: 20px;
 		height: 100vh;
 	}
 	.side-container ul {
 		list-style: none;
+		padding-inline-start: 0;
+		width: 100%;
 	}
 	.cards li {
 		list-style: none;
+	}
+	#styleButton {
+		position: absolute;
+		top: 25px;
+		right: 40px;
 	}
 </style>
