@@ -129,7 +129,6 @@
 			if (installationArr) {
 				createMarkers(installationArr);
 			}
-
 			map.resize();
 		});
 	});
