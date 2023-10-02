@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Filter from '$lib/components/Filter.svelte';
+	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
@@ -14,6 +15,18 @@
 	});
 
 	let selectedInstallation = installations[0];
+
+	let sdk;
+    onMount(async () => {
+        sdk = await new AppExtensionsSDK().initialize();
+        await sdk.execute('resize', { height: 700, width: 800 });
+    });
+
+	let sdk;
+    onMount(async () => {
+        sdk = await new AppExtensionsSDK().initialize();
+        await sdk.execute('resize', { height: 700, width: 800 });
+    });
 
 	let style = 5;
 	const API_TOKEN =
