@@ -9,15 +9,22 @@
 	let map;
 	let filterUpdate;
 	let installations = [];
-	let sdk;
-
-	const dispatch = createEventDispatcher();
+	let directionsArr = [
+		[0.47469,51.71796],
+		[-1.113156, 53.96058]
+	];
 
 	// Input test data
 	onMount(async () => {
 		getInstallationData();
+	});
+
+	let selectedInstallation = installations[0];
+
+	let sdk;
+	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-        await sdk.execute('resize', { height: 700, width: 800 });
+		await sdk.execute('resize', { height: 700, width: 800 });
 	});
 
 	let selectedInstallation = null;
@@ -90,7 +97,7 @@
 		for (let line = 2; line < lines.length; line++) {
 			let row = lines[line].split('"');
 			// Only create object if address available
-			if (row[9].length > 0 ) {
+			if (row[9].length > 0) {
 				let install = {
 					name: row[1],
 					status: row[3],
@@ -99,7 +106,7 @@
 					endDate: row[7],
 					id: row[11],
 					createdDate: row[13]
-				}
+				};
 				installations.push(install);
 			}
 		}
@@ -112,8 +119,7 @@
 			<h1>Installation Map</h1>
 			<div class="side-container">
 				<div class="filters">
-					<div>Filters</div>
-					<div>Installation Date</div>
+					<h2>Filters</h2>
 					<ul>
 						<li>
 							<label
@@ -189,20 +195,35 @@
 						<button on:click={submitFilter}>Submit Filter</button>
 					</div>
 				</div>
-				
+
 				<div class="details">
 					<div class="installation_info">
 						<div class="cards">
 							<button on:click={prevInstall}>Prev</button>
 							<button on:click={nextInstall}>Next</button>
+							<h2>
+								{#if selectedInstallation}Installation Info{/if}
+							</h2>
 							<li>
-								{#if selectedInstallation}{selectedInstallation.name}{/if}
+								{#if selectedInstallation}Title: {selectedInstallation.name}{/if}
 							</li>
 							<li>
-								{#if selectedInstallation}{selectedInstallation.status}{/if}
+								{#if selectedInstallation}Phase: {selectedInstallation.status}{/if}
+							</li>
+							<li>
+								{#if selectedInstallation}Address: {selectedInstallation.address}{/if}
+							</li>
+							<li>
+								{#if selectedInstallation}Start Date: {selectedInstallation.startDate}{/if}
+							</li>
+							<li>
+								{#if selectedInstallation}ID: {selectedInstallation.id}{/if}
 							</li>
 						</div>
 					</div>
+				</div>
+				<div class="navigation">
+					
 				</div>
 			</div>
 		</div>
@@ -217,6 +238,7 @@
 							--border-radius="10px"
 							installationArr={installations}
 							filtersArr={selectedFilters}
+							directionsArr={directionsArr}
 							on:markerClick={handleMarkerClick}
 							{selectedInstallation}
 						/>
