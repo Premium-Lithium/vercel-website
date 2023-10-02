@@ -8,6 +8,10 @@
 	let map;
 	let filterUpdate;
 	let installations = [];
+	let directionsArr = [
+		[-1.077366, 53.959063],
+		[-1.113156, 53.96058]
+	];
 
 	// Input test data
 	onMount(async () => {
@@ -184,6 +188,9 @@
 						</div>
 					</div>
 				</div>
+				<div class="navigation">
+					
+				</div>
 			</div>
 		</div>
 		<div class="grid-item">
@@ -197,6 +204,7 @@
 							--border-radius="10px"
 							installationArr={installations}
 							filtersArr={selectedFilters}
+							directionsArr={directionsArr}
 							on:markerClick={handleMarkerClick}
 						/>
 					{/key}

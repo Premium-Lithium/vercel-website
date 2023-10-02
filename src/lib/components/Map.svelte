@@ -12,6 +12,7 @@
 	export let map = undefined;
 	export let installationArr;
 	export let filtersArr = [];
+	export let directionsArr = [];
 	let installations = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -42,6 +43,7 @@
 	import { onMount } from 'svelte';
 
 	import { createEventDispatcher } from 'svelte';
+	import Loading from './Loading.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -78,8 +80,6 @@
 			this.address = address;
 			this.lat = lat;
 			this.lon = lon;
-			console.log(filtersArr);
-			console.log(status);
 			if (filtersArr.includes(this.status)) {
 				this.hidden = false;
 			} else {
@@ -102,7 +102,6 @@
 			center: [-3.435973, 53.378051], // longitude and latitude of the center of the UK
 			zoom: 5 // zoom level
 		});
-
 		map.on('load', async () => {
 			if (search) {
 				const search = new MapboxGeocoder({
@@ -134,25 +133,25 @@
 				});
 				map.addControl(search);
 			}
-			console.log(filtersArr);
 			if (installationArr) {
 				createMarkers(installationArr);
+			}
+
+			if (directionsArr) {
+				getDirections(directionsArr);
 			}
 			map.resize();
 		});
 	});
 
 	function handleMarkerClick(installation) {
-		console.log('Marker clicked:', installation);
 		dispatch('markerClick', { installation });
 	}
 
 	function filterMarkers(filters) {
-		console.log(installations);
 		for (let i in installations) {
 			const shouldShow = filters.has(installations[i].status);
 			if (shouldShow) {
-				console.log(installations[i].status);
 				installations[i].marker.addTo(map);
 			} else {
 				installations[i].marker.remove();
@@ -226,7 +225,6 @@
 			installations[i].marker.setPopup(popup).addTo(map);
 			installations[i].marker.getElement().addEventListener('click', () => {
 				// Access the stored installations[i] variable
-				console.log(installations[i]);
 			});
 		}
 	}
@@ -241,22 +239,61 @@
 
 	// Returns in form of [lon, lat]
 	async function fetchLonLatFromAddress(address) {
-		console.log(address);
 		const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${API_TOKEN}`;
 		try {
 			const geocodingResponse = await fetch(endpoint);
 			if (geocodingResponse.ok) {
 				const data = await geocodingResponse.json();
-				const longLat = [
+				const lonLat = [
 					data.features[0].geometry.coordinates[0],
 					data.features[0].geometry.coordinates[1]
 				];
-				return longLat;
+				return lonLat;
 			} else {
 				console.error('Bad Response');
 			}
 		} catch (error) {
 			console.error('Bad Catch');
+		}
+	}
+
+	// directions are  [[lon, lat],...]
+	export async function getDirections(directions) {
+		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${directions[0][0]},${directions[0][1]};${directions[1][0]},${directions[1][1]}?geometries=geojson&access_token=${API_TOKEN}`;
+		try {
+			const directionsResponse = await fetch(endpoint, { method: 'GET' });
+			if (directionsResponse.ok) {
+				const res = await directionsResponse.json();
+				console.log(res);
+				const route = res.routes[0].geometry.coordinates;
+				const geojson = {
+					type: 'Feature',
+					properties: {},
+					geometry: {
+						type: 'LineString',
+						coordinates: route
+					}
+				};
+				map.addLayer({
+					id: 'route',
+					type: 'line',
+					source: {
+						type: 'geojson',
+						data: geojson
+					},
+					layout: {
+						'line-join': 'round',
+						'line-cap': 'round'
+					},
+					paint: {
+						'line-color': '#3887be',
+						'line-width': 5,
+						'line-opacity': 0.75
+					}
+				});
+			}
+		} catch (error) {
+			console.error("Error: " + error);
 		}
 	}
 </script>
