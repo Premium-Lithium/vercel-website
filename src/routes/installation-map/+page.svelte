@@ -22,6 +22,7 @@
 	function submitFilter() {
 		filterUpdate = !filterUpdate;
 	}
+	// Update selectedInstallation when a marker is clicked
 
 	let installations = [
 		{
@@ -61,6 +62,10 @@
 		}
 	];
 	let selectedInstallation = installations[0];
+
+	function handleMarkerClick(event) {
+		selectedInstallation = event.detail.installation;
+	}
 </script>
 
 <body>
@@ -127,8 +132,12 @@
 						<div class="cards">
 							<button>left</button>
 							<button>right</button>
-							<li>{selectedInstallation.name}</li>
-							<li>{selectedInstallation.status}</li>
+							<li>
+								{#if selectedInstallation}{selectedInstallation.name}{/if}
+							</li>
+							<li>
+								{#if selectedInstallation}{selectedInstallation.status}{/if}
+							</li>
 						</div>
 					</div>
 				</div>
@@ -145,6 +154,7 @@
 							--border-radius="10px"
 							installationArr={installations}
 							filtersArr={selectedFilters}
+							on:markerClick={handleMarkerClick}
 						/>
 					{/key}
 				{/key}

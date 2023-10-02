@@ -41,6 +41,10 @@
 	export let style = 5;
 	import { onMount } from 'svelte';
 
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+
 	class Installation {
 		name: String;
 		status: String;
@@ -121,6 +125,13 @@
 			map.resize();
 		});
 	});
+
+	function handleMarkerClick(installation) {
+		console.log('Marker clicked:', installation);
+		dispatch('markerClick', { installation });
+	}
+
+
 	function filterMarkers(filters) {
 		console.log(installations);
 		for (let i in installations) {
@@ -165,6 +176,11 @@
 							installations[i].address
 					);
 				installations[i].marker.setPopup(popup).addTo(map);
+				// Add an event listener for the click event
+				installations[i].marker.getElement().addEventListener('click', () => {
+					handleMarkerClick(installations[i]);
+				});
+				installations[i].marker.getElement().style.cursor = 'pointer';
 			}
 		}
 	}
@@ -183,6 +199,10 @@
 						installations[i].address
 				);
 			installations[i].marker.setPopup(popup).addTo(map);
+			installations[i].marker.getElement().addEventListener('click', () => {
+				// Access the stored installations[i] variable
+				console.log(installations[i]);
+			});
 		}
 	}
 
@@ -227,7 +247,7 @@
 	/>
 </svelte:head>
 
-<div id="map" />
+<div id="map"/>
 
 <style>
 	#map {
