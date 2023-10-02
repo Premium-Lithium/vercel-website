@@ -228,6 +228,7 @@
 
 	// Returns in form of [lon, lat]
 	async function fetchLonLatFromAddress(address) {
+		console.log(address);
 		const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${API_TOKEN}`;
 		try {
 			const geocodingResponse = await fetch(endpoint);

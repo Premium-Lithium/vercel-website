@@ -9,10 +9,9 @@
 	let installations = [];
 
 	// Input test data
-	onMount(async() => {
+	onMount(async () => {
 		getInstallationData();
 	});
-	
 
 	let selectedInstallation = installations[0];
 
@@ -38,7 +37,10 @@
 	function prevInstall() {
 		let currInstall = installations.indexOf(selectedInstallation);
 		// Horrible calculation because js cant mod properly: ((value % max) + max) % max
-		selectedInstallation = installations[((((currInstall - 1) % installations.length) + installations.length) % installations.length)];
+		selectedInstallation =
+			installations[
+				(((currInstall - 1) % installations.length) + installations.length) % installations.length
+			];
 	}
 
 	function handleMarkerClick(event) {
@@ -47,7 +49,7 @@
 
 	// Reading from a csv file for now TODO read from deals once they are converted from projects and then remove projects.csv
 	async function getInstallationData() {
-		const file = "src/routes/installation-map/projects.csv";
+		const file = 'src/routes/installation-map/projects.csv';
 
 		const res = await fetch(file);
 		const data = await res.text();
@@ -55,20 +57,24 @@
 		const lines = data.split('\n');
 
 		// Construct installation object
-		for (let line = 1; line < lines.length; line++) {
-			let install = {
-				name: lines[line][0],
-				status: lines[line][3],
-				startDate: lines[line][4],
-				endDate: lines[line][5],
-				address: lines[line][9],
-				id: lines[line][24],
-				createdDate: lines[line][30]
+		// Title 1, Status 3, startDate 5, endDate 7, address 9, id 11, createdDate 13
+		for (let line = 2; line < lines.length; line++) {
+			let row = lines[line].split('"');
+			// Only create object if address available
+			if (row[9].length > 0 ) {
+				let install = {
+					name: row[1],
+					status: row[3],
+					address: row[9],
+					startDate: row[5],
+					endDate: row[7],
+					id: row[11],
+					createdDate: row[13]
+				}
+				installations.push(install);
 			}
-			installations.push(install);
 		}
 	}
-
 </script>
 
 <body>
