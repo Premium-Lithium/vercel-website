@@ -22,7 +22,16 @@
 	function submitFilter() {
 		filterUpdate = !filterUpdate;
 	}
-	// Update selectedInstallation when a marker is clicked
+	function nextInstall() {
+		let currInstall = installations.indexOf(selectedInstallation);
+		selectedInstallation = installations[(currInstall + 1) % installations.length];
+	}
+
+	function prevInstall() {
+		let currInstall = installations.indexOf(selectedInstallation);
+		// Horrible calculation because js cant mod properly: ((value % max) + max) % max
+		selectedInstallation = installations[((((currInstall - 1) % installations.length) + installations.length) % installations.length)];
+	}
 
 	let installations = [
 		{
@@ -130,8 +139,8 @@
 				<div class="details">
 					<div class="installation_info">
 						<div class="cards">
-							<button>left</button>
-							<button>right</button>
+							<button on:click={prevInstall}>Prev</button>
+							<button on:click={nextInstall}>Next</button>
 							<li>
 								{#if selectedInstallation}{selectedInstallation.name}{/if}
 							</li>
