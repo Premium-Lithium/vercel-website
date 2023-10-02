@@ -2,16 +2,16 @@
 	import {
 		latLongOfMarker,
 		markersOnMap,
-		colourOfMapMarker,
-		selectedFilters
+		colourOfMapMarker
 	} from '$lib/MapStores.js';
 
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
 	export let search = true;
 	export let map = undefined;
-	export let installationArr;
+	export let installationArr; //received from the Page
 	export let filtersArr = [];
+	export let selectedInstallation;
 	let installations = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -35,7 +35,8 @@
 		'Site Survey Completed': 'black',
 		'DNO Application': 'green',
 		'Pre-Installation': 'red',
-		'Installation Confirmed': 'purple'
+		'Installation Confirmed': 'purple',
+		'Installation Complete': 'cyan'
 	};
 
 	export let style = 5;
@@ -68,8 +69,8 @@
 			this.address = address;
 			this.lat = lat;
 			this.lon = lon;
-			console.log(filtersArr);
-			console.log(status);
+			//console.log(filtersArr);
+			//console.log(status);
 			if (filtersArr.includes(this.status)) {
 				this.hidden = false;
 			} else {
@@ -81,6 +82,8 @@
 			this.createdDate = createdDate;
 		}
 	}
+
+	
 
 	onMount(() => {
 		const mapboxGlAccessToken =
@@ -124,7 +127,10 @@
 					});
 				});
 				map.addControl(search);
+
 			}
+			
+			console.log("Selected:"+selectedInstallation)
 			console.log(filtersArr);
 			if (installationArr) {
 				createMarkers(installationArr);
@@ -135,6 +141,18 @@
 
 	function handleMarkerClick(installation) {
 		console.log('Marker clicked:', installation);
+
+		const marker = installation.marker;
+		const popup = marker.getPopup();
+
+		// Toggle the popup
+		if (popup.isOpen()) {
+			popup.remove();  // Close the popup if it's open
+		} else {
+			popup.addTo(map);  // Open the popup if it's closed
+		}
+
+		// Dispatch an event or update any other component state as needed
 		dispatch('markerClick', { installation });
 	}
 
@@ -171,6 +189,8 @@
 		addMarkers(installations);
 	}
 
+
+
 	// Adds markers from an array of locations (Markers)
 	function addMarkers(markerArr) {
 		for (let i in markerArr) {
@@ -189,8 +209,10 @@
 				// Add an event listener for the click event
 				installations[i].marker.getElement().addEventListener('click', () => {
 					handleMarkerClick(installations[i]);
+
 				});
 				installations[i].marker.getElement().style.cursor = 'pointer';
+				installations[i].marker.getElement().id = installations[i].id;
 			}
 		}
 	}
@@ -227,7 +249,7 @@
 
 	// Returns in form of [lon, lat]
 	async function fetchLonLatFromAddress(address) {
-		console.log(address);
+		//console.log(address);
 		const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${API_TOKEN}`;
 		try {
 			const geocodingResponse = await fetch(endpoint);

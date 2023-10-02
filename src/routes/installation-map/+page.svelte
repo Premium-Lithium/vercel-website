@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Filter from '$lib/components/Filter.svelte';
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
+	import { createEventDispatcher } from 'svelte';
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
@@ -8,19 +9,18 @@
 	let map;
 	let filterUpdate;
 	let installations = [];
+	let sdk;
+
+	const dispatch = createEventDispatcher();
 
 	// Input test data
 	onMount(async () => {
 		getInstallationData();
+		sdk = await new AppExtensionsSDK().initialize();
+        await sdk.execute('resize', { height: 700, width: 800 });
 	});
 
-	let selectedInstallation = installations[0];
-
-	let sdk;
-    onMount(async () => {
-        sdk = await new AppExtensionsSDK().initialize();
-        await sdk.execute('resize', { height: 700, width: 800 });
-    });
+	let selectedInstallation = null;
 
 	let style = 5;
 	const API_TOKEN =
@@ -31,6 +31,15 @@
 		style = style % 7;
 		style += 1;
 	}
+	
+	function getMarkerElementById(selectedId) {
+		const markerList = document.querySelectorAll('[aria-label="Map marker"]');
+		for (const marker of markerList) {
+			if(marker.id === selectedId){
+				return marker;
+			}
+		}
+	}
 
 	// Just for use in the key to reload the map
 	function submitFilter() {
@@ -39,7 +48,14 @@
 	function nextInstall() {
 		let currInstall = installations.indexOf(selectedInstallation);
 		selectedInstallation = installations[(currInstall + 1) % installations.length];
+		let selectedId = selectedInstallation.id
+		console.log(selectedId)
+		//dispatch('click', { selectedInstallation });
+		//let markerElement = getMarkerElementById(selectedId)//.click()
+		//console.log(markerElement);
+		
 	}
+	
 
 	function prevInstall() {
 		let currInstall = installations.indexOf(selectedInstallation);
@@ -48,7 +64,13 @@
 			installations[
 				(((currInstall - 1) % installations.length) + installations.length) % installations.length
 			];
+		let selectedId = selectedInstallation.id
+		console.log(selectedId)
+		//dispatch('click',{ selectedInstallation });
+		//let markerElement = getMarkerElementById(selectedId)//.click()
+		//console.log(markerElement);
 	}
+
 
 	function handleMarkerClick(event) {
 		selectedInstallation = event.detail.installation;
@@ -153,6 +175,15 @@
 								/>Installation Confirmed</label
 							>
 						</li>
+						<li>
+							<label
+								><input
+									type="checkbox"
+									value={'Installation Complete'}
+									bind:group={selectedFilters}
+								/>Installation Complete</label
+							>
+						</li>
 					</ul>
 					<div id="filterButton">
 						<button on:click={submitFilter}>Submit Filter</button>
@@ -187,6 +218,7 @@
 							installationArr={installations}
 							filtersArr={selectedFilters}
 							on:markerClick={handleMarkerClick}
+							{selectedInstallation}
 						/>
 					{/key}
 				{/key}
