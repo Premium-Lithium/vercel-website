@@ -165,10 +165,19 @@
 							<button on:click={prevInstall}>Prev</button>
 							<button on:click={nextInstall}>Next</button>
 							<li>
-								{#if selectedInstallation}{selectedInstallation.name}{/if}
+								{#if selectedInstallation}Title: {selectedInstallation.name}{/if}
 							</li>
 							<li>
-								{#if selectedInstallation}{selectedInstallation.status}{/if}
+								{#if selectedInstallation}Phase: {selectedInstallation.status}{/if}
+							</li>
+							<li>
+								{#if selectedInstallation}Address: {selectedInstallation.address}{/if}
+							</li>
+							<li>
+								{#if selectedInstallation}Start Date{selectedInstallation.startDate}{/if}
+							</li>
+							<li>
+								{#if selectedInstallation}ID: {selectedInstallation.id}{/if}
 							</li>
 						</div>
 					</div>
