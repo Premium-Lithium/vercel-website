@@ -19,8 +19,6 @@
 		getInstallationData();
 	});
 
-	let selectedInstallation = installations[0];
-
 	let sdk;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
