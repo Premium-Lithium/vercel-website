@@ -9,7 +9,7 @@
 	let filterUpdate;
 	let installations = [];
 	let directionsArr = [
-		[-1.077366, 53.959063],
+		[0.47469,51.71796],
 		[-1.113156, 53.96058]
 	];
 

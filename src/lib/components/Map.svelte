@@ -286,7 +286,7 @@
 						'line-cap': 'round'
 					},
 					paint: {
-						'line-color': '#3887be',
+						'line-color': '#ab1bcf',
 						'line-width': 5,
 						'line-opacity': 0.75
 					}
