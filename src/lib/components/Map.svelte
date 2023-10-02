@@ -53,8 +53,12 @@
 		lat: Number;
 		lon: Number;
 		hidden: Boolean;
+		startDate: String;
+		endDate: String;
+		id: Number;
+		createdDate: String;
 		// Other values ie timeframe etc.
-		constructor(name: String, status: String, address: String, lat: Number, lon: Number) {
+		constructor(name: String, status: String, address: String, lat: Number, lon: Number, startDate: String, endDate: String, id: Number, createdDate: String) {
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
@@ -71,6 +75,10 @@
 			} else {
 				this.hidden = true;
 			}
+			this.startDate = startDate;
+			this.endDate = endDate;
+			this.id = id;
+			this.createdDate = createdDate;
 		}
 	}
 
@@ -131,7 +139,6 @@
 		dispatch('markerClick', { installation });
 	}
 
-
 	function filterMarkers(filters) {
 		console.log(installations);
 		for (let i in installations) {
@@ -154,7 +161,11 @@
 				installationArr[i].status,
 				installationArr[i].address,
 				lonLat[1],
-				lonLat[0]
+				lonLat[0],
+				installationArr[i].startDate,
+				installationArr[i].endDate,
+				installationArr[i].id,
+				installationArr[i].createdDate
 			);
 			installations.push(install);
 		}

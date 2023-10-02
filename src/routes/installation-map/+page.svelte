@@ -1,12 +1,20 @@
 <script lang="ts">
 	import Filter from '$lib/components/Filter.svelte';
-
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
 	let selectedFilters = [];
 	let map;
 	let filterUpdate;
+	let installations = [];
+
+	// Input test data
+	onMount(async() => {
+		getInstallationData();
+	});
+	
+
+	let selectedInstallation = installations[0];
 
 	let style = 5;
 	const API_TOKEN =
@@ -33,48 +41,34 @@
 		selectedInstallation = installations[((((currInstall - 1) % installations.length) + installations.length) % installations.length)];
 	}
 
-	let installations = [
-		{
-			name: 'House 4',
-			address: '86 Poppleton Road, York, YO26 4UP',
-			status: 'Project Handover'
-		},
-		{
-			name: 'House 2',
-			address: '37 Crossways, York, YO10 5JH',
-			status: 'Awaiting Site Survey'
-		},
-		{
-			name: 'House 3',
-			address: '18 Malton Avenue, York, YO31 7TT',
-			status: 'Site Survey Confirmed'
-		},
-		{
-			name: 'House 1',
-			address: '25 Millfield Lane, York, YO10 3AN',
-			status: 'Site Survey Completed'
-		},
-		{
-			name: 'House 5',
-			address: '83 Newborough Street, York, YO30 7AS',
-			status: 'DNO Application'
-		},
-		{
-			name: 'Work 1',
-			address: 'Quartz Point, 13 The Stonebow, York YO1 7NP',
-			status: 'Pre-Installation'
-		},
-		{
-			name: 'Work 2',
-			address: 'Atlas House, York, YO10 3JB',
-			status: 'Installation Confirmed'
-		}
-	];
-	let selectedInstallation = installations[0];
-
 	function handleMarkerClick(event) {
 		selectedInstallation = event.detail.installation;
 	}
+
+	// Reading from a csv file for now TODO read from deals once they are converted from projects and then remove projects.csv
+	async function getInstallationData() {
+		const file = "src/routes/installation-map/projects.csv";
+
+		const res = await fetch(file);
+		const data = await res.text();
+
+		const lines = data.split('\n');
+
+		// Construct installation object
+		for (let line = 1; line < lines.length; line++) {
+			let install = {
+				name: lines[line][0],
+				status: lines[line][3],
+				startDate: lines[line][4],
+				endDate: lines[line][5],
+				address: lines[line][9],
+				id: lines[line][24],
+				createdDate: lines[line][30]
+			}
+			installations.push(install);
+		}
+	}
+
 </script>
 
 <body>
