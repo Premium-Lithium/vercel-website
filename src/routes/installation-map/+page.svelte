@@ -83,7 +83,6 @@
 			<h1>Installation Map</h1>
 			<div class="side-container">
 				<div class="filters">
-					<p>Filters Selected: {selectedFilters}</p>
 					<div>Filters</div>
 					<div>Installation Date</div>
 					<ul>

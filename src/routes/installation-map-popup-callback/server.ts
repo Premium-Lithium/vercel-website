@@ -15,7 +15,7 @@ export async function GET({ request }) {
 
     return json({}, {status: 200})
 }
-
+    
 function initAPIClient({ accessToken = '', refreshToken = '' }) {
     const client = new ApiClient();
     const oAuth2 = client.authentications.oauth2;
