@@ -22,12 +22,6 @@
         await sdk.execute('resize', { height: 700, width: 800 });
     });
 
-	let sdk;
-	onMount(async () => {
-		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 700, width: 800 });
-	});
-
 	let style = 5;
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
