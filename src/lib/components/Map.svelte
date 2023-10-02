@@ -58,7 +58,17 @@
 		id: Number;
 		createdDate: String;
 		// Other values ie timeframe etc.
-		constructor(name: String, status: String, address: String, lat: Number, lon: Number, startDate: String, endDate: String, id: Number, createdDate: String) {
+		constructor(
+			name: String,
+			status: String,
+			address: String,
+			lat: Number,
+			lon: Number,
+			startDate: String,
+			endDate: String,
+			id: Number,
+			createdDate: String
+		) {
 			this.name = name;
 			this.status = status;
 			this.marker = new mapboxgl.Marker({
@@ -92,7 +102,6 @@
 			center: [-3.435973, 53.378051], // longitude and latitude of the center of the UK
 			zoom: 5 // zoom level
 		});
-		
 
 		map.on('load', async () => {
 			if (search) {
@@ -224,7 +233,6 @@
 		installations = [];
 	}
 
-
 	// Returns in form of [lon, lat]
 	async function fetchLonLatFromAddress(address) {
 		console.log(address);
@@ -258,12 +266,11 @@
 	/>
 </svelte:head>
 
-<div id="map"/>
+<div id="map" />
 
 <style>
 	#map {
 		width: 100%;
 		height: 100%;
 	}
-	
 </style>

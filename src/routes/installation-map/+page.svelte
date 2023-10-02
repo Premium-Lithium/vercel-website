@@ -17,10 +17,10 @@
 	let selectedInstallation = installations[0];
 
 	let sdk;
-    onMount(async () => {
-        sdk = await new AppExtensionsSDK().initialize();
-        await sdk.execute('resize', { height: 700, width: 800 });
-    });
+	onMount(async () => {
+		sdk = await new AppExtensionsSDK().initialize();
+		await sdk.execute('resize', { height: 700, width: 800 });
+	});
 
 	let style = 5;
 	const API_TOKEN =
@@ -68,7 +68,7 @@
 		for (let line = 2; line < lines.length; line++) {
 			let row = lines[line].split('"');
 			// Only create object if address available
-			if (row[9].length > 0 ) {
+			if (row[9].length > 0) {
 				let install = {
 					name: row[1],
 					status: row[3],
@@ -77,7 +77,7 @@
 					endDate: row[7],
 					id: row[11],
 					createdDate: row[13]
-				}
+				};
 				installations.push(install);
 			}
 		}
@@ -158,7 +158,7 @@
 						<button on:click={submitFilter}>Submit Filter</button>
 					</div>
 				</div>
-				
+
 				<div class="details">
 					<div class="installation_info">
 						<div class="cards">
