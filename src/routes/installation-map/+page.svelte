@@ -52,7 +52,6 @@
 			selectedInstallation = filteredProjectsData[(currInstall + 1) % filteredProjectsData.length];
 			popUpdate = !popUpdate;
 		}
-		
 	}
 
 	function prevInstall() {
