@@ -3,7 +3,6 @@
 		latLongOfMarker,
 		markersOnMap,
 		colourOfMapMarker,
-		selectedFilters
 	} from '$lib/MapStores.js';
 
 	import mapboxgl from 'mapbox-gl';
