@@ -56,7 +56,7 @@
 		let selectedId = selectedInstallation.id
 		console.log(selectedId)
 		//dispatch('click', { selectedInstallation });
-		//let markerElement = getMarkerElementById(selectedId)//.click()
+		//let markerElement = getMarkerElementById(selectedId).click()
 		//console.log(markerElement);
 		
 	}
@@ -72,7 +72,7 @@
 		let selectedId = selectedInstallation.id
 		console.log(selectedId)
 		//dispatch('click',{ selectedInstallation });
-		//let markerElement = getMarkerElementById(selectedId)//.click()
+		//let markerElement = getMarkerElementById(selectedId).click()
 		//console.log(markerElement);
 	}
 

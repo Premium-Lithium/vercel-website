@@ -10,8 +10,11 @@
 	export let search = true;
 	export let map = undefined;
 	export let installationArr; //received from the Page
+	export let selectedInstallation;
 	export let filtersArr = [];
 	export let directionsArr = [];
+
+	
 	let installations = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -147,7 +150,9 @@
 		});
 	});
 
+
 	function handleMarkerClick(installation) {
+		console.log('Marker clicked:', installation);
 		dispatch('markerClick', { installation });
 	}
 
@@ -246,6 +251,7 @@
 
 	// Returns in form of [lon, lat]
 	async function fetchLonLatFromAddress(address) {
+		//console.log(address);
 		const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${API_TOKEN}`;
 		try {
 			const geocodingResponse = await fetch(endpoint);
@@ -271,7 +277,7 @@
 			const directionsResponse = await fetch(endpoint, { method: 'GET' });
 			if (directionsResponse.ok) {
 				const res = await directionsResponse.json();
-				console.log(res);
+				//console.log(res);
 				const route = res.routes[0].geometry.coordinates;
 				const geojson = {
 					type: 'Feature',
