@@ -7,18 +7,21 @@
 	let selectedFilters = [];
 	let map;
 	let filterUpdate;
-	let installations = [];
+	let popUpdate;
+	
+	let projectsData = [];
 	let directionsArr = [
 		[0.47469,51.71796],
 		[-1.113156, 53.96058]
 	];
+	
 
 	// Input test data
 	onMount(async () => {
 		getInstallationData();
 	});
 
-	let selectedInstallation = installations[0];
+	let selectedInstallation = null;
 
 	let sdk;
 	onMount(async () => {
@@ -41,17 +44,30 @@
 		filterUpdate = !filterUpdate;
 	}
 	function nextInstall() {
-		let currInstall = installations.indexOf(selectedInstallation);
-		selectedInstallation = installations[(currInstall + 1) % installations.length];
+		if(selectedInstallation){
+			let filteredProjectsData = projectsData.filter(obj => {
+				return selectedFilters.includes(obj.status)
+			})
+			let currInstall = projectsData.indexOf(selectedInstallation);
+			selectedInstallation = filteredProjectsData[(currInstall + 1) % filteredProjectsData.length];
+			popUpdate = !popUpdate;
+		}
+		
 	}
 
 	function prevInstall() {
-		let currInstall = installations.indexOf(selectedInstallation);
-		// Horrible calculation because js cant mod properly: ((value % max) + max) % max
-		selectedInstallation =
-			installations[
-				(((currInstall - 1) % installations.length) + installations.length) % installations.length
-			];
+		if(selectedInstallation){
+			let filteredProjectsData = projectsData.filter(obj => {
+				return selectedFilters.includes(obj.status)
+			})
+			let currInstall = projectsData.indexOf(selectedInstallation);
+			// Horrible calculation because js cant mod properly: ((value % max) + max) % max
+			selectedInstallation =
+			filteredProjectsData[
+					(((currInstall - 1) % filteredProjectsData.length) + filteredProjectsData.length) % filteredProjectsData.length
+				];
+			popUpdate = !popUpdate;
+		}
 	}
 
 	function handleMarkerClick(event) {
@@ -82,7 +98,7 @@
 					id: row[11],
 					createdDate: row[13]
 				};
-				installations.push(install);
+				projectsData.push(install);
 			}
 		}
 	}
@@ -156,6 +172,15 @@
 								/>Installation Confirmed</label
 							>
 						</li>
+						<li>
+							<label
+								><input
+									type="checkbox"
+									value={'Installation Complete'}
+									bind:group={selectedFilters}
+								/>Installation Complete</label
+							>
+						</li>
 					</ul>
 					<div id="filterButton">
 						<button on:click={submitFilter}>Submit Filter</button>
@@ -197,16 +222,19 @@
 			<div class="map-view">
 				{#key style}
 					{#key filterUpdate}
-						<Map
-							search={false}
-							bind:style
-							bind:map
-							--border-radius="10px"
-							installationArr={installations}
-							filtersArr={selectedFilters}
-							directionsArr={directionsArr}
-							on:markerClick={handleMarkerClick}
-						/>
+						{#key popUpdate}
+							<Map
+								search={false}
+								bind:style
+								bind:map
+								--border-radius="10px"
+								projectsArr={projectsData}
+								filtersArr={selectedFilters}
+								directionsArr={directionsArr}
+								on:markerClick={handleMarkerClick}
+								selectedMarker={selectedInstallation}
+							/>
+						{/key}
 					{/key}
 				{/key}
 			</div>

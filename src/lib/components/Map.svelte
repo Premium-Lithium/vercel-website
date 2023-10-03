@@ -9,10 +9,12 @@
 	import 'mapbox-gl/dist/mapbox-gl.css';
 	export let search = true;
 	export let map = undefined;
-	export let installationArr;
+	export let projectsArr;
 	export let filtersArr = [];
 	export let directionsArr = [];
-	let installations = [];
+	export let selectedMarker;
+	let selectedInstallation;
+	let installations: Array<Installation> = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 	$latLongOfMarker = { latitude: null, longitude: null };
@@ -35,7 +37,8 @@
 		'Site Survey Completed': 'black',
 		'DNO Application': 'green',
 		'Pre-Installation': 'red',
-		'Installation Confirmed': 'purple'
+		'Installation Confirmed': 'purple',
+		'Installation Complete': 'cyan'
 	};
 
 	export let style = 5;
@@ -132,8 +135,18 @@
 				});
 				map.addControl(search);
 			}
-			if (installationArr) {
-				createMarkers(installationArr);
+			if (projectsArr) {
+				installations = await createMarkers(projectsArr);
+				if(selectedMarker){
+					for (let i in installations){
+						if(installations[i].id === selectedMarker.id){
+							selectedInstallation = installations[i]
+						}
+					}
+					//find installations with matching id
+					selectedInstallation.marker.togglePopup();
+					
+				}
 			}
 
 			if (directionsArr) {
@@ -147,84 +160,55 @@
 		dispatch('markerClick', { installation });
 	}
 
-	function filterMarkers(filters) {
-		for (let i in installations) {
-			const shouldShow = filters.has(installations[i].status);
-			if (shouldShow) {
-				installations[i].marker.addTo(map);
-			} else {
-				installations[i].marker.remove();
-			}
-		}
-	}
-
 	// Creates an array of MapMarker objects from an array of inputs
-	async function createMarkers(installationArr) {
-		for (let i in installationArr) {
-			let lonLat = await fetchLonLatFromAddress(installationArr[i].address);
+	async function createMarkers(projectsArr) {
+		for (let i in projectsArr) {
+			let lonLat = await fetchLonLatFromAddress(projectsArr[i].address);
 			let install = new Installation(
-				installationArr[i].name,
-				installationArr[i].status,
-				installationArr[i].address,
+				projectsArr[i].name,
+				projectsArr[i].status,
+				projectsArr[i].address,
 				lonLat[1],
 				lonLat[0],
-				installationArr[i].startDate,
-				installationArr[i].endDate,
-				installationArr[i].id,
-				installationArr[i].createdDate
+				projectsArr[i].startDate,
+				projectsArr[i].endDate,
+				projectsArr[i].id,
+				projectsArr[i].createdDate
 			);
 			installations.push(install);
+
 		}
-		addMarkers(installations);
+		addMarkers(installations)
+		return installations;
 	}
 
 	// Adds markers from an array of locations (Markers)
 	function addMarkers(markerArr) {
 		for (let i in markerArr) {
-			if (!installations[i].hidden) {
+			if (!markerArr[i].hidden) {
 				let popup = new mapboxgl.Popup({ className: 'pin-popup' })
-					.setLngLat([installations[i].lon, installations[i].lat])
+					.setLngLat([markerArr[i].lon, markerArr[i].lat])
 					.setHTML(
 						'<style>.pin-popup .mapboxgl-popup-content { background-color: #091408;}</style>' +
 							'Title: ' +
-							installations[i].name +
+							markerArr[i].name +
 							'<br>' +
 							'Phase: ' +
-							installations[i].status +
+							markerArr[i].status +
 							'<br>' +
 							'Address: ' +
-							installations[i].address +
+							markerArr[i].address +
 							'<br>' +
 							'Start Date: ' +
-							installations[i].startDate
+							markerArr[i].startDate
 					);
-				installations[i].marker.setPopup(popup).addTo(map);
+					markerArr[i].marker.setPopup(popup).addTo(map);
 				// Add an event listener for the click event
-				installations[i].marker.getElement().addEventListener('click', () => {
-					handleMarkerClick(installations[i]);
+				markerArr[i].marker.getElement().addEventListener('click', () => {
+					handleMarkerClick(markerArr[i]);
 				});
-				installations[i].marker.getElement().style.cursor = 'pointer';
+				markerArr[i].marker.getElement().style.cursor = 'pointer';
 			}
-		}
-	}
-
-	// Adds markers from an array of locations (Markers)
-	function addMarkerPopups(installations) {
-		for (let i in installations) {
-			let popup = new mapboxgl.Popup({ className: 'pin-popup' })
-				.setLngLat([installations[i].lon, installations[i].lat])
-				.setHTML(
-					'<style>.pin-popup .mapboxgl-popup-content { background-color: #091408;}</style>' +
-						installations[i].name +
-						'<br>' +
-						installations[i].status +
-						'<br>' +
-						installations[i].address
-				);
-			installations[i].marker.setPopup(popup).addTo(map);
-			installations[i].marker.getElement().addEventListener('click', () => {
-				// Access the stored installations[i] variable
-			});
 		}
 	}
 
