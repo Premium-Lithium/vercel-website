@@ -32,7 +32,7 @@ const genArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.014837899, 0.0
 
 const nominalPowerOutput = 0;
 const efficiency = 0;
-let forecast : number[] = [];
+let forecast: number[] = [];
 let solarDeclination; // del
 let solarAngle; // H
 let sunAltitudeAngle; // alpha
@@ -41,7 +41,6 @@ let zenith; // theta z
 let angleOfIncidence; // theta
 let irradianceIncident; // Ipoa
 let energyOutput; // Eout
-
 
 function getDay(now) {
     var start = new Date(now.getFullYear(), 0, 0);
@@ -61,7 +60,7 @@ export async function POST({ request }) {
     return json(genArr[timestep])
 }
 
-/* TODO make this work with the OpenWeather APIs
+//TODO make this work with the OpenWeather APIs
 export async function POST({ request }) {
     // array of [lat, lon, area]
     const loc = await request.json();
@@ -70,12 +69,6 @@ export async function POST({ request }) {
     const area = loc[2];
     const panelTilt = loc[3];
     const panelAzimuth = loc[4];
-
-    // API calls go here, for now just temp variables
-    // lat lon gets used here
-    let cloud; // array of length 24, used in irrad to determine whether to use cloudy or clear model
-    // lat lon gets used here
-    let irrad; // 2D array of [[DHI, DNI, GHI]] of length 24
 
     // Calculating day of year and whether it is a leap year
     let now = new Date();
@@ -87,6 +80,25 @@ export async function POST({ request }) {
     } else {
         daysOfYear = 366;
     }
+
+    const YYYY = now.toLocaleString("default", { year: "numeric" });
+    const mm = now.toLocaleString("default", { month: "2-digit" });
+    const dd = now.toLocaleString("default", { day: "2-digit" });
+    const formattedDate = YYYY + '-' + mm + '-' + dd;
+
+    // API calls
+    const cloudRes = fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=${'current,minutely,daily,alerts'}&appid={API key}`);
+    cloudRes.then((responseBody) => {
+        responseBody.json().then((respVal) => {
+            let clouds = respVal;
+        });
+    });
+    const irradRes = fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&date=${formattedDate}&appid={API key}`);
+    irradRes.then((responseBody) => {
+        responseBody.json().then((respVal) => {
+            let irrad = respVal;
+        });
+    });
 
     solarDeclination = -23.45 * Math.cos(360 / daysOfYear) * (day - 81);
 
@@ -113,4 +125,3 @@ export async function POST({ request }) {
 
     return json(forecast)
 }
-*/
