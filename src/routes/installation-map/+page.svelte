@@ -4,27 +4,22 @@
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
+	import { installationStores, currentInstallation } from '$lib/MapStores';
 	let selectedFilters = [];
 	let map;
 	let filterUpdate;
 	let popUpdate;
-	
+
 	let projectsData = [];
 	let directionsArr = [
-		[0.47469,51.71796],
+		[0.47469, 51.71796],
 		[-1.113156, 53.96058]
 	];
-	
+	let sdk;
 
 	// Input test data
 	onMount(async () => {
 		getInstallationData();
-	});
-
-	let selectedInstallation = null;
-
-	let sdk;
-	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
 		await sdk.execute('resize', { height: 700, width: 800 });
 	});
@@ -44,33 +39,38 @@
 		filterUpdate = !filterUpdate;
 	}
 	function nextInstall() {
-		if(selectedInstallation){
-			let filteredProjectsData = projectsData.filter(obj => {
-				return selectedFilters.includes(obj.status)
-			})
-			let currInstall = projectsData.indexOf(selectedInstallation);
-			selectedInstallation = filteredProjectsData[(currInstall + 1) % filteredProjectsData.length];
-			popUpdate = !popUpdate;
-		}
+		$currentInstallation.marker.togglePopup()
+		
+		let filteredInstallations = $installationStores.filter((obj) => {
+			return selectedFilters.includes(obj.status);
+		});
+		let currInstall = $installationStores.indexOf($currentInstallation);
+		
+		currentInstallation.set(filteredInstallations[(currInstall + 1) % filteredInstallations.length]);
+		$currentInstallation.marker.togglePopup()
 	}
 
 	function prevInstall() {
-		if(selectedInstallation){
-			let filteredProjectsData = projectsData.filter(obj => {
-				return selectedFilters.includes(obj.status)
-			})
-			let currInstall = projectsData.indexOf(selectedInstallation);
-			// Horrible calculation because js cant mod properly: ((value % max) + max) % max
-			selectedInstallation =
-			filteredProjectsData[
-					(((currInstall - 1) % filteredProjectsData.length) + filteredProjectsData.length) % filteredProjectsData.length
-				];
-			popUpdate = !popUpdate;
-		}
+		$currentInstallation.marker.togglePopup()
+
+		let filteredInstallations = $installationStores.filter((obj) => {
+			return selectedFilters.includes(obj.status);
+		});
+		let currInstall = $installationStores.indexOf($currentInstallation);
+
+		// Horrible calculation because js cant mod properly: ((value % max) + max) % max
+		currentInstallation.set(
+			filteredInstallations[
+				(((currInstall - 1) % filteredInstallations.length) + filteredInstallations.length) %
+				filteredInstallations.length
+			]
+		);
+		$currentInstallation.marker.togglePopup()
 	}
 
 	function handleMarkerClick(event) {
-		selectedInstallation = event.detail.installation;
+		//currentInstallation = event.detail.installation;
+		return 0;
 	}
 
 	// Reading from a csv file for now TODO read from deals once they are converted from projects and then remove projects.csv
@@ -188,33 +188,31 @@
 
 				<div class="details">
 					<div class="installation_info">
-						<div class="cards">
-							<button on:click={prevInstall}>Prev</button>
-							<button on:click={nextInstall}>Next</button>
-							<h2>
-								{#if selectedInstallation}Installation Info{/if}
-							</h2>
-							<li>
-								{#if selectedInstallation}Title: {selectedInstallation.name}{/if}
-							</li>
-							<li>
-								{#if selectedInstallation}Phase: {selectedInstallation.status}{/if}
-							</li>
-							<li>
-								{#if selectedInstallation}Address: {selectedInstallation.address}{/if}
-							</li>
-							<li>
-								{#if selectedInstallation}Start Date: {selectedInstallation.startDate}{/if}
-							</li>
-							<li>
-								{#if selectedInstallation}ID: {selectedInstallation.id}{/if}
-							</li>
-						</div>
+						{#if $currentInstallation}
+							<div class="cards">
+								<button on:click={prevInstall}>Prev</button>
+								<button on:click={nextInstall}>Next</button>
+								<h2>Installation Info</h2>
+								<li>
+									Title: {$currentInstallation.name}
+								</li>
+								<li>
+									Phase: {$currentInstallation.status}
+								</li>
+								<li>
+									Address: {$currentInstallation.address}
+								</li>
+								<li>
+									Start Date: {$currentInstallation.startDate}
+								</li>
+								<li>
+									ID: {$currentInstallation.id}
+								</li>
+							</div>
+						{/if}
 					</div>
 				</div>
-				<div class="navigation">
-					
-				</div>
+				<div class="navigation" />
 			</div>
 		</div>
 		<div class="grid-item">
@@ -229,9 +227,7 @@
 								--border-radius="10px"
 								projectsArr={projectsData}
 								filtersArr={selectedFilters}
-								directionsArr={directionsArr}
-								on:markerClick={handleMarkerClick}
-								selectedMarker={selectedInstallation}
+								{directionsArr}
 							/>
 						{/key}
 					{/key}

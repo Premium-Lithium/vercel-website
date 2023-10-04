@@ -4,3 +4,6 @@ export let markersOnMap = writable([]);
 export let latLongOfMarker = writable({'latitude': undefined, 'longitude': undefined});
 export let colourOfMapMarker = readable('red');
 export let installationStores = writable([]);
+export let currentInstallation = writable(null); // WIll only be a single array consist of the current clicked Installation
+
+
