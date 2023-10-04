@@ -3,8 +3,10 @@
 		latLongOfMarker,
 		markersOnMap,
 		colourOfMapMarker,
+		installationStores,
+		currentInstallation
 	} from '$lib/MapStores.js';
-
+	import { get } from 'svelte/store'
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
 	export let search = true;
@@ -12,13 +14,12 @@
 	export let projectsArr;
 	export let filtersArr = [];
 	export let directionsArr = [];
-	export let selectedMarker;
-	let selectedInstallation;
 	let installations: Array<Installation> = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 	$latLongOfMarker = { latitude: null, longitude: null };
 	$markersOnMap = [];
+	$currentInstallation;
 	const styles = [
 		'mapbox://styles/mapbox/streets-v12', // 0
 		'mapbox://styles/mapbox/outdoors-v12', // 1
@@ -61,6 +62,8 @@
 		endDate: String;
 		id: Number;
 		createdDate: String;
+		popupOpen: Boolean;
+		
 		// Other values ie timeframe etc.
 		constructor(
 			name: String,
@@ -71,7 +74,8 @@
 			startDate: String,
 			endDate: String,
 			id: Number,
-			createdDate: String
+			createdDate: String,
+			popupOpen = Boolean
 		) {
 			this.name = name;
 			this.status = status;
@@ -91,6 +95,7 @@
 			this.endDate = endDate;
 			this.id = id;
 			this.createdDate = createdDate;
+			this.popupOpen = false;
 		}
 	}
 
@@ -137,16 +142,18 @@
 			}
 			if (projectsArr) {
 				installations = await createMarkers(projectsArr);
+				installationStores.set(installations);
+				console.log("Current",$currentInstallation);
+				/*
 				if(selectedMarker){
 					for (let i in installations){
 						if(installations[i].id === selectedMarker.id){
-							selectedInstallation = installations[i]
+							currentInstallation = installations[i]
 						}
 					}
 					//find installations with matching id
-					selectedInstallation.marker.togglePopup();
-					
-				}
+					currentInstallation.marker.togglePopup();
+				}*/
 			}
 
 			if (directionsArr) {
@@ -176,7 +183,7 @@
 				projectsArr[i].createdDate
 			);
 			installations.push(install);
-
+			$installationStores.push(install);
 		}
 		addMarkers(installations)
 		return installations;
@@ -205,7 +212,9 @@
 					markerArr[i].marker.setPopup(popup).addTo(map);
 				// Add an event listener for the click event
 				markerArr[i].marker.getElement().addEventListener('click', () => {
-					handleMarkerClick(markerArr[i]);
+					markerArr[i].marker.togglePopup()
+					markerArr[i].popupOpen = true;
+					currentInstallation.set(markerArr[i]);
 				});
 				markerArr[i].marker.getElement().style.cursor = 'pointer';
 			}
