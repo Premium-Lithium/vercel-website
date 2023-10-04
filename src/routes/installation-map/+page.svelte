@@ -8,15 +8,19 @@
 	let selectedFilters = [];
 	let map;
 	let filterUpdate;
-	let popUpdate;
-
 	let projectsData = [];
 	let directionsArr = [
 		[0.47469, 51.71796],
 		[-1.113156, 53.96058]
 	];
 	let sdk;
+	let visibleInstallationsCount = 0;
 
+  	// Create a reactive statement that updates the count whenever $installationStores changes
+	$: {
+		let visibleInstallations = $installationStores.filter(installation => !installation.hidden);
+		visibleInstallationsCount = visibleInstallations.length;
+	}
 	// Input test data
 	onMount(async () => {
 		getInstallationData();
@@ -51,7 +55,6 @@
 	}
 
 	function prevInstall() {
-		// Removes current popup from the map before toggling the previous one
 		$currentInstallation.marker._popup.remove()
 		let filteredInstallations = $installationStores.filter((obj) => {
 			return selectedFilters.includes(obj.status);
@@ -90,7 +93,7 @@
 			if (row[9].length > 0) {
 				let install = {
 					name: row[1],
-					status: row[3],
+					status: row[3].replace(/\s+/g, ' '),  // Replace multiple spaces with a single space,
 					address: row[9],
 					startDate: row[5],
 					endDate: row[7],
@@ -107,6 +110,9 @@
 	<div class="grid-container">
 		<div class="grid-item">
 			<h1>Installation Map</h1>
+			{#if visibleInstallationsCount > 0}
+				<p>{visibleInstallationsCount} results</p>
+			{/if}
 			<div class="side-container">
 				<div class="filters">
 					<h2>Filters</h2>
@@ -218,17 +224,15 @@
 			<div class="map-view">
 				{#key style}
 					{#key filterUpdate}
-						{#key popUpdate}
-							<Map
-								search={false}
-								bind:style
-								bind:map
-								--border-radius="10px"
-								projectsArr={projectsData}
-								filtersArr={selectedFilters}
-								{directionsArr}
-							/>
-						{/key}
+						<Map
+							search={false}
+							bind:style
+							bind:map
+							--border-radius="10px"
+							projectsArr={projectsData}
+							filtersArr={selectedFilters}
+							{directionsArr}
+						/>
 					{/key}
 				{/key}
 			</div>
