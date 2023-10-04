@@ -75,7 +75,7 @@
 
 	// Reading from a csv file for now TODO read from deals once they are converted from projects and then remove projects.csv
 	async function getInstallationData() {
-		const file = 'src/routes/installation-map/projects.csv';
+		const file = './projects.csv'; //Projects.csv moved to static folder
 
 		const res = await fetch(file);
 		const data = await res.text();
