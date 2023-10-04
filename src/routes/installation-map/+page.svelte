@@ -39,8 +39,8 @@
 		filterUpdate = !filterUpdate;
 	}
 	function nextInstall() {
-		$currentInstallation.marker.togglePopup()
-		
+		// Removes current popup from the map before toggling the next one
+		$currentInstallation.marker._popup.remove()
 		let filteredInstallations = $installationStores.filter((obj) => {
 			return selectedFilters.includes(obj.status);
 		});
@@ -51,8 +51,8 @@
 	}
 
 	function prevInstall() {
-		$currentInstallation.marker.togglePopup()
-
+		// Removes current popup from the map before toggling the previous one
+		$currentInstallation.marker._popup.remove()
 		let filteredInstallations = $installationStores.filter((obj) => {
 			return selectedFilters.includes(obj.status);
 		});
