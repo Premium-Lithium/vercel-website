@@ -185,7 +185,6 @@
 						<button on:click={submitFilter}>Submit Filter</button>
 					</div>
 				</div>
-
 				<div class="details">
 					<div class="installation_info">
 						{#if $currentInstallation}

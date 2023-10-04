@@ -143,7 +143,6 @@
 			if (projectsArr) {
 				installations = await createMarkers(projectsArr);
 				installationStores.set(installations);
-				console.log("Current",$currentInstallation);
 				/*
 				if(selectedMarker){
 					for (let i in installations){
