@@ -36,7 +36,7 @@ async function addInstaller(installer) {
     if (orgId === null)
         console.log(`Failed to add Organisation for installer ${companyName}`);
 
-    const personId = await addPerson(installer.name, installer.emailAddress, installer.phoneNumber);
+    const personId = await addPerson(installer.name, installer.email, installer.phone);
     if (personId === null)
         console.log(`Failed to add Person for installer ${companyName}`);
 
@@ -82,6 +82,8 @@ async function addPerson(name: string, emailAddress: string, phoneNumber: string
 
     const personApi = new pipedrive.PersonsApi(pd);
     const newPerson = await personApi.addPerson(personData);
+    console.log("Added new person...")
+    console.log(newPerson.data.email)
 
     if(!newPerson.success) {
         console.log(`Failed to add Person for '${name}' to Pipedrive`);
