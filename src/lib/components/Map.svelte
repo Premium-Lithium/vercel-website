@@ -62,7 +62,6 @@
 		endDate: String;
 		id: Number;
 		createdDate: String;
-		popupOpen: Boolean;
 		
 		// Other values ie timeframe etc.
 		constructor(
@@ -75,7 +74,6 @@
 			endDate: String,
 			id: Number,
 			createdDate: String,
-			popupOpen = Boolean
 		) {
 			this.name = name;
 			this.status = status;
@@ -95,7 +93,6 @@
 			this.endDate = endDate;
 			this.id = id;
 			this.createdDate = createdDate;
-			this.popupOpen = false;
 		}
 	}
 
@@ -212,7 +209,6 @@
 				// Add an event listener for the click event
 				markerArr[i].marker.getElement().addEventListener('click', () => {
 					markerArr[i].marker.togglePopup()
-					markerArr[i].popupOpen = true;
 					currentInstallation.set(markerArr[i]);
 				});
 				markerArr[i].marker.getElement().style.cursor = 'pointer';
