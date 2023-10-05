@@ -156,6 +156,7 @@
 				}*/
 			}
 			if ($navigateMarkers) {
+				
 				if($selectedInstallation.length > 1){
 					getDirectionsFromInstallations($selectedInstallation);
 					navigateMarkers.set(false);
