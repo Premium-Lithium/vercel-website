@@ -4,7 +4,10 @@
 		markersOnMap,
 		colourOfMapMarker,
 		installationStores,
-		currentInstallation
+		currentInstallation,
+
+		selectedInstallation
+
 	} from '$lib/MapStores.js';
 	import { get } from 'svelte/store'
 	import mapboxgl from 'mapbox-gl';
@@ -95,7 +98,7 @@
 			this.createdDate = createdDate;
 		}
 	}
-
+	
 	onMount(() => {
 		const mapboxGlAccessToken =
 			'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -137,6 +140,7 @@
 				});
 				map.addControl(search);
 			}
+			
 			if (projectsArr) {
 				installations = await createMarkers(projectsArr);
 				installationStores.set(installations);
@@ -151,6 +155,15 @@
 					currentInstallation.marker.togglePopup();
 				}*/
 			}
+			
+			if($selectedInstallation.length >= 2){
+				directionsArr = [
+					[$selectedInstallation[0].lon, $selectedInstallation[0].lat],
+					[$selectedInstallation[1].lon, $selectedInstallation[1].lat]
+				]
+				getDirections(directionsArr);
+			}
+			
 
 			if (directionsArr) {
 				getDirections(directionsArr);
@@ -210,6 +223,7 @@
 				markerArr[i].marker.getElement().addEventListener('click', () => {
 					markerArr[i].marker.togglePopup()
 					currentInstallation.set(markerArr[i]);
+					$selectedInstallation.push(markerArr[i]);
 				});
 				markerArr[i].marker.getElement().style.cursor = 'pointer';
 			}
@@ -243,6 +257,9 @@
 			console.error('Bad Catch');
 		}
 	}
+
+
+
 
 	// directions are  [[lon, lat],...]
 	export async function getDirections(directions) {

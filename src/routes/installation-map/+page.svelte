@@ -4,7 +4,7 @@
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
-	import { installationStores, currentInstallation } from '$lib/MapStores';
+	import { installationStores, currentInstallation, selectedInstallation } from '$lib/MapStores';
 	let selectedFilters = [];
 	let map;
 	let filterUpdate;
