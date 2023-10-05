@@ -4,15 +4,13 @@
 	//import { selectedFilters } from '$lib/MapStores.js';
 	import Map from '$lib/components/Map.svelte';
 	import { onMount } from 'svelte';
-	import { installationStores, currentInstallation, selectedInstallation } from '$lib/MapStores';
+	import { installationStores, currentInstallation, selectedInstallation, navigateMarkers} from '$lib/MapStores';
 	let selectedFilters = [];
 	let map;
 	let filterUpdate;
 	let projectsData = [];
-	let directionsArr = [
-		[0.47469, 51.71796],
-		[-1.113156, 53.96058]
-	];
+	let navigateUpdate;
+
 	let sdk;
 	let visibleInstallationsCount = 0;
 
@@ -66,7 +64,7 @@
 			filteredInstallations[
 				(((currInstall - 1) % filteredInstallations.length) + filteredInstallations.length) %
 				filteredInstallations.length
-			]
+			] 
 		);
 		$currentInstallation.marker.togglePopup()
 	}
@@ -74,6 +72,18 @@
 	function handleMarkerClick(event) {
 		//currentInstallation = event.detail.installation;
 		return 0;
+	}
+
+	function handleNavigate(){
+		selectedInstallation.set([]) // set selected back to empty
+		navigateMarkers.set(true);
+	}
+	function handleDone(){
+		navigateUpdate = !navigateUpdate;
+		//navigateMarkers.set(false);
+	}
+	function handleClear(){
+		selectedInstallation.set([]);
 	}
 
 	// Reading from a csv file for now TODO read from deals once they are converted from projects and then remove projects.csv
@@ -192,6 +202,12 @@
 					</div>
 				</div>
 				<div class="details">
+					<div class="navigation">
+						<!--{$navigateMarkers}-->
+						<button on:click={handleNavigate}> Navigate </button>
+						<button on:click={handleDone}> Done </button>
+						<button on:click={handleClear}> Clear </button>
+					</div>
 					<div class="installation_info">
 						{#if $currentInstallation}
 							<div class="cards">
@@ -216,23 +232,25 @@
 							</div>
 						{/if}
 					</div>
+					
+					
 				</div>
-				<div class="navigation" />
 			</div>
 		</div>
 		<div class="grid-item">
 			<div class="map-view">
 				{#key style}
 					{#key filterUpdate}
-						<Map
-							search={false}
-							bind:style
-							bind:map
-							--border-radius="10px"
-							projectsArr={projectsData}
-							filtersArr={selectedFilters}
-							{directionsArr}
-						/>
+						{#key navigateUpdate}
+							<Map
+								search={false}
+								bind:style
+								bind:map
+								--border-radius="10px"
+								projectsArr={projectsData}
+								filtersArr={selectedFilters}
+							/>
+						{/key}
 					{/key}
 				{/key}
 			</div>
