@@ -19,12 +19,10 @@ function initAPIClient({ accessToken = '', refreshToken = '' }) {
     const client = new ApiClient();
     const oAuth2 = client.authentications.oauth2;
 
-    //oAuth2.clientId = process.env.PIPEDRIVE_MAP_CLIENT_ID;
-    //oAuth2.clientSecret = process.env.PIPEDRIVE_MAP_CLIENT_SECRET;
-    //oAuth2.redirectUri = process.env.PIPEDRIVE_EXTENSION_REDIRECT_URI;
-    oAuth2.clientId = process.env.PIPEDRIVE_MAP_CLIENT_ID;
-    oAuth2.clientSecret = process.env.PIPEDRIVE_MAP_CLIENT_SECRET;
-    oAuth2.redirectUri = process.env.PIPEDRIVE_MAP_REDIRECT_URI;
+    oAuth2.clientId = process.env.PIPEDRIVE_INST_PANEL_CLIENT_ID;
+    oAuth2.clientSecret = process.env.PIPEDRIVE_INST_PANEL_CLIENT_SECRET;
+    //oAuth2.redirectUri = process.env.PIPEDRIVE_INST_PANEL_REDIRECT_URI;
+    oAuth2.redirectUri = "https://28c6-148-252-140-35.ngrok-free.app/installation-panel"
     if (accessToken)
         oAuth2.accessToken = accessToken;
 
