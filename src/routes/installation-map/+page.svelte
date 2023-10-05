@@ -211,10 +211,10 @@
 					</div>
 					<div class="installation_info">
 						{#if $currentInstallation}
-							<div class="cards">
+							<div class="cards">							
+								<h2>Installation Info</h2>
 								<button on:click={prevInstall}>Prev</button>
 								<button on:click={nextInstall}>Next</button>
-								<h2>Installation Info</h2>
 								<li>
 									Title: {$currentInstallation.name}
 								</li>
