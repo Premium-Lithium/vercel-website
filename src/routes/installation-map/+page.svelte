@@ -84,6 +84,7 @@
 	}
 	function handleClear(){
 		selectedInstallation.set([]);
+		navigateUpdate = ! navigateUpdate
 	}
 
 	// Reading from a csv file for now TODO read from deals once they are converted from projects and then remove projects.csv
