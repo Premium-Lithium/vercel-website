@@ -269,7 +269,7 @@
 			}
 			coordinates = coordinates + coord
 		}
-		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordinates}?geometries=geojson&access_token=${API_TOKEN}`;
+		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordinates}?geometries=geojson&access_token=${API_TOKEN}&overview=full`;
 		try {
 			const directionsResponse = await fetch(endpoint, { method: 'GET' });
 			if (directionsResponse.ok) {
