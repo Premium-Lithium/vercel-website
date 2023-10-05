@@ -5,5 +5,6 @@ export let latLongOfMarker = writable({'latitude': undefined, 'longitude': undef
 export let colourOfMapMarker = readable('red');
 export let installationStores = writable([]);
 export let currentInstallation = writable(null);
-export let selectedInstallation = writable([]); // Array of two installations for now
+export let selectedInstallation = writable([]);
+export let navigateMarkers = writable(false);
 

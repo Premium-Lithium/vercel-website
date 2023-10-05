@@ -5,7 +5,7 @@
 		colourOfMapMarker,
 		installationStores,
 		currentInstallation,
-
+		navigateMarkers,
 		selectedInstallation
 
 	} from '$lib/MapStores.js';
@@ -155,22 +155,17 @@
 					currentInstallation.marker.togglePopup();
 				}*/
 			}
-			
-			if($selectedInstallation.length >= 2){
-				directionsArr = [
-					[$selectedInstallation[0].lon, $selectedInstallation[0].lat],
-					[$selectedInstallation[1].lon, $selectedInstallation[1].lat]
-				]
-				getDirections(directionsArr);
+			if ($navigateMarkers) {
+				if($selectedInstallation.length > 1){
+					getDirectionsFromInstallations($selectedInstallation);
+					navigateMarkers.set(false);
+				}
 			}
 			
-
-			if (directionsArr) {
-				getDirections(directionsArr);
-			}
 			map.resize();
 		});
 	});
+	
 
 	function handleMarkerClick(installation) {
 		dispatch('markerClick', { installation });
@@ -258,12 +253,64 @@
 		}
 	}
 
-
+	// coordsArr are  [[lon, lat],...]
+	// coord string 
+	export async function getDirectionsFromInstallations(installations) {
+		let coordsArr = []
+		installations.map(function(element){
+			coordsArr.push([element.lon, element.lat])
+		})
+		let coordinates = ""
+		let coord = ""
+		for(let i in coordsArr){
+			coord = coordsArr[i][0] + "," + coordsArr[i][1]
+			if(i != coordsArr.length - 1){
+				coord = coord + ";"
+			}
+			coordinates = coordinates + coord
+		}
+		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordinates}?geometries=geojson&access_token=${API_TOKEN}`;
+		try {
+			const directionsResponse = await fetch(endpoint, { method: 'GET' });
+			if (directionsResponse.ok) {
+				const res = await directionsResponse.json();
+				console.log(res);
+				const route = res.routes[0].geometry.coordinates;
+				const geojson = {
+					type: 'Feature',
+					properties: {},
+					geometry: {
+						type: 'LineString',
+						coordinates: route
+					}
+				};
+				map.addLayer({
+					id: 'route',
+					type: 'line',
+					source: {
+						type: 'geojson',
+						data: geojson
+					},
+					layout: {
+						'line-join': 'round',
+						'line-cap': 'round'
+					},
+					paint: {
+						'line-color': '#ab1bcf',
+						'line-width': 5,
+						'line-opacity': 0.75
+					}
+				});
+			}
+		} catch (error) {
+			console.error("Error: " + error);
+		}
+	}
 
 
 	// directions are  [[lon, lat],...]
 	export async function getDirections(directions) {
-		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${directions[0][0]},${directions[0][1]};${directions[1][0]},${directions[1][1]}?geometries=geojson&access_token=${API_TOKEN}`;
+		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${directions[0][0]},${directions[0][1]};${directions[1][0]},${directions[1][1]};${directions[2][0]},${directions[2][1]}?geometries=geojson&access_token=${API_TOKEN}`;
 		try {
 			const directionsResponse = await fetch(endpoint, { method: 'GET' });
 			if (directionsResponse.ok) {
