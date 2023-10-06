@@ -1,5 +1,5 @@
 import pipedrive from 'pipedrive';
-
+import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 
 const pd = new pipedrive.ApiClient();
 let apiToken = pd.authentications.api_key;
@@ -63,13 +63,48 @@ function readCustomDealField(fieldName, dealData) {
     // The field exists, now we need to read it
     const key = field.key;
     let value = dealData[key];
-
+    console.log(field)
     // If the field type is an enum, we still need to map the field's value to its readable name
     if(field.field_type === "enum")
         value = field.options.find(option => option.id === parseInt(value)).label;
-
+    else if(field.field_type === "set") {
+        // If value exists in the options..
+        if(value){
+            let output = [];
+            value = value.split(',');
+            for(let i in value){
+                output.push(field.options.find(option => option.id === parseInt(value[i])).label);
+            }
+            value = output
+        }
+    }
     return value;
 }
 
+/** Process:
+ * Get custom field key from name
+ * Create opts - map of fieldKey: data
+ * Call updateLead from pipedrive js api
+ */
+// Fields is a dictionary where the key is the field name and the data is the value to set the field to
+function getKeysForCustomFields(fields) {
+    // [field key:field] data pairs for adding custom fields
+    let fieldKeys = []
 
-export { pd, readCustomDealField, dealFieldsRequest, getField, getOptionIdFor };
+    for (const [fieldName, fieldData] of Object.entries(fields)) {
+        if (dealFieldsRequest.success === false) {
+            console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
+            return null;
+        }
+        const allFields = dealFieldsRequest.data;
+
+        // TODO create object of all custom fields' needed - potentially store them in env?
+        const fieldKey = allFields.find(f => f.name === fieldName).key;
+
+        fieldKeys.push([fieldKey, fieldData]);
+    }
+
+    return fieldKeys;
+}
+
+export { pd, readCustomDealField, dealFieldsRequest, getField, getOptionIdFor, getKeysForCustomFields };
