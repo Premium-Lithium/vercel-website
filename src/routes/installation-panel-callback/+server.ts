@@ -22,10 +22,9 @@ function initAPIClient({ accessToken = '', refreshToken = '' }) {
     oAuth2.clientId = process.env.PIPEDRIVE_INST_PANEL_CLIENT_ID;
     oAuth2.clientSecret = process.env.PIPEDRIVE_INST_PANEL_CLIENT_SECRET;
     //oAuth2.redirectUri = process.env.PIPEDRIVE_INST_PANEL_REDIRECT_URI;
-    oAuth2.redirectUri = "https://28c6-148-252-140-35.ngrok-free.app/installation-panel"
+    oAuth2.redirectUri = "https://28c6-148-252-140-35.ngrok-free.app/installation-panel-callback"
     if (accessToken)
         oAuth2.accessToken = accessToken;
-
     if (refreshToken)
         oAuth2.refreshToken = refreshToken;
 
