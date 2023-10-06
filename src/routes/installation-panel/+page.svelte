@@ -7,6 +7,7 @@
 
 	let sdk;
 	let selectedPhase = [];
+	let selectedTasks = [];
 	let currentStage = 'In Progress Checklist';
 	let checkListData;
 	let allTask = [];
@@ -21,7 +22,8 @@
 		'Assigned Checklist': [
 			{
 				id: 999,
-				label:  'Once initial desktop investigation has been completed call client to advise on next steps'	
+				label:
+					'Once initial desktop investigation has been completed call client to advise on next steps'
 			},
 			{
 				id: 1000,
@@ -69,17 +71,17 @@
 			});
 			if (response.ok) {
 				checkListData = await response.json();
-				console.log("CheckListData:",checkListData);
-                allTask = Object.values(checkListData).flat()
-                allTask.forEach((task) => {
-                    //Issue with apply "checked" on input therefore have to manually
-                    const checkboxes = document.querySelectorAll(`input[name='${task}']`);
-                    if (checkboxes.length > 0) {
-                        checkboxes[0].click();
-                    } else {
-                        console.log('Error finding checkboxes, ');
-                    }
-                });
+				console.log('CheckListData:', checkListData);
+				allTask = Object.values(checkListData).flat();
+				allTask.forEach((task) => {
+					//Issue with apply "checked" on input therefore have to manually
+					const checkboxes = document.querySelectorAll(`input[name='${task}']`);
+					if (checkboxes.length > 0) {
+						checkboxes[0].checked=true;
+					} else {
+						console.log('Error finding checkboxes, ');
+					}
+				});
 			}
 		} catch (error) {
 			console.log('Error', error);
@@ -87,26 +89,21 @@
 	}
 	// TODO - update the stage of the deal when all checklists are checked.
 	function updateSelectedPhase(task) {
-        console.log("updateSelected", task)
+		console.log('updateSelected', task);
 		updateChecklist(task);
 	}
 
 	// TODO - linked checkbox to Pipedrive deals in both direction, retrieve and updating
-	async function updateChecklist(selectedPhase) {
-        console.log(selectedPhase)
+	async function updateChecklist(selectedTasks) {
+        console.log("UpdatedCheckList", selectedTasks)
+        // "In Progress", 1005, "In Progress", 1006
 		//https://api.pipedrive.com/v1/deals/7083?api_token=77a5356773f422eb97c617fd7c37ee526da11851
 		// PUT Request Body: {"field name keyed": [options_id, options_id]})
-		let phaseArr = [];
-        /*
-		for (const [key, value] of Object.entries(selectedPhase)) {
-			console.log(key)
-		}*/
-		//console.log('PhaseArr', phaseArr);
 		try {
 			const response = await fetch('/installation-panel', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ [currentStage]: selectedPhase })
+				body: JSON.stringify({ [selectedTasks[0]]: selectedTasks[1] })
 			});
 			const data = await response.json();
 			return JSON.stringify(data);
@@ -130,7 +127,9 @@
                         value={task.id}
                         name={task.label}
                         bind:checked={selectedPhase[task.label]}
-                        on:change={() => updateSelectedPhase(task.id)}
+                        on:change={() => {
+                            updateChecklist(selectedTasks);
+                        }}
                     />
                     {task.label}
                 </label>

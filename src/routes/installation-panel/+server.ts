@@ -25,6 +25,20 @@ async function fetchDealData(dealId) {
         return json({ error: 'An error occurred' }, { status: 500 });
     }
 }
+updateCustomOption(7083);
+async function updateCustomOption(dealId){
+    try {
+        const pdDealFieldsApi = new pipedrive.DealFieldsApi(pd);
+        const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
+        const allField = dealFieldsRequest.data;
+        console.log("ALL FIELD",allField)
+        
+        let opts = dealFieldsRequest.FieldUpdateRequest({"Test"})
+        console.log("opts", opts)
+    } catch (error) {
+        console.log("Error")
+    }
+}
 
 function getChecklistData(dealData) {
     let assignedChecklist = readCustomDealField("Assigned Checklist", dealData);
@@ -39,10 +53,10 @@ function getChecklistData(dealData) {
 
 export async function POST({ request }) {
     try {
-        const {dealId}  = await request.json();
+        const { dealId } = await request.json();
         const dealData = await fetchDealData(dealId);
         let checklistData = getChecklistData(dealData);
-        
+
         return json(checklistData);
     } catch (error) {
         console.log("Error:", error);
@@ -71,7 +85,7 @@ let checkListTemplate = {
 // Update that field value to data (data have to be value options)
 export async function PUT({ request }) {
     try {
-        const response  = await request.json();
+        const response = await request.json();
         let addRes = getKeysForCustomFields(response)
         addRes = { [addRes[0][0]]: addRes[0][1] }
         const addResponse = await addFieldsForOptions(addRes)
