@@ -10,7 +10,7 @@
 	// Energy Usage
 	let usage = 0;
 
-	// Solar Energy Generation
+	// Solar Energy Generation - also takes timestep
 	let gen = 0;
 	let lon = 0;
 	let lat = 0;
@@ -48,6 +48,7 @@
 			});
 		});
 
+		// TODO add required variables to request - 
 		const genRes = fetch('/energy-arbitrage/prediction/generation-forecast', {
 			method: 'POST',
 			body: body,
