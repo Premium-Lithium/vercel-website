@@ -5,6 +5,7 @@
 	import pipedrive from 'pipedrive';
 	import { json } from '@sveltejs/kit';
 	import ProgressBar from '$lib/components/ProgressBar.svelte';
+	import CircleProgressBar from '$lib/components/CircleProgressBar.svelte';
 
 	let sdk;
 	let checkListData = {};
@@ -164,6 +165,7 @@
 		<details class="details-pane">
 			<summary>{fieldNames[stage]}</summary>
 			<div class="progress-container">
+				<CircleProgressBar progress={Number((counter[stage] / Object.keys(tasks).length))}/>
 				<ProgressBar
 					width="{(counter[stage] / Object.keys(tasks).length) * 100}%"
 					stage="{counter[stage]} / {Object.keys(tasks).length}"
