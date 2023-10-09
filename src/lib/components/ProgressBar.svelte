@@ -1,9 +1,10 @@
 <script>
-    export let width=0; 
-
+    export let width; 
+    export let stage;
 </script>
 
 <div class="wrapper">
+    <span>{stage}</span>
     <div class="progress-bar">
         <span class="progress-bar-fill" style="width: {width}"></span>
     </div>
@@ -12,7 +13,6 @@
 <style>
     .wrapper {
         width: 300px;
-        
     }
     .progress-bar {
         width: 100%;
