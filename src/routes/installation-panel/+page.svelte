@@ -6,20 +6,18 @@
 	import { json } from '@sveltejs/kit';
 
 	let sdk;
-	let selectedPhase = [];
-	let selectedTasks = [];
-	let currentStage = 'In Progress Checklist';
-	let checkListData;
-	let allTask = [];
+	let checkListData = {};
+	let selectedPhase = {};
+	let selectedTasks = {};
 	const dealId = $page.url.searchParams.get('dealId');
 
-	onMount(async () => {
-		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 100 });
-	});
-	//  http://localhost:3000/installation-panel?dealId=7083
+	const fieldNames = {
+		assigned: 'Assigned Checklist',
+		inProgress: 'In Progress Checklist'
+	};
+
 	let checkListTemplate = {
-		'Assigned Checklist': [
+		assigned: [
 			{
 				id: 999,
 				label:
@@ -30,7 +28,7 @@
 				label: 'Arrange follow up call with client'
 			}
 		],
-		'In Progress Checklist': [
+		inProgress: [
 			{
 				id: 1002,
 				label: 'Update Ticket details with outcome of discussion with client'
@@ -53,6 +51,13 @@
 			}
 		]
 	};
+
+	onMount(async () => {
+		sdk = await new AppExtensionsSDK().initialize();
+		await sdk.execute('resize', { height: 100 });
+	});
+	//  http://localhost:3000/installation-panel?dealId=7083
+
 	onMount(() => {
 		if (dealId) {
 			retrieveDealChecklist();
@@ -65,45 +70,77 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					dealId: dealId,
-					currentStage: currentStage
+					dealId: dealId
 				})
 			});
 			if (response.ok) {
 				checkListData = await response.json();
-				console.log('CheckListData:', checkListData);
-				allTask = Object.values(checkListData).flat();
-				allTask.forEach((task) => {
-					//Issue with apply "checked" on input therefore have to manually
-					const checkboxes = document.querySelectorAll(`input[name='${task}']`);
-					if (checkboxes.length > 0) {
-						checkboxes[0].checked=true;
-					} else {
-						console.log('Error finding checkboxes, ');
+				console.log('Received:', checkListData);
+
+				// Initialize selectedPhase and push initially checked checkboxes to selectedTasks
+				Object.keys(checkListData).forEach((stage) => {
+					if (!Array.isArray(checkListData[stage])) {
+						checkListData[stage] = []; // Set the stage to be an empty array if returned response is null
 					}
+					checkListData[stage].forEach((label) => {
+						selectedPhase[label] = true;
+
+						// Check if the checkbox is initially checked
+						if (selectedPhase[label]) {
+							// Find the corresponding task in checkListTemplate and push it to selectedTask
+							const taskList = checkListTemplate[stage];
+							if (taskList) {
+								// Find task in the list where label == task.label
+								const task = taskList.find((task) => task.label === label);
+								if (task) {
+									if (!selectedTasks[stage]) {
+										selectedTasks[stage] = [];
+									}
+									selectedTasks[stage].push({ id: task.id, label: task.label });
+								} else {
+									console.log(`Task not found for label: ${label}`);
+								}
+							} else {
+								console.log(`Task list not found for stage: ${stage}`);
+							}
+						}
+					});
 				});
 			}
 		} catch (error) {
 			console.log('Error', error);
 		}
 	}
-	// TODO - update the stage of the deal when all checklists are checked.
-	function updateSelectedPhase(task) {
-		console.log('updateSelected', task);
-		updateChecklist(task);
+	function handleCheckbox(event, checkList) {
+		const taskId = Number(event.target.value);
+		const taskLabel = event.target.name;
+		const stageName = checkList;
+
+		if (event.target.checked) {
+			if (!selectedTasks[stageName]) {
+				selectedTasks[stageName] = [];
+			}
+			selectedTasks[stageName].push({ id: taskId, label: taskLabel });
+		} else {
+			// Remove the task from selectedTask if unchecked
+			selectedTasks[stageName] = selectedTasks[stageName].filter((task) => task.id !== taskId);
+		}
+		// Call the function to send PUT request (you need to implement this)
+		updateChecklist(stageName, selectedTasks);
 	}
 
 	// TODO - linked checkbox to Pipedrive deals in both direction, retrieve and updating
-	async function updateChecklist(selectedTasks) {
-        console.log("UpdatedCheckList", selectedTasks)
-        // "In Progress", 1005, "In Progress", 1006
+	async function updateChecklist(stageName, selectedTasks) {
+		console.log('Updated', selectedTasks);
+		// "In Progress", 1005, "In Progress", 1006
 		//https://api.pipedrive.com/v1/deals/7083?api_token=77a5356773f422eb97c617fd7c37ee526da11851
-		// PUT Request Body: {"field name keyed": [options_id, options_id]})
+		// PUT Request Body: {{assigned: [], inprogress: []}})
 		try {
 			const response = await fetch('/installation-panel', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ [selectedTasks[0]]: selectedTasks[1] })
+				body: JSON.stringify({ [stageName]: selectedTasks[stageName] , dealId: dealId
+                })
 			});
 			const data = await response.json();
 			return JSON.stringify(data);
@@ -114,27 +151,22 @@
 </script>
 
 <div class="project-panel">
-	{dealId}
-	{currentStage}
-	<p>selected: {selectedPhase}</p>
-	{#each Object.entries(checkListTemplate) as [checkList, tasks]}
-        <h3>{checkList}</h3>
-        {#each tasks as task}
-            <li>
-                <label>
-                    <input
-                        type="checkbox"
-                        value={task.id}
-                        name={task.label}
-                        bind:checked={selectedPhase[task.label]}
-                        on:change={() => {
-                            updateChecklist(selectedTasks);
-                        }}
-                    />
-                    {task.label}
-                </label>
-            </li>
-        {/each}
+	{#each Object.entries(checkListTemplate) as [stage, tasks]}
+		<h3>{fieldNames[stage]}</h3>
+		{#each tasks as task}
+			<li>
+				<label>
+					<input
+						type="checkbox"
+						value={task.id}
+						name={task.label}
+						bind:checked={selectedPhase[task.label]}
+						on:change={(e) => handleCheckbox(e, stage)}
+					/>
+					{task.label}
+				</label>
+			</li>
+		{/each}
 	{/each}
 </div>
 
