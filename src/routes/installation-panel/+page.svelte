@@ -16,7 +16,7 @@
 		inProgress: 0
 	};
 	const dealId = $page.url.searchParams.get('dealId');
-
+	
 	const fieldNames = {
 		assigned: 'Assigned Checklist',
 		inProgress: 'In Progress Checklist'
@@ -165,7 +165,8 @@
 		<details class="details-pane">
 			<summary>{fieldNames[stage]}</summary>
 			<div class="progress-container">
-				<CircleProgressBar progress={Number((counter[stage] / Object.keys(tasks).length))}/>
+				<p>{(counter[stage] / Object.keys(tasks).length)}</p>
+				<CircleProgressBar progress="{(counter[stage] / Object.keys(tasks).length)*360}"/>
 				<ProgressBar
 					width="{(counter[stage] / Object.keys(tasks).length) * 100}%"
 					stage="{counter[stage]} / {Object.keys(tasks).length}"
