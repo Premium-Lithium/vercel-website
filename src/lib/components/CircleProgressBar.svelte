@@ -1,6 +1,6 @@
 <script>
 	export let progress;
-	const angle = 360 * progress;
+	let angle = Number(progress)*360;
 
 	const background = `radial-gradient(white 50%, transparent 51%),
     conic-gradient(transparent 0deg ${angle}deg, gainsboro ${angle}deg 360deg),
@@ -9,7 +9,8 @@
 	$: cssVarStyles = `--background:${background}`;
 </script>
 
-<div id="progress-circle" style={cssVarStyles} /> {progress}
+<div id="progress-circle" style={cssVarStyles} /> 
+<p>angle {angle}</p>
 
 <style>
 	#progress-circle {
