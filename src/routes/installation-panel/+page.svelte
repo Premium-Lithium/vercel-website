@@ -8,6 +8,7 @@
 	import CircleProgressBar from '$lib/components/CircleProgressBar.svelte';
 
 	let sdk;
+	let currentStage;
 	let checkListData = {};
 	let selectedPhase = {};
 	let selectedTasks = {};
@@ -80,7 +81,9 @@
 				})
 			});
 			if (response.ok) {
-				checkListData = await response.json();
+				const responseData = await response.json();
+				checkListData = responseData[0]
+				currentStage = responseData[1]
 				console.log('Received:', checkListData);
 
 				// Initialize selectedPhase and push initially checked checkboxes to selectedTasks
@@ -143,7 +146,7 @@
 	// TODO - linked checkbox to Pipedrive deals in both direction, retrieve and updating
 	async function updateChecklist(stageName, selectedTasks) {
 		console.log('Updated', selectedTasks);
-		// "In Progress", 1005, "In Progress", 1006
+
 		//https://api.pipedrive.com/v1/deals/7083?api_token=77a5356773f422eb97c617fd7c37ee526da11851
 		// PUT Request Body: {{assigned: [], inprogress: []}})
 		try {
@@ -159,35 +162,36 @@
 		}
 	}
 </script>
-
 <div class="project-panel">
 	{#each Object.entries(checkListTemplate) as [stage, tasks]}
-		<details class="details-pane">
-			<summary>{fieldNames[stage]}</summary>
-			<div class="progress-container">
-				<p>{(counter[stage] / Object.keys(tasks).length)}</p>
-				<CircleProgressBar progress="{(counter[stage] / Object.keys(tasks).length)*360}"/>
-				<ProgressBar
-					width="{(counter[stage] / Object.keys(tasks).length) * 100}%"
-					stage="{counter[stage]} / {Object.keys(tasks).length}"
-				/><!-- Progress % -->
-			</div>
+		{#if fieldNames[stage].includes(currentStage)}
+			<details class="details-pane">
+				<summary>{fieldNames[stage]}</summary>
+				<div class="progress-container">
+					<!-- <p>{(counter[stage] / Object.keys(tasks).length)}</p>
+					<CircleProgressBar progress="{(counter[stage] / Object.keys(tasks).length)*360}"/> -->
+					<ProgressBar
+						width="{(counter[stage] / Object.keys(tasks).length) * 100}%"
+						stage="{counter[stage]} / {Object.keys(tasks).length}"
+					/><!-- Progress % -->
+				</div>
 
-			{#each tasks as task}
-				<li>
-					<label>
-						<input
-							type="checkbox"
-							value={task.id}
-							name={task.label}
-							bind:checked={selectedPhase[task.label]}
-							on:change={(e) => handleCheckbox(e, stage)}
-						/>
-						{task.label}
-					</label>
-				</li>
-			{/each}
-		</details>
+				{#each tasks as task}
+					<li>
+						<label>
+							<input
+								type="checkbox"
+								value={task.id}
+								name={task.label}
+								bind:checked={selectedPhase[task.label]}
+								on:change={(e) => handleCheckbox(e, stage)}
+							/>
+							{task.label}
+						</label>
+					</li>
+				{/each}
+			</details>
+		{/if}
 	{/each}
 </div>
 
