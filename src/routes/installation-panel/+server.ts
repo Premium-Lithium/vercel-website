@@ -17,10 +17,12 @@ async function fetchDealData(dealId) {
     try {
         const pdDealsApi = new pipedrive.DealsApi(pd);
         const requestDeal = await pdDealsApi.getDeal(dealId);
+        const stageId = requestDeal.data.stage_id
+        const stageName = requestDeal.related_objects.stage[stageId].name //Getting the stage name (e.g Assigned)
 
         if (requestDeal.success) {
             const dealData = requestDeal.data
-            return dealData;
+            return [dealData, stageName];
         } else {
             console.log(`Error fetching customer data for deal ${dealId} on pipedrive`);
             return json({ error: 'An error occurred' }, { status: 500 });
@@ -44,9 +46,10 @@ export async function POST({ request }) {
     try {
         const { dealId } = await request.json();
         const dealData = await fetchDealData(dealId);
-        let checklistData = getChecklistData(dealData);
+        let checklistData = getChecklistData(dealData[0]);
+        let stageName = dealData[1];
 
-        return json(checklistData);
+        return json([checklistData, stageName]);
     } catch (error) {
         console.log("Error:", error);
         return json({ error: "Can't get checkListData" })
@@ -67,7 +70,7 @@ export async function PUT({ request }) {
         const idValues = response[propertyName].map(item => item.id);// Extract the id values from the array of objects
 
         const result = {[checklistLabel]: idValues};
-        console.log(result);
+        //console.log(result);
         const addResponse = await updateFieldsForOptions(result, response.dealId);
         return json(addResponse);
     } catch (error) {
@@ -83,7 +86,7 @@ export async function PUT({ request }) {
 // Update that field value to data (data have to be value options)
 async function updateFieldsForOptions(response, dealId) {
     const keyedData = getKeysForCustomFields(response)
-    console.log(keyedData)
+   // console.log(keyedData)
     const req = {
         method: "PUT",
         headers: { 'Content-Type': 'application/json' },
