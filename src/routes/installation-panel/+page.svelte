@@ -16,7 +16,7 @@
 		assigned: 0,
 		inProgress: 0
 	};
-	const dealId = $page.url.searchParams.get('dealId');
+	const dealId = $page.url.searchParams.get('id');
 	
 	const fieldNames = {
 		assigned: 'Assigned Checklist',
@@ -66,9 +66,12 @@
 	//  http://localhost:3000/installation-panel?dealId=7083
 
 	onMount(() => {
+
 		if (dealId) {
 			retrieveDealChecklist();
+			getHeight()
 		}
+				
 	});
 	// TODO - show current checked checklist and display it on the Panel.
 	async function retrieveDealChecklist() {
@@ -161,11 +164,16 @@
 			console.log('Error', error);
 		}
 	}
+
+	function getHeight(){
+		const divElement = document.getElementById("details-panel").clientHeight;
+		console.log("Div Height:", divElement)
+	}
 </script>
-<div class="project-panel">
+<div class="project-panel" id="details-panel">
 	{#each Object.entries(checkListTemplate) as [stage, tasks]}
 		{#if fieldNames[stage].includes(currentStage)}
-			<details class="details-pane">
+			<details class="details-pane" open>
 				<summary>{fieldNames[stage]}</summary>
 				<div class="progress-container">
 					<!-- <p>{(counter[stage] / Object.keys(tasks).length)}</p>
@@ -199,6 +207,8 @@
 	.project-panel {
 		list-style: none;
 		padding: 15px;
+		border: 2px solid black;
+		width: 450px;
 	}
 	details > summary {
 		font-size: 18px;
