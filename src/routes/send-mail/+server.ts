@@ -39,7 +39,7 @@ export async function POST({ request }) {
     try {
         const mailAttempt = await sendMail(...Object.values(requestData));
         console.log(mailAttempt);
-
+        
         return json(
             { message: mailAttempt.message },
             { status: mailAttempt.success ? 200 : 500 }

@@ -5,7 +5,9 @@ import querystring from 'querystring';
 // import { Client } from "@microsoft/microsoft-graph-client";
 
 
-async function sendMail(sender, recipients, subject, mail_body, content_type) {
+//If system_time is provided, schedule mail to be sent on that system_time 
+//Format Time 2019-01-29T20:00:00"
+async function sendMail(sender, recipients, subject, mail_body, content_type, system_time) {
     console.log("sending mail")
     let mailAttempt = {
         "success": true,
@@ -18,9 +20,9 @@ async function sendMail(sender, recipients, subject, mail_body, content_type) {
         mailAttempt.message = `Error: Sender '${sender}' is not a Premium Lithium email address.`;
         console.log(mailAttempt.message);
         return mailAttempt;
-    }
+    }   
 
-    const messagePayload = {
+    let messagePayload = {
         message: {
             subject: subject,
             body: {
@@ -30,6 +32,16 @@ async function sendMail(sender, recipients, subject, mail_body, content_type) {
             toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
         }
     };
+
+    //If system_time is provided, schedule mail to be sent on that system_time 
+    //Format Time 2019-01-29T20:00:00"
+    if(system_time != undefined){
+        console.log("Email is going to be send on ", system_time)
+        messagePayload.message.singleValueExtendedProperties = [{
+            id: "SystemTime 0x3FEF",
+            value: system_time
+        }]
+    }
 
     try {
         const apiToken = await getNewAPIToken();
