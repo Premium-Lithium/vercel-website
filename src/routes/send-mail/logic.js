@@ -5,9 +5,9 @@ import querystring from 'querystring';
 // import { Client } from "@microsoft/microsoft-graph-client";
 
 
-//If system_time is provided, schedule mail to be sent on that system_time 
+//If date_time is provided, schedule mail to be sent on that date_time 
 //Format Time 2019-01-29T20:00:00"
-async function sendMail(sender, recipients, subject, mail_body, content_type, system_time) {
+async function sendMail(sender, recipients, subject, mail_body, content_type, date_time) {
     console.log("sending mail")
     let mailAttempt = {
         "success": true,
@@ -33,13 +33,13 @@ async function sendMail(sender, recipients, subject, mail_body, content_type, sy
         }
     };
 
-    //If system_time is provided, add a new key on messagePayload to take account of scheduled time
+    //If date_time is provided, add a new key on messagePayload to take account of scheduled time
     //Format Time 2019-01-29T20:00:00"
-    if(system_time){
-        console.log("Email scheduled to send at", system_time)
+    if(date_time){
+        console.log("Email scheduled to send at", date_time)
         messagePayload.message.singleValueExtendedProperties = [{
             id: "SystemTime 0x3FEF",
-            value: system_time
+            value: date_time
         }]
     }
 
