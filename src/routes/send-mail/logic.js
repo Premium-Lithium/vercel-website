@@ -35,8 +35,8 @@ async function sendMail(sender, recipients, subject, mail_body, content_type, sy
 
     //If system_time is provided, schedule mail to be sent on that system_time 
     //Format Time 2019-01-29T20:00:00"
-    if(system_time != undefined){
-        console.log("Email is going to be send on ", system_time)
+    if(system_time){
+        console.log("Email scheduled to send at", system_time)
         messagePayload.message.singleValueExtendedProperties = [{
             id: "SystemTime 0x3FEF",
             value: system_time
