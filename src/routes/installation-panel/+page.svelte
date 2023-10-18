@@ -17,7 +17,8 @@
 		inProgress: 0
 	};
 	const dealId = $page.url.searchParams.get('id');
-	
+	//const dealId = $page.url.pathname.split('/deal/')[1]; //https://premiumlithium.pipedrive.com/deal/7142
+
 	const fieldNames = {
 		assigned: 'Assigned Checklist',
 		inProgress: 'In Progress Checklist'
@@ -59,20 +60,26 @@
 		]
 	};
 
-	onMount(async () => {
-		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 100 });
-	});
-	//  http://localhost:3000/installation-panel?dealId=7083
-
+	
 	onMount(() => {
 
 		if (dealId) {
 			retrieveDealChecklist();
 			getHeight()
+			console.log("Current Stage", currentStage)
 		}
+		
 				
 	});
+	//Work on dynamic height based on number of items in the list.
+	//e.g if each list item is 5px high, then set the div height to be (5px * number_of_items + padding)
+	onMount(async () => {
+		
+		sdk = await new AppExtensionsSDK().initialize();
+		await sdk.execute('resize', { height: 100 });
+	});
+	//  http://localhost:3000/installation-panel?dealId=7083
+
 	// TODO - show current checked checklist and display it on the Panel.
 	async function retrieveDealChecklist() {
 		try {
