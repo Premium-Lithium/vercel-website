@@ -63,23 +63,32 @@
 			// Query Params to add based on tracking type
 			const cardQrCodeURL = qrCodeURL + '&card=1';
 			const cardQrCodeFileName = qrCodeFileName + '_card';
-	
+
 			const clotheQrCodeURL = qrCodeURL + '&clothing=1';
 			const clotheQrCodeFileName = qrCodeFileName + '_clothing';
 
 			// QR Code maker
 			const baseQRbody = JSON.stringify(qrCodeURL);
-			const baseQRRes = await fetch(url+encodeURIComponent(baseQRbody)+"&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg");	
+			const baseQRRes = await fetch(
+				url + encodeURIComponent(baseQRbody) + '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
+			);
 			const baseQR = (await baseQRRes.text()).valueOf();
 
 			const clothesQRbody = JSON.stringify(clotheQrCodeURL);
-			const clothesQRRes = await fetch(url+encodeURIComponent(clothesQRbody)+"&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg");	
+			const clothesQRRes = await fetch(
+				url +
+					encodeURIComponent(clothesQRbody) +
+					'&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
+			);
 			const clothesQR = (await clothesQRRes.text()).valueOf();
-			
+
 			const cardQRbody = JSON.stringify(clotheQrCodeURL);
-			const cardQRRes = await fetch(url+encodeURIComponent(cardQRbody)+"&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg");	
+			const cardQRRes = await fetch(
+				url + encodeURIComponent(cardQRbody) + '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
+			);
 			const cardQR = (await cardQRRes.text()).valueOf();
-			
+
+			// TODO add the QR codes to the database
 		}
 	}
 </script>
