@@ -8,8 +8,9 @@
 	const PUBLIC_SUPABASE_ANON_KEY =
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtZnV3bWR5bm92ZGx5b2psdGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTU3MjE3NzUsImV4cCI6MjAxMTI5Nzc3NX0.PzKOk4uqHBfSRGg8j2LjL0R8WAyp_iBdLckYPEigCvc';
 	const PUBLIC_SUPABASE_URL = 'https://tmfuwmdynovdlyojlthe.supabase.co';
-
 	const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+
+	const url = 'https://api.qrserver.com/v1/create-qr-code/?data=';
 
 	/**
 	 * TODO
@@ -67,13 +68,18 @@
 			const clotheQrCodeFileName = qrCodeFileName + '_clothing';
 
 			// QR Code maker
-			const body = JSON.stringify(qrCodeURL)
+			const baseQRbody = JSON.stringify(qrCodeURL);
+			const baseQRRes = await fetch(url+encodeURIComponent(baseQRbody)+"&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg");	
+			const baseQR = (await baseQRRes.text()).valueOf();
 
-			const qrRes = await fetch("/qr-codes", {
-				method: "POST",
-				body: body
-			})
-			console.log(qrRes);
+			const clothesQRbody = JSON.stringify(clotheQrCodeURL);
+			const clothesQRRes = await fetch(url+encodeURIComponent(clothesQRbody)+"&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg");	
+			const clothesQR = (await clothesQRRes.text()).valueOf();
+			
+			const cardQRbody = JSON.stringify(clotheQrCodeURL);
+			const cardQRRes = await fetch(url+encodeURIComponent(cardQRbody)+"&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg");	
+			const cardQR = (await cardQRRes.text()).valueOf();
+			
 		}
 	}
 </script>
