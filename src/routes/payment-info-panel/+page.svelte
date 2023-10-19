@@ -5,6 +5,7 @@
 	import { writable } from 'svelte/store';
 	import { json } from '@sveltejs/kit';
 	import ProgressBar from '$lib/components/ProgressBar.svelte';
+	import { accessToken } from '$lib/payment-info-panel/sessionStore';
 
 	const dealId = $page.url.searchParams.get('selectedIds'); //dealID in payload is called selectedIds
     const userId = $page.url.searchParams.get('userId'); //userId
@@ -18,7 +19,7 @@
 
     //TO DO - deploy the panel on branch deployment
     //Add authentication for users permmissions.
-    const managerList = ["15970437"]; // for testing purposes this is my userId (Nicholas Dharmadi)
+    const managerList = ["15970437"]; // for testing purposes I'm using my userId (Nicholas Dharmadi)
     const authenticated = managerList.includes(userId);
 
 	let invoice = {
@@ -52,13 +53,9 @@
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
 		await sdk.execute('resize', { height: 315 });
-        const context = await sdk.data.getContext();
-        console.log("SDK", context);
 	});
 
 	onMount(() => {
-        console.log($page.url.pathname)
-        console.log("DealId", dealId)
 		if (dealId) {
 			getPaymentInfo();
 			updateTotalPaidFrom(dummyInvoices);
@@ -100,6 +97,7 @@
 </script>
 
 <div class="payment-panel">
+	{$accessToken}
     <h3>Payment</h3>
 	<hr />
 	<div class="plan">
