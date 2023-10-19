@@ -4,7 +4,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { createClient } from '@supabase/supabase-js';
-	import "qrcode-svg";
+	import { GET } from '../energy-arbitrage/inverter/battery-level/+server';
+	import { json } from '@sveltejs/kit';
 	// TODO put these in env
 	const PUBLIC_SUPABASE_ANON_KEY =
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtZnV3bWR5bm92ZGx5b2psdGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTU3MjE3NzUsImV4cCI6MjAxMTI5Nzc3NX0.PzKOk4uqHBfSRGg8j2LjL0R8WAyp_iBdLckYPEigCvc';
@@ -15,7 +16,7 @@
 	/**
 	 * TODO
 	 * Create input box for the name and add formatting - John Smith -> john_smith DONE
-	 * Find QR code library/API to create the SVGs - https://www.npmjs.com/package/qrcode-svg
+	 * Find QR code library/API to create the SVGs - https://goqr.me/api/doc/create-qr-code/#param_format
 	 * Store them in Supabase instead of Drive
 	 *  - Create new column in supabase table to store the SVGs DONE
 	 * Find a way to render and download them
@@ -36,8 +37,6 @@
 	}
 
 	let referralTable: Array<refRow> = [];
-
-	// $: console.log(clothing, card);
 
 	onMount(async () => {
 		referralTable = await getReferralTable();
@@ -70,6 +69,8 @@
 			const clotheQrCodeFileName = qrCodeFileName + '_clothing';
 
 			// QR Code maker
+			const qrCodeSVG = await GET({json.stringify(qrCodeURL)})
+			console.log(qrCodeSVG);
 
 		}
 	}
