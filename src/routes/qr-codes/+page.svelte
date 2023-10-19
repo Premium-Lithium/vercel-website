@@ -15,10 +15,11 @@
 	/**
 	 * TODO
 	 * Create input box for the name and add formatting - John Smith -> john_smith DONE
-	 * Find QR code library/API to create the SVGs - https://goqr.me/api/doc/create-qr-code/#param_format
+	 * Find QR code library/API to create the SVGs - https://goqr.me/api/doc/create-qr-code/#param_format DONE
 	 * Store them in Supabase instead of Drive
 	 *  - Create new column in supabase table to store the SVGs DONE
-	 * Find a way to render and download them
+	 * 	- Store them in supabase
+	 * Find a way to render and download them 
 	 * Represent the Supabase table DONE
 	 */
 
@@ -58,14 +59,11 @@
 		if (name) {
 			// Creating the QR code link
 			let qrCodeURL = baseURL + '?ref=' + name.toLowerCase().replace(/\s/g, '_');
-			let qrCodeFileName = name.toLowerCase().replace(/\s/g, '_');
 
 			// Query Params to add based on tracking type
 			const cardQrCodeURL = qrCodeURL + '&card=1';
-			const cardQrCodeFileName = qrCodeFileName + '_card';
 
 			const clotheQrCodeURL = qrCodeURL + '&clothing=1';
-			const clotheQrCodeFileName = qrCodeFileName + '_clothing';
 
 			// QR Code maker
 			const baseQRbody = JSON.stringify(qrCodeURL);
@@ -82,13 +80,14 @@
 			);
 			const clothesQR = (await clothesQRRes.text()).valueOf();
 
-			const cardQRbody = JSON.stringify(clotheQrCodeURL);
+			const cardQRbody = JSON.stringify(cardQrCodeURL);
 			const cardQRRes = await fetch(
 				url + encodeURIComponent(cardQRbody) + '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
 			);
 			const cardQR = (await cardQRRes.text()).valueOf();
 
 			// TODO add the QR codes to the database
+
 		}
 	}
 </script>
