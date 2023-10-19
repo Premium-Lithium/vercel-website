@@ -1,18 +1,31 @@
 import { json } from '@sveltejs/kit';
 import pipedrive from 'pipedrive';
+import { XeroClient } from 'xero-node';
+import { pd, readCustomDealField } from '../../lib/pipedrive-utils.js';
+import { redirect } from '@sveltejs/kit';
 
-import { pd, readCustomDealField, dealFieldsRequest, getKeysForCustomFields } from '../../lib/pipedrive-utils.js';
-import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
+const XERO_CLIENT_ID = "58566968C54B401F82854F6C633E43B5"
+const XERO_CLIENT_SECRET = "xHotLIrz1eeZqG3Ggeny7SNISo3XcLkFuwC9hMewAGmJodD2"
+const XERO_REDIRECT_URI = "http://localhost:3000/payment-info-panel/xero-callback"
 
-const companyDomainFields = 'https://api.pipedrive.com/v1/deals/'
-
-let dealId;
+const xero = new XeroClient({
+  clientId: XERO_CLIENT_ID,
+  clientSecret: XERO_CLIENT_SECRET,
+  redirectUris: [XERO_REDIRECT_URI],
+  scopes: 'openid profile email accounting.transactions offline_access'.split(" "),
+  state: 'hastalavista', // custom params (optional)
+  httpTimeout: 3000, // ms (optional)
+  clockTolerance: 10 // seconds (optional)
+});
  
 async function fetchDealData(dealId) {
     try {
         const pdDealsApi = new pipedrive.DealsApi(pd);
         const requestDeal = await pdDealsApi.getDeal(dealId);
 
+        let consentUrl = await xero.buildConsentUrl();
+        console.log(consentUrl)
+        throw redirect(302,consentUrl)
         if (requestDeal.success) {
             const dealData = requestDeal.data
             return dealData;
@@ -26,7 +39,7 @@ async function fetchDealData(dealId) {
     }
 }
 
-//
+
 export async function POST({ request }) {
     try {
         const { dealId } = await request.json();
@@ -39,8 +52,6 @@ export async function POST({ request }) {
     }
 }
 
-//Get data on 
-
 function getPaymentDataFrom(dealData){
     const paymentData = {
         plan: readCustomDealField('Configurator Plan', dealData),
@@ -48,3 +59,5 @@ function getPaymentDataFrom(dealData){
     }
     return paymentData
 }
+
+

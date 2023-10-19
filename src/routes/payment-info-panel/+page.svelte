@@ -15,8 +15,10 @@
 	let formattedPrice;
 	let totalPaidFormatted;
 
+
+    //TO DO - deploy the panel on branch deployment
     //Add authentication for users permmissions.
-    const managerList = ["15970437"];
+    const managerList = ["15970437"]; // for testing purposes this is my userId (Nicholas Dharmadi)
     const authenticated = managerList.includes(userId);
 
 	let invoice = {
