@@ -70,6 +70,7 @@
 		"openai": "4.0.0-beta.12",
 		"pipedrive": "^21.2.0",
 		"postprocessing": "^6.33.0",
+		"qrcode-svg": "^1.1.0",
 		"readline-sync": "^1.4.10",
 		"shopify-token": "^4.1.0",
 		"svelte-material-icons": "^3.0.5",

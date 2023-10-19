@@ -4,6 +4,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { createClient } from '@supabase/supabase-js';
+	import "qrcode-svg";
 	// TODO put these in env
 	const PUBLIC_SUPABASE_ANON_KEY =
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtZnV3bWR5bm92ZGx5b2psdGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTU3MjE3NzUsImV4cCI6MjAxMTI5Nzc3NX0.PzKOk4uqHBfSRGg8j2LjL0R8WAyp_iBdLckYPEigCvc';
@@ -13,17 +14,15 @@
 
 	/**
 	 * TODO
-	 * Create input box for the name and add formatting - John Smith -> john_smith
-	 * Find QR code library/API to create the SVGs
+	 * Create input box for the name and add formatting - John Smith -> john_smith DONE
+	 * Find QR code library/API to create the SVGs - https://www.npmjs.com/package/qrcode-svg
 	 * Store them in Supabase instead of Drive
-	 *  - Create new column in supabase table to store the SVGs
-	 * Find a way to render and download them - https://www.npmjs.com/package/qrcode-svg
-	 * Represent the Supabase table
+	 *  - Create new column in supabase table to store the SVGs DONE
+	 * Find a way to render and download them
+	 * Represent the Supabase table DONE
 	 */
 
-	let clothing: boolean = true,
-		card: boolean = false,
-		name: string = '',
+	let name: string = '',
 		baseURL = 'energiser.ai/';
 
 	interface refRow {
@@ -42,7 +41,7 @@
 
 	onMount(async () => {
 		referralTable = await getReferralTable();
-		referralTable.sort((a, b) => a.id - b.id);
+		referralTable.sort((a, b) => a.id - b.id); // Sort by ID
 		console.log(referralTable);
 	});
 
@@ -59,55 +58,34 @@
 	// Creates a QR code based on the users input
 	async function createQRCode() {
 		if (name) {
-			console.log(clothing, card, name);
-
 			// Creating the QR code link
 			let qrCodeURL = baseURL + '?ref=' + name.toLowerCase().replace(/\s/g, '_');
 			let qrCodeFileName = name.toLowerCase().replace(/\s/g, '_');
 
 			// Query Params to add based on tracking type
-			if (card) {
-				qrCodeURL += '&card=1';
-				qrCodeFileName += '_card';
-			}
-			if (clothing) {
-				qrCodeURL += '&clothing=1';
-				qrCodeFileName += '_clothing';
-			}
+			const cardQrCodeURL = qrCodeURL + '&card=1';
+			const cardQrCodeFileName = qrCodeFileName + '_card';
+	
+			const clotheQrCodeURL = qrCodeURL + '&clothing=1';
+			const clotheQrCodeFileName = qrCodeFileName + '_clothing';
+
+			// QR Code maker
+
 		}
 	}
 </script>
 
 <body>
-	<div class="layout"> 
-		<div class="qrCodeMaker">
-			<h2>Internal QR Codes</h2>
-			<h3>Create a new QR Code</h3>
-			<b>Tracking Options</b>
-			<br />
-			<br />
-			<form class="tracking-form">
-				<label>
-					<input type="checkbox" name="clothing" bind:checked={clothing} />
-					Clothing
-				</label>
-
-				<label>
-					<input type="checkbox" name="card" bind:checked={card} />
-					Business Card
-				</label>
-
-				<!-- <label>
-        <input type="checkbox" name="" value="">
-        ~
-    	</label> -->
+	<div class="layout">
+		<div class="qr-code-maker">
+			<h2>Add a new Referee</h2>
+			<div class="qr-details">
 				<label>
 					Name:
 					<input type="text" name="username" bind:value={name} />
 				</label>
-			</form>
-			<br />
-			<button name="createQR" on:click={createQRCode}>Create QR Code</button>
+				<button name="createQR" on:click={createQRCode}>Create QR Code</button>
+			</div>
 		</div>
 		<div class="referralTable">
 			<h2>Referral Counts</h2>
@@ -131,8 +109,8 @@
 </body>
 
 <style>
-	.tracking-form {
+	.qr-details {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 	}
 </style>
