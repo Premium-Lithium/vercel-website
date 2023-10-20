@@ -12,6 +12,11 @@
 
 	const url = 'https://api.qrserver.com/v1/create-qr-code/?data=';
 
+	let qrCodeCreated = false;
+	let baseQR: string;
+	let clothesQR: string;
+	let cardQR: string;
+
 	/**
 	 * TODO
 	 * Create input box for the name and add formatting - John Smith -> john_smith DONE
@@ -19,12 +24,13 @@
 	 * Store them in Supabase instead of Drive
 	 *  - Create new column in supabase table to store the SVGs DONE
 	 * 	- Store them in supabase
-	 * Find a way to render and download them 
+	 * Find a way to render and download them
 	 * Represent the Supabase table DONE
 	 */
 
-	let name: string = '',
-		baseURL = 'energiser.ai/';
+	let addName: string = '',
+		lookupName: string = '',
+		baseURL = 'https://energiser.ai/';
 
 	interface refRow {
 		count: number;
@@ -40,8 +46,7 @@
 
 	onMount(async () => {
 		referralTable = await getReferralTable();
-		referralTable.sort((a, b) => a.id - b.id); // Sort by ID
-		console.log(referralTable);
+		referralTable.sort((a, b) => b.count - a.count); // Sort by ID
 	});
 
 	// Gets the referrals table from Supabase
@@ -56,9 +61,9 @@
 
 	// Creates a QR code based on the users input
 	async function createQRCode() {
-		if (name) {
+		if (addName) {
 			// Creating the QR code link
-			let qrCodeURL = baseURL + '?ref=' + name.toLowerCase().replace(/\s/g, '_');
+			let qrCodeURL = baseURL + '?ref=' + addName.toLowerCase().replace(/\s/g, '_');
 
 			// Query Params to add based on tracking type
 			const cardQrCodeURL = qrCodeURL + '&card=1';
@@ -70,7 +75,8 @@
 			const baseQRRes = await fetch(
 				url + encodeURIComponent(baseQRbody) + '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
 			);
-			const baseQR = (await baseQRRes.text()).valueOf();
+			baseQR = (await baseQRRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
+			console.log(baseQR);
 
 			const clothesQRbody = JSON.stringify(clotheQrCodeURL);
 			const clothesQRRes = await fetch(
@@ -78,33 +84,29 @@
 					encodeURIComponent(clothesQRbody) +
 					'&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
 			);
-			const clothesQR = (await clothesQRRes.text()).valueOf();
+			clothesQR = (await clothesQRRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
 
 			const cardQRbody = JSON.stringify(cardQrCodeURL);
 			const cardQRRes = await fetch(
 				url + encodeURIComponent(cardQRbody) + '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
 			);
-			const cardQR = (await cardQRRes.text()).valueOf();
+			cardQR = (await cardQRRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
 
 			// TODO add the QR codes to the database
-
+			// TODO add right hand panel for searching for a users
+			qrCodeCreated = true;
 		}
 	}
+
+	function lookupQRCode() {
+
+	}
+
 </script>
 
 <body>
 	<div class="layout">
-		<div class="qr-code-maker">
-			<h2>Add a new Referee</h2>
-			<div class="qr-details">
-				<label>
-					Name:
-					<input type="text" name="username" bind:value={name} />
-				</label>
-				<button name="createQR" on:click={createQRCode}>Create QR Code</button>
-			</div>
-		</div>
-		<div class="referralTable">
+		<div class="referral-table">
 			<h2>Referral Counts</h2>
 			<!-- Table for referrals -->
 			<table>
@@ -122,12 +124,87 @@
 				{/each}
 			</table>
 		</div>
+		<div class="qr-lookup">
+			<h2>QR Code Lookup</h2>
+			<div class="lookup-input">
+				<label>
+					Name:
+					<input type="text" name="username" bind:value={addName} />
+				</label>
+				<button name="createQR" on:click={lookupQRCode}>Lookup QR Codes</button>
+			</div>
+		</div>
+		<div class="qr-code-maker">
+			<h2>Add a new Referee</h2>
+			<div class="qr-details">
+				<label>
+					Name:
+					<input type="text" name="username" bind:value={lookupName} />
+				</label>
+				<button name="createQR" on:click={createQRCode}>Create QR Code</button>
+			</div>
+			<div class="qr-render">
+				{#if qrCodeCreated}
+					<div class="qr-codes">
+						<div class="base-qr">
+							<h3>Base QR Code</h3>
+							<div class="base-qr-render">{@html baseQR}</div>
+						</div>
+						<div class="clothes-qr">
+							<h3>Clothes QR Code</h3>
+							<div class="clothes-qr-render">{@html clothesQR}</div>
+						</div>
+						<div class="card-qr">
+							<h3>Card QR Code</h3>
+							<div class="card-qr-render">{@html cardQR}</div>
+						</div>
+					</div>
+				{/if}
+			</div>
+		</div>
 	</div>
 </body>
 
 <style>
-	.qr-details {
+	.layout {
+		padding: 2%;
 		display: flex;
 		flex-direction: row;
 	}
+
+	.referral-table {
+		padding: 10px;
+		width: 15%;
+		border-right: 3px solid black;
+	}
+
+	.qr-code-maker {
+		padding: 10px;
+		padding: 10px;
+	}
+	.qr-details {
+		display: flex;
+		flex-direction: row;
+		padding: 10px;
+	}
+
+	.qr-lookup {
+		display: flex;
+		width: 60%;
+		flex-direction: column;
+		padding: 10px;
+		border-right: 3px solid black;
+	}
+
+	.qr-render {
+		width: 25%;
+	}
+
+	.qr-codes {
+		display: flex;
+		width: 100%;
+		flex-direction: column;
+		padding: 10px;
+	}
+
 </style>
