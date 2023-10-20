@@ -18,10 +18,10 @@ export async function GET({ request }) {
 function initAPIClient({ accessToken = '', refreshToken = '' }) {
     const client = new ApiClient();
     const oAuth2 = client.authentications.oauth2;
-
-    oAuth2.clientId = "4481e66b04925a66";
-    oAuth2.clientSecret = "7b212b78ebac2effb210c3e7fc980971bed71b2d";
-    oAuth2.redirectUri = "https://0720-62-232-61-90.ngrok-free.app/payment-info-panel-callback";
+    
+    oAuth2.clientId = "384bd950042db8e0";
+    oAuth2.clientSecret = "a80006aaa7d7c247e4a726d5a4f706aa617b6b85";
+    oAuth2.redirectUri = "https://6fe0-62-232-61-90.ngrok-free.app/payment-info-panel-callback";
     if (accessToken)
         oAuth2.accessToken = accessToken;
 

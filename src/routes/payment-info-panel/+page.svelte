@@ -1,5 +1,5 @@
 <script>
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 	import { writable } from 'svelte/store';
@@ -7,8 +7,11 @@
 	import ProgressBar from '$lib/components/ProgressBar.svelte';
 	import { accessToken } from '$lib/payment-info-panel/sessionStore';
 
-	const dealId = $page.url.searchParams.get('selectedIds'); //dealID in payload is called selectedIds
-    const userId = $page.url.searchParams.get('userId'); //userId
+	//const dealId = $page.url.searchParams.get('selectedIds'); //dealID in payload is called selectedIds
+	const dealId = 7142;
+	const userId = $page.url.searchParams.get('userId'); //userId
+	const tempCode = $page.url.searchParams.get('code'); //accessToken is passed thru URL for now (not a really good idea)
+
 	let currentPlan;
 	let totalPaid = writable(0);
 	let price = 0;
@@ -16,11 +19,10 @@
 	let formattedPrice;
 	let totalPaidFormatted;
 
-
-    //TO DO - deploy the panel on branch deployment
-    //Add authentication for users permmissions.
-    const managerList = ["15970437"]; // for testing purposes I'm using my userId (Nicholas Dharmadi)
-    const authenticated = managerList.includes(userId);
+	//TO DO - deploy the panel on branch deployment
+	//Add authentication for users permmissions.
+	const managerList = ['15970437']; // for testing purposes I'm using my userId (Nicholas Dharmadi)
+	const authenticated = managerList.includes(userId);
 
 	let invoice = {
 		id: '',
@@ -56,9 +58,12 @@
 	});
 
 	onMount(() => {
-		if (dealId) {
+		if (dealId && tempCode) {
 			getPaymentInfo();
 			updateTotalPaidFrom(dummyInvoices);
+			console.log('ALL PASS');
+		} else if (tempCode) {
+			console.log('temp pass');
 		}
 	});
 
@@ -68,14 +73,15 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					dealId: dealId
+					dealId: dealId,
+					tempCode: tempCode
 				})
 			});
 			if (response.ok) {
 				const responseData = await response.json();
 				console.log('Received:', responseData);
-				currentPlan = responseData.plan;
-				price = responseData.price;
+				currentPlan = responseData.paymentData.plan;
+				price = responseData.paymentData.price;
 			}
 		} catch (error) {
 			console.log(error);
@@ -97,8 +103,14 @@
 </script>
 
 <div class="payment-panel">
-	{$accessToken}
-    <h3>Payment</h3>
+	<div class="header">
+		<h3>Payment</h3>
+		<a
+			href="https://login.xero.com/identity/connect/authorize?client_id=58566968C54B401F82854F6C633E43B5&scope=openid%20profile%20email%20accounting.transactions%20offline_access&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fpayment-info-panel"
+			class="link-btn">Sync</a
+		>
+	</div>
+
 	<hr />
 	<div class="plan">
 		<p>Plan: {currentPlan}</p>
@@ -118,25 +130,37 @@
 		</div>
 	</div>
 	<hr />
-    {#if authenticated}
-        <div class="manager-view">
-            <p>Margin: Profit:</p>
-        </div>
-    {/if}
+	{#if authenticated}
+		<div class="manager-view">
+			<p>Margin: Profit:</p>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.payment-panel {
-		padding: 0 15px;
+		padding: 15px;
 		border: 0px solid grey;
+	}
+
+	.header {
+		display: grid;
+		grid-template-columns: auto auto;
 	}
 
 	.payment-details {
 		display: grid;
 		grid-template-columns: auto auto auto;
-        
-        & div {
-            padding: 2px;
-        }
+
+		& div {
+			padding: 2px;
+		}
+	}
+
+	.link-btn {
+		background-color: #60b7bd;
+		color: white;
+		text-decoration: none;
+		text-align: center;
 	}
 </style>
