@@ -103,8 +103,12 @@
 </script>
 
 <div class="payment-panel">
+	<h3>Payment</h3>
 	<div class="header">
-		<h3>Payment</h3>
+		<a
+			href="https://login.xero.com/identity/connect/authorize?client_id=58566968C54B401F82854F6C633E43B5&scope=openid%20profile%20email%20accounting.transactions%20offline_access&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fpayment-info-panel"
+			class="link-btn invoice">Generate Invoice</a
+		>
 		<a
 			href="https://login.xero.com/identity/connect/authorize?client_id=58566968C54B401F82854F6C633E43B5&scope=openid%20profile%20email%20accounting.transactions%20offline_access&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fpayment-info-panel"
 			class="link-btn">Sync</a
@@ -158,9 +162,13 @@
 	}
 
 	.link-btn {
-		background-color: #60b7bd;
+		background-color: #939393;
 		color: white;
 		text-decoration: none;
 		text-align: center;
+
+		&.invoice {
+			background-color: #373376;
+		}
 	}
 </style>

@@ -41,15 +41,15 @@ export async function POST({ request }) {
 
         const dealData = await fetchDealData(dealId);
         const paymentData = getPaymentDataFrom(dealData);
-        console.log(tempCode)
-        const token = await exchangeTokenFrom(tempCode);
-        console.log("access token: ", token)
+        const tokens = await exchangeTokenFrom(tempCode);
 
+    
         //store token to supabase (?)
-        getConnections(token)
+        //getConnections(token)
+        const allInvoices = await getInvoices(tokens.access_token);
         let data = {
             paymentData: paymentData,
-            invoices: getInvoices(token)
+            invoice: getInvoiceFromRef(allInvoices, 'PL0005577')
         }
         return json(data);
     } catch (error) {
@@ -70,7 +70,6 @@ function getPaymentDataFrom(dealData) {
     return paymentData
 }
 
-
 //Invoices:
 // Amount Due   |   Paid      | 
 async function getInvoices(token) {
@@ -83,8 +82,39 @@ async function getInvoices(token) {
     })
     const responseData = await response.json()
     const invoices = responseData.Invoices //Array of invoices
-    console.log(responseData)
-    return new Response(JSON.stringify(responseData))
+    return invoices
+}
+
+//WIP 
+async function refreshToken(refresh_token) {
+    const data = {
+        grant_type: 'authorization_code',
+        refresh_token: refresh_token
+    }
+    const payload = querystring.stringify(data)
+    const headers = {
+        'Authorization': "Basic " + btoa(XERO_CLIENT_ID + ":" + XERO_CLIENT_SECRET),
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    const options = {
+        method: 'POST',
+        headers: headers,
+        body: payload
+    }
+    const response = await fetch("https://identity.xero.com/connect/token", options)
+    const responseData = await response.json();
+    return responseData
+}
+
+//getInvoiceFromRef
+function getInvoiceFromRef(invoices, reference) {
+    let invoiceFound = []
+    for (const i in invoices) {
+        if (invoices[i].Reference === reference) {
+            invoiceFound.push(invoices[i])
+        }
+    }
+    return invoiceFound
 }
 //Check the authorized tenants (getting the xero-tenant-id)
 async function getConnections(token) {
@@ -120,9 +150,8 @@ async function exchangeTokenFrom(code) {
         const response = await fetch("https://identity.xero.com/connect/token", options)
         const data = await response.json();
 
-        if (data.access_token) {
-            console.log(data)
-            const token = data.access_token;
+        if (data) {
+            const token = data;
             return token;
         } else {
             console.log('Error exchanging token');
