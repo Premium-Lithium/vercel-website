@@ -2,9 +2,7 @@ import { json } from '@sveltejs/kit';
 import pipedrive from 'pipedrive';
 import { XeroClient } from 'xero-node';
 import { pd, readCustomDealField } from '../../lib/pipedrive-utils.js';
-import { accessToken } from '$lib/payment-info-panel/sessionStore.js';
 import querystring from 'querystring';
-import { redirect } from '@sveltejs/kit';
 
 const XERO_CLIENT_ID = "58566968C54B401F82854F6C633E43B5"
 const XERO_CLIENT_SECRET = "xHotLIrz1eeZqG3Ggeny7SNISo3XcLkFuwC9hMewAGmJodD2"
@@ -15,6 +13,28 @@ const xero = new XeroClient({
     clientSecret: XERO_CLIENT_SECRET,
     grantType: 'client_credentials'
 });
+
+export async function POST({ request }) {
+    try {
+        const { dealId, tempCode } = await request.json();
+
+        const dealData = await fetchDealData(dealId);
+        const paymentData = getPaymentDataFrom(dealData);
+        const tokens = await exchangeTokenFrom(tempCode);
+        await fetchProductsFromDeal(dealId)
+        //store token to supabase (?)
+        //getConnections(token)
+        const allInvoices = await getInvoices(tokens.access_token);
+        let data = {
+            paymentData: paymentData,
+            invoice: getInvoiceFromRef(allInvoices, 'PL0005577')
+        }
+        return json(data);
+    } catch (error) {
+        console.log("Error:", error);
+        return json({ error: "Can't get dealData" })
+    }
+}
 
 async function fetchDealData(dealId) {
     try {
@@ -34,38 +54,49 @@ async function fetchDealData(dealId) {
     }
 }
 
-
-export async function POST({ request }) {
+async function fetchProductsFromDeal(dealId){
     try {
-        const { dealId, tempCode } = await request.json();
+        const response = await fetch(`https://api.pipedrive.com/v1/deals/${dealId}/products?api_token=77a5356773f422eb97c617fd7c37ee526da11851`)
+        const responseData = await response.json()
+        const products = responseData.data.map((item) => {
+            return {
+              name: item.name,
+              price: item.item_price,
+              quantity: item.quantity,
+              tax: item.tax,
+            };
+          });
+        console.log("Products List:", products)
+        return products
 
-        const dealData = await fetchDealData(dealId);
-        const paymentData = getPaymentDataFrom(dealData);
-        const tokens = await exchangeTokenFrom(tempCode);
-
-    
-        //store token to supabase (?)
-        //getConnections(token)
-        const allInvoices = await getInvoices(tokens.access_token);
-        let data = {
-            paymentData: paymentData,
-            invoice: getInvoiceFromRef(allInvoices, 'PL0005577')
-        }
-        return json(data);
     } catch (error) {
-        console.log("Error:", error);
-        return json({ error: "Can't get dealData" })
+        console.error('Error:', error);
+        return json({ error: 'An error occurred' }, { status: 500 });
     }
 }
+//TO DO - create a valid invoice from a deal 
+async function createXeroInvoiceFromDeal(dealId){
+    const person = {
+        name: "",
 
-//Payment Data would need enough information to conenct with invoice, such as
+    }
+    const products = fetchProductsFromDeal(dealId)
+    
+    const response = await fetch('https://api.xero.com/api.xro/2.0/Invoices')
+}
+
+
+//Payment Data would need enough information to generate Xero invoice, such as
 //PersonID.name: e.g Richard Goodenough
 //PL Number: eg. PL0005577
+//Date:
+//Product Details: Name, Price, Quantity, Tax
 //Identifier for Reference
 function getPaymentDataFrom(dealData) {
     const paymentData = {
         plan: readCustomDealField('Configurator Plan', dealData),
-        price: dealData.value
+        price: dealData.value,
+        pl_number: readCustomDealField('PL Number', dealData)
     }
     return paymentData
 }
