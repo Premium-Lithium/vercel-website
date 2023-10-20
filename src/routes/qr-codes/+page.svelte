@@ -13,9 +13,15 @@
 	const url = 'https://api.qrserver.com/v1/create-qr-code/?data=';
 
 	let qrCodeCreated = false;
+	let searchMade = false;
+	let nameFound = false;
+	let nameSearchedFor: string;
 	let baseQR: string;
 	let clothesQR: string;
 	let cardQR: string;
+	let lookupBaseQR: string;
+	let lookupClothesQR: string;
+	let lookupCardQR: string;
 
 	/**
 	 * TODO
@@ -92,74 +98,109 @@
 			);
 			cardQR = (await cardQRRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
 
-			// TODO add the QR codes to the database
-			// TODO add right hand panel for searching for a users
+			// TODO add the created QR codes to the database
+			// TODO allow user to download QR codes from the lookup (+ zip the codes first)
+			// TODO allow user to download all QR codes (+ zip codes first)
 			qrCodeCreated = true;
 		}
 	}
 
 	function lookupQRCode() {
-
+		if (lookupName) {
+			searchMade = true;
+			nameSearchedFor = lookupName;
+			for (let entry in referralTable) {
+				if (referralTable[entry].referee === lookupName.toLowerCase()) {
+					nameFound = true;
+					lookupBaseQR = referralTable[entry].qrcodebase;
+					lookupCardQR = referralTable[entry].qrcodecard;
+					lookupClothesQR = referralTable[entry].qrcodeclothes;
+				}
+			}
+		}
 	}
-
 </script>
 
 <body>
-	<div class="layout">
-		<div class="referral-table">
-			<h2>Referral Counts</h2>
-			<!-- Table for referrals -->
-			<table>
-				<tr>
-					<th>ID</th>
-					<th>User</th>
-					<th>Count</th>
-				</tr>
-				{#each referralTable as user}
+	<div class="title">
+		<h1>Internal Referral Tracking and Lookup</h1>
+		<div class="layout">
+			<div class="referral-table">
+				<h2>Referral Counts</h2>
+				<!-- Table for referrals -->
+				<table>
 					<tr>
-						<td>{user.id}</td>
-						<td>{user.referee}</td>
-						<td>{user.count}</td>
+						<th>ID</th>
+						<th>User</th>
+						<th>Count</th>
 					</tr>
-				{/each}
-			</table>
-		</div>
-		<div class="qr-lookup">
-			<h2>QR Code Lookup</h2>
-			<div class="lookup-input">
-				<label>
-					Name:
-					<input type="text" name="username" bind:value={addName} />
-				</label>
-				<button name="createQR" on:click={lookupQRCode}>Lookup QR Codes</button>
+					{#each referralTable as user}
+						<tr>
+							<td>{user.id}</td>
+							<td>{user.referee}</td>
+							<td>{user.count}</td>
+						</tr>
+					{/each}
+				</table>
 			</div>
-		</div>
-		<div class="qr-code-maker">
-			<h2>Add a new Referee</h2>
-			<div class="qr-details">
-				<label>
-					Name:
-					<input type="text" name="username" bind:value={lookupName} />
-				</label>
-				<button name="createQR" on:click={createQRCode}>Create QR Code</button>
+			<div class="qr-lookup">
+				<h2>QR Code Lookup</h2>
+				<div class="lookup-input">
+					<label>
+						Name:
+						<input type="text" name="username" bind:value={lookupName} />
+					</label>
+					<button name="createQR" on:click={lookupQRCode}>Lookup QR Codes</button>
+				</div>
+				<div class="lookup-output">
+					{#if searchMade}
+						{#if nameFound}
+							<p>QR Codes for {nameSearchedFor}</p>
+							<div class="qr-code-lookup-render">
+								{#each [['Base QR Code', lookupBaseQR], ['Business Card QR Code', lookupCardQR], ['Clothing QR Code', lookupClothesQR]] as qr}
+									<div class="qr-code-lookup-element">
+										<b>{qr[0]}</b>
+										{#if qr[1]}
+											{@html qr[1]}
+										{:else}
+											<p>No QR Code Found</p>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						{:else}
+							<b>{nameSearchedFor} not found</b>
+						{/if}
+					{/if}
+				</div>
 			</div>
-			<div class="qr-render">
-				{#if qrCodeCreated}
-					<div class="qr-codes">
-						<div class="base-qr">
-							<h3>Base QR Code</h3>
-							<div class="base-qr-render">{@html baseQR}</div>
+			<div class="qr-code-maker">
+				<h2>Add a new Referee</h2>
+				<div class="qr-details">
+					<label>
+						Name:
+						<input type="text" name="username" bind:value={lookupName} />
+					</label>
+					<button name="createQR" on:click={createQRCode}>Create QR Code</button>
+				</div>
+				<div class="qr-render">
+					{#if qrCodeCreated}
+						<div class="qr-codes">
+							<div class="base-qr">
+								<h3>Base QR Code</h3>
+								<div class="base-qr-render">{@html baseQR}</div>
+							</div>
+							<div class="clothes-qr">
+								<h3>Clothes QR Code</h3>
+								<div class="clothes-qr-render">{@html clothesQR}</div>
+							</div>
+							<div class="card-qr">
+								<h3>Card QR Code</h3>
+								<div class="card-qr-render">{@html cardQR}</div>
+							</div>
 						</div>
-						<div class="clothes-qr">
-							<h3>Clothes QR Code</h3>
-							<div class="clothes-qr-render">{@html clothesQR}</div>
-						</div>
-						<div class="card-qr">
-							<h3>Card QR Code</h3>
-							<div class="card-qr-render">{@html cardQR}</div>
-						</div>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>
@@ -207,4 +248,13 @@
 		padding: 10px;
 	}
 
+	.qr-code-lookup-render {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.qr-code-lookup-element {
+		display: flex;
+		flex-direction: column;
+	}
 </style>
