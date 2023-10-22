@@ -18,6 +18,8 @@
 	let sdk;
 	let formattedPrice;
 	let totalPaidFormatted;
+	let authUrl;
+	let pdfData;
 
 	//TO DO - deploy the panel on branch deployment
 	//Add authentication for users permmissions.
@@ -62,10 +64,22 @@
 			getPaymentInfo();
 			updateTotalPaidFrom(dummyInvoices);
 			console.log('ALL PASS');
-		} else if (tempCode) {
+		} else {
 			console.log('temp pass');
+			getAuthLink();
 		}
 	});
+
+	async function getAuthLink() {
+		try {
+			//Get the Auth login link
+			const response = await fetch('/payment-info-panel');
+			const responseData = await response.json();
+			authUrl = responseData;
+		} catch (error) {
+			console.log('Error');
+		}
+	}
 
 	async function getPaymentInfo() {
 		try {
@@ -82,6 +96,7 @@
 				console.log('Received:', responseData);
 				currentPlan = responseData.paymentData.plan;
 				price = responseData.paymentData.price;
+				pdfData = responseData.buffer.data;
 			}
 		} catch (error) {
 			console.log(error);
@@ -105,10 +120,7 @@
 <div class="payment-panel">
 	<h3>Payment</h3>
 	<div class="header">
-		<a
-			href="https://login.xero.com/identity/connect/authorize?client_id=58566968C54B401F82854F6C633E43B5&scope=openid%20profile%20email%20accounting.transactions%20offline_access&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fpayment-info-panel"
-			class="link-btn invoice">Generate Invoice</a
-		>
+		<a href={authUrl} class="link-btn invoice">Generate Invoice</a>
 		<a
 			href="https://login.xero.com/identity/connect/authorize?client_id=58566968C54B401F82854F6C633E43B5&scope=openid%20profile%20email%20accounting.transactions%20offline_access&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fpayment-info-panel"
 			class="link-btn">Sync</a
@@ -134,6 +146,16 @@
 		</div>
 	</div>
 	<hr />
+	{#if pdfData}
+		<a
+			href={URL.createObjectURL(new Blob([new Uint8Array(pdfData).buffer]))}
+			download="invoice.pdf"
+		>
+			Download Invoice PDF
+		</a>
+	{:else}
+		<p>Error fetching PDF data</p>
+	{/if}
 	{#if authenticated}
 		<div class="manager-view">
 			<p>Margin: Profit:</p>
