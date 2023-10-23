@@ -8,7 +8,7 @@
 	import { accessToken } from '$lib/payment-info-panel/sessionStore';
 
 	//const dealId = $page.url.searchParams.get('selectedIds'); //dealID in payload is called selectedIds
-	const dealId = 7142;
+	const dealId = 6227;
 	const userId = $page.url.searchParams.get('userId'); //userId
 	const tempCode = $page.url.searchParams.get('code'); //accessToken is passed thru URL for now (not a really good idea)
 
@@ -127,7 +127,7 @@
 	</div>
 	{#if xeroPdfData}
 		<a
-			href={URL.createObjectURL(new Blob([new Uint8Array(pdfData).buffer]))}
+			href={URL.createObjectURL(new Blob([new Uint8Array(xeroPdfData).buffer]))}
 			download="invoice.pdf"
 		>
 			Download Invoice PDF
