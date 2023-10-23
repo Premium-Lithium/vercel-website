@@ -4,10 +4,14 @@ import { XeroClient, Invoices, Invoice, LineItem, Contact } from 'xero-node';
 import { pd, readCustomDealField } from '../../lib/pipedrive-utils.js';
 import querystring from 'querystring';
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import getStream from 'get-stream';
 
 const XERO_CLIENT_ID = "58566968C54B401F82854F6C633E43B5"
 const XERO_CLIENT_SECRET = "xHotLIrz1eeZqG3Ggeny7SNISo3XcLkFuwC9hMewAGmJodD2"
 const XERO_REDIRECT_URI = "http://localhost:3000/payment-info-panel"
+
+const SAFETY_CULTURE_TOKEN = "f5a8b512b90d4ea239858d63f768cdbcdb8cd83c6bd2216001ceb5f20a35632c"
 
 const xero = new XeroClient({
     clientId: XERO_CLIENT_ID,
@@ -29,11 +33,13 @@ export async function POST({ request }) {
         const activeTenantId = await startXero(tokenSet)
         const allInvoices = await getInvoices(activeTenantId);
         const pdfBuffer = await getInvoiceAsPDF(activeTenantId, "ca348509-7c4f-4bf4-8a94-0b43c71cd1d1")
-
+        await getInspectionsFrom()
+        
         let data = {
             paymentData: paymentData,
             invoice: getInvoiceFromRef(allInvoices, 'PL0005577'),
-            buffer: pdfBuffer
+            buffer: pdfBuffer,
+            safetyCulturePdfLink: await exportInspectionToPDFLink("audit_fa3a22f70d89462da2a169dd76864e50")
         }
 
         return json(data);
@@ -56,6 +62,7 @@ export async function GET({ request }) {
 //Initialization 
 //Get Active Tenant
 // TO DO - refresh the token so user does not need to keep on clicking authorize multiple times
+// Gets token from supabase and check if its expired, then refresh
 async function startXero(tokenSet) {
     console.log(tokenSet)
 
@@ -99,7 +106,7 @@ async function fetchDealData(dealId) {
 }
 
 // TO DO - PDF needs to be stored as a file instead of a buffer to be attached to Pipedrive deals. So might need to upload to supabase.
-async function attachPDFTo(buffer, dealId) {
+async function attachXeroPDFToDeal(buffer, dealId) {
     try {
         // Store the invoice to static folder temporarily so it can be attached to pipedrive deals (API reads a file and does not like blob objects)
         const filePath = './static/invoice.pdf';
@@ -214,6 +221,7 @@ async function createXeroInvoiceFromDeal(dealId) {
 }
 
 
+
 //Payment Data would need enough information to generate Xero invoice, such as
 //PersonID.name: e.g Richard Goodenough
 //PL Number: eg. PL0005577
@@ -224,10 +232,13 @@ function getPaymentDataFrom(dealData) {
     const paymentData = {
         plan: readCustomDealField('Configurator Plan', dealData),
         price: dealData.value,
-        pl_number: readCustomDealField('PL Number', dealData)
+        pl_number: readCustomDealField('PL Number', dealData),
+        person_name: dealData.person_name
     }
     return paymentData
 }
+
+
 
 
 async function getInvoiceAsPDF(activeTenantId, invoiceId) {
@@ -336,4 +347,80 @@ async function getTokenSetFrom(code) {
     } catch (error) {
         console.log("Error fetching")
     }
+}
+
+const safetyCultureTemplatesId = {
+    'PV, Battery and EV Survey': 'template_ca68194ee1fa4fae98c923fb5e3b4edb',
+    'Solar PV & Battery Storage Survey': 'template_6f1eec9f81494d3e96704ddd39739cbe'
+
+}
+
+const Logo = "0ab5dc1c-ded8-4241-8df3-07ac5a30e3da"
+
+// SafeCulture API
+// Search through all audits (inspections)
+// Find and match which audits matches the person_name or PL number (Each Inspections needs a TITLE! and a PL number is attached to it)
+// Get the media file (PDF) 
+// attach it to pipedrive
+async function getInspectionsFrom() {
+    const audit_id = "audit_fa3a22f70d89462da2a169dd76864e50"
+    const response = await fetch(`https://api.safetyculture.io/audits/audit_fa3a22f70d89462da2a169dd76864e50`, {
+        headers: {
+            'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+        }
+    })
+    const responseData = await response.json()
+    const auditsList = responseData.audits
+    console.log(responseData)
+
+    await exportInspectionToPDFLink(audit_id)
+    /*
+    //Loop through each audits_data, and find which matches
+    for (const i in auditsList) {
+        const audit_id = auditsList[i].audit_id
+        const response = await fetch(`https://api.safetyculture.io/audits/${audit_id}`, {
+            headers: {
+                'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+            }
+        })
+        const responseData = await response.json()
+    }*/
+}
+
+// API returns download link to PDF
+async function exportInspectionToPDFLink(inspection_id) {
+    const options = {
+        method: 'POST',
+        headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+        },
+        body: JSON.stringify({
+            type: 'DOCUMENT_TYPE_PDF',
+            export_data: [
+                {
+                    inspection_id: inspection_id,
+                }
+            ]
+        })
+
+    }
+    const response = await fetch('https://api.safetyculture.io/inspection/v1/export', options)
+    const responseData = await response.json() // returns PDF download link
+    console.log(responseData.url)
+    const pdfResponse = await fetch(responseData.url, {
+        headers: {
+            'Content-Type': 'text/pdf'
+        }
+    }) // Make HTTP request to download the file
+    const pdfResponseBody = await pdfResponse.json()
+    const filePath = './static/site_survey.pdf';
+    const buffer = await getStream(pdfResponse.body);
+
+    console.log(pdfResponseBody)
+    //TO DO - convert readable stream to buffer
+    fs.writeFileSync(filePath, buffer);
+    
+    return responseData.url
 }

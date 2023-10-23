@@ -19,7 +19,8 @@
 	let formattedPrice;
 	let totalPaidFormatted;
 	let authUrl;
-	let pdfData;
+	let xeroPdfData;
+	let safetyCulturePdfLink;
 
 	//TO DO - deploy the panel on branch deployment
 	//Add authentication for users permmissions.
@@ -96,7 +97,8 @@
 				console.log('Received:', responseData);
 				currentPlan = responseData.paymentData.plan;
 				price = responseData.paymentData.price;
-				pdfData = responseData.buffer.data;
+				xeroPdfData = responseData.buffer.data;
+				safetyCulturePdfLink = responseData.safetyCulturePdfLink
 			}
 		} catch (error) {
 			console.log(error);
@@ -120,12 +122,25 @@
 <div class="payment-panel">
 	<h3>Payment</h3>
 	<div class="header">
-		<a href={authUrl} class="link-btn invoice">Generate Invoice</a>
-		<a
-			href="https://login.xero.com/identity/connect/authorize?client_id=58566968C54B401F82854F6C633E43B5&scope=openid%20profile%20email%20accounting.transactions%20offline_access&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fpayment-info-panel"
-			class="link-btn">Sync</a
-		>
+		<a href={authUrl} class="link-btn invoice">Generate Xero Invoice From Deal</a>
+		<a href={safetyCulturePdfLink} class="link-btn safetyculture">Download SafetyCulture PDF</a>
 	</div>
+	{#if xeroPdfData}
+		<a
+			href={URL.createObjectURL(new Blob([new Uint8Array(pdfData).buffer]))}
+			download="invoice.pdf"
+		>
+			Download Invoice PDF
+		</a>
+	{/if}
+	{#if safetyCulturePdfLink}
+		<a
+			href={safetyCulturePdfLink}
+			download="site-survey.pdf"
+		>
+			Download Site Survey PDF
+		</a>
+	{/if}
 
 	<hr />
 	<div class="plan">
@@ -146,16 +161,7 @@
 		</div>
 	</div>
 	<hr />
-	{#if pdfData}
-		<a
-			href={URL.createObjectURL(new Blob([new Uint8Array(pdfData).buffer]))}
-			download="invoice.pdf"
-		>
-			Download Invoice PDF
-		</a>
-	{:else}
-		<p>Error fetching PDF data</p>
-	{/if}
+	
 	{#if authenticated}
 		<div class="manager-view">
 			<p>Margin: Profit:</p>
@@ -171,7 +177,7 @@
 
 	.header {
 		display: grid;
-		grid-template-columns: auto auto;
+		grid-template-columns: 50% 50%;
 	}
 
 	.payment-details {
@@ -188,6 +194,9 @@
 		color: white;
 		text-decoration: none;
 		text-align: center;
+		padding: 10px;
+		margin: 10px;
+		border-radius: 10px;
 
 		&.invoice {
 			background-color: #373376;
