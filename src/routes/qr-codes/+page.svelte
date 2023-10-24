@@ -27,11 +27,16 @@
 	 * TODO
 	 * Create input box for the name and add formatting - John Smith -> john_smith DONE
 	 * Find QR code library/API to create the SVGs - https://goqr.me/api/doc/create-qr-code/#param_format DONE
-	 * Store them in Supabase instead of Drive
+	 * Store them in Supabase instead of Drive DONE
 	 *  - Create new column in supabase table to store the SVGs DONE
-	 * 	- Store them in supabase
+	 * 	- Store them in supabase DONE
 	 * Find a way to render and download them
 	 * Represent the Supabase table DONE
+	 * Allow user to download all QR codes
+	 * 	- put each persons qr codes into a folder under their name
+	 * 	- put each folder into a single qr code folder and zip it
+	 * 	- download the file
+	 * 
 	 */
 
 	let addName: string = '',
@@ -65,6 +70,16 @@
 		}
 	}
 
+	async function qrCodeMaker(base: string, id: string) {
+		const qrOptions = '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
+		const qrBody = JSON.stringify(base + "&id=" + id);
+		const qrRes = await fetch(url + encodeURIComponent(qrBody) + qrOptions)
+		const qrCode = (await qrRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
+
+		// console.log(qrCode);
+		return qrCode
+	}
+
 	// Creates a QR code based on the users input
 	async function createQRCode() {
 		if (addName) {
@@ -72,36 +87,41 @@
 			let qrCodeURL = baseURL + '?ref=' + addName.toLowerCase().replace(/\s/g, '_');
 
 			// Query Params to add based on tracking type
-			const cardQrCodeURL = qrCodeURL + '&card=1';
+			baseQR = await qrCodeMaker(qrCodeURL, '0');
+			clothesQR = await qrCodeMaker(qrCodeURL, '1');
+			cardQR = await qrCodeMaker(qrCodeURL, '2');
 
-			const clotheQrCodeURL = qrCodeURL + '&clothing=1';
-
-			// QR Code maker
-			const baseQRbody = JSON.stringify(qrCodeURL);
-			const baseQRRes = await fetch(
-				url + encodeURIComponent(baseQRbody) + '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
-			);
-			baseQR = (await baseQRRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
-			console.log(baseQR);
-
-			const clothesQRbody = JSON.stringify(clotheQrCodeURL);
-			const clothesQRRes = await fetch(
-				url +
-					encodeURIComponent(clothesQRbody) +
-					'&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
-			);
-			clothesQR = (await clothesQRRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
-
-			const cardQRbody = JSON.stringify(cardQrCodeURL);
-			const cardQRRes = await fetch(
-				url + encodeURIComponent(cardQRbody) + '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
-			);
-			cardQR = (await cardQRRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
-
-			// TODO add the created QR codes to the database
-			// TODO allow user to download QR codes from the lookup (+ zip the codes first)
-			// TODO allow user to download all QR codes (+ zip codes first)
 			qrCodeCreated = true;
+		}
+	}
+
+	async function saveQRCode() {
+		let count = 0;
+		for (let entry in referralTable) {
+			if (referralTable[entry].referee === addName.toLowerCase()) {
+				console.log(referralTable[entry].referee)
+				count = referralTable[entry].count;
+				break;
+			}
+		}
+
+		const { data, error } = await supabase
+			.from('referrals')
+			.upsert([
+				{
+					referee: addName.toLowerCase(),
+					count: count,
+					qrcodebase: baseQR,
+					qrcodeclothes: clothesQR,
+					qrcodecard: cardQR
+				}
+			], {onConflict: 'referee', ignoreDuplicates: false})
+			.select();
+		if (error) {
+			console.log(error);
+		} else {
+			// Need to reload 
+			location.reload();
 		}
 	}
 
@@ -179,9 +199,12 @@
 				<div class="qr-details">
 					<label>
 						Name:
-						<input type="text" name="username" bind:value={lookupName} />
+						<input type="text" name="username" bind:value={addName} />
 					</label>
 					<button name="createQR" on:click={createQRCode}>Create QR Code</button>
+					{#if qrCodeCreated}
+						<button name="saveQR" on:click={saveQRCode}>Save User to Database</button>
+					{/if}
 				</div>
 				<div class="qr-render">
 					{#if qrCodeCreated}
