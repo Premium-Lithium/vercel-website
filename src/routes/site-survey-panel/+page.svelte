@@ -39,6 +39,7 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
+				status = responseData.message;
 				console.log('Received:', responseData);
 			}
 		} catch (error) {
@@ -48,7 +49,7 @@
 	async function startInspection() {
 		try {
 			console.log('Button 1 clicked');
-			const response = await fetch('/site-survey-panel/inspection', {
+			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -58,7 +59,7 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				inspectedCreated = true; // alert that form is created
+				alertMessage = responseData.message;
 			}
 		} catch (error) {
 			console.log(error);
@@ -68,7 +69,7 @@
 	async function attachPDFToDeal() {
 		try {
 			console.log('Button 2 clicked');
-			const response = await fetch('/site-survey-panel/inspection', {
+			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -79,7 +80,7 @@
 			if (response.ok) {
 				const responseData = await response.json();
 				inspectedCreated = true; // alert that form is created
-				if (responseData.statusCode === 500) alertMessage = responseData.message;
+				alertMessage = responseData.message;
 			}
 		} catch (error) {
 			console.log(error);
@@ -88,20 +89,25 @@
 </script>
 
 <div class="site-survey-panel">
+	
+	{#if alertMessage}
+		<div class="alert-message">
+			<span>{alertMessage}</span>
+		</div>
+	{/if}
+	
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 		<p>Status: {status}</p>
 	</div>
-	{#if alertMessage}
-		<span>{alertMessage}</span>
-	{/if}
+	
 	<div class="buttons-container">
 		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
 		<button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
 		<button class="link-btn">Update Custom Field</button>
 	</div>
 
-	<hr />
+	
 </div>
 
 <style>
@@ -113,6 +119,16 @@
 	.header {
 		display: grid;
 		grid-template-columns: 50% 50%;
+		& p {
+			text-align: center;
+		}
+	}
+
+	.alert-message {
+		text-align: center;
+		padding: 10px;
+		background-color: #4ba6d1;
+		border: 1px solid black;
 	}
 
 	.buttons-container {
@@ -125,7 +141,7 @@
 		color: black;
 		text-align: center;
 		padding: 10px;
-		margin: 10px;
+		margin: 10px 0;
 		border-radius: 10px;
 		border: 1px solid black;
 		cursor: pointer;
