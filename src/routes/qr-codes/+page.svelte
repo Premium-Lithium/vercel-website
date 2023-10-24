@@ -4,7 +4,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { createClient } from '@supabase/supabase-js';
-	import { json } from '@sveltejs/kit';
 	import { saveAs } from 'file-saver';
 	import JSZip from 'jszip';
 	const PUBLIC_SUPABASE_ANON_KEY =
@@ -28,7 +27,7 @@
 	let lookupName: string = '';
 	let baseURL: string = 'https://energiser.ai/';
 	let databaseError: boolean = false;
-	let addError: boolean = true;
+	let addError: boolean = false;
 
 	interface refRow {
 		count: number;
