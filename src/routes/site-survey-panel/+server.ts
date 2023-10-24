@@ -1,8 +1,11 @@
 import { json } from '@sveltejs/kit';
 import pipedrive from 'pipedrive';
-import { pd, readCustomDealField } from '../../lib/pipedrive-utils.js';
+import { pd, readCustomDealField , dealFieldsRequest, getKeysForCustomFields} from '../../lib/pipedrive-utils.js';
 import querystring from 'querystring';
 import fs from 'fs';
+import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
+
+const companyDomainFields = 'https://api.pipedrive.com/v1/deals/'
 
 const SAFETY_CULTURE_TOKEN = 'f5a8b512b90d4ea239858d63f768cdbcdb8cd83c6bd2216001ceb5f20a35632c'
 
@@ -25,7 +28,7 @@ export async function POST({ request }) {
             const pdfRes = await attachPDFToDeal(dealData)
             const pdfResData = await pdfRes?.json()
             return json(pdfResData)
-        } else if (option ===3 ){
+        } else if (option === 3 ){
             // update custom field on Pipedrive
             const updateRes = await updateCustomFieldFrom(dealData)
             const updateResData = await updateRes?.json()
@@ -251,11 +254,24 @@ async function exportInspectionAsPDF(inspection_id) {
     return responseData.url
 }
 
+// [fieldName]: value
+const fieldsToUpdate = {
+    'Energy use per year (kWh)':888,
+    'MPAN number':888,
+}
+//WIP
 async function updateCustomFieldFrom(dealData) {
     const inspectionAnswers = await getInspectionAnswersFrom(dealData)
-    
+    console.log(inspectionAnswers)
     if (inspectionAnswers) {
-        
+        const keyedData = getKeysForCustomFields(fieldsToUpdate)
+        const req = {
+            method: "PUT",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({[keyedData[0][0]]: keyedData[0][1]})
+        };
+        const response = await fetch(companyDomainFields + dealData.id + '?api_token=' + PIPEDRIVE_API_TOKEN, req);
+    
         return json({ message: 'Custom field updated.', statusCode: 200 })
     } else return json({ message: 'Not Found', statusCode: 500 })
 }
