@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import pipedrive from 'pipedrive';
 import { pd, readCustomDealField, dealFieldsRequest, getKeysForCustomFields } from '../../lib/pipedrive-utils.js';
-import querystring from 'querystring';
 import fs from 'fs';
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 import { toJson } from 'really-relaxed-json'
