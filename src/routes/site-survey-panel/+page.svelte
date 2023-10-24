@@ -4,7 +4,6 @@
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 	import { json } from '@sveltejs/kit';
 
-
 	const dealId = $page.url.searchParams.get('selectedIds'); //dealID in payload is called selectedIds
 	//const dealId = 7142;
 	const userId = $page.url.searchParams.get('userId'); //userId
@@ -12,9 +11,9 @@
 
 	let status;
 	let sdk;
-    
-    let inspectedCreated = false
-	let error = null
+
+	let inspectedCreated = false;
+	let alertMessage = null;
 	//TO DO - deploy the panel on branch deployment
 	//Add authentication for users permmissions.
 	const managerList = ['15970437']; // for testing purposes I'm using my userId (Nicholas Dharmadi)
@@ -26,17 +25,16 @@
 	});
 
 	onMount(() => {
-        showCustomerData()
+		showCustomerData();
 	});
 
-
-    async function showCustomerData() {
+	async function showCustomerData() {
 		try {
 			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					dealId: dealId,
+					dealId: dealId
 				})
 			});
 			if (response.ok) {
@@ -49,18 +47,18 @@
 	}
 	async function startInspection() {
 		try {
-			console.log("Button 1 clicked")
+			console.log('Button 1 clicked');
 			const response = await fetch('/site-survey-panel/inspection', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 1,
+					option: 1
 				})
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				inspectedCreated = true // alert that form is created
+				inspectedCreated = true; // alert that form is created
 			}
 		} catch (error) {
 			console.log(error);
@@ -69,44 +67,41 @@
 
 	async function attachPDFToDeal() {
 		try {
-			console.log("Button 2 clicked")
+			console.log('Button 2 clicked');
 			const response = await fetch('/site-survey-panel/inspection', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 2,
+					option: 2
 				})
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				inspectedCreated = true // alert that form is created
-				if(responseData.statusCode === 500)
-					error = responseData.message
+				inspectedCreated = true; // alert that form is created
+				if (responseData.statusCode === 500) alertMessage = responseData.message;
 			}
 		} catch (error) {
 			console.log(error);
 		}
 	}
-
 </script>
 
 <div class="site-survey-panel">
-    <div class="header">
-        <p>Selected ID: {dealId}</p>
-        <p>Status: {status}</p>
-    </div>
-    {#if error}
-		<span>{error}</span>
+	<div class="header">
+		<p>Selected ID: {dealId}</p>
+		<p>Status: {status}</p>
+	</div>
+	{#if alertMessage}
+		<span>{alertMessage}</span>
 	{/if}
 	<div class="buttons-container">
 		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
-        <button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
-        <button class="link-btn">Update Custom Field</button>
+		<button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
+		<button class="link-btn">Update Custom Field</button>
 	</div>
 
 	<hr />
-
 </div>
 
 <style>
@@ -115,16 +110,15 @@
 		border: 0px solid grey;
 	}
 
-    .header {
-        display: grid;
-        grid-template-columns: 50% 50%;
-    }
+	.header {
+		display: grid;
+		grid-template-columns: 50% 50%;
+	}
 
 	.buttons-container {
 		display: grid;
 		grid-template-columns: auto;
 	}
-
 
 	.link-btn {
 		background-color: #9b9b9b;
@@ -133,8 +127,8 @@
 		padding: 10px;
 		margin: 10px;
 		border-radius: 10px;
-        border: 1px solid black;
-        cursor: pointer;
+		border: 1px solid black;
+		cursor: pointer;
 
 		&:hover {
 			background-color: #5d5d5d;
