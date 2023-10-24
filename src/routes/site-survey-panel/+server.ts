@@ -36,7 +36,7 @@ export async function POST({ request }) {
         return json(responseData);
     } catch (error) {
         console.log('Error:', error);
-        return json({ error: "Can't get dealData" });
+        return json({ message: "Can't get dealData", statusCode: 500 });
     }
 }
 

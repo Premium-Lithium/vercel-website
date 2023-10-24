@@ -2,26 +2,19 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
-	import { json } from '@sveltejs/kit';
 
 	const dealId = $page.url.searchParams.get('selectedIds'); //dealID in payload is called selectedIds
-	//const dealId = 7142;
-	const userId = $page.url.searchParams.get('userId'); //userId
-	const tempCode = $page.url.searchParams.get('code'); //accessToken is passed thru URL for now (not a really good idea)
 
 	let status;
 	let sdk;
 
 	let inspectedCreated = false;
 	let alertMessage = null;
-	//TO DO - deploy the panel on branch deployment
-	//Add authentication for users permmissions.
-	const managerList = ['15970437']; // for testing purposes I'm using my userId (Nicholas Dharmadi)
-	const authenticated = managerList.includes(userId);
+
 
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 315 });
+		await sdk.execute('resize', { height: 300 });
 	});
 
 	onMount(() => {
@@ -40,12 +33,21 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				status = responseData.message;
+				
+				if(responseData.statusCode === 200){
+					status = responseData.message;
+				} else {
+					alertMessage = responseData.message
+					await new Promise((resolve) => setTimeout(resolve, 3000));
+				}
 				alertMessage = null;
 				console.log('Initial:', responseData);
 			}
 		} catch (error) {
 			console.log(error);
+			alertMessage = error;
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+			alertMessage = null;
 		}
 	}
 	async function startInspection() {
