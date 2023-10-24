@@ -33,10 +33,15 @@
 	 * Find a way to render and download them
 	 * Represent the Supabase table DONE
 	 * Allow user to download all QR codes
+	 * 	- button at top of screen to bulk download all files
 	 * 	- put each persons qr codes into a folder under their name
 	 * 	- put each folder into a single qr code folder and zip it
 	 * 	- download the file
-	 * 
+	 * Allow user to download an individuals qr codes
+	 * 	- button that appears after qr code lookup
+	 * 	- put the persons qr codes into a folder and zip it
+	 * 	- download the file
+	 * Add error message to display whenever there is an error
 	 */
 
 	let addName: string = '',
@@ -76,7 +81,6 @@
 		const qrRes = await fetch(url + encodeURIComponent(qrBody) + qrOptions)
 		const qrCode = (await qrRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
 
-		// console.log(qrCode);
 		return qrCode
 	}
 
@@ -164,8 +168,9 @@
 				</table>
 			</div>
 			<div class="qr-lookup">
-				<h2>QR Code Lookup</h2>
+				<h2>QR Code Lookup and Download</h2>
 				<div class="lookup-input">
+					<p>Type in a name to look them up on the database, and if they are in the database you can download their QR codes</p>
 					<label>
 						Name:
 						<input type="text" name="username" bind:value={lookupName} />
@@ -183,19 +188,22 @@
 										{#if qr[1]}
 											{@html qr[1]}
 										{:else}
-											<p>No QR Code Found</p>
+											<p>No QR Code Found!</p>
 										{/if}
 									</div>
 								{/each}
 							</div>
 						{:else}
-							<b>{nameSearchedFor} not found</b>
+							<b>{nameSearchedFor} not found! Check spelling, or add this person in the right hand panel!</b>
 						{/if}
 					{/if}
 				</div>
 			</div>
 			<div class="qr-code-maker">
 				<h2>Add a new Referee</h2>
+				<p>Create a set of QR codes for a new referee, and then choose to add them to the database</p>
+				<p>Duplicates are automatically ignored - no need to worry about putting in a name twice
+				</p>
 				<div class="qr-details">
 					<label>
 						Name:
@@ -243,6 +251,7 @@
 	}
 
 	.qr-code-maker {
+		width: 42.5%;
 		padding: 10px;
 		padding: 10px;
 	}
@@ -254,7 +263,7 @@
 
 	.qr-lookup {
 		display: flex;
-		width: 60%;
+		width: 42.5%;
 		flex-direction: column;
 		padding: 10px;
 		border-right: 3px solid black;
