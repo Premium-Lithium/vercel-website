@@ -49,6 +49,7 @@
 	}
 	async function startInspection() {
 		try {
+			console.log("Clicked")
 			const response = await fetch('/site-survey-panel/inspection', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -109,5 +110,9 @@
 		border-radius: 10px;
         border: 1px solid black;
         cursor: pointer;
+
+		&:hover {
+			background-color: #5d5d5d;
+		}
 	}
 </style>
