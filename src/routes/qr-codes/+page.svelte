@@ -5,8 +5,8 @@
 	import { onMount } from 'svelte';
 	import { createClient } from '@supabase/supabase-js';
 	import { json } from '@sveltejs/kit';
-	import FileSaver, { saveAs } from 'file-saver'
-	import JSZip from 'jszip'
+	import { saveAs } from 'file-saver';
+	import JSZip from 'jszip';
 	const PUBLIC_SUPABASE_ANON_KEY =
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtZnV3bWR5bm92ZGx5b2psdGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTU3MjE3NzUsImV4cCI6MjAxMTI5Nzc3NX0.PzKOk4uqHBfSRGg8j2LjL0R8WAyp_iBdLckYPEigCvc';
 	const PUBLIC_SUPABASE_URL = 'https://tmfuwmdynovdlyojlthe.supabase.co';
@@ -24,31 +24,11 @@
 	let lookupBaseQR: string;
 	let lookupClothesQR: string;
 	let lookupCardQR: string;
-
-	/**
-	 * TODO
-	 * Create input box for the name and add formatting - John Smith -> john_smith DONE
-	 * Find QR code library/API to create the SVGs - https://goqr.me/api/doc/create-qr-code/#param_format DONE
-	 * Store them in Supabase instead of Drive DONE
-	 *  - Create new column in supabase table to store the SVGs DONE
-	 * 	- Store them in supabase DONE
-	 * Find a way to render and download them
-	 * Represent the Supabase table DONE
-	 * Allow user to download all QR codes
-	 * 	- button at top of screen to bulk download all files
-	 * 	- put each persons qr codes into a folder under their name
-	 * 	- put each folder into a single qr code folder and zip it
-	 * 	- download the file
-	 * Allow user to download an individuals qr codes
-	 * 	- button that appears after qr code lookup
-	 * 	- put the persons qr codes into a folder and zip it
-	 * 	- download the file
-	 * Add error message to display whenever there is an error
-	 */
-
-	let addName: string = '',
-		lookupName: string = '',
-		baseURL = 'https://energiser.ai/';
+	let addName: string = '';
+	let lookupName: string = '';
+	let baseURL: string = 'https://energiser.ai/';
+	let databaseError: boolean = false;
+	let addError: boolean = true;
 
 	interface refRow {
 		count: number;
@@ -64,7 +44,7 @@
 
 	onMount(async () => {
 		referralTable = await getReferralTable();
-		referralTable.sort((a, b) => b.count - a.count); // Sort by ID
+		referralTable.sort((a, b) => b.count - a.count); // Sort in descending order
 	});
 
 	// Gets the referrals table from Supabase
@@ -72,27 +52,27 @@
 		let { data: referrals, error } = await supabase.from('referrals').select('*');
 		if (error) {
 			console.log(error);
+			databaseError = true;
 		} else {
 			return referrals;
 		}
 	}
 
+	// Create a qr code for a given base URL and id
 	async function qrCodeMaker(base: string, id: string) {
-		const qrOptions = '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg'
-		const qrBody = JSON.stringify(base + "&id=" + id);
-		const qrRes = await fetch(url + encodeURIComponent(qrBody) + qrOptions)
+		const qrOptions = '&color=0-0-0&bgcolor=255-255-255&qzone=4&format=svg';
+		const qrBody = JSON.stringify(base + '&id=' + id);
+		const qrRes = await fetch(url + encodeURIComponent(qrBody) + qrOptions);
 		const qrCode = (await qrRes.text()).valueOf().replace(/<\?xml[^>]*\?>/, '');
 
-		return qrCode
+		return qrCode;
 	}
 
-	// Creates a QR code based on the users input
+	// Creates the QR codes for a given user
 	async function createQRCode() {
 		if (addName) {
-			// Creating the QR code link
 			let qrCodeURL = baseURL + '?ref=' + addName.toLowerCase().replace(/\s/g, '_');
 
-			// Query Params to add based on tracking type
 			baseQR = await qrCodeMaker(qrCodeURL, '0');
 			clothesQR = await qrCodeMaker(qrCodeURL, '1');
 			cardQR = await qrCodeMaker(qrCodeURL, '2');
@@ -101,11 +81,12 @@
 		}
 	}
 
-	async function saveQRCode() {
+	// Upserts a user in the database
+	async function saveQRCodeInDatabase() {
 		let count = 0;
 		for (let entry in referralTable) {
 			if (referralTable[entry].referee === addName.toLowerCase()) {
-				console.log(referralTable[entry].referee)
+				console.log(referralTable[entry].referee);
 				count = referralTable[entry].count;
 				break;
 			}
@@ -113,54 +94,72 @@
 
 		const { data, error } = await supabase
 			.from('referrals')
-			.upsert([
-				{
-					referee: addName.toLowerCase(),
-					count: count,
-					qrcodebase: baseQR,
-					qrcodeclothes: clothesQR,
-					qrcodecard: cardQR
-				}
-			], {onConflict: 'referee', ignoreDuplicates: false})
+			.upsert(
+				[
+					{
+						referee: addName.toLowerCase(),
+						count: count,
+						qrcodebase: baseQR,
+						qrcodeclothes: clothesQR,
+						qrcodecard: cardQR
+					}
+				],
+				{ onConflict: 'referee', ignoreDuplicates: false }
+			)
 			.select();
 		if (error) {
+			addError = true;
 			console.log(error);
 		} else {
-			// Need to reload 
+			// Need to reload
 			location.reload();
 		}
 	}
 
+	// ZIP and download all QR codes
 	async function saveAllQRCodes() {
-		const zip = new JSZip()
-		
+		const zip = new JSZip();
+
 		for (let user in referralTable) {
-			const folder = zip.folder(referralTable[user].referee)
-			folder?.file(referralTable[user].referee + 'BaseQR.svg', referralTable[user].qrcodebase)
-			folder?.file(referralTable[user].referee + 'CardQR.svg', referralTable[user].qrcodecard)
-			folder?.file(referralTable[user].referee + 'ClothesQR.svg', referralTable[user].qrcodeclothes)
+			const folder = zip.folder(referralTable[user].referee);
+			folder?.file(referralTable[user].referee + 'BaseQR.svg', referralTable[user].qrcodebase);
+			folder?.file(referralTable[user].referee + 'CardQR.svg', referralTable[user].qrcodecard);
+			folder?.file(
+				referralTable[user].referee + 'ClothesQR.svg',
+				referralTable[user].qrcodeclothes
+			);
 		}
 
-		zip.generateAsync({ type: 'blob'}).then(function (qrCodes) {
+		zip.generateAsync({ type: 'blob' }).then(function (qrCodes) {
 			saveAs(qrCodes, 'allQrCodesSVG.zip');
-		})
+		});
 	}
 
+	// ZIP and download an individual users QR codes
 	async function saveUserQRCodes() {
+		const indexOfUser = referralTable.findIndex((obj) => obj.referee === nameSearchedFor);
+		const zip = new JSZip();
 
-		const indexOfUser = referralTable.findIndex(obj => obj.referee === nameSearchedFor)
-		const zip = new JSZip()
+		const folder = zip.folder(referralTable[indexOfUser].referee);
+		folder?.file(
+			referralTable[indexOfUser].referee + 'BaseQR.svg',
+			referralTable[indexOfUser].qrcodebase
+		);
+		folder?.file(
+			referralTable[indexOfUser].referee + 'CardQR.svg',
+			referralTable[indexOfUser].qrcodecard
+		);
+		folder?.file(
+			referralTable[indexOfUser].referee + 'ClothesQR.svg',
+			referralTable[indexOfUser].qrcodeclothes
+		);
 
-		const folder = zip.folder(referralTable[indexOfUser].referee)
-		folder?.file(referralTable[indexOfUser].referee + 'BaseQR.svg', referralTable[indexOfUser].qrcodebase)
-		folder?.file(referralTable[indexOfUser].referee + 'CardQR.svg', referralTable[indexOfUser].qrcodecard)
-		folder?.file(referralTable[indexOfUser].referee + 'ClothesQR.svg', referralTable[indexOfUser].qrcodeclothes)
-
-		zip.generateAsync({ type: 'blob'}).then(function (qrCodes) {
+		zip.generateAsync({ type: 'blob' }).then(function (qrCodes) {
 			saveAs(qrCodes, referralTable[indexOfUser].referee + 'QrCodesSVG.zip');
-		})
+		});
 	}
 
+	// Lookup a QR code for an individual user
 	function lookupQRCode() {
 		if (lookupName) {
 			searchMade = true;
@@ -178,97 +177,123 @@
 </script>
 
 <body>
-	<div class="title">
-		<h1>Internal Referral Tracking and Lookup</h1>
-		<button name="downloadAllQR" on:click={saveAllQRCodes}>Download all QR Codes</button>
-		<div class="layout">
-			<div class="referral-table">
-				<h2>Referral Counts</h2>
-				<!-- Table for referrals -->
-				<table>
-					<tr>
-						<th>ID</th>
-						<th>User</th>
-						<th>Count</th>
-					</tr>
-					{#each referralTable as user}
+	{#if !databaseError}
+		<div class="title">
+			<h1>Internal Referral Tracking and Lookup</h1>
+			<button name="downloadAllQR" on:click={saveAllQRCodes}>Download all QR Codes</button>
+			<div class="layout">
+				<div class="referral-table">
+					<h2>Referral Counts</h2>
+					<!-- Table for referrals -->
+					<table>
 						<tr>
-							<td>{user.id}</td>
-							<td>{user.referee}</td>
-							<td>{user.count}</td>
+							<th>ID</th>
+							<th>User</th>
+							<th>Count</th>
 						</tr>
-					{/each}
-				</table>
-			</div>
-			<div class="qr-lookup">
-				<h2>QR Code Lookup and Download</h2>
-				<div class="lookup-input">
-					<p>Type in a name to look them up on the database, and if they are in the database you can download their QR codes</p>
-					<label>
-						Name:
-						<input type="text" name="username" bind:value={lookupName} />
-					</label>
-					<button name="createQR" on:click={lookupQRCode}>Lookup QR Codes</button>
+						{#each referralTable as user}
+							<tr>
+								<td>{user.id}</td>
+								<td>{user.referee}</td>
+								<td>{user.count}</td>
+							</tr>
+						{/each}
+					</table>
 				</div>
-				<div class="lookup-output">
-					{#if searchMade}
-						{#if nameFound}
-							<p>QR Codes for {nameSearchedFor}</p>
-							<div class="qr-code-lookup-render">
-								{#each [['Base QR Code', lookupBaseQR], ['Business Card QR Code', lookupCardQR], ['Clothing QR Code', lookupClothesQR]] as qr}
-									<div class="qr-code-lookup-element">
-										<b>{qr[0]}</b>
-										{#if qr[1]}
-											{@html qr[1]}
-										{:else}
-											<p>No QR Code Found!</p>
-										{/if}
-									</div>
-								{/each}
-							</div>
-							<button name="downloadUserQR" on:click={saveUserQRCodes}>Download {nameSearchedFor}'s QR Codes</button>
-						{:else}
-							<b>{nameSearchedFor} not found! Check spelling, or add this person in the right hand panel!</b>
+				<div class="qr-lookup">
+					<h2>QR Code Lookup and Download</h2>
+					<div class="lookup-input">
+						<p>
+							Type in a name to look them up on the database, and if they are in the database you
+							can download their QR codes
+						</p>
+						<label>
+							Name:
+							<input type="text" name="username" bind:value={lookupName} />
+						</label>
+						<button name="createQR" on:click={lookupQRCode}>Lookup QR Codes</button>
+					</div>
+					<div class="lookup-output">
+						{#if searchMade}
+							{#if nameFound}
+								<p>QR Codes for {nameSearchedFor}</p>
+								<div class="qr-code-lookup-render">
+									{#each [['Base QR Code', lookupBaseQR], ['Business Card QR Code', lookupCardQR], ['Clothing QR Code', lookupClothesQR]] as qr}
+										<div class="qr-code-lookup-element">
+											<b>{qr[0]}</b>
+											{#if qr[1]}
+												{@html qr[1]}
+											{:else}
+												<p>No QR Code Found!</p>
+											{/if}
+										</div>
+									{/each}
+								</div>
+								<button name="downloadUserQR" on:click={saveUserQRCodes}
+									>Download {nameSearchedFor}'s QR Codes</button
+								>
+							{:else}
+								<b
+									>{nameSearchedFor} not found! Check spelling, or add this person in the right hand
+									panel!</b
+								>
+							{/if}
 						{/if}
-					{/if}
+					</div>
 				</div>
-			</div>
-			<div class="qr-code-maker">
-				<h2>Add a new Referee</h2>
-				<p>Create a set of QR codes for a new referee, and then choose to add them to the database</p>
-				<p>Duplicates are automatically ignored - no need to worry about putting in a name twice
-				</p>
-				<div class="qr-details">
-					<label>
-						Name:
-						<input type="text" name="username" bind:value={addName} />
-					</label>
-					<button name="createQR" on:click={createQRCode}>Create QR Code</button>
-					{#if qrCodeCreated}
-						<button name="saveQR" on:click={saveQRCode}>Save User to Database</button>
-					{/if}
-				</div>
-				<div class="qr-render">
-					{#if qrCodeCreated}
-						<div class="qr-codes">
-							<div class="base-qr">
-								<h3>Base QR Code</h3>
-								<div class="base-qr-render">{@html baseQR}</div>
-							</div>
-							<div class="clothes-qr">
-								<h3>Clothes QR Code</h3>
-								<div class="clothes-qr-render">{@html clothesQR}</div>
-							</div>
-							<div class="card-qr">
-								<h3>Card QR Code</h3>
-								<div class="card-qr-render">{@html cardQR}</div>
-							</div>
+				{#if !addError}
+					<div class="qr-code-maker">
+						<h2>Add a new Referee</h2>
+						<p>
+							Create a set of QR codes for a new referee, and then choose to add them to the
+							database
+						</p>
+						<p>
+							Duplicates are automatically ignored - no need to worry about putting in a name twice
+						</p>
+						<div class="qr-details">
+							<label>
+								Name:
+								<input type="text" name="username" bind:value={addName} />
+							</label>
+							<button name="createQR" on:click={createQRCode}>Create QR Code</button>
+							{#if qrCodeCreated}
+								<button name="saveQR" on:click={saveQRCodeInDatabase}>Save User to Database</button>
+							{/if}
 						</div>
-					{/if}
-				</div>
+						<div class="qr-render">
+							{#if qrCodeCreated}
+								<div class="qr-codes">
+									<div class="base-qr">
+										<h3>Base QR Code</h3>
+										<div class="base-qr-render">{@html baseQR}</div>
+									</div>
+									<div class="clothes-qr">
+										<h3>Clothes QR Code</h3>
+										<div class="clothes-qr-render">{@html clothesQR}</div>
+									</div>
+									<div class="card-qr">
+										<h3>Card QR Code</h3>
+										<div class="card-qr-render">{@html cardQR}</div>
+									</div>
+								</div>
+							{/if}
+						</div>
+					</div>
+				{:else}
+					<div class="error-message">
+						<h2>Something went wrong</h2>
+						<p>Refresh the page or let Peter know it broke</p>
+					</div>
+				{/if}
 			</div>
 		</div>
-	</div>
+	{:else}
+		<div class="error-message">
+			<h2>Something went wrong</h2>
+			<p>Refresh the page or let Peter know it broke</p>
+		</div>
+	{/if}
 </body>
 
 <style>
@@ -320,6 +345,11 @@
 	}
 
 	.qr-code-lookup-element {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.error-message {
 		display: flex;
 		flex-direction: column;
 	}
