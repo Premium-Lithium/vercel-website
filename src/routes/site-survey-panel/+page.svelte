@@ -30,6 +30,7 @@
 
 	async function showCustomerData() {
 		try {
+			alertMessage = 'initializing';
 			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -40,7 +41,8 @@
 			if (response.ok) {
 				const responseData = await response.json();
 				status = responseData.message;
-				console.log('Received:', responseData);
+				alertMessage = null;
+				console.log('Initial:', responseData);
 			}
 		} catch (error) {
 			console.log(error);
@@ -48,18 +50,26 @@
 	}
 	async function startInspection() {
 		try {
-			console.log('Button 1 clicked');
-			const response = await fetch('/site-survey-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 1
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				alertMessage = responseData.message;
+			if (status === undefined) {
+				alertMessage = 'Generating survey';
+				const response = await fetch('/site-survey-panel', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						dealId: dealId,
+						option: 1
+					})
+				});
+				if (response.ok) {
+					const responseData = await response.json();
+					alertMessage = responseData.message;
+					await new Promise((resolve) => setTimeout(resolve, 3000));
+					alertMessage = null;
+				}
+			} else {
+				alertMessage = 'Error generating duplicate';
+				await new Promise((resolve) => setTimeout(resolve, 3000));
+				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
@@ -68,7 +78,7 @@
 
 	async function attachPDFToDeal() {
 		try {
-			console.log('Button 2 clicked');
+			alertMessage = 'Attaching PDF';
 			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -81,6 +91,8 @@
 				const responseData = await response.json();
 				inspectedCreated = true; // alert that form is created
 				alertMessage = responseData.message;
+				await new Promise((resolve) => setTimeout(resolve, 3000));
+				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
@@ -89,7 +101,7 @@
 
 	async function updateCustomField() {
 		try {
-			console.log('Button 3 clicked');
+			alertMessage = 'Updating';
 			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -100,8 +112,9 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				inspectedCreated = true; // alert that form is created
 				alertMessage = responseData.message;
+				await new Promise((resolve) => setTimeout(resolve, 3000));
+				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
@@ -110,34 +123,33 @@
 </script>
 
 <div class="site-survey-panel">
-	
 	{#if alertMessage}
 		<div class="alert-message">
 			<span>{alertMessage}</span>
 		</div>
 	{/if}
-	
+
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 		<p>Status: {status}</p>
 	</div>
-	
+
 	<div class="buttons-container">
 		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
 		<button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
 		<button class="link-btn" on:click={updateCustomField}>Update Custom Field</button>
 	</div>
-
-	
 </div>
 
 <style>
 	.site-survey-panel {
 		padding: 15px;
 		border: 0px solid grey;
+		text-align: center;
 	}
 
 	.header {
+		font-weight: bold;
 		display: grid;
 		grid-template-columns: 50% 50%;
 		& p {
@@ -147,9 +159,10 @@
 
 	.alert-message {
 		text-align: center;
-		padding: 10px;
+		padding: 2px;
 		background-color: #4ba6d1;
 		border: 1px solid black;
+		border-radius: 10px;
 	}
 
 	.buttons-container {
@@ -158,7 +171,7 @@
 	}
 
 	.link-btn {
-		background-color: #9b9b9b;
+		background-color: #c6c6c6;
 		color: black;
 		text-align: center;
 		padding: 10px;
@@ -166,9 +179,10 @@
 		border-radius: 10px;
 		border: 1px solid black;
 		cursor: pointer;
-
+		font-weight: bold;
+		font-size: 16px;
 		&:hover {
-			background-color: #5d5d5d;
+			background-color: #9f9f9f;
 		}
 	}
 </style>

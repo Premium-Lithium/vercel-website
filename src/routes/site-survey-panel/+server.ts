@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import pipedrive from 'pipedrive';
-import { pd, readCustomDealField , dealFieldsRequest, getKeysForCustomFields} from '../../lib/pipedrive-utils.js';
+import { pd, readCustomDealField, dealFieldsRequest, getKeysForCustomFields } from '../../lib/pipedrive-utils.js';
 import querystring from 'querystring';
 import fs from 'fs';
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
+import { toJson } from 'really-relaxed-json'
 
 const companyDomainFields = 'https://api.pipedrive.com/v1/deals/'
 
@@ -16,31 +17,26 @@ const templates = {
 export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
-
         const dealData = await fetchDealData(dealId);
-        const customerData = getCustomerDataFrom(dealData)
+        const customerData = getCustomerDataFrom(dealData);
+
+        let response;
+
         if (option === 1) {
-            const inspectionRes = await createInspectionFrom(dealData)
-            const inspectionResData = await inspectionRes?.json()
-            return json(inspectionResData)
+            response = await createInspectionFrom(dealData);
         } else if (option === 2) {
-            // attach PDF
-            const pdfRes = await attachPDFToDeal(dealData)
-            const pdfResData = await pdfRes?.json()
-            return json(pdfResData)
-        } else if (option === 3 ){
-            // update custom field on Pipedrive
-            const updateRes = await updateCustomFieldFrom(dealData)
-            const updateResData = await updateRes?.json()
+            response = await attachPDFToDeal(dealData);
+        } else if (option === 3) {
+            response = await updateMPAN(dealData);
         } else {
-            // Get status of survey
-            const statusRes = await getStatusFromInspection(dealData)
-            const statusResData = await statusRes?.json()
-            return json(statusResData)
+            response = await getStatusFromInspection(dealData);
         }
+
+        const responseData = await response?.json();
+        return json(responseData);
     } catch (error) {
         console.log('Error:', error);
-        return json({ error: "Can't get dealData" })
+        return json({ error: "Can't get dealData" });
     }
 }
 
@@ -137,7 +133,7 @@ async function getInspectionDataFrom(dealData) {
         return responseData
     }
 }
-
+//WIP
 async function getInspectionAnswersFrom(dealData) {
     const targetInspectionId = await searchForInspectionFrom(dealData)
     if (targetInspectionId === null) {
@@ -145,13 +141,42 @@ async function getInspectionAnswersFrom(dealData) {
     } else {
         const response = await fetch(`https://api.safetyculture.io/inspections/v1/answers/${targetInspectionId}`, {
             headers: {
-                'content-type': 'application/json',
+                'accept': 'application/json',
                 'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
             }
         })
-        
         const responseData = await response.text()
-        return responseData
+
+        //Parsing to array of JSONs
+        let parsedResponse = "[" + responseData + "]"
+        parsedResponse = JSON.parse(toJson(parsedResponse))
+
+        return parsedResponse
+    }
+}
+
+async function getInspectionSingleAnswerFrom(dealData, question_id) {
+    const targetInspectionId = await searchForInspectionFrom(dealData)
+    if (targetInspectionId === null) {
+        return null
+    } else {
+        const response = await fetch(`https://api.safetyculture.io/inspections/v1/answers/${targetInspectionId}`, {
+            headers: {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+            }
+        })
+        const responseData = await response.text()
+
+        //Parsing to array of JSONs
+        let parsedResponse = "[" + responseData + "]"
+        parsedResponse = JSON.parse(toJson(parsedResponse))
+        for (const i in parsedResponse) {
+            if (parsedResponse[i].result.question_id === question_id) {
+                return parsedResponse[i].result.text_answer
+            }
+        }
+        return null
     }
 }
 
@@ -161,11 +186,11 @@ async function getStatusFromInspection(dealData) {
         let status = null
         //console.log("Data Response", inspectionData)
         if (inspectionData.audit_data.date_completed) {
-            status = "Completed"
-        } else status = "Not Completed"
+            status = 'Completed'
+        } else status = 'Not Completed'
         console.log(status)
         return json({ message: status, statusCode: 200 })
-    } else return json({ message: 'Not Found', statusCode: 500 })
+    } else return json({ message: undefined, statusCode: 500 })
 }
 
 async function attachPDFToDeal(dealData) {
@@ -255,23 +280,42 @@ async function exportInspectionAsPDF(inspection_id) {
 }
 
 // [fieldName]: value
-const fieldsToUpdate = {
-    'Energy use per year (kWh)':888,
-    'MPAN number':888,
+let fieldsToUpdate = {
+    'MPAN number': '',
 }
 //WIP
 async function updateCustomFieldFrom(dealData) {
     const inspectionAnswers = await getInspectionAnswersFrom(dealData)
-    console.log(inspectionAnswers)
+
     if (inspectionAnswers) {
+        /*
         const keyedData = getKeysForCustomFields(fieldsToUpdate)
         const req = {
             method: "PUT",
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({[keyedData[0][0]]: keyedData[0][1]})
+            body: JSON.stringify({ [keyedData[0][0]]: keyedData[0][1] })
         };
         const response = await fetch(companyDomainFields + dealData.id + '?api_token=' + PIPEDRIVE_API_TOKEN, req);
-    
+        */
+        return json({ message: 'Custom field updated.', statusCode: 200 })
+    } else return json({ message: 'Not Found', statusCode: 500 })
+}
+
+async function updateMPAN(dealData) {
+    const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, '047b6bc5-f478-44d4-bf12-91fc51f560a9')
+    let fieldsToUpdate = {
+        'MPAN number': inspectionAnswer.answer,
+    }
+    if (inspectionAnswer) {
+
+        const keyedData = getKeysForCustomFields(fieldsToUpdate)
+        console.log(keyedData)
+        const req = {
+            method: "PUT",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [keyedData[0][0]]: keyedData[0][1] })
+        };
+        const response = await fetch(companyDomainFields + dealData.id + '?api_token=' + PIPEDRIVE_API_TOKEN, req);
         return json({ message: 'Custom field updated.', statusCode: 200 })
     } else return json({ message: 'Not Found', statusCode: 500 })
 }

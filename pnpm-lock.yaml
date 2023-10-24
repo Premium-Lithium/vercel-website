@@ -107,6 +107,9 @@ dependencies:
   readline-sync:
     specifier: ^1.4.10
     version: 1.4.10
+  really-relaxed-json:
+    specifier: ^0.3.2
+    version: 0.3.2
   shopify-token:
     specifier: ^4.1.0
     version: 4.1.0
@@ -4911,6 +4914,10 @@ packages:
   /readline-sync@1.4.10:
     resolution: {integrity: sha512-gNva8/6UAe8QYepIQH/jQ2qn91Qj0B9sYjMBBs3QOB8F2CXcKgLxQaJRP76sWVRQt+QU+8fAkCbCvjjMFu7Ycw==}
     engines: {node: '>= 0.8.0'}
+    dev: false
+
+  /really-relaxed-json@0.3.2:
+    resolution: {integrity: sha512-dWDnjzCnOyjfY26IHMEomqE5D3btCs5D7I8iSAeqPs+Jxm1m6W/jwn0cxlXW8u24RD29bi5llLOEVN87JUrqag==}
     dev: false
 
   /regenerator-runtime@0.13.11:
