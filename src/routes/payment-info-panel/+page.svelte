@@ -8,7 +8,7 @@
 	import { accessToken } from '$lib/payment-info-panel/sessionStore';
 
 	//const dealId = $page.url.searchParams.get('selectedIds'); //dealID in payload is called selectedIds
-	const dealId = 6227;
+	const dealId = 7142;
 	const userId = $page.url.searchParams.get('userId'); //userId
 	const tempCode = $page.url.searchParams.get('code'); //accessToken is passed thru URL for now (not a really good idea)
 
@@ -123,7 +123,6 @@
 	<h3>Payment</h3>
 	<div class="header">
 		<a href={authUrl} class="link-btn invoice">Generate Xero Invoice From Deal</a>
-		<a href={safetyCulturePdfLink} class="link-btn safetyculture">Download SafetyCulture PDF</a>
 	</div>
 	{#if xeroPdfData}
 		<a
@@ -177,7 +176,7 @@
 
 	.header {
 		display: grid;
-		grid-template-columns: 50% 50%;
+		grid-template-columns: auto;
 	}
 
 	.payment-details {

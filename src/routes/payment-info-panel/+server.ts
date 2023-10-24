@@ -32,7 +32,6 @@ export async function POST({ request }) {
         const activeTenantId = await startXero(tokenSet)
         const allInvoices = await getXeroInvoicesFrom(activeTenantId);
         const pdfBuffer = await exportXeroInvoiceAsPDF(activeTenantId, "ca348509-7c4f-4bf4-8a94-0b43c71cd1d1")
-        await getInspectionsFrom()
         
         let data = {
             paymentData: paymentData,
@@ -63,7 +62,15 @@ export async function GET({ request }) {
 // Gets token from supabase and check if its expired, then refresh
 async function startXero(tokenSet) {
     console.log(tokenSet)
-
+    tokenSet = {
+        id_token: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjFDQUY4RTY2NzcyRDZEQzAyOEQ2NzI2RkQwMjYxNTgxNTcwRUZDMTkiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJISy1PWm5jdGJjQW8xbkp2MENZVmdWY09fQmsifQ.eyJuYmYiOjE2OTgxNjI2MDAsImV4cCI6MTY5ODE2MjkwMCwiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS54ZXJvLmNvbSIsImF1ZCI6IjU4NTY2OTY4QzU0QjQwMUY4Mjg1NEY2QzYzM0U0M0I1IiwiaWF0IjoxNjk4MTYyNjAwLCJhdF9oYXNoIjoicS1hNGZKRHIwbXB1UFlpYTVSRFY2dyIsInNpZCI6ImI0ZDNmY2FiMTkxMTRiMGVhZWI3MTk1MTZlZjg0ZjAzIiwic3ViIjoiOGMzY2UzNjdjNmNkNWZlM2FhMWUwNmI2MjBhNmY5OWEiLCJhdXRoX3RpbWUiOjE2OTgxNjI1ODYsInhlcm9fdXNlcmlkIjoiYWExZTFlNzYtYTY4ZS00ZjRmLThlNWEtZmFjZjdkMzA1MDVlIiwiZ2xvYmFsX3Nlc3Npb25faWQiOiJiNGQzZmNhYjE5MTE0YjBlYWViNzE5NTE2ZWY4NGYwMyIsInByZWZlcnJlZF91c2VybmFtZSI6Im5pY2hvbGFzLmRoYXJtYWRpQHByZW1pdW1saXRoaXVtLmNvbSIsImVtYWlsIjoibmljaG9sYXMuZGhhcm1hZGlAcHJlbWl1bWxpdGhpdW0uY29tIiwiZ2l2ZW5fbmFtZSI6Ik5pY2hvbGFzIiwiZmFtaWx5X25hbWUiOiJEaGFybWFkaSIsIm5hbWUiOiJOaWNob2xhcyBEaGFybWFkaSIsImFtciI6WyJwd2QiXX0.acwqgWCWRnIma2-VJ8swVHC0czo6O0DxbB_wVGJuHu2xnsdAX2g5TtN_Ila-W-u1R3KR50XYEI5K3HSlXhpVAV3zGFSGTmOvcEYK1weIlCY06ArNPwgu2JXl_QCKRXIxOARdyiQhLavYUi_Gglo4cwRYuz6-n2ZESxcLKxJQbtdiRlTummdCrHDryycQreoKzT3L38EXwfavqVuy3OM_Ax2v5I2OWRAqLu7eQzB39EOAdFZONFJkvMFrsyiugxR9V4A6DRns0aHV7UZ6mGASB4sRB5TYHxc6Lq4H_-EBhvbD_PBPH40CMvXhOSOr6geqLkkQcGVhV9YU10xsOZAbIw',
+        access_token: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjFDQUY4RTY2NzcyRDZEQzAyOEQ2NzI2RkQwMjYxNTgxNTcwRUZDMTkiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJISy1PWm5jdGJjQW8xbkp2MENZVmdWY09fQmsifQ.eyJuYmYiOjE2OTgxNjI2MDAsImV4cCI6MTY5ODE2NDQwMCwiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS54ZXJvLmNvbSIsImF1ZCI6Imh0dHBzOi8vaWRlbnRpdHkueGVyby5jb20vcmVzb3VyY2VzIiwiY2xpZW50X2lkIjoiNTg1NjY5NjhDNTRCNDAxRjgyODU0RjZDNjMzRTQzQjUiLCJzdWIiOiI4YzNjZTM2N2M2Y2Q1ZmUzYWExZTA2YjYyMGE2Zjk5YSIsImF1dGhfdGltZSI6MTY5ODE2MjU4NiwieGVyb191c2VyaWQiOiJhYTFlMWU3Ni1hNjhlLTRmNGYtOGU1YS1mYWNmN2QzMDUwNWUiLCJnbG9iYWxfc2Vzc2lvbl9pZCI6ImI0ZDNmY2FiMTkxMTRiMGVhZWI3MTk1MTZlZjg0ZjAzIiwic2lkIjoiYjRkM2ZjYWIxOTExNGIwZWFlYjcxOTUxNmVmODRmMDMiLCJqdGkiOiJCRTU3QzM2QzgxQ0Q1QzI4ODY4NzUyOTYxMTNEMjQyMiIsImF1dGhlbnRpY2F0aW9uX2V2ZW50X2lkIjoiMDY3ZTE4MjEtZDNjYS00OWQ0LWExMDEtZmFkODk3NmFmOThlIiwic2NvcGUiOlsiZW1haWwiLCJwcm9maWxlIiwib3BlbmlkIiwiYWNjb3VudGluZy5zZXR0aW5ncy5yZWFkIiwiYWNjb3VudGluZy5hdHRhY2htZW50cyIsImFjY291bnRpbmcudHJhbnNhY3Rpb25zIiwiYWNjb3VudGluZy5jb250YWN0cyIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.knRN-uKcB8bIwxKqYsZ2MEBvQlFHt_YA5_itrGZ7yBHRUpNoBX7ByH5b5kdGnBIl_w-H1CneVPfu1fHXNQ8zt5lhVVi1yp9tUweX_sU3tUAyRcA6bIHxEa8A77Z0f3gkg_HyvjSf7glIeKjbdG2HGWCaDYzIvMn-q3k1efZDvQrO6OinVaQs1uaoTrU0hB6ziHZ9XiQFynFhvEd_0QzWklMBq2DKKYz9Qc_nHvUQqHpfunZzzAvl95gRhVxZM_Frii5WKXts1SxWaS4V8Z6UNV5J2us40XJ3MrusfjITVxEGD8rb3CQEot3DsjvzxBG3hYMNK_P1YIQr8z9YO58gvg',
+        expires_in: 1800,
+        token_type: 'Bearer',
+        refresh_token: 'ii9A-AFVkcRCljzpBtLhzGZe-movCBglzCkojsChVbE',
+        scope: 'openid profile email accounting.transactions accounting.attachments accounting.contacts accounting.settings.read offline_access'
+      }
+      
     try {
         await xero.initialize();
         await xero.setTokenSet(tokenSet);
@@ -345,82 +352,4 @@ async function getTokenSetFrom(code) {
     } catch (error) {
         console.log("Error fetching")
     }
-}
-
-const safetyCultureTemplatesId = {
-    'PV, Battery and EV Survey': 'template_ca68194ee1fa4fae98c923fb5e3b4edb',
-    'Solar PV & Battery Storage Survey': 'template_6f1eec9f81494d3e96704ddd39739cbe'
-
-}
-
-
-// SafeCulture API
-// Search through all audits (inspections)
-// Find and match which audits matches the person_name or PL number (Each Inspections needs a TITLE! and a PL number is attached to it)
-// Get the media file (PDF) 
-// attach it to pipedrive
-async function getInspectionsFrom() {
-    const audit_id = "audit_fa3a22f70d89462da2a169dd76864e50"
-    /*
-    const response = await fetch(`https://api.safetyculture.io/audits/audit_fa3a22f70d89462da2a169dd76864e50`, {
-        headers: {
-            'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
-        }
-    })*/
-    const response = await fetch(`https://api.safetyculture.io/inspections/v1/inspections/audit_fa3a22f70d89462da2a169dd76864e50`, {
-        headers: {
-            'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
-        }
-    })
-    const responseData = await response.json()
-    const auditsList = responseData.audits
-    console.log(responseData)
-
-    await exportInspectionAsPDF(audit_id)
-    /*
-    //Loop through each audits_data, and find which matches
-    for (const i in auditsList) {
-        const audit_id = auditsList[i].audit_id
-        const response = await fetch(`https://api.safetyculture.io/audits/${audit_id}`, {
-            headers: {
-                'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
-            }
-        })
-        const responseData = await response.json()
-    }*/
-}
-
-
-
-// API returns download link to PDF
-async function exportInspectionAsPDF(inspection_id) {
-    const options = {
-        method: 'POST',
-        headers: {
-            accept: 'application/json',
-            'content-type': 'application/json',
-            'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
-        },
-        body: JSON.stringify({
-            type: 'DOCUMENT_TYPE_PDF',
-            export_data: [
-                {
-                    inspection_id: inspection_id,
-                }
-            ]
-        })
-    }
-    const response = await fetch('https://api.safetyculture.io/inspection/v1/export', options)
-    const responseData = await response.json() // returns PDF download link
-
-    const pdfResponse = await fetch(responseData.url) // Make HTTP request to download the file
-
-    // Convert readable stream to buffer
-    const pdfArrayBuffer = await pdfResponse.arrayBuffer()
-    const buffer = Buffer.from(new Uint8Array(pdfArrayBuffer));
-    
-    const filePath = './static/site_survey.pdf'; // creates temporary PDF
-    fs.writeFileSync(filePath, buffer);
-    
-    return responseData.url
 }
