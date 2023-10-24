@@ -27,6 +27,8 @@ export async function POST({ request }) {
             return json(pdfResData)
         } else if (option ===3 ){
             // update custom field on Pipedrive
+            const updateRes = await updateCustomFieldFrom(dealData)
+            const updateResData = await updateRes?.json()
         } else {
             // Get status of survey
             const statusRes = await getStatusFromInspection(dealData)
@@ -68,10 +70,12 @@ function getCustomerDataFrom(dealData) {
     return customerData
 }
 
-const sectionMapping = {
+const sectionsMapping = {
     'PL Number': '866ec171-9b09-40af-86f1-4dc20fbf2b75',
     'Customer Name': '3f38c167-5a2b-40a5-aa88-329886e7a5ef',
-    'Property Address': '7288b6ad-d800-410e-94bb-f52c92fcbf5f'
+    'Property Address': '7288b6ad-d800-410e-94bb-f52c92fcbf5f',
+    'MPAN': '047b6bc5-f478-44d4-bf12-91fc51f560a9',
+    'Estimated Electricity Usage Per Year': 'cadce879-b36a-436a-b65f-201b5c99e710',
 }
 
 async function createInspectionFrom(dealData) {
@@ -131,11 +135,28 @@ async function getInspectionDataFrom(dealData) {
     }
 }
 
+async function getInspectionAnswersFrom(dealData) {
+    const targetInspectionId = await searchForInspectionFrom(dealData)
+    if (targetInspectionId === null) {
+        return null
+    } else {
+        const response = await fetch(`https://api.safetyculture.io/inspections/v1/answers/${targetInspectionId}`, {
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+            }
+        })
+        
+        const responseData = await response.text()
+        return responseData
+    }
+}
+
 async function getStatusFromInspection(dealData) {
     const inspectionData = await getInspectionDataFrom(dealData)
     if (inspectionData) {
         let status = null
-        console.log("Data Response", inspectionData)
+        //console.log("Data Response", inspectionData)
         if (inspectionData.audit_data.date_completed) {
             status = "Completed"
         } else status = "Not Completed"
@@ -188,7 +209,7 @@ async function searchForInspectionFrom(dealData) {
 
             //Matches
             if (surveyTitle.toLowerCase().includes(customerData.pl_number.toLowerCase())) {
-                console.log(surveyTitle + audit_id)
+                console.log(surveyTitle)
                 found = true
                 targetInspection.push(audit_id)
                 return targetInspection
@@ -228,4 +249,13 @@ async function exportInspectionAsPDF(inspection_id) {
     fs.writeFileSync(filePath, buffer);
 
     return responseData.url
+}
+
+async function updateCustomFieldFrom(dealData) {
+    const inspectionAnswers = await getInspectionAnswersFrom(dealData)
+    
+    if (inspectionAnswers) {
+        
+        return json({ message: 'Custom field updated.', statusCode: 200 })
+    } else return json({ message: 'Not Found', statusCode: 500 })
 }
