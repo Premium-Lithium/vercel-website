@@ -12,11 +12,20 @@ const templates = {
 
 export async function POST({ request }) {
     try {
-        const { dealId } = await request.json();
+        const { dealId, option } = await request.json();
 
         const dealData = await fetchDealData(dealId);
         const customerData = getCustomerDataFrom(dealData)
-        const inspectionRes = await createInspectionFrom(dealData)
+        if (option === 1) {
+            const inspectionRes = await createInspectionFrom(dealData)
+        } else if (option === 2) {
+            // attach
+            const pdfRes = await attachPDFToDeal(dealData)
+            const pdfResData = await pdfRes?.json()
+            return json(pdfResData)
+
+        }
+
         return json(customerData);
     } catch (error) {
         console.log('Error:', error);
@@ -93,13 +102,12 @@ async function createInspectionFrom(dealData) {
     try {
         const response = await fetch('https://api.safetyculture.io/audits', options)
         const responseData = await response.json()
-        console.log(responseData.response)
-        return json({message: 'Success'})
+        return json({ message: 'Success' })
     } catch (error) {
         console.log('Error starting inspection with deal data', error)
-        return json({message: 'Error starting inspection with deal data'})
+        return json({ message: 'Error starting inspection with deal data' })
     }
-    
+
 }
 
 //https://developer.safetyculture.com/reference/answerservice_getanswersforinspection
@@ -113,4 +121,90 @@ async function getInspectionDataFrom() {
     })
     const responseData = await response.json()
     console.log(responseData)
+}
+
+async function attachPDFToDeal(dealData) {
+    //Find the specific inspection that matches the PL Number || Customer Name
+    //Generate PDF to that inspection 
+    const targetInspectionId = await searchForInspectionFrom(dealData)
+    console.log(targetInspectionId)
+    if (targetInspectionId === null) {
+        // If no site survey is found
+        return json({ message: 'Fail to locate site survey, generate one!', statusCode: 500})
+    } else {
+        const pdfLink = await exportInspectionAsPDF(targetInspectionId[0])
+        const pdFilesApi = new pipedrive.FilesApi(pd);
+        const addFileRequest = await pdFilesApi.addFile('./static/site_survey.pdf', { 'dealId': dealData.id })
+        console.log(addFileRequest)
+    }
+}
+
+//Search for a first matching inspection that has a matching PL number in the title
+async function searchForInspectionFrom(dealData) {
+    const customerData = getCustomerDataFrom(dealData)
+
+    const response = await fetch(`https://api.safetyculture.io/audits/search?template=template_c8a5e85ccaf948358be9c7854aed847d&archived=false&completed=both`, {
+        headers: {
+            'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+        }
+    })
+    const responseData = await response.json()
+    const auditList = responseData.audits
+    //customerData.pl_number = 'pl001224'
+    //Loop through each audits_data, and find which matches
+    let found = false
+    let targetInspection = []
+    if (found === false) {
+        for (const i in auditList) {
+            const audit_id = auditList[i].audit_id
+            const response = await fetch(`https://api.safetyculture.io/audits/${audit_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+                }
+            })
+            const responseData = await response.json()
+            const surveyTitle = responseData.audit_data.name
+
+            //Matches
+            if (surveyTitle.toLowerCase().includes(customerData.pl_number.toLowerCase())) {
+                console.log(surveyTitle + audit_id)
+                found = true
+                targetInspection.push(audit_id)
+                return targetInspection
+            }
+        }
+    }
+    return null
+}
+
+async function exportInspectionAsPDF(inspection_id) {
+    const options = {
+        method: 'POST',
+        headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
+        },
+        body: JSON.stringify({
+            type: 'DOCUMENT_TYPE_PDF',
+            export_data: [
+                {
+                    inspection_id: inspection_id,
+                }
+            ]
+        })
+    }
+    const response = await fetch('https://api.safetyculture.io/inspection/v1/export', options)
+    const responseData = await response.json() // returns PDF download link
+
+    const pdfResponse = await fetch(responseData.url) // Make HTTP request to download the file
+
+    // Convert readable stream to buffer
+    const pdfArrayBuffer = await pdfResponse.arrayBuffer()
+    const buffer = Buffer.from(new Uint8Array(pdfArrayBuffer));
+
+    const filePath = './static/site_survey.pdf'; // creates temporary PDF
+    fs.writeFileSync(filePath, buffer);
+
+    return responseData.url
 }

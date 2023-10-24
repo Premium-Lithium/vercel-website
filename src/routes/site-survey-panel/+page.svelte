@@ -14,7 +14,7 @@
 	let sdk;
     
     let inspectedCreated = false
-
+	let error = null
 	//TO DO - deploy the panel on branch deployment
 	//Add authentication for users permmissions.
 	const managerList = ['15970437']; // for testing purposes I'm using my userId (Nicholas Dharmadi)
@@ -49,17 +49,40 @@
 	}
 	async function startInspection() {
 		try {
-			console.log("Clicked")
+			console.log("Button 1 clicked")
 			const response = await fetch('/site-survey-panel/inspection', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
+					option: 1,
 				})
 			});
 			if (response.ok) {
 				const responseData = await response.json();
 				inspectedCreated = true // alert that form is created
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	async function attachPDFToDeal() {
+		try {
+			console.log("Button 2 clicked")
+			const response = await fetch('/site-survey-panel/inspection', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 2,
+				})
+			});
+			if (response.ok) {
+				const responseData = await response.json();
+				inspectedCreated = true // alert that form is created
+				if(responseData.statusCode === 500)
+					error = responseData.message
 			}
 		} catch (error) {
 			console.log(error);
@@ -73,10 +96,12 @@
         <p>Selected ID: {dealId}</p>
         <p>Status: {status}</p>
     </div>
-    
+    {#if error}
+		<span>{error}</span>
+	{/if}
 	<div class="buttons-container">
 		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
-        <button class="link-btn">Attach SafetyCulture PDF to Deal</button>
+        <button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
         <button class="link-btn">Update Custom Field</button>
 	</div>
 
