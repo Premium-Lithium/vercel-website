@@ -6,6 +6,7 @@
 	import { createClient } from '@supabase/supabase-js';
 	import { json } from '@sveltejs/kit';
 	import FileSaver, { saveAs } from 'file-saver'
+	import JSZip from 'jszip'
 	const PUBLIC_SUPABASE_ANON_KEY =
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtZnV3bWR5bm92ZGx5b2psdGhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTU3MjE3NzUsImV4cCI6MjAxMTI5Nzc3NX0.PzKOk4uqHBfSRGg8j2LjL0R8WAyp_iBdLckYPEigCvc';
 	const PUBLIC_SUPABASE_URL = 'https://tmfuwmdynovdlyojlthe.supabase.co';
@@ -44,8 +45,6 @@
 	 * 	- download the file
 	 * Add error message to display whenever there is an error
 	 */
-
-	downloadFile("test");
 
 	let addName: string = '',
 		lookupName: string = '',
@@ -132,8 +131,34 @@
 		}
 	}
 
-	async function downloadFile(file) {
-		let fileSaved = saveAs(file, "QRCodes.zip");
+	async function saveAllQRCodes() {
+		const zip = new JSZip()
+		
+		for (let user in referralTable) {
+			const folder = zip.folder(referralTable[user].referee)
+			folder?.file(referralTable[user].referee + 'BaseQR.svg', referralTable[user].qrcodebase)
+			folder?.file(referralTable[user].referee + 'CardQR.svg', referralTable[user].qrcodecard)
+			folder?.file(referralTable[user].referee + 'ClothesQR.svg', referralTable[user].qrcodeclothes)
+		}
+
+		zip.generateAsync({ type: 'blob'}).then(function (qrCodes) {
+			saveAs(qrCodes, 'allQrCodesSVG.zip');
+		})
+	}
+
+	async function saveUserQRCodes() {
+
+		const indexOfUser = referralTable.findIndex(obj => obj.referee === nameSearchedFor)
+		const zip = new JSZip()
+
+		const folder = zip.folder(referralTable[indexOfUser].referee)
+		folder?.file(referralTable[indexOfUser].referee + 'BaseQR.svg', referralTable[indexOfUser].qrcodebase)
+		folder?.file(referralTable[indexOfUser].referee + 'CardQR.svg', referralTable[indexOfUser].qrcodecard)
+		folder?.file(referralTable[indexOfUser].referee + 'ClothesQR.svg', referralTable[indexOfUser].qrcodeclothes)
+
+		zip.generateAsync({ type: 'blob'}).then(function (qrCodes) {
+			saveAs(qrCodes, referralTable[indexOfUser].referee + 'QrCodesSVG.zip');
+		})
 	}
 
 	function lookupQRCode() {
@@ -155,6 +180,7 @@
 <body>
 	<div class="title">
 		<h1>Internal Referral Tracking and Lookup</h1>
+		<button name="downloadAllQR" on:click={saveAllQRCodes}>Download all QR Codes</button>
 		<div class="layout">
 			<div class="referral-table">
 				<h2>Referral Counts</h2>
@@ -200,6 +226,7 @@
 									</div>
 								{/each}
 							</div>
+							<button name="downloadUserQR" on:click={saveUserQRCodes}>Download {nameSearchedFor}'s QR Codes</button>
 						{:else}
 							<b>{nameSearchedFor} not found! Check spelling, or add this person in the right hand panel!</b>
 						{/if}
