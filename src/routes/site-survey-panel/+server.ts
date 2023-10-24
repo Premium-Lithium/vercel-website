@@ -21,10 +21,12 @@ export async function POST({ request }) {
             const inspectionResData = await inspectionRes?.json()
             return json(inspectionResData)
         } else if (option === 2) {
-            // attach
+            // attach PDF
             const pdfRes = await attachPDFToDeal(dealData)
             const pdfResData = await pdfRes?.json()
             return json(pdfResData)
+        } else if (option ===3 ){
+            // update custom field on Pipedrive
         } else {
             // Get status of survey
             const statusRes = await getStatusFromInspection(dealData)

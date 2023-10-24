@@ -86,6 +86,27 @@
 			console.log(error);
 		}
 	}
+
+	async function updateCustomField() {
+		try {
+			console.log('Button 3 clicked');
+			const response = await fetch('/site-survey-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 3
+				})
+			});
+			if (response.ok) {
+				const responseData = await response.json();
+				inspectedCreated = true; // alert that form is created
+				alertMessage = responseData.message;
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}
 </script>
 
 <div class="site-survey-panel">
@@ -104,7 +125,7 @@
 	<div class="buttons-container">
 		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
 		<button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
-		<button class="link-btn">Update Custom Field</button>
+		<button class="link-btn" on:click={updateCustomField}>Update Custom Field</button>
 	</div>
 
 	
