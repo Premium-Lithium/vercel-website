@@ -28,6 +28,7 @@ export async function POST({ request }) {
             response = await attachPDFToDeal(dealData);
         } else if (option === 3) {
             response = await updateMPAN(dealData);
+            await addNote(dealData)
         } else {
             response = await getStatusFromInspection(dealData);
         }
@@ -75,6 +76,7 @@ const sectionsMapping = {
     'Property Address': '7288b6ad-d800-410e-94bb-f52c92fcbf5f',
     'MPAN': '047b6bc5-f478-44d4-bf12-91fc51f560a9',
     'Estimated Electricity Usage Per Year': 'cadce879-b36a-436a-b65f-201b5c99e710',
+    'Comments': 'e54cd46a-d8cb-4a2e-9190-2a6efd69dcbf'
 }
 
 async function createInspectionFrom(dealData) {
@@ -317,4 +319,17 @@ async function updateMPAN(dealData) {
         const response = await fetch(companyDomainFields + dealData.id + '?api_token=' + PIPEDRIVE_API_TOKEN, req);
         return json({ message: 'Custom field updated.', statusCode: 200 })
     } else return json({ message: 'Not Found', statusCode: 500 })
+}
+
+async function addNote(dealData) {
+    const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, 'e54cd46a-d8cb-4a2e-9190-2a6efd69dcbf')
+
+    const noteRequest = {
+        dealId: dealData.id,
+        content: inspectionAnswer.answer
+    };
+    
+    const noteApi = new pipedrive.NotesApi(pd);
+    const newNote = await noteApi.addNote(noteRequest);
+    return newNote
 }
