@@ -184,9 +184,9 @@ async function getStatusFromInspection(dealData) {
     const inspectionData = await getInspectionDataFrom(dealData)
     if (inspectionData) {
         let status = null
-        //console.log("Data Response", inspectionData)
         if (inspectionData.audit_data.date_completed) {
             status = 'Completed'
+            // Update custom field Completed, to Yes
         } else status = 'Not Completed'
         return json({ message: status, statusCode: 200 })
     } else return json({ message: undefined, statusCode: 500 })
@@ -202,7 +202,7 @@ async function attachPDFToDeal(dealData) {
     } else {
         const pdfLink = await exportInspectionAsPDF(targetInspectionId[0])
         const pdFilesApi = new pipedrive.FilesApi(pd);
-        const filePath = './site_survey.pdf'
+        const filePath = './tmp/site_survey.pdf'
         const addFileRequest = await pdFilesApi.addFile(filePath, { 'dealId': dealData.id })
         fs.unlinkSync(filePath);
         return json({ message: 'PDF succesfully attached to deal.', statusCode: 200, pdfLink: pdfLink, addFileRequest: addFileRequest })
@@ -273,7 +273,7 @@ async function exportInspectionAsPDF(inspection_id) {
     const pdfArrayBuffer = await pdfResponse.arrayBuffer()
     const buffer = Buffer.from(new Uint8Array(pdfArrayBuffer));
 
-    const filePath = './site_survey.pdf'; // creates temporary PDF
+    const filePath = './tmp/site_survey.pdf'; // creates temporary PDF
     fs.writeFileSync(filePath, buffer);
 
     return responseData.url
