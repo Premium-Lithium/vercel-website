@@ -202,7 +202,7 @@ async function attachPDFToDeal(dealData) {
     } else {
         const pdfLink = await exportInspectionAsPDF(targetInspectionId[0])
         const pdFilesApi = new pipedrive.FilesApi(pd);
-        const filePath = './tmp/site_survey.pdf'
+        const filePath = '/tmp/site_survey.pdf'
         const addFileRequest = await pdFilesApi.addFile(filePath, { 'dealId': dealData.id })
         fs.unlinkSync(filePath);
         return json({ message: 'PDF succesfully attached to deal.', statusCode: 200, pdfLink: pdfLink, addFileRequest: addFileRequest })
@@ -273,7 +273,7 @@ async function exportInspectionAsPDF(inspection_id) {
     const pdfArrayBuffer = await pdfResponse.arrayBuffer()
     const buffer = Buffer.from(new Uint8Array(pdfArrayBuffer));
 
-    const filePath = './tmp/site_survey.pdf'; // creates temporary PDF
+    const filePath = '/tmp/site_survey.pdf'; // creates temporary PDF
     fs.writeFileSync(filePath, buffer);
 
     return responseData.url
