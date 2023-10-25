@@ -205,7 +205,7 @@ async function attachPDFToDeal(dealData) {
         const filePath = './static/pdfs/site_survey.pdf'
         const addFileRequest = await pdFilesApi.addFile(filePath, { 'dealId': dealData.id })
         fs.unlinkSync(filePath);
-        return json({ message: 'PDF succesfully attached to deal.', statusCode: 200 })
+        return json({ message: 'PDF succesfully attached to deal.', statusCode: 200, pdfLink: pdfLink, addFileRequest: addFileRequest })
     }
 }
 
