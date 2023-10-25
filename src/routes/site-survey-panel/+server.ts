@@ -202,7 +202,9 @@ async function attachPDFToDeal(dealData) {
     } else {
         const pdfLink = await exportInspectionAsPDF(targetInspectionId[0])
         const pdFilesApi = new pipedrive.FilesApi(pd);
-        const addFileRequest = await pdFilesApi.addFile('./static/pdfs/site_survey.pdf', { 'dealId': dealData.id })
+        const filePath = './static/pdfs/site_survey.pdf'
+        const addFileRequest = await pdFilesApi.addFile(filePath, { 'dealId': dealData.id })
+        fs.unlinkSync(filePath);
         return json({ message: 'PDF succesfully attached to deal.', statusCode: 200 })
     }
 }
@@ -210,7 +212,6 @@ async function attachPDFToDeal(dealData) {
 //Search for a first matching inspection that has a matching PL number in the title
 async function searchForInspectionFrom(dealData) {
     const customerData = getCustomerDataFrom(dealData)
-
     const response = await fetch(`https://api.safetyculture.io/audits/search?template=template_c8a5e85ccaf948358be9c7854aed847d&archived=false&completed=both`, {
         headers: {
             'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
@@ -218,7 +219,7 @@ async function searchForInspectionFrom(dealData) {
     })
     const responseData = await response.json()
     const auditList = responseData.audits
-    //customerData.pl_number = 'pl001224'
+
     //Loop through each audits_data, and find which matches
     let found = false
     let targetInspection = []
@@ -232,10 +233,12 @@ async function searchForInspectionFrom(dealData) {
             })
             const responseData = await response.json()
             const surveyTitle = responseData.audit_data.name
+            const match = surveyTitle.match(/PL\d+/i);
 
             //Matches
-            if (surveyTitle.toLowerCase().includes(customerData.pl_number.toLowerCase())) {
+            if (match[0].toLowerCase() === customerData.pl_number.toLowerCase()) {
                 found = true
+
                 targetInspection.push(audit_id)
                 return targetInspection
             }
@@ -270,7 +273,7 @@ async function exportInspectionAsPDF(inspection_id) {
     const pdfArrayBuffer = await pdfResponse.arrayBuffer()
     const buffer = Buffer.from(new Uint8Array(pdfArrayBuffer));
 
-    const filePath = './static/site_survey.pdf'; // creates temporary PDF
+    const filePath = './static/pdfs/site_survey.pdf'; // creates temporary PDF
     fs.writeFileSync(filePath, buffer);
 
     return responseData.url

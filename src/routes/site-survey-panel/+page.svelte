@@ -18,7 +18,9 @@
 	});
 
 	onMount(() => {
-		showCustomerData();
+		if(dealId){
+			showCustomerData();
+		}
 	});
 
 	async function showCustomerData() {
@@ -42,12 +44,15 @@
 				}
 				alertMessage = null;
 				console.log('Initial:', responseData);
+				return response
 			}
+			
 		} catch (error) {
 			console.log(error);
 			alertMessage = error;
 			await new Promise((resolve) => setTimeout(resolve, 3000));
 			alertMessage = null;
+			return error
 		}
 	}
 	async function startInspection() {
@@ -66,15 +71,20 @@
 					const responseData = await response.json();
 					alertMessage = responseData.message;
 					await new Promise((resolve) => setTimeout(resolve, 3000));
+					showCustomerData();
 					alertMessage = null;
 				}
+				return response
 			} else {
 				alertMessage = 'Error generating duplicate';
 				await new Promise((resolve) => setTimeout(resolve, 3000));
 				alertMessage = null;
+				
 			}
+			
 		} catch (error) {
 			console.log(error);
+			return error
 		}
 	}
 
@@ -96,8 +106,10 @@
 				await new Promise((resolve) => setTimeout(resolve, 3000));
 				alertMessage = null;
 			}
+			return response
 		} catch (error) {
 			console.log(error);
+			return error
 		}
 	}
 
@@ -118,8 +130,10 @@
 				await new Promise((resolve) => setTimeout(resolve, 3000));
 				alertMessage = null;
 			}
+			return response
 		} catch (error) {
 			console.log(error);
+			return error
 		}
 	}
 </script>
