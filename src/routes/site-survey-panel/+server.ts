@@ -188,7 +188,6 @@ async function getStatusFromInspection(dealData) {
         if (inspectionData.audit_data.date_completed) {
             status = 'Completed'
         } else status = 'Not Completed'
-        console.log(status)
         return json({ message: status, statusCode: 200 })
     } else return json({ message: undefined, statusCode: 500 })
 }
@@ -197,7 +196,6 @@ async function attachPDFToDeal(dealData) {
     //Find the specific inspection that matches the PL Number || Customer Name
     //Generate PDF to that inspection 
     const targetInspectionId = await searchForInspectionFrom(dealData)
-    console.log(targetInspectionId)
     if (targetInspectionId === null) {
         // If no site survey is found
         return json({ message: 'Fail to locate an existing site survey.', statusCode: 500 })
@@ -237,7 +235,6 @@ async function searchForInspectionFrom(dealData) {
 
             //Matches
             if (surveyTitle.toLowerCase().includes(customerData.pl_number.toLowerCase())) {
-                console.log(surveyTitle)
                 found = true
                 targetInspection.push(audit_id)
                 return targetInspection
@@ -309,7 +306,6 @@ async function updateMPAN(dealData) {
     if (inspectionAnswer) {
 
         const keyedData = getKeysForCustomFields(fieldsToUpdate)
-        console.log(keyedData)
         const req = {
             method: "PUT",
             headers: { 'Content-Type': 'application/json' },
