@@ -186,12 +186,31 @@ async function getStatusFromInspection(dealData) {
     const inspectionData = await getInspectionDataFrom(dealData)
     if (inspectionData) {
         let status = null
+
+        let fieldsToUpdate = {
+            'Site Survey Status': "",
+        }
+
         if (inspectionData.audit_data.date_completed) {
             status = 'Completed'
-            // Update custom field Completed, to Yes
-        } else status = 'Not Completed'
+            fieldsToUpdate['Site Survey Status'] = "1047" // 1047 is the option id for Yes
+        } else {
+            status = 'Not Completed'
+            fieldsToUpdate['Site Survey Status'] = "1048" // 1048 is the option id for No
+        }
+
+        const keyedData = getKeysForCustomFields(fieldsToUpdate)
+        // keyedData is in form of [ [ 'e775d10dd3e167c96a1d7cf0a12639ad9cfc1548', '1048' ] ]
+        const customFieldKey = keyedData[0][0];
+        const customFieldValue = keyedData[0][1];
+
+        const parsedRequest = { [customFieldKey]: customFieldValue }; // request is in the form {"e775d10dd3e167c96a1d7cf0a12639ad9cfc1548":"1048"}
+        const pdDealsApi = new pipedrive.DealsApi(pd)
+        const updateDealRequest = await pdDealsApi.updateDeal(dealData.id, parsedRequest)
+
         return json({ message: status, statusCode: 200 })
-    } else return json({ message: undefined, statusCode: 500 })
+    }
+    else return json({ message: undefined, statusCode: 500 })
 }
 
 async function attachPDFToDeal(dealData) {
@@ -268,7 +287,7 @@ async function exportInspectionAsPDF(inspection_id) {
     }
     const response = await fetch('https://api.safetyculture.io/inspection/v1/export', options)
     const responseData = await response.json() // returns PDF download link
-
+    
     const pdfResponse = await fetch(responseData.url) // Make HTTP request to download the file
 
     // Convert readable stream to buffer
@@ -285,7 +304,7 @@ async function exportInspectionAsPDF(inspection_id) {
 let fieldsToUpdate = {
     'MPAN number': '',
 }
-//WIP
+// WIP for updating multiple custom field in later version 
 async function updateCustomFieldFrom(dealData) {
     const inspectionAnswers = await getInspectionAnswersFrom(dealData)
 
@@ -305,18 +324,19 @@ async function updateCustomFieldFrom(dealData) {
 
 async function updateMPAN(dealData) {
     const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, '047b6bc5-f478-44d4-bf12-91fc51f560a9')
+
     let fieldsToUpdate = {
         'MPAN number': inspectionAnswer.answer,
     }
-    if (inspectionAnswer) {
 
+    if (inspectionAnswer) {
         const keyedData = getKeysForCustomFields(fieldsToUpdate)
-        const req = {
-            method: "PUT",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [keyedData[0][0]]: keyedData[0][1] })
-        };
-        const response = await fetch(companyDomainFields + dealData.id + '?api_token=' + PIPEDRIVE_API_TOKEN, req);
+        const customFieldKey = keyedData[0][0];
+        const customFieldValue = keyedData[0][1];
+
+        const parsedRequest = { [customFieldKey]: customFieldValue };  // request is in the form {"e775d10dd3e167c96a1d7cf0a12639ad9cfc1548":"1048"}
+        const pdDealsApi = new pipedrive.DealsApi(pd)
+        const updateDealRequest = await pdDealsApi.updateDeal(dealData.id, parsedRequest)
         return json({ message: 'Custom field updated.', statusCode: 200 })
     } else return json({ message: 'Not Found', statusCode: 500 })
 }
@@ -328,8 +348,10 @@ async function addNote(dealData) {
         dealId: dealData.id,
         content: inspectionAnswer.answer
     };
-    
+
     const noteApi = new pipedrive.NotesApi(pd);
     const newNote = await noteApi.addNote(noteRequest);
     return newNote
 }
+
+
