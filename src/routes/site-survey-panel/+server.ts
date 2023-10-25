@@ -204,7 +204,7 @@ async function attachPDFToDeal(dealData) {
     } else {
         const pdfLink = await exportInspectionAsPDF(targetInspectionId[0])
         const pdFilesApi = new pipedrive.FilesApi(pd);
-        const addFileRequest = await pdFilesApi.addFile('./static/site_survey.pdf', { 'dealId': dealData.id })
+        const addFileRequest = await pdFilesApi.addFile('./static/pdfs/site_survey.pdf', { 'dealId': dealData.id })
         return json({ message: 'PDF succesfully attached to deal.', statusCode: 200 })
     }
 }
