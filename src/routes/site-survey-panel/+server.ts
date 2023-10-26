@@ -242,27 +242,20 @@ async function searchForInspectionFrom(dealData) {
     const auditList = responseData.audits
 
     //Loop through each audits_data, and find which matches
-    let found = false
-    let targetInspection = []
-    if (found === false) {
-        for (const i in auditList) {
-            const audit_id = auditList[i].audit_id
-            const response = await fetch(`https://api.safetyculture.io/audits/${audit_id}`, {
-                headers: {
-                    'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
-                }
-            })
-            const responseData = await response.json()
-            const surveyTitle = responseData.audit_data.name
-            const match = surveyTitle.match(/PL\d+/i);
-
-            //Matches
-            if (match[0].toLowerCase() === customerData.pl_number.toLowerCase()) {
-                found = true
-
-                targetInspection.push(audit_id)
-                return targetInspection
+    for (const i in auditList) {
+        const audit_id = auditList[i].audit_id
+        const response = await fetch(`https://api.safetyculture.io/audits/${audit_id}`, {
+            headers: {
+                'Authorization': `Bearer ${SAFETY_CULTURE_TOKEN}`,
             }
+        })
+        const responseData = await response.json()
+        const surveyTitle = responseData.audit_data.name
+        const match = surveyTitle.match(/PL\d+/i);
+
+        //Matches
+        if (match[0].toLowerCase() === customerData.pl_number.toLowerCase()) {
+            return audit_id
         }
     }
     return null
