@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import pipedrive from 'pipedrive';
-import { pd, readCustomDealField, dealFieldsRequest, getKeysForCustomFields } from '../../lib/pipedrive-utils.js';
+import { pd, readCustomDealField, dealFieldsRequest, getKeysForCustomFields, getField, getOptionIdFor } from '../../lib/pipedrive-utils.js';
 import fs from 'fs';
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 import pkg from 'really-relaxed-json';
@@ -32,6 +32,8 @@ export async function POST({ request }) {
             await addNote(dealData)
         } else {
             response = await getStatusFromInspection(dealData);
+            //const updateRes = await updateCustomFieldsFrom(dealData);
+            console.log(getField('Is trenching required?'))
         }
 
         const responseData = await response?.json();
@@ -92,19 +94,67 @@ const safetyCultureFieldsMapping = {
     'Roof Type': 'e2e4d156-dc1a-4079-b1f4-826f1ea4efce',
     'Roof Tile Type': null,
     'Site Survey Status': null,
-    'Additional Comments': '7d67e682-b402-41ef-bedd-a53e5292bf33'
+    'Additional Comments': '7d67e682-b402-41ef-bedd-a53e5292bf33',
 }
 
 const safetyCultureResponsesMapping = {
     'Roof Tile Type': {
-      'rosemary': '88e5b264-45fe-4f6a-a410-fa7a5fa07372',
-      'concrete': '47f9144e-ae4e-4c8b-8304-abba1f5eaa01',
-      'slate': '055d6483-9e8e-4abe-9289-4ecfd7e7cc1f',
-      'trapezoidal': 'e06d490f-0678-4629-8740-ae6586730744',
-      'flat': '4f77c3ec-0b33-4b24-802e-91e0d5fec5f8',
-      'other': 'b6f61759-5ea3-4f2d-ac48-4f19ae770271'
+        'rosemary': '88e5b264-45fe-4f6a-a410-fa7a5fa07372',
+        'concrete': '47f9144e-ae4e-4c8b-8304-abba1f5eaa01',
+        'slate': '055d6483-9e8e-4abe-9289-4ecfd7e7cc1f',
+        'trapezoidal': 'e06d490f-0678-4629-8740-ae6586730744',
+        'flat': '4f77c3ec-0b33-4b24-802e-91e0d5fec5f8',
+        'other': 'b6f61759-5ea3-4f2d-ac48-4f19ae770271'
     }
-  };
+};
+
+
+// TO - DO create mapping between pipedrive options field and safetyculture response answer
+//[pipedrive options id] : [safetyculture response id]
+const pipeDriveSafetyCultureOptionMapping = {
+        821: 'safetyculture response id', // Trenching (Yes)
+        822: 'safetyculture response id', // Trenching (No)
+        
+    
+}
+const pipeDriveFieldsOptions = {
+    'Is trenching required?': [{ id: 821, label: 'Yes' }, { id: 822, label: 'No' }],
+    'Scaffolding Required?': [
+        { id: 823, label: '1 SIDE -  1 FLOOR' },
+        { id: 824, label: '1 SIDE -  2 FLOOR' },
+        { id: 1033, label: '1 SIDE -  3 FLOOR' },
+        { id: 1034, label: '2 SIDE -  1 FLOOR' },
+        { id: 1035, label: '2 SIDE -  2 FLOOR' },
+        { id: 1036, label: '2 SIDE -  3 FLOOR' },
+        { id: 1037, label: '3 SIDE -  1 FLOOR' },
+        { id: 1038, label: '3 SIDE -  2 FLOOR' },
+        { id: 1039, label: '3 SIDE -  3 FLOOR' },
+        { id: 1040, label: 'Not Required' }
+    ],
+    'Roof Structure Type': [
+        { id: 1030, label: 'Traditional' },
+        { id: 1031, label: 'Trussed' },
+        { id: 1032, label: 'Other' }
+    ],
+    'Roof Type': [
+        { id: 929, label: 'Pitched/Angled' },
+        { id: 930, label: 'Flat' },
+        { id: 942, label: 'Hip' },
+        { id: 1022, label: 'Gable' },
+        { id: 931, label: 'Unsure' }
+    ],
+    'Roof Tile Type': [
+        { id: 1023, label: 'Concrete' },
+        { id: 1024, label: 'Rosemary' },
+        { id: 1025, label: 'Slate' },
+        { id: 1026, label: 'Yorkshire stone' },
+        { id: 1027, label: 'Trapezoidal' },
+        { id: 1028, label: 'Felted' },
+        { id: 1029, label: 'Other' }
+    ],
+    'Site Survey Status': [{ id: 1047, label: 'Yes' }, { id: 1048, label: 'No' }],
+
+}
 
 const pipeDriveFieldsToUpdate = {
     'Existing Inverter - Make/Model/Size': '66ae80e6e27e7af328cb51c2de5a6c3df2afd04a',
@@ -341,19 +391,40 @@ let fieldsToUpdate = {
     'MPAN number': '',
 }
 // WIP for updating multiple custom field in later version 
-async function updateCustomFieldFrom(dealData) {
+async function updateCustomFieldsFrom(dealData) {
     const inspectionAnswers = await getInspectionAnswersFrom(dealData)
 
-    if (inspectionAnswers) {
-        /*
-        const keyedData = getKeysForCustomFields(fieldsToUpdate)
-        const req = {
-            method: "PUT",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [keyedData[0][0]]: keyedData[0][1] })
+    if (!inspectionAnswers) {
+        const pipeDriveFieldsToUpdate = {
+            'Existing Inverter - Make/Model/Size': ' PPP 50kWh',
+            'MPAN number': '221',
+            'Is trenching required?': '', //options (choose string id from options)  return options_id where its label === answerFromSafetyCulture
+            'Proposed battery location - request photo': 'Office',
+            'Scaffolding Required?': '', //options
+            'Stringing Configuration': ' config 1',
+            'Azimuth, Pitch': 'config 2',
+            'Annual consumption & Unit Rate': '5000kwh',
+            'Shade factor': 'none',
+            'Roof Structure Type': '', //options
+            'Roof Type': '', //options
+            'Roof Tile Type': '', //options
+            'Site Survey Status': '', //options
         };
-        const response = await fetch(companyDomainFields + dealData.id + '?api_token=' + PIPEDRIVE_API_TOKEN, req);
-        */
+        function getOptionsIDFrom(answer_id){
+            // from mapping object, return key where its value === answer_id
+            // return mapObject.get(answer_id)
+        }   // 
+
+        const keyedData = getKeysForCustomFields(pipeDriveFieldsToUpdate) // returns the mapping of custom field key 
+
+        const resultObject = {};
+        for (const [key, value] of keyedData) {
+            resultObject[key] = value
+        }
+        console.log(resultObject);
+        const pdDealsApi = new pipedrive.DealsApi(pd)
+        const updateDealRequest = await pdDealsApi.updateDeal(dealData.id, resultObject)
+        console.log(updateDealRequest)
         return json({ message: 'Custom field updated.', statusCode: 200 })
     } else return json({ message: 'Not Found', statusCode: 500 })
 }
@@ -361,11 +432,12 @@ async function updateCustomFieldFrom(dealData) {
 async function updateMPAN(dealData) {
     const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, '047b6bc5-f478-44d4-bf12-91fc51f560a9')
 
-    let fieldsToUpdate = {
-        'MPAN number': inspectionAnswer.answer,
-    }
 
     if (inspectionAnswer) {
+        let fieldsToUpdate = {
+            'MPAN number': inspectionAnswer.answer,
+        }
+
         const keyedData = getKeysForCustomFields(fieldsToUpdate) // returns the mapping of custom field key 
         const customFieldKey = keyedData[0][0];
         const customFieldValue = keyedData[0][1];
