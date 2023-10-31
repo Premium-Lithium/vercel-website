@@ -114,4 +114,5 @@ async function syncJobOwnersToPipedrive(
 			}
 		}
 	);
+	console.log(res);
 }
