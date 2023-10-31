@@ -98,22 +98,15 @@ async function syncJobOwnersToPipedrive(
 ) {
 	// This is ran at time of deal close via a Pipedrive Webhook.
 	// on deal.update.. if deal.status open -> won.. update owner in pipedrive.
-	// 'da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b' is the 'Sales Contact' custom field
-	let res = await fetch(
-		`https://api.pipedrive.com/api/v1/users/${dealOwnerId}?api_token=${PIPEDRIVE_API_TOKEN}`,
-		{ method: 'GET' }
-	);
-	console.log('res', res);
-	let data = await res.json();
-	if (!data.ok) return;
+	// 'da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b' is the 'Sales Contact' custom fiel
 
-	console.log('data', data);
-	res = await fetch(
+	console.log('dealOwnerId', dealOwnerId);
+	let res = await fetch(
 		`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`,
 		{
 			method: 'PUT',
 			body: JSON.stringify({
-				da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b: { data },
+				da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b: { dealOwnerId },
 				user_id: installerManagerUserID
 			}),
 			headers: {
