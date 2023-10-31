@@ -106,7 +106,7 @@ async function syncJobOwnersToPipedrive(
 		{
 			method: 'PUT',
 			body: JSON.stringify({
-				da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b: { dealOwnerId },
+				da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b: dealOwnerId,
 				user_id: installerManagerUserID
 			}),
 			headers: {
