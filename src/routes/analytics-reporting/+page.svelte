@@ -90,7 +90,7 @@
 	async function someData() {
 		let data = await getMatomoData("Live.getLastVisitsDetails", {
 			additionalOpts: [
-				["countVisitorsToFetch", "-1"]
+				["countVisitorsToFetch", "10"]
 			]
 		})
 		console.log(data)
