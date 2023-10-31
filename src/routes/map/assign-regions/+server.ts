@@ -106,7 +106,6 @@ async function syncJobOwnersToPipedrive(
 		{
 			method: 'PUT',
 			body: JSON.stringify({
-				da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b: dealOwnerId,
 				user_id: installerManagerUserID
 			}),
 			headers: {
@@ -114,5 +113,20 @@ async function syncJobOwnersToPipedrive(
 			}
 		}
 	);
+
+	console.log(res);
+	res = await fetch(
+		`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`,
+		{
+			method: 'PUT',
+			body: JSON.stringify({
+				da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b: dealOwnerId
+			}),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		}
+	);
+
 	console.log(res);
 }
