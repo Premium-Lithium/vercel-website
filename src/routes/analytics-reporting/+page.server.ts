@@ -1,16 +1,24 @@
 // get all the juicy data from matomo
 
 import type { PageServerLoad } from "./$types";
-import { MATOMO_API_KEY } from "$env/static/private";
+import { matomoAPICall } from "./matomoQuery.server";
+
 
 
 // have inital load, and some actions to load extra data
-
 export const load: PageServerLoad = async ({params}) => {
+    // construct basic query
+    let queryparams = [
+        ["method", "API.get"],
+        ["idSite", "3"],
+        ["period", "week"],
+        ["date", "yesterday"],
+        ["format", "JSON"],
+
+    ];
+    const data = await matomoAPICall(queryparams)
     return {
-        post: {
-            test: "test1",
-            content: "sample content",
-        }
+        post: data,
     }
 }
+
