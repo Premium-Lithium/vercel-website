@@ -103,9 +103,11 @@ async function syncJobOwnersToPipedrive(
 		`https://api.pipedrive.com/api/v1/users/${dealOwnerId}?api_token=${PIPEDRIVE_API_TOKEN}`,
 		{ method: 'GET' }
 	);
+	console.log('res', res);
 	let data = await res.json();
 	if (!data.ok) return;
 
+	console.log('data', data);
 	res = await fetch(
 		`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`,
 		{
