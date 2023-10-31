@@ -23,6 +23,7 @@
 		filterLimit?: number,
 		expanded?: "0" | "1",
 		flat?: "0" | "1",
+		additionalOpts?: Array<Array<string>> // any other params, will jsut be passed through
 	}
 
 	let dataString = JSON.stringify(data.post);
@@ -61,6 +62,12 @@
 		if (opts.flat) {
 			queryData.push(["flat", opts.flat])
 		}
+
+		// any extra params
+		if (opts.additionalOpts) {
+			queryData.push(...opts.additionalOpts)
+			console.log(queryData)
+		}
 		console.log("Querydata", queryData)
 		const data = await fetch("", {
 			method: "POST",
@@ -81,8 +88,10 @@
 	}
 
 	async function someData() {
-		let data = await getMatomoData("Actions.getPageTitles", {
-			flat: "1"
+		let data = await getMatomoData("Live.getLastVisitsDetails", {
+			additionalOpts: [
+				["countVisitorsToFetch", "-1"]
+			]
 		})
 		console.log(data)
 	}
