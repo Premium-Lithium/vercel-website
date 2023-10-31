@@ -109,6 +109,8 @@ const pipeDriveSafetyCultureOptionMapping = {
     1026: '', //Yorkshire stone
     1027: 'e06d490f-0678-4629-8740-ae6586730744', //Trapezoidal
     1028: '', //Felted
+    1059: '6d554cfa-0e32-4d03-b09c-965b7ea152f6', //Ground Mount
+    1060: '4f77c3ec-0b33-4b24-802e-91e0d5fec5f8', //Flat
     1029: 'b6f61759-5ea3-4f2d-ac48-4f19ae770271', //Other
 
 
@@ -318,7 +320,7 @@ async function getStatusFromInspection(dealData) {
 async function attachPDFToDeal(dealData) {
     //Find the specific inspection that matches the PL Number || Customer Name
     //Generate PDF to that inspection 
-    const targetInspectionId = await searchForInspectionFrom(dealData)
+    const targetInspectionId = await searchForInspectionFrom(dealData, 'PV, Battery and EV Survey')
     if (targetInspectionId === null) {
         // If no site survey is found
         return json({ message: 'Fail to locate an existing site survey.', statusCode: 500 })
