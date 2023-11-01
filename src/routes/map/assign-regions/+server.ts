@@ -55,15 +55,16 @@ export async function POST({ request }) {
 			console.log(dealGeographicalPoint);
 			let polygonPointIsIn = pointInPolygonFromList(dealGeographicalPoint, polygons);
 			if (polygonPointIsIn != null) {
-				await syncJobOwnersToPipedrive(
+				let isOk = await syncJobOwnersToPipedrive(
 					dealInfo.meta.id,
 					installationManagerDetails[polygonPointIsIn].id,
 					dealInfo.current['user_id']
 				);
-				return json(
-					{ message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.` },
-					{ status: 200 }
-				);
+				if (isOk)
+					return json(
+						{ message: `Deal with id ${dealInfo.meta.id} has had it's owner updated.` },
+						{ status: 200 }
+					);
 			}
 			return json(
 				{ message: `Deal with id ${dealInfo.meta.id} not inside a defined region.` },
@@ -120,4 +121,6 @@ async function syncJobOwnersToPipedrive(
 	for (const [key, value] of res.headers) {
 		console.log(`${key}: ${value}`);
 	}
+
+	return res.ok;
 }
