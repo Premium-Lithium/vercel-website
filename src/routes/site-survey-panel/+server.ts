@@ -29,7 +29,7 @@ export async function POST({ request }) {
             response = await attachPDFToDeal(dealData);
         } else if (option === 3) {
             response = await updateCustomFieldsFrom(dealData);
-            //await addNote(dealData)
+            await addNote(dealData)
         } else {
             response = await getStatusFromInspection(dealData);
         }
