@@ -8,6 +8,5 @@ export const POST: RequestHandler = async ({ request }) => {
     // make a call to matomo API for whatever data is asked for 
 
     const data = await matomoAPICall(params)
-    console.log(data)
     return json(data)
 };

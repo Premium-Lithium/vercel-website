@@ -50,9 +50,9 @@
 		}
 		let queryData = [
 			["method", method],
-			["idSite", String(opts.siteID || 3)],
+			["idSite", String(opts.siteID || 1)],
 			["period", opts.period || "day"],
-			["date", opts.date || "yesterday"],
+			["date", opts.date || "today"],
 			["format", opts.format || "JSON"],
 		]
 		// handle optional API parameters
@@ -66,9 +66,7 @@
 		// any extra params
 		if (opts.additionalOpts) {
 			queryData.push(...opts.additionalOpts)
-			console.log(queryData)
 		}
-		console.log("Querydata", queryData)
 		const data = await fetch("", {
 			method: "POST",
 			body: JSON.stringify(queryData),
@@ -82,15 +80,21 @@
 
 	function changeAssistant(id: number) {
 		assistantID = id;
-		getMatomoData("API.get", {
+		const data = getMatomoData("API.get", {
 			period: "month"
 		})
 	}
 
 	async function someData() {
+		// get segmented data for an assistant
+		
+		// define segment for specific assistant ID
+		const segment = "eventCategory==setAssistant;eventAction==" + String(assistantID);
+
 		let data = await getMatomoData("Live.getLastVisitsDetails", {
 			additionalOpts: [
-				["countVisitorsToFetch", "10"]
+				["countVisitorsToFetch", "10"],
+				["segment", segment]
 			]
 		})
 		console.log(data)
