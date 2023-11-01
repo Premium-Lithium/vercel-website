@@ -92,14 +92,14 @@ const safetyCultureFieldsToRetrieveMapping = {
 
 
 // TO - DO create mapping between pipedrive options field and safetyculture response answer
-//[pipedrive options id] : [safetyculture response id]
 const pipeDriveSafetyCultureOptionMapping = {
+    // PIPEDRIVE CUSTOM FIELD KEY : SAFETYCULTURE QUESTIONS ID
     '66ae80e6e27e7af328cb51c2de5a6c3df2afd04a': '3c696419-8380-434c-85d5-8836487761e9', // Existing Inverter 
     '75b418263a46a2ee1025fc8f87d730219484b56b': '047b6bc5-f478-44d4-bf12-91fc51f560a9', // MPAN
     '47692599a527f65407125f43a1a4fb2f79ad0df6': 'e2e4d156-dc1a-4079-b1f4-826f1ea4efce', // Roof Tile Type 
     '120b9ae729965a5bbce64521e8d100c1b75366a8': '76fb0ffe-3e3d-45d9-9554-78e229ff112e', // Is scaffolding required?
 
-    // Options
+    // PIPEDRIVE CUSTOM FIELD OPTIONS ID : SAFETYCULTURE RESPONSES ID
     823: '8fadf2e2-4cee-4efe-ae29-3ed4e8ee954c', // 1 SIDE - 1 FLOOR
     824: '6470c37e-0703-489e-8ce0-0608fbdc5fe1', // 1 SIDE - 2 FLOOR
     1033: '9fcb11e1-713b-4e54-875f-c47eac114c4b', // 1 SIDE - 3 FLOOR
@@ -118,44 +118,6 @@ const pipeDriveSafetyCultureOptionMapping = {
     1059: '6d554cfa-0e32-4d03-b09c-965b7ea152f6', // Ground Mount
     1060: '4f77c3ec-0b33-4b24-802e-91e0d5fec5f8', // Flat
     1029: 'b6f61759-5ea3-4f2d-ac48-4f19ae770271', // Other
-}
-const pipeDriveFieldsOptions = {
-    'Is trenching required?': [{ id: 821, label: 'Yes' }, { id: 822, label: 'No' }],
-    'Scaffolding Required?': [
-        { id: 823, label: '1 SIDE -  1 FLOOR' },
-        { id: 824, label: '1 SIDE -  2 FLOOR' },
-        { id: 1033, label: '1 SIDE -  3 FLOOR' },
-        { id: 1034, label: '2 SIDE -  1 FLOOR' },
-        { id: 1035, label: '2 SIDE -  2 FLOOR' },
-        { id: 1036, label: '2 SIDE -  3 FLOOR' },
-        { id: 1037, label: '3 SIDE -  1 FLOOR' },
-        { id: 1038, label: '3 SIDE -  2 FLOOR' },
-        { id: 1039, label: '3 SIDE -  3 FLOOR' },
-        { id: 1040, label: 'Not Required' }
-    ],
-    'Roof Structure Type': [
-        { id: 1030, label: 'Traditional' },
-        { id: 1031, label: 'Trussed' },
-        { id: 1032, label: 'Other' }
-    ],
-    'Roof Type': [
-        { id: 929, label: 'Pitched/Angled' },
-        { id: 930, label: 'Flat' },
-        { id: 942, label: 'Hip' },
-        { id: 1022, label: 'Gable' },
-        { id: 931, label: 'Unsure' }
-    ],
-    'Roof Tile Type': [
-        { id: 1023, label: 'Concrete' },
-        { id: 1024, label: 'Rosemary' },
-        { id: 1025, label: 'Slate' },
-        { id: 1026, label: 'Yorkshire stone' },
-        { id: 1027, label: 'Trapezoidal' },
-        { id: 1028, label: 'Felted' },
-        { id: 1029, label: 'Other' }
-    ],
-    'Site Survey Status': [{ id: 1047, label: 'Yes' }, { id: 1048, label: 'No' }],
-
 }
 
 const pipeDriveFieldsToUpdate = {
@@ -277,7 +239,7 @@ async function getInspectionSingleAnswerFrom(dealData, question_id) {
         let responseObject = JSON.parse(toJson(parsedResponse))
 
         const foundResult = responseObject.find(item => item.result.question_id === question_id);
-        // Return the response if answer is a list type & return string answer if text type
+        // Return the response option if answer is a list type & return string answer if its a text type
         // Return null if empty string
         if ('list_answer' in foundResult.result) {
             return foundResult.result.list_answer.responses;
@@ -288,6 +250,7 @@ async function getInspectionSingleAnswerFrom(dealData, question_id) {
         }
     }
 }
+
 function getKeyByValue(obj, value) {
     return Object.keys(obj)
         .filter(key => obj[key] === value);
@@ -410,10 +373,7 @@ async function exportInspectionAsPDF(inspection_id) {
     return responseData.url
 }
 
-// WIP for updating multiple custom field in later version 
-async function updateCustomFieldsFrom(dealData) {
-    const inspectionAnswers = await getInspectionAnswersFrom(dealData)
-    console.log(inspectionAnswers)
+function mapSafetyCultureAnswersToPD(inspectionAnswers) {
     let resultObject = {}
     // Map all safety culture answers into pipedrive format
     for (const key in inspectionAnswers) {
@@ -429,20 +389,25 @@ async function updateCustomFieldsFrom(dealData) {
             else resultObject[getPipeDriveFieldId] = value
         }
     }
-    console.log(resultObject)
+    return resultObject
+}
+
+async function updateCustomFieldsFrom(dealData) {
+    const inspectionAnswers = await getInspectionAnswersFrom(dealData)
+
+    let resultObject = mapSafetyCultureAnswersToPD(inspectionAnswers)
+
     const pdDealsApi = new pipedrive.DealsApi(pd)
     const updateDealRequest = await pdDealsApi.updateDeal(dealData.id, resultObject)
-    console.log(updateDealRequest)
     return json({ message: 'Custom field updated.', statusCode: 200 })
 }
 
-async function updateMPAN(dealData) {
-    const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, '047b6bc5-f478-44d4-bf12-91fc51f560a9')
-
+async function updateSingleCustomFieldFrom(dealData, customFieldName, question_id) {
+    const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, question_id)
 
     if (inspectionAnswer) {
         let fieldsToUpdate = {
-            'MPAN number': inspectionAnswer.answer,
+            [customFieldName]: inspectionAnswer.answer,
         }
 
         const keyedData = getKeysForCustomFields(fieldsToUpdate) // returns the mapping of custom field key 
