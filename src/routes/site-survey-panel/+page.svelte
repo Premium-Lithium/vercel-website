@@ -44,6 +44,8 @@
 				}
 				alertMessage = null;
 				console.log('Initial:', responseData);
+				
+				
 				return response
 			}
 			

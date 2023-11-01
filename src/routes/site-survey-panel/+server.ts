@@ -28,22 +28,17 @@ export async function POST({ request }) {
         } else if (option === 2) {
             response = await attachPDFToDeal(dealData);
         } else if (option === 3) {
-            response = await updateMPAN(dealData);
-            await addNote(dealData)
+            response = await updateCustomFieldsFrom(dealData);
+            //await addNote(dealData)
         } else {
             response = await getStatusFromInspection(dealData);
-            //await getInspectionAnswersFrom(dealData)
-            await updateCustomFieldsFrom(dealData)
-            
-            //const updateRes = await updateCustomFieldsFrom(dealData);
-            //getInspectionAnswersFrom(deal)
         }
 
         const responseData = await response?.json();
         return json(responseData);
     } catch (error) {
         console.log('Error:', error);
-        return json({ message: "Can't get dealData", statusCode: 500 });
+        return json({ message: "Internal server error", statusCode: 500 });
     }
 }
 
@@ -84,10 +79,11 @@ const safetyCultureFieldsToUpdateMapping = {
     'Conducted on': '5e88e4da-6dfb-48e2-8ddd-925564f690aa',
 }
 
+//https://developer.safetyculture.com/reference/templatesservice_gettemplatebyinspectionid
 const safetyCultureFieldsToRetrieveMapping = {
     'Make and model of existing inverter': '3c696419-8380-434c-85d5-8836487761e9',
     'MPAN': '047b6bc5-f478-44d4-bf12-91fc51f560a9',
-    'Scaffolding?': null,
+    'Scaffolding?': '76fb0ffe-3e3d-45d9-9554-78e229ff112e',
     'Roof Type': 'e2e4d156-dc1a-4079-b1f4-826f1ea4efce',
     //'Additional Comments': '7d67e682-b402-41ef-bedd-a53e5292bf33',
 }
@@ -100,20 +96,28 @@ const safetyCultureFieldsToRetrieveMapping = {
 const pipeDriveSafetyCultureOptionMapping = {
     '66ae80e6e27e7af328cb51c2de5a6c3df2afd04a': '3c696419-8380-434c-85d5-8836487761e9', // Existing Inverter 
     '75b418263a46a2ee1025fc8f87d730219484b56b': '047b6bc5-f478-44d4-bf12-91fc51f560a9', // MPAN
-    '47692599a527f65407125f43a1a4fb2f79ad0df6': 'e2e4d156-dc1a-4079-b1f4-826f1ea4efce', // Roof Tile Type
+    '47692599a527f65407125f43a1a4fb2f79ad0df6': 'e2e4d156-dc1a-4079-b1f4-826f1ea4efce', // Roof Tile Type 
+    '120b9ae729965a5bbce64521e8d100c1b75366a8': '76fb0ffe-3e3d-45d9-9554-78e229ff112e', // Is scaffolding required?
 
     // Options
+    823: '8fadf2e2-4cee-4efe-ae29-3ed4e8ee954c', // 1 SIDE - 1 FLOOR
+    824: '6470c37e-0703-489e-8ce0-0608fbdc5fe1', // 1 SIDE - 2 FLOOR
+    1033: '9fcb11e1-713b-4e54-875f-c47eac114c4b', // 1 SIDE - 3 FLOOR
+    1034: '2576b336-95c7-4b66-b605-fa73414e5fe6', // 2 SIDE - 1 FLOOR
+    1035: '95d5f388-f72c-4026-b678-c137a23e2fb5', // 2 SIDE - 2 FLOOR
+    1036: '98a8954c-0843-46d4-baee-771b302fdc61', // 2 SIDE - 3 FLOOR
+    1037: '07aa0d81-e099-4565-adfc-b7da5508d37d', // 3 SIDE - 1 FLOOR
+    1038: 'dd392ea7-cdb2-4e2a-beb0-6e0b0fe472da', // 3 SIDE - 2 FLOOR
+    1039: '2c6f72bb-7b17-4419-8de3-eb5a83af816e', // 3 SIDE - 3 FLOOR
     1023: '47f9144e-ae4e-4c8b-8304-abba1f5eaa01', // Concrete
     1024: '88e5b264-45fe-4f6a-a410-fa7a5fa07372', // Rosemary
-    1025: '055d6483-9e8e-4abe-9289-4ecfd7e7cc1f', //Slate
-    1026: '', //Yorkshire stone
-    1027: 'e06d490f-0678-4629-8740-ae6586730744', //Trapezoidal
-    1028: '', //Felted
-    1059: '6d554cfa-0e32-4d03-b09c-965b7ea152f6', //Ground Mount
-    1060: '4f77c3ec-0b33-4b24-802e-91e0d5fec5f8', //Flat
-    1029: 'b6f61759-5ea3-4f2d-ac48-4f19ae770271', //Other
-
-
+    1025: '055d6483-9e8e-4abe-9289-4ecfd7e7cc1f', // Slate
+    1026: 'be2a5ac6-c9cd-46ec-847f-bf7f8c96c5f3', // Yorkshire stone
+    1027: 'e06d490f-0678-4629-8740-ae6586730744', // Trapezoidal
+    1028: 'f23275eb-6099-414b-ac99-0a0e746ee09e', // Felted
+    1059: '6d554cfa-0e32-4d03-b09c-965b7ea152f6', // Ground Mount
+    1060: '4f77c3ec-0b33-4b24-802e-91e0d5fec5f8', // Flat
+    1029: 'b6f61759-5ea3-4f2d-ac48-4f19ae770271', // Other
 }
 const pipeDriveFieldsOptions = {
     'Is trenching required?': [{ id: 821, label: 'Yes' }, { id: 822, label: 'No' }],
@@ -273,11 +277,14 @@ async function getInspectionSingleAnswerFrom(dealData, question_id) {
         let responseObject = JSON.parse(toJson(parsedResponse))
 
         const foundResult = responseObject.find(item => item.result.question_id === question_id);
-        const textAnswer = foundResult.result.text_answer
-        const listAnswer = foundResult.result.list_answer.responses
-        if (textAnswer) return textAnswer
-        else {
-            return listAnswer
+        // Return the response if answer is a list type & return string answer if text type
+        // Return null if empty string
+        if ('list_answer' in foundResult.result) {
+            return foundResult.result.list_answer.responses;
+        } else if (foundResult.result.text_answer.answer === "") {
+            return null;
+        } else {
+            return foundResult.result.text_answer.answer;
         }
     }
 }
@@ -297,10 +304,10 @@ async function getStatusFromInspection(dealData) {
 
         if (inspectionData.audit_data.date_completed) {
             status = 'Completed'
-            fieldsToUpdate['Site Survey Status'] = "1047" // 1047 is the option id for Yes
+            fieldsToUpdate['Site Survey Status'] = status // 1047 is the option id for Yes
         } else {
             status = 'Not Completed'
-            fieldsToUpdate['Site Survey Status'] = "1048" // 1048 is the option id for No
+            fieldsToUpdate['Site Survey Status'] = status // 1048 is the option id for No
         }
 
         const keyedData = getKeysForCustomFields(fieldsToUpdate)
@@ -321,11 +328,12 @@ async function attachPDFToDeal(dealData) {
     //Find the specific inspection that matches the PL Number || Customer Name
     //Generate PDF to that inspection 
     const targetInspectionId = await searchForInspectionFrom(dealData, 'PV, Battery and EV Survey')
+    console.log(targetInspectionId)
     if (targetInspectionId === null) {
         // If no site survey is found
         return json({ message: 'Fail to locate an existing site survey.', statusCode: 500 })
     } else {
-        const pdfLink = await exportInspectionAsPDF(targetInspectionId[0])
+        const pdfLink = await exportInspectionAsPDF(targetInspectionId)
         const pdFilesApi = new pipedrive.FilesApi(pd);
         const filePath = '/tmp/site_survey.pdf'
         const addFileRequest = await pdFilesApi.addFile(filePath, { 'dealId': dealData.id })
@@ -345,9 +353,9 @@ async function searchForInspectionFrom(dealData, templateName) {
     })
     const responseData = await response.json()
     const auditList = responseData.audits
-
-    //Loop through each audits_data, and find which matches
-    for (const i in auditList) {
+    // Loop through each audits_data, and find first matches
+    // Iterate from latest inspection to oldest
+    for (const i in auditList.reverse()) {
         const audit_id = auditList[i].audit_id
         const response = await fetch(`https://api.safetyculture.io/audits/${audit_id}`, {
             headers: {
@@ -382,6 +390,7 @@ async function exportInspectionAsPDF(inspection_id) {
             export_data: [
                 {
                     inspection_id: inspection_id,
+                    lang: 'en-US',
                 }
             ]
         })
@@ -405,27 +414,26 @@ async function exportInspectionAsPDF(inspection_id) {
 async function updateCustomFieldsFrom(dealData) {
     const inspectionAnswers = await getInspectionAnswersFrom(dealData)
     console.log(inspectionAnswers)
-
-    let resultObjectFinal = {}
+    let resultObject = {}
     // Map all safety culture answers into pipedrive format
-    for(const key in inspectionAnswers){
+    for (const key in inspectionAnswers) {
         const value = inspectionAnswers[key]
         const getPipeDriveFieldId = getKeyByValue(pipeDriveSafetyCultureOptionMapping, key)[0]
         // If a resposne object is found, map it to its pipedrive options value
-        if(typeof(value) != "string")
-        {
+        if (typeof (value) != "string") {
             const pipeDriveOptionsId = getKeyByValue(pipeDriveSafetyCultureOptionMapping, value[0])[0]
-            resultObjectFinal[getPipeDriveFieldId] = pipeDriveOptionsId
+            resultObject[getPipeDriveFieldId] = pipeDriveOptionsId
         }
         else {
-            resultObjectFinal[getPipeDriveFieldId] = value
+            if (value.length == 0) resultObject[getPipeDriveFieldId] = null
+            else resultObject[getPipeDriveFieldId] = value
         }
     }
+    console.log(resultObject)
     const pdDealsApi = new pipedrive.DealsApi(pd)
-    const updateDealRequest = await pdDealsApi.updateDeal(dealData.id, resultObjectFinal)
+    const updateDealRequest = await pdDealsApi.updateDeal(dealData.id, resultObject)
     console.log(updateDealRequest)
     return json({ message: 'Custom field updated.', statusCode: 200 })
-
 }
 
 async function updateMPAN(dealData) {
@@ -449,16 +457,17 @@ async function updateMPAN(dealData) {
 }
 
 async function addNote(dealData) {
-    const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, 'e54cd46a-d8cb-4a2e-9190-2a6efd69dcbf')
+    const inspectionAnswer = await getInspectionSingleAnswerFrom(dealData, '7d67e682-b402-41ef-bedd-a53e5292bf33')
+    if (inspectionAnswer) {
+        const noteRequest = {
+            dealId: dealData.id,
+            content: inspectionAnswer
+        };
 
-    const noteRequest = {
-        dealId: dealData.id,
-        content: inspectionAnswer.answer
-    };
-
-    const noteApi = new pipedrive.NotesApi(pd);
-    const newNote = await noteApi.addNote(noteRequest);
-    return newNote
+        const noteApi = new pipedrive.NotesApi(pd);
+        const newNote = await noteApi.addNote(noteRequest);
+        return newNote
+    }
 }
 
 
