@@ -118,9 +118,5 @@ async function syncJobOwnersToPipedrive(
 	);
 	console.log(res);
 
-	for (const [key, value] of res.headers) {
-		console.log(`${key}: ${value}`);
-	}
-
 	return res.ok;
 }
