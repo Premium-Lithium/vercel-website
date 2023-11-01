@@ -31,7 +31,6 @@ export async function POST({ request }) {
             response = await updateCustomFieldsFrom(dealData);
             await addNote(dealData)
         } else {
-            console.log(getField('Roof Tile Type'))
             response = await getStatusFromInspection(dealData);
         }
 
@@ -292,7 +291,6 @@ async function attachPDFToDeal(dealData) {
     //Find the specific inspection that matches the PL Number || Customer Name
     //Generate PDF to that inspection 
     const targetInspectionId = await searchForInspectionFrom(dealData, 'PV, Battery and EV Survey')
-    console.log(targetInspectionId)
     if (targetInspectionId === null) {
         // If no site survey is found
         return json({ message: 'Fail to locate an existing site survey.', statusCode: 500 })
