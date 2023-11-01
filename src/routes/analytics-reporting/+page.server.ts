@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({params}) => {
     // construct basic query
     let queryparams = [
         ["method", "API.get"],
-        ["idSite", "3"],
+        ["idSite", "1"],
         ["period", "week"],
         ["date", "yesterday"],
         ["format", "JSON"],
