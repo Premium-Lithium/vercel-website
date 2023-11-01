@@ -115,6 +115,10 @@ async function syncJobOwnersToPipedrive(
 			}
 		}
 	);
-
+	res = await res.json();
 	console.log(res);
+
+	for (const [key, value] of res.headers) {
+		console.log(`${key}: ${value}`);
+	}
 }
