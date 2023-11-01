@@ -101,25 +101,13 @@ async function syncJobOwnersToPipedrive(
 	// 'da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b' is the 'Sales Contact' custom fiel
 
 	console.log('dealOwnerId', dealOwnerId);
+	console.log('installerManagerId', installerManagerUserID);
 	let res = await fetch(
 		`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`,
 		{
 			method: 'PUT',
 			body: JSON.stringify({
-				user_id: installerManagerUserID
-			}),
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		}
-	);
-
-	console.log(res);
-	res = await fetch(
-		`https://api.pipedrive.com/api/v1/deals/${dealId}?api_token=${PIPEDRIVE_API_TOKEN}`,
-		{
-			method: 'PUT',
-			body: JSON.stringify({
+				user_id: installerManagerUserID,
 				da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b: dealOwnerId
 			}),
 			headers: {
