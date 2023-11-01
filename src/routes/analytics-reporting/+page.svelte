@@ -91,13 +91,33 @@
 		// define segment for specific assistant ID
 		const segment = "eventCategory==setAssistant;eventAction==" + String(assistantID);
 
+		let data = await summaryConstructor(segment)
+		console.log(data)
+	}
+
+	async function summaryConstructor(segment?: string) {
+		let opts = [
+
+		]
+		if (segment) {
+			opts.push(["segment", segment])
+		}
+		let data = await getMatomoData("API.get", {
+			additionalOpts: opts,
+		})
+		return data
+
+	}
+
+	// construct request for Live last visits API
+	async function lastVisitConstructor (segment: string) {
 		let data = await getMatomoData("Live.getLastVisitsDetails", {
 			additionalOpts: [
 				["countVisitorsToFetch", "10"],
 				["segment", segment]
 			]
 		})
-		console.log(data)
+		return data;
 	}
 </script>
 
@@ -128,7 +148,7 @@
 	<div>
 		<button on:click={() => changeAssistant(1)}>Assistant 1</button>
 		<button on:click={() => changeAssistant(2)}>Assistant 2</button>
-		<button on:click={() => changeAssistant(3)}>Assistant 3</button>
+		<button on:click={() => changeAssistant(123512)}>Assistant 123512</button>
 		<button on:click={() => changeAssistant(4)}>Assistant 4</button>
 		<button on:click={() => changeAssistant(5)}>Assistant 5</button>
 	</div>
