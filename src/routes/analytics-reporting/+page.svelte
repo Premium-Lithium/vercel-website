@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	interface AssistantData {
 		sessions: number,
-		medSessionLength: number,
 		totalSessionTime: number,
+		avgSessionTime: number,
 		numConsultationsBooked: number,
+		totalConsultationValue: number,
 		numSurveysBooked: number,
+		totalSurveyValue: number,
 		conversionRate: string,
-
+		sessionValue: number,
+		sessionValuePerMinute: number,
 	}
 
 	interface MatomoAPIOpts {
@@ -26,7 +28,18 @@
 		additionalOpts?: Array<Array<string>> // any other params, will jsut be passed through
 	}
 
-	let dataString = JSON.stringify(data.post);
+	let assistantData: AssistantData = { // data for selected assistant
+		sessions: 0,
+		totalSessionTime: 0,
+		avgSessionTime: 0,
+		numConsultationsBooked: 0,
+		totalConsultationValue: 0,
+		numSurveysBooked: 0,
+		totalSurveyValue: 0,
+		conversionRate: "0%",
+		sessionValue: 0,
+		sessionValuePerMinute: 0,
+	}
 
 	console.log(data);
 	const mtmo = data.post;
@@ -39,10 +52,6 @@
 	};
 
 	let assistantID = 1;
-	let assistantData = {
-
-	}
-	
 
 	async function getMatomoData (method: string, opts?:MatomoAPIOpts ) {
 		if (!opts) {
@@ -78,11 +87,32 @@
 		return res;
 	}
 
-	function changeAssistant(id: number) {
+	async function changeAssistant(id: number) {
 		assistantID = id;
-		const data = getMatomoData("API.get", {
-			period: "month"
-		})
+
+		const segment = "eventCategory==setAssistant;eventAction==" + String(assistantID);
+		// fetch the actual data for that assistant
+
+		// session number data
+
+		// data for bookings
+
+		const bookingData = await getBookingData(segment);
+
+		const sessionData = await getSessiondata(segment);
+
+
+		// extract data from returned values
+		assistantData.sessions = sessionData.num,
+		assistantData.totalSessionTime = sessionData.totalTime,
+		assistantData.avgSessionTime = sessionData.avgDuration,
+		assistantData.numConsultationsBooked = bookingData.consultation.num
+		assistantData.totalConsultationValue = bookingData.consultation.val
+		assistantData.numSurveysBooked = bookingData.survey.num
+		assistantData.totalSurveyValue = bookingData.survey.val
+		assistantData.conversionRate = sessionData.conversionRate
+		assistantData.sessionValue = Math.round((bookingData.survey.val + bookingData.consultation.val) / sessionData.num)
+		assistantData.sessionValuePerMinute = Math.round((bookingData.survey.val + bookingData.consultation.val) / (sessionData.totalTime / 60))
 	}
 
 	async function someData() {
@@ -91,8 +121,86 @@
 		// define segment for specific assistant ID
 		const segment = "eventCategory==setAssistant;eventAction==" + String(assistantID);
 
-		let data = await summaryConstructor(segment)
+		let data = await getSessiondata(segment)
 		console.log(data)
+	}
+
+	async function getBookingData(segment?: string) {
+		// get count for each booking event
+		// event category successfulBooking has subtable ID 4
+		let opts = [
+			["idSubtable", "4"]
+		]
+		if (segment) {
+			opts.push(["segment", segment])
+		}
+		let data = await getMatomoData("Events.getActionFromCategoryId", {
+			additionalOpts: opts
+		})
+
+		let bookingData = {
+			consultation: {
+				num: 0,
+				val: 0,
+			},
+			survey: {
+				num: 0,
+				val: 0,
+			}
+		}
+		// handle if error instead
+		if (data.result) {
+			if (data.result === "error") {
+				console.log(data.message)
+				return bookingData;
+			}
+		}
+		// returns array containing an object for every event this matches
+		// for each element, construct whatever data is needed
+		
+		for (const booking of data) {
+			if (booking.label === "Consultation") {
+				bookingData.consultation.num = booking.nb_visits;
+				bookingData.consultation.val = booking.sum_event_value;
+			} else if (booking.label === "Survey") {
+				bookingData.survey.num = booking.nb_visits;
+				bookingData.survey.val = booking.sum_event_value;
+			}
+		}
+		return bookingData
+	}
+
+	async function getSessiondata(segment?: string) {
+		// get data on session number, length and conversion rate
+		let opts = [
+
+		]
+		if (segment) {
+			opts.push(["segment", segment])
+		}
+		let data = await getMatomoData("API.get", {
+			additionalOpts: opts,
+		})
+		const sessionData = {
+			num: data.nb_visits,
+			totalTime: data.sum_visit_length,
+			avgDuration: data.avg_time_on_site,
+			conversionRate: data.conversion_rate,
+		}
+
+		return sessionData;
+	}
+
+	async function eventConstructor(segment?: string) {
+		let opts = [
+		]
+		if (segment) {
+			opts.push(["segment", segment])
+		}
+		let data = await getMatomoData("Events.getCategory", {
+			additionalOpts: opts,
+		})
+		return data
 	}
 
 	async function summaryConstructor(segment?: string) {
@@ -125,7 +233,7 @@
 	<div>
 		<h1>get aggregate data for each assistant</h1>
 		<p>Make a call to the matomo API to get data for every session</p>
-		<h2>Some interesing data</h2>
+		<h2>Some interesting data</h2>
 		<table>
 			<tr>
 				<td>Visitors</td>
@@ -160,29 +268,48 @@
 		<table>
 			<tr>
 				<td>Sessions</td>
-				<td></td>
+				<td>{assistantData.sessions}</td>
 			</tr>
 			<tr>
-				<td></td>
-				<td></td>
+				<td>Total session time</td>
+				<td>{assistantData.totalSessionTime} seconds</td>
 			</tr>
 			<tr>
-				<td></td>
-				<td></td>
+				<td>Average session time</td>
+				<td>{assistantData.avgSessionTime} seconds</td>
 			</tr>
 			<tr>
-				<td></td>
-				<td></td>
+				<td>Consultations booked</td>
+				<td>{assistantData.numConsultationsBooked}</td>
 			</tr>
 			<tr>
-				<td></td>
-				<td></td>
+				<td>Total Consultation Value</td>
+				<td>£{assistantData.totalConsultationValue}</td>
 			</tr>
 			<tr>
-				<td></td>
-				<td></td>
+				<td>Surveys booked</td>
+				<td>{assistantData.numSurveysBooked}</td>
+			</tr>
+			<tr>
+				<td>Total Survey Value</td>
+				<td>£{assistantData.totalSurveyValue}</td>
+			</tr>
+			<tr>
+				<td>Conversion rate</td>
+				<td>{assistantData.conversionRate}</td>
+			</tr>
+			<tr>
+				<td>Avg session value</td>
+				<td>£{assistantData.sessionValue}</td>
+			</tr>
+			<tr>
+				<td>Value per minute</td>
+				<td>£{assistantData.sessionValuePerMinute}</td>
 			</tr>
 		</table>
+	</div>
+	<div class=buttons>
+
 	</div>
 </body>
 
