@@ -76,7 +76,7 @@
 			['method', method],
 			['idSite', String(opts.siteID || 1)],
 			['period', opts.period || 'day'],
-			['date', opts.date || 'today'],
+			['date', opts.date || 'yesterday'],
 			['format', opts.format || 'JSON']
 		];
 		// handle optional API parameters
@@ -173,7 +173,7 @@
 		}
 		// returns array containing an object for every event this matches
 		// for each element, construct whatever data is needed
-
+		console.log(data)
 		for (const booking of data) {
 			if (booking.label === 'Consultation') {
 				bookingData.consultation.num = booking.nb_visits;
@@ -291,9 +291,11 @@
 	<div>
 		<button on:click={() => changeAssistant(1)}>Assistant 1</button>
 		<button on:click={() => changeAssistant(2)}>Assistant 2</button>
-		<button on:click={() => changeAssistant(123512)}>Assistant 123512</button>
+		<button on:click={() => changeAssistant(3)}>Assistant 3</button>
 		<button on:click={() => changeAssistant(4)}>Assistant 4</button>
 		<button on:click={() => changeAssistant(5)}>Assistant 5</button>
+		<button on:click={() => changeAssistant(123512)}>Assistant 123512</button>
+		<button on:click={() => changeAssistant(-1)}>Assistant not selected</button>
 	</div>
 	<div class="panel">
 		<div class="assistant-info">
