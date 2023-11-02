@@ -4,8 +4,6 @@ import type { PageServerLoad } from "./$types";
 import { matomoAPICall } from "./matomoQuery.server";
 
 
-const 
-
 
 // have inital load, and some actions to load extra data
 export const load: PageServerLoad = async ({params}) => {
