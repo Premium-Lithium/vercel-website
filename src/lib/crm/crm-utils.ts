@@ -1,20 +1,14 @@
 import { pd, getKeysForCustomFields, getField, getOptionIdFor, readCustomDealField } from '$lib/pipedrive-utils';
 import pipedrive from 'pipedrive';
 
-/*
-let surveyDataSource = new SurveyDataSource();
-const mpan = surveyDataSource.getMpan();
-crm.setMpanFor("PL000234", mpan);
-*/
 
 export class CRM {
 	async setCustomField(PLNumber: string, fieldName: string, value: string, options: boolean) {
 		const pdDealsApi = new pipedrive.DealsApi(pd);
-		const field = getField(fieldName);
-
 		const dealFound = await pdDealsApi.searchDeals(PLNumber) //Returns array of deal found 
 		const dealId = dealFound.data.items[0].item.id
-
+		
+		const field = getField(fieldName);
 		let request = {[field.key]: value}
 		// If field is an option, convert string value to option ID
 		if(options === true) {
@@ -105,12 +99,22 @@ export class CRM {
 
 	async setRoofStructureTypeFor(PLNumber: string, value: string) {
 		const updateDealRequest = await this.setCustomField(PLNumber, 'Roof Structure Type', value, true)
-		return updateDealRequest
+		return updateDealRequest;
 	}
 
 	async getRoofStructureTypeFor(PLNumber: string) {
 		const fieldResponse = await this.getCustomField(PLNumber, 'Roof Structure Type')
 		return fieldResponse;
+	}
+
+	async attachPdfFor(PLNumber: string, filePath: string) {
+		const pdDealsApi = new pipedrive.DealsApi(pd);
+		const dealFound = await pdDealsApi.searchDeals(PLNumber) 
+		const dealId = dealFound.data.items[0].item.id
+
+		const pdFilesApi = new pipedrive.FilesApi(pd);
+		const addFileRequest = await pdFilesApi.addFile(filePath, { 'dealId': dealId})
+		return addFileRequest;
 	}
 }
 

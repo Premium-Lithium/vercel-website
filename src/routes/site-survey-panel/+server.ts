@@ -34,6 +34,7 @@ export async function POST({ request }) {
             await addNote(dealData)
         } else {
             const pl_reference = "PL0007786"
+            const templateName = 'PV, Battery and EV Survey'
             /*
             const crm = new CRM()
             await crm.setMpanFor(pl_reference, "Mpan")
@@ -44,15 +45,9 @@ export async function POST({ request }) {
             await crm.setRoofTileTypeFor(pl_reference, "Ground Mount")
             await crm.setScaffoldingRequiredFor(pl_reference, "2 SIDE -  2 FLOOR") // *** TWO spaces after -
             await crm.setRoofStructureTypeFor(pl_reference, "Trussed")
-            console.log(await crm.getRoofTileTypeFor(pl_reference))
             */
             const surveyDataSource = new SurveyDataSource()
-            //await surveyDataSource.getTemplateIdFor('PV, Battery and EV Survey')
-            console.log(await surveyDataSource.setMpanFor(pl_reference, 'PV, Battery and EV Survey', "1000"))
-
-            const crm = new CRM()
-            const mpan = await surveyDataSource.getMpanFor(pl_reference, 'PV, Battery and EV Survey')
-            await crm.setMpanFor(pl_reference, mpan)
+            console.log(await surveyDataSource.exportPdfFor(pl_reference, templateName))
             response = await getStatusFromInspection(dealData);
         }
 

@@ -47,7 +47,8 @@ export class SurveyDataSource {
                 const match = surveyTitle.match(/PL\d+/i);
                 if (match) {
                     if (match[0].toLowerCase() === PLNumber.toLowerCase()) {
-                        return audit_id
+                        return responseData
+                        //return audit_id
                     }
                 }
             }
@@ -85,11 +86,33 @@ export class SurveyDataSource {
         if (result) return result.id
     }
 
+    async getLabelFromId(targetId: string, templateName: string) {
+        const templateId = await this.getTemplateIdFor(templateName)
+        const response = await fetch(`https://api.safetyculture.io/templates/v1/templates/${templateId}`, {
+            headers: {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`,
+            }
+        })
+        const responseData = await response.json()
+        const responseSets = responseData.template.response_sets
+        for (const item of responseSets) {
+            for (const response of item.responses) {
+                if (response.id === targetId) {
+                    return response.label;
+                }
+            }
+        }
+        return null
+    }
+
+
     async fetchAnswersFrom(PLNumber: string, fieldName: string, templateName: string) {
-        const foundId = await this.searchInspectionFrom(PLNumber, templateName)
+        const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
+        const targetInspectionId = targetInspection.audit_id
         const fieldId = await this.getIdFromFieldName(fieldName, templateName)
 
-        const response = await fetch(`https://api.safetyculture.io/inspections/v1/answers/${foundId}`, {
+        const response = await fetch(`https://api.safetyculture.io/inspections/v1/answers/${targetInspectionId}`, {
             headers: {
                 'accept': 'application/json',
                 'Authorization': `Bearer ${this.accessToken}`,
@@ -101,10 +124,15 @@ export class SurveyDataSource {
         let responseObject = JSON.parse(toJson(parsedResponse))
         const foundResult = responseObject.find(item => item.result.question_id === fieldId)
 
+        // If responses, still needs to map
         if ('list_answer' in foundResult.result) {
-            return foundResult.result.list_answer.responses;
+            const targetId = foundResult.result.list_answer.responses[0]
+            const label = this.getLabelFromId(targetId, templateName)
+            return label;
         } else if ('question_answer' in foundResult.result) {
-            return foundResult.result.question_answer.responses;
+            const targetId = foundResult.result.question_answer.responses[0];
+            const label = this.getLabelFromId(targetId, templateName)
+            return label
         } else if (foundResult.result.text_answer.answer === "") {
             return undefined;
         } else {
@@ -112,32 +140,34 @@ export class SurveyDataSource {
         }
     }
 
-    async updateAnswersFor(PLNumber: string, fieldName:string, templateName: string, value:string) {
-        const foundId = await this.searchInspectionFrom(PLNumber, templateName)
+
+    async updateAnswersFor(PLNumber: string, fieldName: string, templateName: string, value: string) {
+        const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
+        const targetInspectionId = targetInspection.audit_id
         const fieldId = await this.getIdFromFieldName(fieldName, templateName)
 
         const options = {
             method: 'PUT',
             headers: {
-              'accept': 'application/json',
-              'content-type': 'application/json',
-              'Authorization': `Bearer ${this.accessToken}`
+                'accept': 'application/json',
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`
             },
             body: JSON.stringify({
-              items: [
-                {
-                  type: 'text',
-                  responses: {text: value}, //currently only for text answers
-                  item_id: fieldId
-                }
-              ]
+                items: [
+                    {
+                        type: 'text',
+                        responses: { text: value }, //currently only for text answers
+                        item_id: fieldId
+                    }
+                ]
             })
-          };
-        const response = await fetch(`https://api.safetyculture.io/audits/${foundId}`, options)
+        };
+        const response = await fetch(`https://api.safetyculture.io/audits/${targetInspectionId}`, options)
         return response
     }
 
-    async setMpanFor(PLNumber: string, templateName: string, value:string) {
+    async setMpanFor(PLNumber: string, templateName: string, value: string) {
         return this.updateAnswersFor(PLNumber, 'MPAN', templateName, value)
     }
 
@@ -145,7 +175,7 @@ export class SurveyDataSource {
         return this.fetchAnswersFrom(PLNumber, 'MPAN', templateName)
     }
 
-    async setExistingInverterFor(PLNumber: string, templateName: string, value:string) {
+    async setExistingInverterFor(PLNumber: string, templateName: string, value: string) {
         return this.updateAnswersFor(PLNumber, 'Make and model of existing inverter ', templateName, value)
     }
 
@@ -153,12 +183,16 @@ export class SurveyDataSource {
         return this.fetchAnswersFrom(PLNumber, 'Make and model of existing inverter ', templateName)
     }
 
-    async setPitchFor(PLNumber: string, templateName: string, value:string) {
+    async setPitchFor(PLNumber: string, templateName: string, value: string) {
         return this.updateAnswersFor(PLNumber, 'Roof Pitch', templateName, value)
     }
 
     async getPitchFor(PLNumber: string, templateName: string) {
         return this.fetchAnswersFrom(PLNumber, 'Roof Pitch', templateName)
+    }
+
+    async setAzimuthFor(PLNumber: string, templateName: string, value: string) {
+        return this.updateAnswersFor(PLNumber, 'Roof Orientation from South ', templateName, value)
     }
 
     async getAzimuthFor(PLNumber: string, templateName: string) {
@@ -175,5 +209,39 @@ export class SurveyDataSource {
 
     async getRoofTileTypeFor(PLNumber: string, templateName: string) {
         return this.fetchAnswersFrom(PLNumber, 'Roof Type ', templateName)
+    }
+
+    async getSurveyStatusFor(PLNumber: string, templateName: string) {
+        const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
+        const completed = targetInspection.audit_data.date_completed
+        if (completed) return "Completed"
+        else return "Not Completed"
+
+    }
+
+    async exportPdfFor(PLNumber: string, templateName: string) {
+        const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
+        const targetInspectionId = targetInspection.audit_id
+
+        const options = {
+            method: 'POST',
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`,
+            },
+            body: JSON.stringify({
+                type: 'DOCUMENT_TYPE_PDF',
+                export_data: [
+                    {
+                        inspection_id: targetInspectionId,
+                        lang: 'en-US',
+                    }
+                ]
+            })
+        }
+        const response = await fetch('https://api.safetyculture.io/inspection/v1/export', options)
+        const responseData = await response.json()
+        return responseData
     }
 }
