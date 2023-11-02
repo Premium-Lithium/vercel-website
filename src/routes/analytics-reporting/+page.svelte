@@ -1,32 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import SummaryReport from './components/summaryReport.svelte';
+	import type { DataSummary, MatomoAPIOpts } from './scripts/matomoTypes';
+
 
 	export let data: PageData;
 
-	interface DataSummary {
-		sessions: number;
-		totalSessionTime: number;
-		avgSessionTime: number;
-		numConsultationsBooked: number;
-		totalConsultationValue: number;
-		numSurveysBooked: number;
-		totalSurveyValue: number;
-		conversionRate: string;
-		sessionValue: number;
-		sessionValuePerMinute: number;
-	}
-
-	interface MatomoAPIOpts {
-		siteID?: number;
-		period?: 'day' | 'week' | 'month' | 'year' | 'range';
-		date?: 'today' | 'yesterday' | 'lastWeek' | 'lastMonth' | 'lastYear' | string;
-		segment?: string;
-		format?: 'xml' | 'json' | 'csv' | 'tsv' | 'html' | 'original';
-		filterLimit?: number;
-		expanded?: '0' | '1';
-		flat?: '0' | '1';
-		additionalOpts?: Array<Array<string>>; // any other params, will jsut be passed through
-	}
+	
 
 	let assistantData: DataSummary = {
 		// data for selected assistant
@@ -386,13 +366,10 @@
 					<td>Avg session value</td>
 					<td>£{storeData.sessionValue}</td>
 				</tr>
-				<tr>
-					<td>Value per minute</td>
-					<td>£{storeData.sessionValuePerMinute}</td>
-				</tr>
 			</table>
 		</div>
 	</div>
+	<SummaryReport />
 </body>
 
 <style>
