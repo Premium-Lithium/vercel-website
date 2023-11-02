@@ -5,6 +5,8 @@ import fs from 'fs';
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
 import pkg from 'really-relaxed-json';
 const { toJson } = pkg;
+import { CRM } from '$lib/crm/crm-utils.js';
+import { SurveyDataSource } from '$lib/crm/safetyculture-utils.js';
 
 const companyDomainFields = 'https://api.pipedrive.com/v1/deals/'
 
@@ -31,6 +33,26 @@ export async function POST({ request }) {
             response = await updateCustomFieldsFrom(dealData);
             await addNote(dealData)
         } else {
+            const pl_reference = "PL0007786"
+            /*
+            const crm = new CRM()
+            await crm.setMpanFor(pl_reference, "Mpan")
+            await crm.setExistingInverterFor(pl_reference, "Existing")
+            await crm.setRoofPitchFor(pl_reference, "Pitch")
+            await crm.setAzimuthFor(pl_reference, "Azimuth")
+            await crm.setSurveyStatusFor(pl_reference, "Completed")
+            await crm.setRoofTileTypeFor(pl_reference, "Ground Mount")
+            await crm.setScaffoldingRequiredFor(pl_reference, "2 SIDE -  2 FLOOR") // *** TWO spaces after -
+            await crm.setRoofStructureTypeFor(pl_reference, "Trussed")
+            console.log(await crm.getRoofTileTypeFor(pl_reference))
+            */
+            const surveyDataSource = new SurveyDataSource()
+            //await surveyDataSource.getTemplateIdFor('PV, Battery and EV Survey')
+            console.log(await surveyDataSource.setMpanFor(pl_reference, 'PV, Battery and EV Survey', "1000"))
+
+            const crm = new CRM()
+            const mpan = await surveyDataSource.getMpanFor(pl_reference, 'PV, Battery and EV Survey')
+            await crm.setMpanFor(pl_reference, mpan)
             response = await getStatusFromInspection(dealData);
         }
 
@@ -98,7 +120,7 @@ const pipeDriveSafetyCultureOptionMapping = {
     '75b418263a46a2ee1025fc8f87d730219484b56b': '047b6bc5-f478-44d4-bf12-91fc51f560a9', // MPAN
     '47692599a527f65407125f43a1a4fb2f79ad0df6': 'e2e4d156-dc1a-4079-b1f4-826f1ea4efce', // Roof Tile Type 
     '120b9ae729965a5bbce64521e8d100c1b75366a8': '76fb0ffe-3e3d-45d9-9554-78e229ff112e', // Is scaffolding required?
-    '102498b690aae6ccf74ba24764adc239c23a3aae': '1e5da9a2-11aa-4e33-9d48-00ce2880f1ed', // Roof structure type / is it a truss roof?
+    '102498b690aae6ccf74ba24764adc239c23a3aae': '1e5da9a2-11aa-4e33-9d48-00ce2880f1ed', // Roof structure type ?
     '2784a6bfc692ef55a36ec269500bc196a6aa9f2d': '530917c3-ac73-49d6-b3b0-9b73c75ef3ab', // Pitch / Roof Pitch
     '1c7c3a1b307f040a89e95dab1cfe5e177e45d51f': '22bd6c9b-5802-4b1e-9b53-12fc3f6d4012', // Azimuth / Roof orientation from south
 
@@ -125,6 +147,121 @@ const pipeDriveSafetyCultureOptionMapping = {
     1031: '60f61b2d-88a3-47a8-8588-463c1066efce', // Roof Structure Type - Trussed
     1032: 'a29bdcb4-4d38-47ac-8b74-1a9ec1fa2402', // Roof Structure Type - Other
 }
+
+const dataPoints = {
+    ExistingInverter: {
+        pipedrive: '66ae80e6e27e7af328cb51c2de5a6c3df2afd04a',
+        safetyculture: '3c696419-8380-434c-85d5-8836487761e9'
+    },
+    MPAN: {
+        pipedrive: '75b418263a46a2ee1025fc8f87d730219484b56b',
+        safetyculture: '047b6bc5-f478-44d4-bf12-91fc51f560a9'
+    },
+    RoofTileType: {
+        pipedrive: '47692599a527f65407125f43a1a4fb2f79ad0df6',
+        safetyculture: 'e2e4d156-dc1a-4079-b1f4-826f1ea4efce'
+    },
+    IsScaffoldingRequired: {
+        pipedrive: '120b9ae729965a5bbce64521e8d100c1b75366a8',
+        safetyculture: '76fb0ffe-3e3d-45d9-9554-78e229ff112e'
+    },
+    RoofStructureType: {
+        pipedrive: '102498b690aae6ccf74ba24764adc239c23a3aae',
+        safetyculture: '1e5da9a2-11aa-4e33-9d48-00ce2880f1ed'
+    },
+    RoofPitch: {
+        pipedrive: '2784a6bfc692ef55a36ec269500bc196a6aa9f2d',
+        safetyculture: '530917c3-ac73-49d6-b3b0-9b73c75ef3ab'
+    },
+    Azimuth: {
+        pipedrive: '1c7c3a1b307f040a89e95dab1cfe5e177e45d51f',
+        safetyculture: '22bd6c9b-5802-4b1e-9b53-12fc3f6d4012'
+    },
+    ScaffoldingRequired1Side1Floor: {
+        pipedrive: 823,
+        safetyculture: '8fadf2e2-4cee-4efe-ae29-3ed4e8ee954c'
+    },
+    ScaffoldingRequired1Side2Floor: {
+        pipedrive: 824,
+        safetyculture: '6470c37e-0703-489e-8ce0-0608fbdc5fe1'
+    },
+    ScaffoldingRequired1Side3Floor: {
+        pipedrive: 1033,
+        safetyculture: '9fcb11e1-713b-4e54-875f-c47eac114c4b'
+    },
+    ScaffoldingRequired2Side1Floor: {
+        pipedrive: 1034,
+        safetyculture: '2576b336-95c7-4b66-b605-fa73414e5fe6'
+    },
+    ScaffoldingRequired2Side2Floor: {
+        pipedrive: 1035,
+        safetyculture: '95d5f388-f72c-4026-b678-c137a23e2fb5'
+    },
+    ScaffoldingRequired2Side3Floor: {
+        pipedrive: 1036,
+        safetyculture: '98a8954c-0843-46d4-baee-771b302fdc61'
+    },
+    ScaffoldingRequired3Side1Floor: {
+        pipedrive: 1037,
+        safetyculture: '07aa0d81-e099-4565-adfc-b7da5508d37d'
+    },
+    ScaffoldingRequired3Side2Floor: {
+        pipedrive: 1038,
+        safetyculture: 'dd392ea7-cdb2-4e2a-beb0-6e0b0fe472da'
+    },
+    ScaffoldingRequired3Side3Floor: {
+        pipedrive: 1039,
+        safetyculture: '2c6f72bb-7b17-4419-8de3-eb5a83af816e'
+    },
+    RoofTileTypeConcrete: {
+        pipedrive: 1023,
+        safetyculture: '47f9144e-ae4e-4c8b-8304-abba1f5eaa01'
+    },
+    RoofTileTypeRosemary: {
+        pipedrive: 1024,
+        safetyculture: '88e5b264-45fe-4f6a-a410-fa7a5fa07372'
+    },
+    RoofTileTypeSlate: {
+        pipedrive: 1025,
+        safetyculture: '055d6483-9e8e-4abe-9289-4ecfd7e7cc1f'
+    },
+    RoofTileTypeYorkshireStone: {
+        pipedrive: 1026,
+        safetyculture: 'be2a5ac6-c9cd-46ec-847f-bf7f8c96c5f3'
+    },
+    RoofTileTypeTrapezoidal: {
+        pipedrive: 1027,
+        safetyculture: 'e06d490f-0678-4629-8740-ae6586730744'
+    },
+    RoofTileTypeFelted: {
+        pipedrive: 1028,
+        safetyculture: 'f23275eb-6099-414b-ac99-0a0e746ee09e'
+    },
+    RoofTileTypeGroundMount: {
+        pipedrive: 1059,
+        safetyculture: '6d554cfa-0e32-4d03-b09c-965b7ea152f6'
+    },
+    RoofTileTypeFlat: {
+        pipedrive: 1060,
+        safetyculture: '4f77c3ec-0b33-4b24-802e-91e0d5fec5f8'
+    },
+    RoofTileTypeOther: {
+        pipedrive: 1029,
+        safetyculture: 'b6f61759-5ea3-4f2d-ac48-4f19ae770271'
+    },
+    RoofStructureTypeTraditional: {
+        pipedrive: 1030,
+        safetyculture: '8ffd7a5e-5957-4be8-be49-ea1a46eddc80'
+    },
+    RoofStructureTypeTrussed: {
+        pipedrive: 1031,
+        safetyculture: '60f61b2d-88a3-47a8-8588-463c1066efce'
+    },
+    RoofStructureTypeOther: {
+        pipedrive: 1032,
+        safetyculture: 'a29bdcb4-4d38-47ac-8b74-1a9ec1fa2402'
+    }
+};
 
 async function createInspectionFrom(dealData, templateName) {
     const customerData = getCustomerDataFrom(dealData)
@@ -212,7 +349,7 @@ async function getInspectionAnswersFrom(dealData) {
             } else if ('question_answer' in foundResults[i].result) {
                 answerObject[foundResults[i].result.question_id] = foundResults[i].result.question_answer.responses
             }
-        }
+        } 
         return answerObject
     }
 }
