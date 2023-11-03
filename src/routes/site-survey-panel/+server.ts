@@ -32,7 +32,7 @@ export async function POST({ request }) {
 }
 
 async function createInspectionFrom(PLNumber: string, templateName: string) {
-    try{
+    try {
         const personName = await crm.getPersonNameFor(PLNumber);
         const propertyAddress = await crm.getCustomFieldDataFor(PLNumber, 'Address of Property')
         const response = await surveyDataSource.startSurveyFor(PLNumber, personName, propertyAddress, templateName);
@@ -49,7 +49,7 @@ async function createInspectionFrom(PLNumber: string, templateName: string) {
     }
 }
 
-async function getStatusFromInspection(PLNumber:string, templateName:string) {
+async function getStatusFromInspection(PLNumber: string, templateName: string) {
     try {
         const status = await surveyDataSource.getSurveyStatusFor(PLNumber, templateName);
 
@@ -73,7 +73,7 @@ async function getStatusFromInspection(PLNumber:string, templateName:string) {
     }
 }
 
-async function attachPDFToDeal(PLNumber:string) {
+async function attachPDFToDeal(PLNumber: string) {
     try {
         //Find the specific inspection that matches the PL Number || Customer Name
         //Generate PDF to that inspection 
@@ -99,8 +99,9 @@ async function attachPDFToDeal(PLNumber:string) {
 
 }
 
-async function updatePipedriveDealFrom(PLNumber:string) {
+async function updatePipedriveDealFrom(PLNumber: string) {
     try {
+        /*
         const mpan = await surveyDataSource.getMpanFor(PLNumber, templateName);
         const pitch = await surveyDataSource.getRoofPitchFor(PLNumber, templateName);
         const existingInverter = await surveyDataSource.getExistingInverterFor(PLNumber, templateName);
@@ -109,6 +110,7 @@ async function updatePipedriveDealFrom(PLNumber:string) {
         const roofStructureType = await surveyDataSource.getRoofStructureTypeFor(PLNumber, templateName);
         const roofTileType = await surveyDataSource.getRoofTileTypeFor(PLNumber, templateName);
         const comments = await surveyDataSource.getAdditionalCommentFor(PLNumber, templateName)
+        */
         /*
         const mpan = await surveyDataSource.getMpanFor(PLNumber, templateName);
         if (mpan) {
@@ -151,12 +153,12 @@ async function updatePipedriveDealFrom(PLNumber:string) {
             crm.setRoofTileTypeFor(PLNumber, roofTileType);
             console.log(`Roof Tile Type field updated`);
         }
-        const comments = await surveyDataSource.getAdditionalCommentFor(PLNumber, templateName)
-        if(comments){
-            crm.attachNoteFor(PLNumber, comments);
-            console.log(`Additional comments attached`);
-        }
         */
+        const comments = await surveyDataSource.getAdditionalCommentFor(PLNumber, templateName)
+
+        const answerObject = await surveyDataSource.fetchAnswersFromFields(PLNumber, ['MPAN', 'Roof Type ', 'Roof Structure Type ', 'How many side of scaffolding are required?'], templateName)
+        console.log(answerObject)
+        /*
         const request = {
             'MPAN number': mpan,
             'Existing Inverter - Make/Model/Size': existingInverter,
@@ -165,16 +167,22 @@ async function updatePipedriveDealFrom(PLNumber:string) {
             'Roof Structure Type': roofStructureType,
             'Roof Tile Type': roofTileType,
             'Scaffolding Required': scaffoldingRequired
+        }*/
+
+        const request = {
+            'MPAN number': answerObject['MPAN'],
+            'Roof Structure Type': answerObject['Roof Structure Type '],
+            'Roof Tile Type': answerObject['Roof Type '],
+            'Scaffolding Required': answerObject['How many side of scaffolding are required?']
         }
-        
 
         const updateRequest = await crm.setCustomFields(PLNumber, request)
-        
-        if(comments){
+
+        if (comments) {
             crm.attachNoteFor(PLNumber, comments);
             console.log(`Additional comments attached`);
         }
-        console.log(updateRequest)
+
         return json({ message: 'Custom fields updated successfully.', statusCode: 200 });
     } catch (error) {
         console.error('Error updating custom fields', error);
