@@ -3,6 +3,7 @@ const { toJson } = pkg;
 
 export class SurveyDataSource {
     accessToken: string;
+
     constructor() {
         // TO DO - update environment variable
         this.accessToken = 'f5a8b512b90d4ea239858d63f768cdbcdb8cd83c6bd2216001ceb5f20a35632c'
@@ -48,7 +49,6 @@ export class SurveyDataSource {
                 if (match) {
                     if (match[0].toLowerCase() === PLNumber.toLowerCase()) {
                         return responseData
-                        //return audit_id
                     }
                 }
             }
@@ -56,6 +56,7 @@ export class SurveyDataSource {
         return null
     }
 
+    //Recursive search to find an object with specific label in children
     findObjectWithLabel(arr, targetLabel: string) {
         for (const obj of arr) {
             if (obj.label === targetLabel) {
@@ -106,7 +107,7 @@ export class SurveyDataSource {
         return null
     }
 
-
+    //https://developer.safetyculture.com/reference/answerservice_getanswersforinspection
     async fetchAnswersFrom(PLNumber: string, fieldName: string, templateName: string) {
         const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
         const targetInspectionId = targetInspection.audit_id
@@ -167,6 +168,39 @@ export class SurveyDataSource {
         return response
     }
 
+    async startSurveyFor(PLNumber: string, personName: string, propertyAddress: string, templateName: string) {
+        const bodyData = {
+            template_id: this.getTemplateIdFor(templateName),
+            header_items: [
+                {
+                    type: 'text',
+                    responses: { text: PLNumber },
+                    item_id: this.getIdFromFieldName('PL Reference  ', templateName)
+                },
+                {
+                    type: 'text',
+                    responses: { text: personName },
+                    item_id: this.getIdFromFieldName('Customer Name ', templateName)
+                },
+                {
+                    type: 'text',
+                    responses: { text: propertyAddress },
+                    item_id: this.getIdFromFieldName('Property Address ', templateName)
+                }
+            ]
+        }
+        const options = {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`
+            },
+            body: JSON.stringify(bodyData)
+        }
+        const response = await fetch('https://api.safetyculture.io/audits', options)
+        return response
+    }
+
     async setMpanFor(PLNumber: string, templateName: string, value: string) {
         return this.updateAnswersFor(PLNumber, 'MPAN', templateName, value)
     }
@@ -183,11 +217,11 @@ export class SurveyDataSource {
         return this.fetchAnswersFrom(PLNumber, 'Make and model of existing inverter ', templateName)
     }
 
-    async setPitchFor(PLNumber: string, templateName: string, value: string) {
+    async setRoofPitchFor(PLNumber: string, templateName: string, value: string) {
         return this.updateAnswersFor(PLNumber, 'Roof Pitch', templateName, value)
     }
 
-    async getPitchFor(PLNumber: string, templateName: string) {
+    async getRoofPitchFor(PLNumber: string, templateName: string) {
         return this.fetchAnswersFrom(PLNumber, 'Roof Pitch', templateName)
     }
 
@@ -213,10 +247,21 @@ export class SurveyDataSource {
 
     async getSurveyStatusFor(PLNumber: string, templateName: string) {
         const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
-        const completed = targetInspection.audit_data.date_completed
-        if (completed) return "Completed"
-        else return "Not Completed"
+        if (targetInspection) {
+            const completed = targetInspection.audit_data.date_completed
+            if (completed) return "Completed"
+            else return "Not Completed"
+        } else {
+            return null
+        }
+    }
 
+    async setAdditionalCommentFor(PLNumber: string, templateName: string, value: string) {
+        return this.updateAnswersFor(PLNumber, 'Any additional comments', templateName, value)
+    }
+
+    async getAdditionalCommentFor(PLNumber: string, templateName: string) {
+        return this.fetchAnswersFrom(PLNumber, 'Any additional comments', templateName)
     }
 
     async exportPdfFor(PLNumber: string, templateName: string) {
