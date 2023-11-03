@@ -35,7 +35,7 @@
             <td>{bounceRate}</td>
         </tr>
         <tr>
-            <td>avg non-bounce session time</td>
+            <td>avg session time</td>
             <td>{sessionTime}</td>
         </tr>
         <tr>
