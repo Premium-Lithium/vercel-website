@@ -18,8 +18,7 @@ export class CRM {
 		return dealId
 	}
 	async setCustomField(PLNumber: string, fieldName: string, value: string) {
-		const dealFound = await this.pdDealsApi.searchDeals(PLNumber) //Returns array of deal found 
-		const dealId = dealFound.data.items[0].item.id
+		const dealId = await this.getDealIdFromPL(PLNumber)
 
 		const field = getField(fieldName);
 		let request = { [field.key]: value }
@@ -34,8 +33,7 @@ export class CRM {
 	}
 
 	async getDealDataFor(PLNumber: string) {
-		const dealFound = await this.pdDealsApi.searchDeals(PLNumber)
-		const dealId = dealFound.data.items[0].item.id
+		const dealId = await this.getDealIdFromPL(PLNumber)
 		const dealRequest = await this.pdDealsApi.getDeal(dealId)
 		return dealRequest.data
 	}
