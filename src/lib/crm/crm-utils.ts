@@ -32,6 +32,21 @@ export class CRM {
 		return updateDealRequest;
 	}
 
+	async setCustomFields(PLNumber: string, request) {
+		const dealId = await this.getDealIdFromPL(PLNumber)
+		let parsedRequest = {}
+		for(const key in request){
+			let field = getField(key)
+			if(field.field_type == 'enum') {
+				parsedRequest[field.key] = getOptionIdFor(request[key], field)
+			} else {
+				parsedRequest[field.key] = request[key]
+			}
+		}
+		const dealRequest = await this.pdDealsApi.updateDeal(dealId, parsedRequest)
+		return dealRequest
+	}
+
 	async getDealDataFor(PLNumber: string) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 		const dealRequest = await this.pdDealsApi.getDeal(dealId)

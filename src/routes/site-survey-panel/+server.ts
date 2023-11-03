@@ -102,6 +102,15 @@ async function attachPDFToDeal(PLNumber:string) {
 async function updatePipedriveDealFrom(PLNumber:string) {
     try {
         const mpan = await surveyDataSource.getMpanFor(PLNumber, templateName);
+        const pitch = await surveyDataSource.getRoofPitchFor(PLNumber, templateName);
+        const existingInverter = await surveyDataSource.getExistingInverterFor(PLNumber, templateName);
+        const scaffoldingRequired = await surveyDataSource.getScaffoldingRequiredFor(PLNumber, templateName);
+        const azimuth = await surveyDataSource.getAzimuthFor(PLNumber, templateName);
+        const roofStructureType = await surveyDataSource.getRoofStructureTypeFor(PLNumber, templateName);
+        const roofTileType = await surveyDataSource.getRoofTileTypeFor(PLNumber, templateName);
+        const comments = await surveyDataSource.getAdditionalCommentFor(PLNumber, templateName)
+        /*
+        const mpan = await surveyDataSource.getMpanFor(PLNumber, templateName);
         if (mpan) {
             crm.setMpanFor(PLNumber, mpan);
             console.log(`MPAN field updated`);
@@ -147,10 +156,28 @@ async function updatePipedriveDealFrom(PLNumber:string) {
             crm.attachNoteFor(PLNumber, comments);
             console.log(`Additional comments attached`);
         }
+        */
+        const request = {
+            'MPAN number': mpan,
+            'Existing Inverter - Make/Model/Size': existingInverter,
+            'Pitch': pitch,
+            'Azimuth': azimuth,
+            'Roof Structure Type': roofStructureType,
+            'Roof Tile Type': roofTileType,
+            'Scaffolding Required': scaffoldingRequired
+        }
+        
 
+        const updateRequest = await crm.setCustomFields(PLNumber, request)
+        
+        if(comments){
+            crm.attachNoteFor(PLNumber, comments);
+            console.log(`Additional comments attached`);
+        }
+        console.log(updateRequest)
         return json({ message: 'Custom fields updated successfully.', statusCode: 200 });
     } catch (error) {
-        console.error(`Error updating custom fields for PLNumber ${PLNumber}: ${error}`);
+        console.error('Error updating custom fields', error);
         return json({ message: 'Failed to update custom fields.', statusCode: 500 });
     }
 }
