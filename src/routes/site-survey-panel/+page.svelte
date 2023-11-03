@@ -44,6 +44,8 @@
 				}
 				alertMessage = null;
 				console.log('Initial:', responseData);
+				
+				
 				return response
 			}
 			
@@ -153,7 +155,7 @@
 	<div class="buttons-container">
 		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
 		<button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
-		<button class="link-btn" on:click={updateCustomField}>Update MPAN Field</button>
+		<button class="link-btn" on:click={updateCustomField}>Update Custom Fields</button>
 	</div>
 </div>
 
