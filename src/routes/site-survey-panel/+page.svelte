@@ -50,7 +50,7 @@
 		} catch (error) {
 			console.log(error);
 			alertMessage = error;
-			await new Promise((resolve) => setTimeout(resolve, 3000));
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 			alertMessage = null;
 			return error
 		}
@@ -70,14 +70,14 @@
 				if (response.ok) {
 					const responseData = await response.json();
 					alertMessage = responseData.message;
-					await new Promise((resolve) => setTimeout(resolve, 3000));
+					await new Promise((resolve) => setTimeout(resolve, 2000));
 					showCustomerData();
 					alertMessage = null;
 				}
 				return response
 			} else {
 				alertMessage = 'Error generating duplicate';
-				await new Promise((resolve) => setTimeout(resolve, 3000));
+				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 				
 			}
@@ -90,23 +90,29 @@
 
 	async function attachPDFToDeal() {
 		try {
-			alertMessage = 'Attaching PDF';
-			const response = await fetch('/site-survey-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 2
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				inspectedCreated = true; // alert that form is created
-				alertMessage = responseData.message;
-				await new Promise((resolve) => setTimeout(resolve, 3000));
+			if(status != undefined){
+				alertMessage = 'Attaching PDF';
+				const response = await fetch('/site-survey-panel', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						dealId: dealId,
+						option: 2
+					})
+				});
+				if (response.ok) {
+					const responseData = await response.json();
+					inspectedCreated = true; // alert that form is created
+					alertMessage = responseData.message;
+					await new Promise((resolve) => setTimeout(resolve, 2000));
+					alertMessage = null;
+				}
+				return response
+			} else {
+				alertMessage = 'Survey not found'
+				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 			}
-			return response
 		} catch (error) {
 			console.log(error);
 			return error
@@ -115,22 +121,28 @@
 
 	async function updateCustomField() {
 		try {
-			alertMessage = 'Updating';
-			const response = await fetch('/site-survey-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 3
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				alertMessage = responseData.message;
-				await new Promise((resolve) => setTimeout(resolve, 3000));
+			if(status != undefined){
+				alertMessage = 'Updating';
+				const response = await fetch('/site-survey-panel', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						dealId: dealId,
+						option: 3
+					})
+				});
+				if (response.ok) {
+					const responseData = await response.json();
+					alertMessage = responseData.message;
+					await new Promise((resolve) => setTimeout(resolve, 2000));
+					alertMessage = null;
+				}
+				return response
+			} else {
+				alertMessage = 'Survey not found'
+				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 			}
-			return response
 		} catch (error) {
 			console.log(error);
 			return error
@@ -152,8 +164,8 @@
 
 	<div class="buttons-container">
 		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
-		<button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
-		<button class="link-btn" on:click={updateCustomField}>Update Custom Fields</button>
+		<button disabled={status==undefined} class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
+		<button disabled={status==undefined} class="link-btn" on:click={updateCustomField}>Update Custom Fields</button>
 	</div>
 </div>
 
@@ -200,5 +212,11 @@
 		&:hover {
 			background-color: #9f9f9f;
 		}
+		&:disabled {
+			cursor: default;
+			background-color: rgb(101, 101, 101);
+		}
 	}
+
+
 </style>
