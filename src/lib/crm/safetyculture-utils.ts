@@ -255,22 +255,22 @@ export class SurveyDataSource {
 
     async startSurveyFor(PLNumber: string, personName: string, propertyAddress: string, templateName: string) {
         const bodyData = {
-            template_id: this.getTemplateIdFor(templateName),
+            template_id: await this.getTemplateIdFor(templateName),
             header_items: [
                 {
                     type: 'text',
                     responses: { text: PLNumber },
-                    item_id: this.getIdFromFieldName('PL Reference  ', templateName)
+                    item_id: await this.getIdFromFieldName('PL Reference  ', templateName)
                 },
                 {
                     type: 'text',
                     responses: { text: personName },
-                    item_id: this.getIdFromFieldName('Customer Name ', templateName)
+                    item_id: await this.getIdFromFieldName('Customer Name ', templateName)
                 },
                 {
                     type: 'text',
                     responses: { text: propertyAddress },
-                    item_id: this.getIdFromFieldName('Property Address ', templateName)
+                    item_id: await this.getIdFromFieldName('Property Address ', templateName)
                 }
             ]
         }
