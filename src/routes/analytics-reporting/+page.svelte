@@ -55,7 +55,7 @@
 		let queryData = [
 			['method', method],
 			['idSite', String(opts.siteID || 1)],
-			['period', opts.period || 'day'],
+			['period', opts.period || 'week'],
 			['date', opts.date || 'yesterday'],
 			['format', opts.format || 'JSON']
 		];
