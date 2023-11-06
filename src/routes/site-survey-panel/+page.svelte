@@ -38,14 +38,12 @@
 				
 				if(responseData.statusCode === 200){
 					status = responseData.message;
+					alertMessage = 'synced.'
 				} else {
 					alertMessage = responseData.message
-					await new Promise((resolve) => setTimeout(resolve, 3000));
 				}
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 				alertMessage = null;
-				console.log('Initial:', responseData);
-				
-				
 				return response
 			}
 			
