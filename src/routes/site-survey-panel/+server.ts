@@ -32,7 +32,7 @@ export async function POST({ request }) {
 }
 
 async function createInspectionFrom(PLNumber: string, templateName: string) {
-    try{
+    try {
         const personName = await crm.getPersonNameFor(PLNumber);
         const propertyAddress = await crm.getCustomFieldDataFor(PLNumber, 'Address of Property')
         const response = await surveyDataSource.startSurveyFor(PLNumber, personName, propertyAddress, templateName);
@@ -49,7 +49,7 @@ async function createInspectionFrom(PLNumber: string, templateName: string) {
     }
 }
 
-async function getStatusFromInspection(PLNumber:string, templateName:string) {
+async function getStatusFromInspection(PLNumber: string, templateName: string) {
     try {
         const status = await surveyDataSource.getSurveyStatusFor(PLNumber, templateName);
 
@@ -73,7 +73,7 @@ async function getStatusFromInspection(PLNumber:string, templateName:string) {
     }
 }
 
-async function attachPDFToDeal(PLNumber:string) {
+async function attachPDFToDeal(PLNumber: string) {
     try {
         //Find the specific inspection that matches the PL Number || Customer Name
         //Generate PDF to that inspection 
@@ -99,83 +99,41 @@ async function attachPDFToDeal(PLNumber:string) {
 
 }
 
-async function updatePipedriveDealFrom(PLNumber:string) {
+async function updatePipedriveDealFrom(PLNumber: string) {
     try {
-        const mpan = await surveyDataSource.getMpanFor(PLNumber, templateName);
-        const pitch = await surveyDataSource.getRoofPitchFor(PLNumber, templateName);
-        const existingInverter = await surveyDataSource.getExistingInverterFor(PLNumber, templateName);
-        const scaffoldingRequired = await surveyDataSource.getScaffoldingRequiredFor(PLNumber, templateName);
-        const azimuth = await surveyDataSource.getAzimuthFor(PLNumber, templateName);
-        const roofStructureType = await surveyDataSource.getRoofStructureTypeFor(PLNumber, templateName);
-        const roofTileType = await surveyDataSource.getRoofTileTypeFor(PLNumber, templateName);
         const comments = await surveyDataSource.getAdditionalCommentFor(PLNumber, templateName)
-        /*
-        const mpan = await surveyDataSource.getMpanFor(PLNumber, templateName);
-        if (mpan) {
-            crm.setMpanFor(PLNumber, mpan);
-            console.log(`MPAN field updated`);
-        }
+        const fieldNames = [
+            'Make and model of existing inverter ',
+            'MPAN',
+            'Roof Type ',
+            'Roof Pitch ',
+            'Roof Orientation from South ',
+            'Roof Structure Type ',
+            'How many side of scaffolding are required?',
+        ]
+        const answerObject = await surveyDataSource.fetchAnswersFromFields(PLNumber, fieldNames, templateName)
 
-        const pitch = await surveyDataSource.getRoofPitchFor(PLNumber, templateName);
-        if (pitch) {
-            crm.setRoofPitchFor(PLNumber, pitch);
-            console.log(`Roof Pitch field updated`);
-        }
-
-        const existingInverter = await surveyDataSource.getExistingInverterFor(PLNumber, templateName);
-        if (existingInverter) {
-            crm.setExistingInverterFor(PLNumber, existingInverter);
-            console.log(`Existing Inverter field updated`);
-        }
-
-        const scaffoldingRequired = await surveyDataSource.getScaffoldingRequiredFor(PLNumber, templateName);
-        if (scaffoldingRequired) {
-            crm.setScaffoldingRequiredFor(PLNumber, scaffoldingRequired);
-            console.log(`Scaffolding Required field updated`);
-        }
-
-        const azimuth = await surveyDataSource.getAzimuthFor(PLNumber, templateName);
-        if (azimuth) {
-            crm.setAzimuthFor(PLNumber, azimuth);
-            console.log(`Azimuth field updated`);
-        }
-
-        const roofStructureType = await surveyDataSource.getRoofStructureTypeFor(PLNumber, templateName);
-        if (roofStructureType) {
-            crm.setRoofStructureTypeFor(PLNumber, roofStructureType);
-            console.log(`Roof Structure Type field updated`);
-        }
-
-        const roofTileType = await surveyDataSource.getRoofTileTypeFor(PLNumber, templateName);
-        if (roofTileType) {
-            crm.setRoofTileTypeFor(PLNumber, roofTileType);
-            console.log(`Roof Tile Type field updated`);
-        }
-        const comments = await surveyDataSource.getAdditionalCommentFor(PLNumber, templateName)
-        if(comments){
-            crm.attachNoteFor(PLNumber, comments);
-            console.log(`Additional comments attached`);
-        }
-        */
         const request = {
-            'MPAN number': mpan,
-            'Existing Inverter - Make/Model/Size': existingInverter,
-            'Pitch': pitch,
-            'Azimuth': azimuth,
-            'Roof Structure Type': roofStructureType,
-            'Roof Tile Type': roofTileType,
-            'Scaffolding Required': scaffoldingRequired
+            'Existing Inverter - Make/Model/Size': answerObject['Make and model of existing inverter '],
+            'MPAN number': answerObject['MPAN'],
+            'Roof Tile Type': answerObject['Roof Type '],
+            'Pitch': answerObject['Roof Pitch '],
+            'Azimuth': answerObject['Roof Orientation from South '],
+            'Roof Structure Type': answerObject['Roof Structure Type '],
+            'Scaffolding Required': answerObject['How many side of scaffolding are required?'],
         }
-        
 
         const updateRequest = await crm.setCustomFields(PLNumber, request)
-        
-        if(comments){
+        console.log('Custom fields updated');
+        if (comments) {
             crm.attachNoteFor(PLNumber, comments);
-            console.log(`Additional comments attached`);
+            console.log('Additional comments attached');
         }
         console.log(updateRequest)
-        return json({ message: 'Custom fields updated successfully.', statusCode: 200 });
+        if (updateRequest.success)
+            return json({ message: 'Custom fields updated successfully.', statusCode: 200 });
+        else
+            return json({ message: 'Failed to update custom fields.', statusCode: 500 });
     } catch (error) {
         console.error('Error updating custom fields', error);
         return json({ message: 'Failed to update custom fields.', statusCode: 500 });
