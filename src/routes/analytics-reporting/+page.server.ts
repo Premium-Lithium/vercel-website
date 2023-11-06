@@ -16,6 +16,7 @@ export const load: PageServerLoad = async ({params}) => {
         ["format", "JSON"],
 
     ];
+    console.log("what?")
     const data = await matomoAPICall(queryparams)
     return {
         post: data,
