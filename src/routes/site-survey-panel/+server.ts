@@ -65,7 +65,7 @@ async function getStatusFromInspection(PLNumber: string, templateName: string) {
             }
         } else {
             console.error('Survey status is undefined.');
-            return json({ message: undefined, statusCode: 500 });
+            return json({ message: undefined, statusCode: 200 });
         }
     } catch (error) {
         console.error('Error getting and updating survey status:', error);

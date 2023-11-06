@@ -3,10 +3,12 @@ const { toJson } = pkg;
 
 export class SurveyDataSource {
     accessToken: string;
+    organisationId: string;
 
     constructor() {
         // TO DO - update environment variable
         this.accessToken = 'f5a8b512b90d4ea239858d63f768cdbcdb8cd83c6bd2216001ceb5f20a35632c'
+        this.organisationId = 'role_b660120a576a483a9b1f380e4ad7f572'
     }
 
     async getTemplateIdFor(templateName: string) {
@@ -283,6 +285,28 @@ export class SurveyDataSource {
             body: JSON.stringify(bodyData)
         }
         const response = await fetch('https://api.safetyculture.io/audits', options)
+        const responseData = await response.json() 
+        const shareResponse = await this.shareInspection(responseData.audit_id, this.organisationId) // Makes sure everyone in organisation have access to edit,delete
+        console.log(shareResponse)
+        return shareResponse
+    }
+
+    async shareInspection(auditId: string, userId: string) {
+        const bodyData = {
+            shares: [
+                { permission: 'edit', id: userId },
+                { permission: 'delete', id: userId }
+            ]
+        }
+        const options = {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`
+            },
+            body: JSON.stringify(bodyData)
+        }
+        const response = await fetch(`https://api.safetyculture.io/audits/${auditId}/share`, options)
         return response
     }
 
