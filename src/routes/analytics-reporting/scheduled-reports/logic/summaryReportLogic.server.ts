@@ -1,4 +1,6 @@
-import type { EnergiserSummary, MatomoAPIOpts } from "./matomoTypes";
+import { matomoAPICall } from "../../matomoQuery.server";
+import type { EnergiserSummary, MatomoAPIOpts } from "../../scripts/matomoTypes";
+
 
 // constants
 const unbouncedSessionSegment = "interactions>%3D3";
@@ -11,11 +13,9 @@ export enum siteId {
 
 
 async function matomoDataCall(method: string, opts?: MatomoAPIOpts) {
-
     if (!opts) {
         opts = {};
     }
-    console.log("data call")
     let queryData = [
         ['method', method],
         ['idSite', String(opts.siteID || siteId.DEV)],
@@ -28,22 +28,8 @@ async function matomoDataCall(method: string, opts?: MatomoAPIOpts) {
     if (opts.additionalOpts) {
         queryData.push(...opts.additionalOpts);
     }
+    const res = await matomoAPICall(queryData)
     
-    const data = await fetch('', {
-        method: 'POST',
-        body: JSON.stringify(queryData),
-        headers: {
-            'content-type': 'application/json'
-        }
-    });
-    
-    const res = await data.json();
-    if (res.result === "error") {
-        return {
-            result: "error",
-            message: res.message,
-        }
-    }
     return res;
 }
 
@@ -75,7 +61,6 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
         period: period,
         siteID: siteId
     });
-
     // if there is an error, leave at defaults
     if (metaData.result === "error") {
         console.log(metaData.message);

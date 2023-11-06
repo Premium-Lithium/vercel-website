@@ -1,4 +1,7 @@
 import type { Config } from '@sveltejs/adapter-vercel';
+import type { RequestHandler } from '@sveltejs/kit';
+import { getSummary } from './logic/summaryReportLogic.server';
+
 
 export const config: Config = {
     runtime: "edge"
@@ -11,3 +14,15 @@ export const config: Config = {
 
 // first iteration will just construct the reprot and send it in the response body
 // then requests will trigger an email
+
+export const GET: RequestHandler = async ({url}) => {
+
+
+    let msgBody = "Test message please ignore"
+
+    msgBody = JSON.stringify(await getSummary(1, "yesterday", "month"));
+
+    return new Response(msgBody, {
+        
+    });
+}
