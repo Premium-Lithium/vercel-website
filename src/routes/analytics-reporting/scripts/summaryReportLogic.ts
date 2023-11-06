@@ -87,77 +87,110 @@ export async function getSummary(siteId: number) {
     }
     summaryData.bouncedSessions = summaryData.sessions - summaryData.unBouncedSessions;
 
-    // to get the right subtable ID, first get the subtable
+    
+    const bookingData = await getBookingDetails(siteId)
+    console.log(bookingData);
 
-    // get subtable ID
-    let categorySubtableId = await getCategorySubtableId("SuccessfulBooking", siteId);
-    // backup is in case no names are found on the main one - for some reason they might be assigned differently?
-    let backupCategorySubtableId = await getCategorySubtableId("BookConsultation", siteId)
-    let detailedGoals = true; // additional data stored with goal events
-    if (categorySubtableId === -1) { // SuccessfulBooking event not found
-        // use old event, no detailed tracking
-        categorySubtableId = await getCategorySubtableId("SuccessfulConsultationBooking", siteId)
-        detailedGoals = false;
-    }
+    summaryData.consultationsBooked = bookingData.consultationsBooked;
+    summaryData.totalConsultationValue = bookingData.totalConsultationValue;
+    summaryData.surveysBooked = bookingData.surveysBooked;
+    summaryData.totalSurveyValue = bookingData.totalSurveyValue;
+    summaryData.preorderNum = bookingData.preorderNum;
+    summaryData.preorderVal = bookingData.preorderVal;
+    summaryData.expressNum = bookingData.expressNum;
+    summaryData.expressVal = bookingData.expressVal;
 
-    if (detailedGoals === true) {
-
-        // get booking data
-        const eventData = await matomoDataCall("Events.getActionFromCategoryId", {
-            siteID: siteId,
-            additionalOpts: [
-                ["idSubtable", String(categorySubtableId)], // successful booking event
-            ]
-        });
-
-        // get event names (don't know why this works but it does)
-        let eventNames = await matomoDataCall("Events.getNameFromCategoryId", {
-            siteID: siteId,
-            additionalOpts: [
-                ["idSubtable", String(categorySubtableId)], // successful booking event
-            ]
-        });
-
-        if (eventNames.length === 0) {
-            // try the other option
-            eventNames = await matomoDataCall("Events.getNameFromCategoryId", {
-                siteID: siteId,
-                additionalOpts: [
-                    ["idSubtable", String(backupCategorySubtableId)], // successful booking event
-                ]
-            });
-        }
-
-        // get booking type data
-        for (const booking of eventData) {
-            if (booking.label === "Consultation") {
-                summaryData.consultationsBooked = booking.nb_events;
-                summaryData.totalConsultationValue = booking.sum_event_value;
-            } else if (booking.label === "Survey") {
-                summaryData.surveysBooked = booking.nb_events;
-                summaryData.totalSurveyValue = booking.sum_event_value;
-            }
-        }
-
-        // get order type data
-
-        for (const name of eventNames) {
-            if (name.label === "PREMIUM_EXPRESS") {
-                summaryData.expressNum = name.nb_events;
-                summaryData.expressVal = name.sum_event_value;
-            } else if (name.label === "PREMIUM_PREORDER") {
-                summaryData.preorderNum = name.nb_events;
-                summaryData.preorderVal = name.sum_event_value;
-            }
-        }
-        
-        
-    }
+    
     //console.log(orderData)
     // query events API for order types
 
-    console.log("summary data", summaryData)
     return summaryData;
+}
+
+async function getBookingDetails(siteId: number) {
+    // https://energiser.matomo.cloud/index.php?module=API&method=Events.getCategory&expanded=1&secondaryDimension=eventAction&idSite=1&idSubtable=1&period=month&date=2023-11-02&format=JSON&token_auth=01935f0876764df2395daa536871c023&force_api_session=1
+    // use this to get actions and names for each category
+    // find successfulBooking category and get all the data from it
+    // if that doesn't have any data, fall back to SuccessfulConsultationBooking
+
+    // data to get: number/value of consultations/surveys; number/value of preorders/express
+
+    // get actions (consultaion/survey) of bookings
+    const eventCategoryActions = await matomoDataCall("Events.getCategory", {
+        siteID: siteId,
+        additionalOpts: [
+            ["secondaryDimension", "eventAction"],
+            ["expanded", "1"], // successful booking event
+        ]
+    });
+
+    const bookingDetails = { // base state
+        consultationsBooked: 0,
+        totalConsultationValue: 0,
+        surveysBooked: 0,
+        totalSurveyValue: 0,
+        preorderNum: 0,
+        preorderVal: 0,
+        expressNum: 0,
+        expressVal: 0,
+    }
+    let successfulBookingObj;
+    let backupBookingObj;
+
+    // get successful booking object
+    for (const category of eventCategoryActions) {  
+        if (category.label === "SuccessfulBooking") {
+            successfulBookingObj = category;
+        } else if (category.label === "SuccessfulConsultationBooking") {
+            console.log("backup")
+            backupBookingObj = category;
+        }
+    }
+    // get analytics data for previus analytics version instead (just number of consultations)
+    console.log(successfulBookingObj)
+    if (!successfulBookingObj) {
+        if (backupBookingObj) {
+            bookingDetails.consultationsBooked = backupBookingObj.nb_events;
+        }
+        return bookingDetails;
+    }
+
+    // get consultation and survey data from booking object
+    for (const action of successfulBookingObj.subtable) {
+        if (action.label === "Consultation") {
+            bookingDetails.consultationsBooked = action.nb_events;
+            bookingDetails.totalConsultationValue = action.sum_event_value;
+        } else if (action.label === "Survey") {
+            bookingDetails.surveysBooked = action.nb_events;
+            bookingDetails.totalSurveyValue = action.sum_event_value;
+        }
+    }
+
+    // get names (express/preorder) of booking events
+    const eventCategoryNames = await matomoDataCall("Events.getCategory", {
+        siteID: siteId,
+        additionalOpts: [
+            ["secondaryDimension", "eventName"],
+            ["expanded", "1"], // successful booking event
+        ]
+    });
+
+    // get SuccessfulBooking order type data
+    for (const category of eventCategoryNames) {
+        if (category.label === "SuccessfulBooking") {
+            for (const name of category.subtable) {
+                if (name.label === "PREMIUM_EXPRESS") {
+                    bookingDetails.expressNum = name.nb_events;
+                    bookingDetails.expressVal = name.sum_event_value;
+                } else if (name.label === "PREMIUM_PREORDER") {
+                    bookingDetails.preorderNum = name.nb_events;
+                    bookingDetails.preorderVal = name.sum_event_value;
+                }
+            }
+        }
+    }
+
+    return (bookingDetails);
 }
 
 // make matomo data call for category
