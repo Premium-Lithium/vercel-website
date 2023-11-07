@@ -108,7 +108,7 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
     let data = {
         title: lead.name,
         person_id: personId,
-        pipeline_id: 31 // todo: look up the name of the stage on pipedrive
+        // pipeline_id: 31 // todo: look up the name of the stage on pipedrive NOT NEEDED FOR LEADS
     };
 
     let noteContent = "";
@@ -213,8 +213,8 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
     lead.buildingType
     */
 
-    const dealsApi = new pipedrive.DealsApi(pd);
-    const newDeal = await dealsApi.addDeal(data);
+    const leadsApi = new pipedrive.LeadsApi(pd);
+    const newDeal = await leadsApi.addLead(data);
 
     if(newDeal.success === false) {
         console.log(`Error adding deal: ${JSON.stringify(newDeal)}`);
