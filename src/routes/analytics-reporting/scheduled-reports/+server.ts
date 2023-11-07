@@ -18,11 +18,11 @@ export const config: Config = {
 
 export const GET: RequestHandler = async ({url}) => {
 
-
+    const origin = url.origin;
     let msgBody = "Test message please ignore"
 
     msgBody = JSON.stringify(await getSummary(1, "yesterday", "month"));
-    const res = await emailSummaryReport()
+    const res = await emailSummaryReport(origin)
     msgBody = JSON.stringify(res)
     return new Response(msgBody, {
         
