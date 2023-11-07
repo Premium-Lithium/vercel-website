@@ -1,7 +1,6 @@
 import { matomoAPICall } from "../../matomoQuery.server";
 import type { EnergiserSummary, MatomoAPIOpts } from "../../scripts/matomoTypes";
 
-
 // constants
 const unbouncedSessionSegment = "interactions>%3D3";
 export enum siteId {
@@ -39,20 +38,68 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
     if (!date) date = "yesterday"
     if (!period) period ="day"
     let summaryData: EnergiserSummary = {
-        sessions: 0,
-        totalRevenue: 0,
-        conversionRate: "0%",
-        unBouncedSessions: 0,
-        bouncedSessions: 0,
-        avgSessionLength: 0,
-        consultationsBooked: 0,
-        totalConsultationValue: 0,
-        surveysBooked: 0,
-        totalSurveyValue: 0,
-        preorderNum: 0,
-        preorderVal: 0,
-        expressNum: 0,
-        expressVal: 0,
+        sessions: {
+            value: 0,
+            name: "Sessions"
+        },
+        totalRevenue: {
+            value: 0,
+            name: "Total revenue",
+            prefix: "£",
+        },
+        conversionRate: {
+            value: "0%",
+            name: "Conversion rate"
+        },
+        unBouncedSessions: {
+            value: 0,
+            name: "Engaged sessions"
+        },
+        bouncedSessions: {
+            value: 0,
+            name: "Bounced sessions"
+        },
+        avgSessionLength: {
+            value: 0,
+            name: "Average session length",
+            suffix: " seconds"
+        },
+        consultationsBooked: {
+            value: 0,
+            name: "Consultations booked"
+        },
+        totalConsultationValue: {
+            value: 0,
+            name: "Total consultation value",
+            prefix: "£"
+        },
+        surveysBooked: {
+            value: 0,
+            name: "Surveys booked"
+        },
+        totalSurveyValue: {
+            value: 0,
+            name: "Total survey value",
+            prefix: "£"
+        },
+        preorderNum: {
+            value: 0,
+            name: "Pre-orders"
+        },
+        preorderVal: {
+            value: 0,
+            name: "Total pre-order value",
+            prefix: "£"
+        },
+        expressNum: {
+            value: 0,
+            name: "Express orders"
+        },
+        expressVal: {
+            value: 0,
+            name: "Total express order value",
+            prefix: "£"
+        },
     }
     // get info from metadata API
     // stats should include bounced sessions
@@ -66,10 +113,10 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
     if (metaData.result === "error") {
         console.log(metaData.message);
     } else {
-        summaryData.conversionRate = metaData.conversion_rate;
-        summaryData.sessions = metaData.nb_visits;
-        summaryData.avgSessionLength = metaData.avg_time_on_site;
-        summaryData.totalRevenue = metaData.revenue;
+        summaryData.conversionRate.value = metaData.conversion_rate;
+        summaryData.sessions.value = metaData.nb_visits;
+        summaryData.avgSessionLength.value = metaData.avg_time_on_site;
+        summaryData.totalRevenue.value = metaData.revenue;
     }
     // parse and error check non-bounced sessions
     const unbouncedMetaData = await matomoDataCall("API.get", {
@@ -83,21 +130,21 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
     if (unbouncedMetaData.result === "error") {
         console.log(unbouncedMetaData.message);
     } else {
-        summaryData.unBouncedSessions = unbouncedMetaData.nb_visits;
+        summaryData.unBouncedSessions.value = unbouncedMetaData.nb_visits;
     }
-    summaryData.bouncedSessions = summaryData.sessions - summaryData.unBouncedSessions;
+    summaryData.bouncedSessions.value = summaryData.sessions.value - summaryData.unBouncedSessions.value;
 
     
     const bookingData = await getBookingDetails(siteId, date, period)
 
-    summaryData.consultationsBooked = bookingData.consultationsBooked;
-    summaryData.totalConsultationValue = bookingData.totalConsultationValue;
-    summaryData.surveysBooked = bookingData.surveysBooked;
-    summaryData.totalSurveyValue = bookingData.totalSurveyValue;
-    summaryData.preorderNum = bookingData.preorderNum;
-    summaryData.preorderVal = bookingData.preorderVal;
-    summaryData.expressNum = bookingData.expressNum;
-    summaryData.expressVal = bookingData.expressVal;
+    summaryData.consultationsBooked.value = bookingData.consultationsBooked;
+    summaryData.totalConsultationValue.value = bookingData.totalConsultationValue;
+    summaryData.surveysBooked.value = bookingData.surveysBooked;
+    summaryData.totalSurveyValue.value = bookingData.totalSurveyValue;
+    summaryData.preorderNum.value = bookingData.preorderNum;
+    summaryData.preorderVal.value = bookingData.preorderVal;
+    summaryData.expressNum.value = bookingData.expressNum;
+    summaryData.expressVal.value = bookingData.expressVal;
 
     
     //console.log(orderData)
