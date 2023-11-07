@@ -15,11 +15,10 @@ async function matomoDataCall(method: string, opts?: MatomoAPIOpts) {
     if (!opts) {
         opts = {};
     }
-    console.log("data call")
     let queryData = [
         ['method', method],
         ['idSite', String(opts.siteID || siteId.DEV)],
-        ['period', opts.period || 'day'],
+        ['period', opts.period || 'month'],
         ['date', opts.date || 'yesterday'],
         ['format', opts.format || 'JSON']
     ];
@@ -51,9 +50,10 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
 
     // initialise default paramters
     if (!date) date = "yesterday"
-    if (!period) period ="day"
+    if (!period) period ="month"
     let summaryData: EnergiserSummary = {
         sessions: 0,
+        totalRevenue: 0,
         conversionRate: "0%",
         unBouncedSessions: 0,
         bouncedSessions: 0,
@@ -84,6 +84,7 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
         summaryData.sessions = metaData.nb_visits;
         summaryData.avgSessionLength = metaData.avg_time_on_site;
     }
+    console.log("metadata", metaData)
     // parse and error check non-bounced sessions
     const unbouncedMetaData = await matomoDataCall("API.get", {
         siteID: siteId,
@@ -102,7 +103,6 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
 
     
     const bookingData = await getBookingDetails(siteId, date, period)
-    console.log(bookingData);
 
     summaryData.consultationsBooked = bookingData.consultationsBooked;
     summaryData.totalConsultationValue = bookingData.totalConsultationValue;
@@ -157,12 +157,10 @@ async function getBookingDetails(siteId: number, date: string, period: MatomoAPI
         if (category.label === "SuccessfulBooking") {
             successfulBookingObj = category;
         } else if (category.label === "SuccessfulConsultationBooking") {
-            console.log("backup")
             backupBookingObj = category;
         }
     }
     // get analytics data for previus analytics version instead (just number of consultations)
-    console.log(successfulBookingObj)
     if (!successfulBookingObj) {
         if (backupBookingObj) {
             bookingDetails.consultationsBooked = backupBookingObj.nb_events;
