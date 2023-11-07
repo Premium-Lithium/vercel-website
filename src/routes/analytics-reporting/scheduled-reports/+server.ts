@@ -1,6 +1,7 @@
 import type { Config } from '@sveltejs/adapter-vercel';
 import type { RequestHandler } from '@sveltejs/kit';
 import { getSummary } from './logic/summaryReportLogic.server';
+import { emailSummaryReport } from './summaryReport.server';
 
 
 export const config: Config = {
@@ -21,7 +22,8 @@ export const GET: RequestHandler = async ({url}) => {
     let msgBody = "Test message please ignore"
 
     msgBody = JSON.stringify(await getSummary(1, "yesterday", "month"));
-
+    const res = await emailSummaryReport()
+    msgBody = JSON.stringify(res)
     return new Response(msgBody, {
         
     });
