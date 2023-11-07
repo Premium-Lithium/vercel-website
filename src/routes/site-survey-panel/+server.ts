@@ -3,7 +3,8 @@ import pipedrive from 'pipedrive';
 import { pd, readCustomDealField, dealFieldsRequest, getKeysForCustomFields } from '../../lib/pipedrive-utils.js';
 import fs from 'fs';
 import { PIPEDRIVE_API_TOKEN } from '$env/static/private';
-import { toJson } from 'really-relaxed-json'
+import pkg from 'really-relaxed-json';
+const { toJson } = pkg;
 
 const companyDomainFields = 'https://api.pipedrive.com/v1/deals/'
 
