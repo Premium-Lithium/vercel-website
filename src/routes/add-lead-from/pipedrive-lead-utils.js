@@ -143,7 +143,7 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
     fieldName = "Lead Source";
     const field = getField(fieldName);
     if(field !== null)
-        data[field.key] = leadSourceName;
+        data[field.key] = 969; // leadSourceName Battery Finder ID
     else
         noteContent += `<li><b>${fieldName}: ${leadSourceName}</b></li><br>`;
 
