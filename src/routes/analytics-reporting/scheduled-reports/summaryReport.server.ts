@@ -3,6 +3,7 @@ import { page } from "$app/stores"
 import { get } from "svelte/store";
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
+import nunjucks from "nunjucks"
 
 enum Sites {
     DEV = 1,
@@ -24,6 +25,7 @@ export async function emailSummaryReport(origin: string) {
     for (const recipient of summary) {
         // send email
         console.log(recipient)
+        
         const emailData = {
             sender: "andrew.packer@premiumlithium.com",
             recipients: [recipient.email],
@@ -35,9 +37,9 @@ export async function emailSummaryReport(origin: string) {
                 preorders: ${summaryHeader.preorders}<br>
                 express orders: ${summaryHeader.expressOrders}<br>
                 <br><br>
-                the summary json blobs:<br?
-                ${JSON.stringify(storeSummary)}<br><br>
-                ${JSON.stringify(siteSummary)}<br><br>
+                the summary json blobs:<br>
+                Store summary ${JSON.stringify(storeSummary)}<br><br>
+                Site summary ${JSON.stringify(siteSummary)}<br><br>
                 All the best,
                 Me
             `,
@@ -75,17 +77,20 @@ async function constructSummaryReport() {
     
     // header data
     const summaryHeader = {
-        totalRevenue: storeSummary.totalRevenue + siteSummary.totalRevenue,
-        consultations: storeSummary.consultationsBooked + siteSummary.consultationsBooked,
-        surveys: storeSummary.surveysBooked + siteSummary.surveysBooked,
-        preorders: storeSummary.preorderNum + siteSummary.preorderNum,
-        expressOrders: storeSummary.expressNum + siteSummary.expressNum,
+        totalRevenue: storeSummary.totalRevenue.value + siteSummary.totalRevenue.value,
+        consultations: storeSummary.consultationsBooked.value + siteSummary.consultationsBooked.value,
+        surveys: storeSummary.surveysBooked.value + siteSummary.surveysBooked.value,
+        preorders: storeSummary.preorderNum.value + siteSummary.preorderNum.value,
+        expressOrders: storeSummary.expressNum.value + siteSummary.expressNum.value,
     }
     
-    // store summary
+    // store summary data
+    // use MJML 
+   
+    // site summary data
+    
 
-
-    // site summary
+    // construct MJML file
 
     return {summaryHeader, storeSummary, siteSummary};
 }
