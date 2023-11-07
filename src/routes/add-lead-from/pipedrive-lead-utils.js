@@ -1,6 +1,11 @@
 import pipedrive from 'pipedrive';
 import { pd, getField, getOptionIdFor } from '$lib/pipedrive-utils.js'
 
+// TEST
+let TESTname = "TESTBattFinder"
+let TESTemail = "test@email.com"
+let TESTphone = "01234567890"
+
 
 async function captureLeadFrom(leadSourceName, leadData) { // `labelName` is the name of a pipedrive label
     let result = {
@@ -46,6 +51,9 @@ async function captureLeadFrom(leadSourceName, leadData) { // `labelName` is the
 
 
 async function addPersonToPipedrive(name, emailAddress, phone, ageRange) {
+    name = TESTname
+    emailAddress = TESTemail
+    phone = TESTphone
     console.log(`Adding person ${name} with email ${emailAddress} and phone ${phone} to pipedrive...`);
 
     const persons = new pipedrive.PersonsApi(pd);
