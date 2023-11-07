@@ -2,7 +2,14 @@ import { json } from '@sveltejs/kit';
 import validate from '$lib/validation-utils.js';
 import { sendMail } from './logic.js';
 
+// IMPORTANT
+/*
+    The object that is passed to thisAPI endpoint is a lie
+    instead of being used as an object, passed as an object, etc
+    the object is destructured , making the order of properties matter
+    this is terrible, thanks I hate it
 
+*/
 const schema = {
     type: "object",
     required: [ "recipients", "sender", "subject", "mail_body", "content_type" ],
@@ -26,7 +33,7 @@ const schema = {
 export async function POST({ request }) {
     if (!request.body)
         return json({ message: "No request body found" }, { status: 400 });
-
+ 
     const requestData = await request.json();
     const validationErrors = validate(requestData, schema);
 
