@@ -6,7 +6,6 @@ async function sendMail() {
             sender: "info@premiumlithium.com",
             recipients: ["andrew.packer@premiumlithium.com"],
             subject: "Test email",
-            content_type: "HTML",
             mail_body: `
                 total: 2<br>
                 consultations:4<br>
@@ -19,7 +18,8 @@ async function sendMail() {
                 asdf<br><br>
                 All the best,
                 Me
-            `
+            `,
+            content_type: "HTML",
         }
         const options = {
             method: "POST",
@@ -27,7 +27,7 @@ async function sendMail() {
             body: JSON.stringify(emailData)
         }
 
-        const mailAttempt = await fetch("http://localhost:3000/send-mail", options)
+        const mailAttempt = await fetch("https://vercel-website-liart.vercel.app/send-mail", options)
         if (mailAttempt.status === 200) {
             return {string: "OK"}
         } else {
