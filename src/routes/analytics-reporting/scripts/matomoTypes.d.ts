@@ -25,6 +25,7 @@ export interface DataSummary {
 
 export interface EnergiserSummary {
     sessions: number,
+    totalRevenue: number,
     conversionRate: string,
     unBouncedSessions: number,
     bouncedSessions: number,
