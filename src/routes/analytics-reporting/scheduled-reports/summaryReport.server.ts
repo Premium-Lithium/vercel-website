@@ -1,5 +1,6 @@
 // complete and email summary report
-
+import { page } from "$app/stores"
+import { get } from "svelte/store";
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
 
@@ -15,20 +16,18 @@ enum Sites {
 
 // send to relevent people
 
-export async function emailSummaryReport() {
+export async function emailSummaryReport(origin: string) {
     // use graph API to send an email to everyone on recipients list
 
     // construct email template
     const {summaryHeader, storeSummary, siteSummary} = await constructSummaryReport();
-
     for (const recipient of summary) {
         // send email
         console.log(recipient)
         const emailData = {
-            sender: "info@premiumlithium.com",
-            recipients: ["andrew.packer@premiumlithium.com"],
+            sender: "andrew.packer@premiumlithium.com",
+            recipients: [recipient.email],
             subject: "Test email",
-            content_type: "HTML",
             mail_body: `
                 total: ${summaryHeader.totalRevenue}<br>
                 consultations: ${summaryHeader.consultations}<br>
@@ -41,21 +40,22 @@ export async function emailSummaryReport() {
                 ${JSON.stringify(siteSummary)}<br><br>
                 All the best,
                 Me
-            `
+            `,
+            content_type: "HTML"
         }
         const options = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(emailData)
         }
-
-        const mailAttempt = await fetch("https://vercel-website-liart.vercel.app/send-mail", options)
+        const mailEndpoint = origin + "/send-mail"
+        const mailAttempt = await fetch(mailEndpoint, options)
         if (mailAttempt.status === 200) {
-            return {string: "OK"}
         } else {
             console.log(mailAttempt);
+            return mailAttempt
         }
-        return mailAttempt
+        
     }
 
     
