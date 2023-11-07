@@ -52,15 +52,19 @@ async function createInspectionFrom(PLNumber: string, templateName: string) {
 async function getStatusFromInspection(PLNumber: string, templateName: string) {
     try {
         const status = await surveyDataSource.getSurveyStatusFor(PLNumber, templateName);
-
+        let statusResponse;
         if (status) {
-            const response = await crm.setSurveyStatusFor(PLNumber, status);
+            if (status === 'Completed')
+                statusResponse = await crm.setSurveyStatusFor(PLNumber, 'Yes');
+            else if (status === 'Not Completed') {
+                statusResponse = await crm.setSurveyStatusFor(PLNumber, 'No');
+            }
 
-            if (response.success) {
+            if (statusResponse.success) {
                 console.log('Successfully updated survey status:', status);
                 return json({ message: status, statusCode: 200 });
             } else {
-                console.error('Failed to update survey status:', response.error_message);
+                console.error('Failed to update survey status:', statusResponse.error_message);
                 return json({ message: 'Failed to update survey status.', statusCode: 500 });
             }
         } else {
