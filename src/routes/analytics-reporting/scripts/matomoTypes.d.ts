@@ -1,3 +1,19 @@
+interface SummaryMetadata { // used to help construct reports automatically
+    name: String,
+    prefix?: String,
+    suffix?: String,
+}
+
+// handle different data types
+
+interface SummaryNumber extends SummaryMetadata {
+    value: number,
+}
+
+interface SummaryString extends SummaryMetadata {
+    value: String,
+}
+
 export interface MatomoAPIOpts {
     siteID?: number;
     period?: 'day' | 'week' | 'month' | 'year' | 'range';
@@ -24,18 +40,18 @@ export interface DataSummary {
 }
 
 export interface EnergiserSummary {
-    sessions: number,
-    totalRevenue: number,
-    conversionRate: string,
-    unBouncedSessions: number,
-    bouncedSessions: number,
-    avgSessionLength: number,
-    consultationsBooked: number,
-    totalConsultationValue: number,
-    surveysBooked: number,
-    totalSurveyValue: number,
-    preorderNum: number,
-    preorderVal: number,
-    expressNum: number,
-    expressVal: number,
+    sessions: SummaryNumber,
+    totalRevenue: SummaryNumber,
+    conversionRate: SummaryString,
+    unBouncedSessions: SummaryNumber,
+    bouncedSessions: SummaryNumber,
+    avgSessionLength: SummaryNumber,
+    consultationsBooked: SummaryNumber,
+    totalConsultationValue: SummaryNumber,
+    surveysBooked: SummaryNumber,
+    totalSurveyValue: SummaryNumber,
+    preorderNum: SummaryNumber,
+    preorderVal: SummaryNumber,
+    expressNum: SummaryNumber,
+    expressVal: SummaryNumber,
 }
