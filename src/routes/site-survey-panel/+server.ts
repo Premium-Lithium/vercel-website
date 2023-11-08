@@ -91,7 +91,7 @@ async function attachPDFToDeal(PLNumber: string) {
         const filePath = '/tmp/site_survey.pdf';
         fs.writeFileSync(filePath, buffer);
 
-        const addFileRequest = await crm.attachPdfFor(PLNumber, filePath)
+        const addFileRequest = await crm.attachFileFor(PLNumber, filePath)
         fs.unlinkSync(filePath);
         console.log('PDF successfully attached to the deal.');
         return json({ message: 'PDF succesfully attached to deal.', statusCode: 200, pdfLink: responseData.url, addFileRequest: addFileRequest })

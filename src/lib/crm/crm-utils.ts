@@ -57,6 +57,16 @@ export class CRM {
 		return dealData.person_id.name
 	}
 
+	async getPersonEmailFor(PLNumber: string) {
+		const dealData = await this.getDealDataFor(PLNumber)
+		return dealData.person_id.email
+	}
+
+	async getPersonTelephoneFor(PLNumber: string) {
+		const dealData = await this.getDealDataFor(PLNumber)
+		return dealData.person_id.phone
+	}
+
 	async getPLNumberFor(dealId: string) {
 		const dealRequest = await this.pdDealsApi.getDeal(dealId)
 		return readCustomDealField('PL Number', dealRequest.data)
@@ -147,7 +157,7 @@ export class CRM {
 		return fieldResponse;
 	}
 
-	async attachPdfFor(PLNumber: string, filePath: string) {
+	async attachFileFor(PLNumber: string, filePath: string) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 
 		const addFileRequest = await this.pdFilesApi.addFile(filePath, { 'dealId': dealId })
