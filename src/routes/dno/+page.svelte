@@ -3,7 +3,7 @@
     let postcode: string = ""
 
 	async function getDNOFromPostCode(postcode: string) {
-		postcode = 'YO1 7NP'; // 
+		postcode = 'YO1 7NP'; // For testing
 
 		let res = await fetch('/dno', {
 			method: 'POST',
