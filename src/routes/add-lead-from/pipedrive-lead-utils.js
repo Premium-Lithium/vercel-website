@@ -8,12 +8,6 @@ async function captureLeadFrom(leadSourceName, leadData) { // `labelName` is the
         message: `Successfully processed lead.`
     };
 
-    // We only want to add users as leads if they provided their phone number
-    if (leadData.phoneNumber === undefined) {
-        result.message = "Request successfully processed, but no phone number provided so not adding lead.";
-        return result;
-    }
-
     // Add a new Person to pipedrive
     const personId = await addPersonToPipedrive(
         leadData.name,
@@ -46,7 +40,7 @@ async function captureLeadFrom(leadSourceName, leadData) { // `labelName` is the
 
 
 async function addPersonToPipedrive(name, emailAddress, phone, ageRange) {
-    console.log(`Adding person ${name} with email ${emailAddress} and phone ${phone} to pipedrive...`);
+    console.log(`Adding person ${name} with email ${emailAddress} and phone ${phone ? phone : "(not provided)"} to pipedrive...`);
 
     const persons = new pipedrive.PersonsApi(pd);
 
