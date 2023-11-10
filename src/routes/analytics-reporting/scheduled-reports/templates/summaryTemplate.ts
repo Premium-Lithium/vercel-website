@@ -1,3 +1,4 @@
+export const summaryTemplate = `
 <mjml>
   <mj-style>
     th,
@@ -13,7 +14,7 @@
       <!-- preamble-->
       <mj-column>
         <mj-text>
-          Hi {{ name }},<br><br>
+          Hi {{ name }},<br>
           Here is the report for {{ energiserModeString }} on {{ date }} over the period {{ period }}.<br><br>
           If the data looks wrong, the report is unclear or you have any suggestions, please let me know.<br><br>
           Andrew
@@ -27,19 +28,20 @@
           <h2>
             Key data
             </h1>
-            <h2>Let's see how this goes</h2>
             <table style="padding: auto; margin: auto">
               <tr>
-                {% for item in summaryHeader %}
-                <td>item["val"]</td>
-                {% endfor %}
-
+                <td>1000
+                <td>3
+                <td>5
+                <td>2
+                <td>6
               </tr>
               <tr>
-                {% for item in summaryHeader %}
-                <td>item.["title"]</td>
-                {% endfor %}
-
+                <th>Revenue
+                <th>Consultations
+                <th>Surveys
+                <th>Pre-orders
+                <th>Express orders
               </tr>
             </table>
         </mj-text>
@@ -52,7 +54,7 @@
           <table>
             <tr>
               <td>
-
+                
               </td>
             </tr>
           </table>
@@ -63,3 +65,4 @@
     </mj-section>
   </mj-body>
 </mjml>
+`
