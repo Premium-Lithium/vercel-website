@@ -10,7 +10,7 @@
 
 	let inspectedCreated = false;
 	let alertMessage = null;
-
+	let loading = false;
 
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
@@ -18,7 +18,7 @@
 	});
 
 	onMount(() => {
-		if(dealId){
+		if (dealId) {
 			showCustomerData();
 		}
 	});
@@ -26,6 +26,7 @@
 	async function showCustomerData() {
 		try {
 			alertMessage = 'initializing';
+			loading = true;
 			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -35,30 +36,31 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				
-				if(responseData.statusCode === 200){
+
+				if (responseData.statusCode === 200) {
 					status = responseData.message;
-					alertMessage = 'synced.'
+					alertMessage = 'synced.';
 				} else {
-					alertMessage = responseData.message
+					alertMessage = responseData.message;
 				}
 				await new Promise((resolve) => setTimeout(resolve, 1000));
 				alertMessage = null;
-				return response
 			}
-			
+			loading = false;
+			return response;
 		} catch (error) {
 			console.log(error);
 			alertMessage = error;
 			await new Promise((resolve) => setTimeout(resolve, 2000));
 			alertMessage = null;
-			return error
+			return error;
 		}
 	}
 	async function startInspection() {
 		try {
 			if (status === undefined) {
 				alertMessage = 'Generating survey';
+				loading = true;
 				const response = await fetch('/site-survey-panel', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -74,24 +76,24 @@
 					showCustomerData();
 					alertMessage = null;
 				}
-				return response
+				loading = false;
+				return response;
 			} else {
 				alertMessage = 'Error generating duplicate';
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
-				
 			}
-			
 		} catch (error) {
 			console.log(error);
-			return error
+			return error;
 		}
 	}
 
 	async function attachPDFToDeal() {
 		try {
-			if(status != undefined){
+			if (status != undefined) {
 				alertMessage = 'Attaching PDF';
+				loading = true;
 				const response = await fetch('/site-survey-panel', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -107,22 +109,24 @@
 					await new Promise((resolve) => setTimeout(resolve, 2000));
 					alertMessage = null;
 				}
-				return response
+				loading = false;
+				return response;
 			} else {
-				alertMessage = 'Survey not found'
+				alertMessage = 'Survey not found';
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
-			return error
+			return error;
 		}
 	}
 
 	async function updateCustomField() {
 		try {
-			if(status != undefined){
+			if (status != undefined) {
 				alertMessage = 'Updating';
+				loading = true;
 				const response = await fetch('/site-survey-panel', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -137,15 +141,16 @@
 					await new Promise((resolve) => setTimeout(resolve, 2000));
 					alertMessage = null;
 				}
-				return response
+				loading = false;
+				return response;
 			} else {
-				alertMessage = 'Survey not found'
+				alertMessage = 'Survey not found';
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
-			return error
+			return error;
 		}
 	}
 </script>
@@ -163,9 +168,15 @@
 	</div>
 
 	<div class="buttons-container">
-		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
-		<button disabled={status==undefined} class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
-		<button disabled={status==undefined} class="link-btn" on:click={updateCustomField}>Update Custom Fields</button>
+		<button disabled={loading} class="link-btn" on:click={startInspection}
+			>Generate SafetyCulture Survey</button
+		>
+		<button disabled={(status == undefined) | loading} class="link-btn" on:click={attachPDFToDeal}
+			>Attach SafetyCulture PDF to Deal</button
+		>
+		<button disabled={(status == undefined) | loading} class="link-btn" on:click={updateCustomField}
+			>Update Custom Fields</button
+		>
 	</div>
 </div>
 
@@ -217,6 +228,4 @@
 			background-color: rgb(101, 101, 101);
 		}
 	}
-
-
 </style>
