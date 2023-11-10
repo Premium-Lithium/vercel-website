@@ -1,9 +1,12 @@
 // complete and email summary report
-import { page } from "$app/stores"
-import { get } from "svelte/store";
+
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
-import nunjucks from "nunjucks"
+import nunjucks, { render } from "nunjucks"
+import mjml2html from "mjml"
+
+import type { MatomoAPIOpts } from "../scripts/matomoTypes";
+
 
 enum Sites {
     DEV = 1,
@@ -17,34 +20,50 @@ enum Sites {
 
 // send to relevent people
 
-export async function emailSummaryReport(origin: string) {
+export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["date"], period: MatomoAPIOpts["period"]) {
     // use graph API to send an email to everyone on recipients list
 
+    const template = await (await fetch(origin + "/summaryTemplate.mjml")).text()
+
     // construct email template
-    const {summaryHeader, storeSummary, siteSummary} = await constructSummaryReport();
+    const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
+
     for (const recipient of summary) {
         // send email
         console.log(recipient)
+        const templateBody = mjml2html(template).html
+        nunjucks.configure({ autoescape: true });
+        const renderedEmail = nunjucks.renderString(templateBody, {
+            name: recipient.name,
+            energiserModeString: "overall energiser performance",
+            date: date,
+            period: period,
+            summaryHeader: summaryHeader,
+            storeReport: storeSummary,
+            siteReport: siteSummary,
+        });
         
+        const mailBody = `
+            total: ${summaryHeader.totalRevenue}<br>
+            consultations: ${summaryHeader.consultations}<br>
+            surveys: ${summaryHeader.surveys}<br>
+            preorders: ${summaryHeader.preorders}<br>
+            express orders: ${summaryHeader.expressOrders}<br>
+            <br><br>
+            the summary json blobs:<br>
+            Store summary ${JSON.stringify(storeSummary)}<br><br>
+            Site summary ${JSON.stringify(siteSummary)}<br><br>
+            All the best,
+            Me
+        `
         const emailData = {
             sender: "andrew.packer@premiumlithium.com",
             recipients: [recipient.email],
             subject: "Test email",
-            mail_body: `
-                total: ${summaryHeader.totalRevenue}<br>
-                consultations: ${summaryHeader.consultations}<br>
-                surveys: ${summaryHeader.surveys}<br>
-                preorders: ${summaryHeader.preorders}<br>
-                express orders: ${summaryHeader.expressOrders}<br>
-                <br><br>
-                the summary json blobs:<br>
-                Store summary ${JSON.stringify(storeSummary)}<br><br>
-                Site summary ${JSON.stringify(siteSummary)}<br><br>
-                All the best,
-                Me
-            `,
+            mail_body: renderedEmail,
             content_type: "HTML"
         }
+        
         const options = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
@@ -57,15 +76,17 @@ export async function emailSummaryReport(origin: string) {
             console.log(mailAttempt);
             return mailAttempt
         }
-        
+        return storeSummary
+
     }
 
-    
+
     return [summaryHeader, storeSummary, siteSummary];
+
 }
 
 
-async function constructSummaryReport() {
+async function constructSummaryReport(date: MatomoAPIOpts["date"], period: MatomoAPIOpts["period"]) {
     // get energiser data
     // get store data
     // calculate key values from them
@@ -74,23 +95,38 @@ async function constructSummaryReport() {
     const storeSummary = await getSummary(Sites.DEV, "yesterday", "month");
     const siteSummary = await getSummary(Sites.WEB, "yesterday", "month");
 
-    
+
     // header data
     const summaryHeader = {
-        totalRevenue: storeSummary.totalRevenue.value + siteSummary.totalRevenue.value,
-        consultations: storeSummary.consultationsBooked.value + siteSummary.consultationsBooked.value,
-        surveys: storeSummary.surveysBooked.value + siteSummary.surveysBooked.value,
-        preorders: storeSummary.preorderNum.value + siteSummary.preorderNum.value,
-        expressOrders: storeSummary.expressNum.value + siteSummary.expressNum.value,
+        totalRevenue: {
+            val: storeSummary.totalRevenue.value + siteSummary.totalRevenue.value,
+            title: "Revenue"
+        },
+        consultations: {
+            val: storeSummary.consultationsBooked.value + siteSummary.consultationsBooked.value,
+            title: "Consultations"
+        },
+        surveys: {
+            val: storeSummary.surveysBooked.value + siteSummary.surveysBooked.value,
+            title: "Surveys"
+        }, 
+        preorders: {
+            val: storeSummary.preorderNum.value + siteSummary.preorderNum.value,
+            title: "Pre-orders"
+        },
+        expressOrders: {
+            val: storeSummary.expressNum.value + siteSummary.expressNum.value,
+            title: "Express orders"
+        },
     }
-    
+    console.log(summaryHeader)
     // store summary data
     // use MJML 
-   
+
     // site summary data
-    
+
 
     // construct MJML file
 
-    return {summaryHeader, storeSummary, siteSummary};
+    return { summaryHeader, storeSummary, siteSummary };
 }
