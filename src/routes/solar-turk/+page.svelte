@@ -1,4 +1,5 @@
 <script>
+	import { goto } from '$app/navigation'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 
@@ -18,11 +19,13 @@
 	})
 
 	async function onListClick(project) {
-		await fetch(`https://api.opensolar.com/api/orgs/52668/projects/`, {
+		let res = await fetch(`https://api.opensolar.com/api/orgs/52668/projects/`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: 'Bearer s_IK65BN2IG56EVZ2GSH5NI5APGMKBCY5H'
+				Authorization: 'Bearer s_IK65BN2IG56EVZ2GSH5NI5APGMKBCY5H',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'POST,PATCH,OPTIONS'
 			},
 			body: JSON.stringify({
 				identifier: project.projectId,
@@ -32,6 +35,11 @@
 				notes: `userId: ${uniqueIdentifier}`
 			})
 		})
+		let data = await res.json()
+
+		console.log(data.id)
+
+		// goto(`https://app.opensolar.com/#/projects//`
 	}
 </script>
 
@@ -44,4 +52,8 @@
 {/key}
 
 <style>
+	li:hover {
+		cursor: pointer;
+		width: fit-content;
+	}
 </style>
