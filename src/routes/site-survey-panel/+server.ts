@@ -105,34 +105,44 @@ async function attachPDFToDeal(PLNumber: string) {
 
 async function updatePipedriveDealFrom(PLNumber: string) {
     try {
-        const comments = await surveyDataSource.getAdditionalCommentFor(PLNumber, templateName)
         const fieldNames = [
-            'Make and model of existing inverter ',
+            'Existing Inverter Make ',
+            'Model of existing inverter ',
             'MPAN',
             'Roof Type ',
             'Roof Pitch ',
             'Roof Orientation from South ',
             'Roof Structure Type ',
             'How many side of scaffolding are required?',
+            'Recommended No. of panels',
+            'Manufacturer',
+            'Battery Size Recommended ',
+            'EV Charger Type',
+            'EPS? ',
+            'Eddi?',
+            'Any additional comments'
         ]
         const answerObject = await surveyDataSource.fetchAnswersFromFields(PLNumber, fieldNames, templateName)
 
         const request = {
-            'Existing Inverter - Make/Model/Size': answerObject['Make and model of existing inverter '],
             'MPAN number': answerObject['MPAN'],
             'Roof Tile Type': answerObject['Roof Type '],
             'Pitch': answerObject['Roof Pitch '],
             'Azimuth': answerObject['Roof Orientation from South '],
             'Roof Structure Type': answerObject['Roof Structure Type '],
             'Scaffolding Required': answerObject['How many side of scaffolding are required?'],
+            'Manufacturer': answerObject['Manufacturer'],
+            'Existing Inverter - Model Number': answerObject['Model of existing inverter '],
+            'Existing Inverter - Make': answerObject['Existing Inverter Make '],
+            'New Battery size (kWh)': (answerObject['Battery Size Recommended ']).replace('kWh', ''),
+            'Number of Panels': answerObject['Recommended No. of panels'],
+            'EV Charger type': answerObject['EV Charger Type'],
+            'Site Survey Comments': answerObject['Any additional comments'],
+            'Eddi required': answerObject['Eddi?'],
+            'EPS Switch': answerObject['EPS? '],
         }
-
         const updateRequest = await crm.setCustomFields(PLNumber, request)
         console.log('Custom fields updated');
-        if (comments) {
-            crm.attachNoteFor(PLNumber, comments);
-            console.log('Additional comments attached');
-        }
         console.log(updateRequest)
         if (updateRequest.success)
             return json({ message: 'Custom fields updated successfully.', statusCode: 200 });
