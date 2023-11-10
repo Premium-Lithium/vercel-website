@@ -9,8 +9,7 @@
 	let awaitingResponse = false
 
 	onMount(async () => {
-		const { data, error } = await supabase.rpc('get_random_rows', {
-			table_name: 'south_facing_houses',
+		const { data, error } = await supabase.rpc('get_random_south_facing_houses', {
 			num_rows: numOfProjects
 		})
 		// const { data, error } = await supabase
