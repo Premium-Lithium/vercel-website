@@ -17,13 +17,21 @@ export const config: Config = {
 // then requests will trigger an email
 
 export const GET: RequestHandler = async ({url}) => {
-
     const origin = url.origin;
+
+    // set date to get report for (in matomo syntax)
+    // TODO: add weekly and monthly reports
+    const date = "yesterday";
+    const period = "day";
+    //const yesterdayReport = await emailSummaryReport(origin, date, period)
+
+
+    
     let msgBody = "Test message please ignore"
 
-    msgBody = JSON.stringify(await getSummary(1, "yesterday", "month"));
-    const res = await emailSummaryReport(origin)
-    msgBody = JSON.stringify(res)
+    const monthReport = await emailSummaryReport(origin, "yesterday", "month")
+    
+    msgBody = JSON.stringify(monthReport)
     return new Response(msgBody, {
         
     });
