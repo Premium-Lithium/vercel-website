@@ -7,6 +7,9 @@ const crm = new CRM()
 const surveyDataSource = new SurveyDataSource()
 const templateName = 'PV, Battery and EV Survey';
 
+// Battery Size Recommended - New Battery size (kWh)
+// 
+
 export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
