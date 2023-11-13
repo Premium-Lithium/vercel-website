@@ -58,18 +58,55 @@ export class openSolarAPI {
         return responseData
     }
 
-    /*
-    async searchForProjectFrom(address: string) {
+    async getProjectDetailsFrom(projectId: string) {
+        const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/${projectId}`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+            }
+        })
+        const responseData = await response.json()
+        return responseData
+    }
+
+    async searchForProjectFromRef(PLNumber: string) {
         const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/`, {
             headers: {
                 'Authorization': `Bearer ${this.token}`,
             }
         })
         const responseData = await response.json()
-        console.log(responseData)
-        for(const i in responseData){
-
+        for (const i in responseData) {
+            const projectId = responseData[i].id
+            const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/${projectId}`, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                }
+            })
+            const responseData = await response.json()
+            if(responseData.identifier && (responseData.identifier).includes(PLNumber)){
+                console.log("Found with PL", responseData)
+            }
         }
+    }
+    async searchForProjectFromAddress(address: string) {
+        const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+            }
+        })
+        let found = false
+        const responseData = await response.json()
+        // Iteratively saerch for the identifier
 
-    }*/
+
+        // Checks from address
+        for (const i in responseData) {
+            const projectAddress = responseData[i].address
+            if (projectAddress && projectAddress.includes(address)) {
+                console.log(projectAddress)
+                console.log("found: ", responseData[i].id)
+                found = true
+            }
+        }
+    }
 }

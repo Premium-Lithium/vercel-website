@@ -21,12 +21,6 @@ export async function POST({ request }) {
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber);
         } else if (option == 2) {
-            const projectData = {
-                id: 3307127,
-                systems: {uuid: 'F732C7A4-FE62-4F00-ADE5-8E127C1E362C'}
-            }
-            response = await downloadSystemImageFrom(projectData)
-        } else if (option == 3) {
             response = await createOpenSolarProjectFrom(PLNumber);
         }
         const responseData = await response?.json();
@@ -37,7 +31,7 @@ export async function POST({ request }) {
     }
 }
 
-async function fetchPostcodeFromAddress(address) {
+async function fetchPostcodeFromAddress(address: string) {
     const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${MAP_API_TOKEN}`;
     try {
         const geocodingResponse = await fetch(endpoint);
@@ -56,7 +50,7 @@ async function fetchPostcodeFromAddress(address) {
     }
 }
 
-async function fetchLongLatFrom(address) {
+async function fetchLongLatFrom(address: string) {
     const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${MAP_API_TOKEN}`;
     try {
         const geocodingResponse = await fetch(endpoint);
@@ -95,17 +89,16 @@ async function generateDnoApplicationFrom(PLNumber: string) {
     
     const customerName = await crm.getPersonNameFor(PLNumber);
     const customerAddress = await crm.getCustomFieldDataFor(PLNumber, 'Address of Property');
-    const customerPostcode = await fetchPostcodeFromAddress(customerAddress);
+    const customerPostcode = await fetchPostcodeFromAddress(customerAddress); // get from custom field
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
     const customerTelephone = (await crm.getPersonTelephoneFor(PLNumber))[0].value;
     const customerMpan = await crm.getMpanFor(PLNumber);
 
     // TO DO - checks if a design exist on openSolar 
-    await openSolar.searchForProjectFrom(customerAddress)
-    
-    console.log('Network Operator Not Found')
-    return json({ message: 'Network Operator Not Found', status: 500 })
-    /*
+    const test = await openSolar.searchForProjectFrom('Premium Lithium Limited, The Stone')
+    console.log(test)
+
+    return test
     //const dnoCompanyCode = await getNetworkOperatorFromPostCode(customerPostcode);
     const dnoCompanyCode = "NPG"
     const dnoCompanyDetailsData = await getDnoDetailsFrom(dnoCompanyCode);
@@ -142,7 +135,7 @@ async function generateDnoApplicationFrom(PLNumber: string) {
     } else {
         console.log('Network Operator Not Found')
         return json({ message: 'Network Operator Not Found', status: 500 })
-    }*/
+    }
 }
 
 async function getNetworkOperatorFromPostCode(postcode: string) {

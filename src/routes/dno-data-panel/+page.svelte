@@ -41,29 +41,6 @@
 		}
 	}
 
-	async function openSolar(){
-		try {
-			alertMessage = "openSolar"
-			const response = await fetch('/dno-data-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 2
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = "";
-				return response;
-			}
-		} catch (error) {
-			console.log(error);
-			return error;
-		}
-	}
-
 	async function generateOpenSolarProject(){
 		try {
 			alertMessage = "generating open solar project"
@@ -72,7 +49,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 3
+					option: 2
 				})
 			});
 			if (response.ok) {
@@ -97,9 +74,8 @@
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 	</div>
+	<button class="link-btn" on:click={generateOpenSolarProject}>Start openSolar Project</button>
 	<button class="link-btn" on:click={handleGenerate}>Generate DNO Application</button>
-	<button class="link-btn" on:click={openSolar}>openSolar</button>
-	<button class="link-btn" on:click={generateOpenSolarProject}>Generate openSolar Project</button>
 </div>
 
 <style>
