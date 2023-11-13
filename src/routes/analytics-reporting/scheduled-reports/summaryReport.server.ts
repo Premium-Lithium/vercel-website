@@ -31,7 +31,7 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
     for (const recipient of summary) {
         // send email
         const templateBody = mjml2html(template).html
-        nunjucks.configure({ autoescape: true });
+        //nunjucks.configure({ autoescape: true });
         const renderedEmail = templateBody//nunjucks.renderString(templateBody, {
         //     name: recipient.name,
         //     energiserModeString: "overall energiser performance",
@@ -76,7 +76,7 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
 //             return mailAttempt
 //         }
 
-//     }
+    }
 
 
     return [summaryHeader, storeSummary, siteSummary];
