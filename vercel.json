@@ -14,10 +14,6 @@
     {
       "path": "/api/installerMatchPulse",
       "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/analytics-reporting/scheduled-reports",
-      "schedule": "0 7 * * *"
     }
   ]
 }
