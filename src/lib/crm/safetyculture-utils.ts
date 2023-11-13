@@ -11,6 +11,16 @@ export class SurveyDataSource {
         this.organisationId = 'role_b660120a576a483a9b1f380e4ad7f572'
     }
 
+    async getTemplateNameFor(templateId: string) {
+        const response = await fetch(`https://api.safetyculture.io/templates/v1/templates/${templateId}`, {
+            headers: {
+                'Authorization': `Bearer ${this.accessToken}`
+            }
+        })
+        const responseData = await response.json()
+        return responseData.template.name
+    }
+
     async getTemplateIdFor(templateName: string) {
         const response = await fetch('https://api.safetyculture.io/templates/search?order=desc&archived=false&owner=all', {
             headers: {
@@ -55,6 +65,7 @@ export class SurveyDataSource {
                 }
             }
         }
+        console.log('No reference found.')
         return null
     }
 
