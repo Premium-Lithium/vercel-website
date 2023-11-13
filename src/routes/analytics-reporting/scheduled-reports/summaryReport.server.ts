@@ -3,7 +3,7 @@
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
 
-//import mjml2html from "mjml"
+import mjml2html from 'mjml';
 
 import type { MatomoAPIOpts } from "../scripts/matomoTypes";
 
@@ -30,6 +30,7 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
 
     for (const recipient of summary) {
         // send email
+        const mjml = await mjml2html(template);
         //const templateBody = mjml2html(template).html
         //nunjucks.configure({ autoescape: true });
         const renderedEmail = "<h1>aaaaaaaaaa</h1>"//nunjucks.renderString(templateBody, {
