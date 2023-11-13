@@ -2,7 +2,7 @@
 
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
-
+import nunjucks from 'nunjucks';
 
 import type { MatomoAPIOpts } from "../scripts/matomoTypes";
 
@@ -22,7 +22,7 @@ enum Sites {
 export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["date"], period: MatomoAPIOpts["period"]) {
     // use graph API to send an email to everyone on recipients list
 
-    const mjmlString = await (await fetch(origin + "/email-templates/summaryTemplate.mjml")).text()
+    const njkString = await (await fetch(origin + "/email-templates/summaryTemplate.njk")).text()
 
     // construct email template
     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
@@ -30,10 +30,8 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
     for (const recipient of summary) {
         
         // send email
-        //const { html } = await mjml2html(mjmlString);
-        
-        //const templateBody = mjml2html(template).html
-        //nunjucks.configure({ autoescape: true });
+
+        nunjucks.configure({ autoescape: true });
         const nunjucksData = {
             name: recipient.name,
             energiserModeString: "overall energiser performance",
@@ -43,9 +41,8 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
             storeReport: storeSummary,
             siteReport: siteSummary,
         }
-        const renderedEmail = "<h1>aaaaaaaaaa</h1>"//nunjucks.renderString(templateBody, );
-        //const renderedEmail = await populateEmailTemplateWith(nunjucksData, origin + "/email-templates/summaryTemplate.mjml")
-        return
+        console.log(nunjucksData)
+        const renderedEmail = nunjucks.renderString(njkString, nunjucksData );
         const mailBody = `
             total: ${summaryHeader.totalRevenue}<br>
             consultations: ${summaryHeader.consultations}<br>
@@ -121,7 +118,7 @@ async function constructSummaryReport(date: MatomoAPIOpts["date"], period: Matom
             val: storeSummary.expressNum.value + siteSummary.expressNum.value,
             title: "Express orders"
         },
-    }
+    }  
 
     return { summaryHeader, storeSummary, siteSummary };
 }
