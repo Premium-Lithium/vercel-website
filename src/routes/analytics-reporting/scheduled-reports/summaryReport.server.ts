@@ -3,7 +3,7 @@
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
 
-import { populateEmailTemplateWith } from '$lib/file-utils.js';
+
 import type { MatomoAPIOpts } from "../scripts/matomoTypes";
 
 
@@ -43,8 +43,8 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
             storeReport: storeSummary,
             siteReport: siteSummary,
         }
-        //const renderedEmail = "<h1>aaaaaaaaaa</h1>"//nunjucks.renderString(templateBody, );
-        const renderedEmail = await populateEmailTemplateWith(nunjucksData, origin + "/email-templates/summaryTemplate.mjml")
+        const renderedEmail = "<h1>aaaaaaaaaa</h1>"//nunjucks.renderString(templateBody, );
+        //const renderedEmail = await populateEmailTemplateWith(nunjucksData, origin + "/email-templates/summaryTemplate.mjml")
         return
         const mailBody = `
             total: ${summaryHeader.totalRevenue}<br>
