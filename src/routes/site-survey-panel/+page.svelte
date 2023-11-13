@@ -10,7 +10,7 @@
 
 	let inspectedCreated = false;
 	let alertMessage = null;
-
+	let loading = false;
 
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
@@ -18,12 +18,15 @@
 	});
 
 	onMount(() => {
-		showCustomerData();
+		if (dealId) {
+			showCustomerData();
+		}
 	});
 
 	async function showCustomerData() {
 		try {
 			alertMessage = 'initializing';
+			loading = true;
 			const response = await fetch('/site-survey-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -33,27 +36,31 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				
-				if(responseData.statusCode === 200){
+
+				if (responseData.statusCode === 200) {
 					status = responseData.message;
+					alertMessage = 'synced.';
 				} else {
-					alertMessage = responseData.message
-					await new Promise((resolve) => setTimeout(resolve, 3000));
+					alertMessage = responseData.message;
 				}
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 				alertMessage = null;
-				console.log('Initial:', responseData);
 			}
+			loading = false;
+			return response;
 		} catch (error) {
 			console.log(error);
 			alertMessage = error;
-			await new Promise((resolve) => setTimeout(resolve, 3000));
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 			alertMessage = null;
+			return error;
 		}
 	}
 	async function startInspection() {
 		try {
 			if (status === undefined) {
 				alertMessage = 'Generating survey';
+				loading = true;
 				const response = await fetch('/site-survey-panel', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -65,61 +72,85 @@
 				if (response.ok) {
 					const responseData = await response.json();
 					alertMessage = responseData.message;
-					await new Promise((resolve) => setTimeout(resolve, 3000));
+					await new Promise((resolve) => setTimeout(resolve, 2000));
+					showCustomerData();
 					alertMessage = null;
 				}
+				loading = false;
+				return response;
 			} else {
 				alertMessage = 'Error generating duplicate';
-				await new Promise((resolve) => setTimeout(resolve, 3000));
+				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
+			return error;
 		}
 	}
 
 	async function attachPDFToDeal() {
 		try {
-			alertMessage = 'Attaching PDF';
-			const response = await fetch('/site-survey-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 2
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				inspectedCreated = true; // alert that form is created
-				alertMessage = responseData.message;
-				await new Promise((resolve) => setTimeout(resolve, 3000));
+			if (status != undefined) {
+				alertMessage = 'Attaching PDF';
+				loading = true;
+				const response = await fetch('/site-survey-panel', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						dealId: dealId,
+						option: 2
+					})
+				});
+				if (response.ok) {
+					const responseData = await response.json();
+					inspectedCreated = true; // alert that form is created
+					alertMessage = responseData.message;
+					await new Promise((resolve) => setTimeout(resolve, 2000));
+					alertMessage = null;
+				}
+				loading = false;
+				return response;
+			} else {
+				alertMessage = 'Survey not found';
+				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
+			return error;
 		}
 	}
 
 	async function updateCustomField() {
 		try {
-			alertMessage = 'Updating';
-			const response = await fetch('/site-survey-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 3
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				alertMessage = responseData.message;
-				await new Promise((resolve) => setTimeout(resolve, 3000));
+			if (status != undefined) {
+				alertMessage = 'Updating';
+				loading = true;
+				const response = await fetch('/site-survey-panel', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						dealId: dealId,
+						option: 3
+					})
+				});
+				if (response.ok) {
+					const responseData = await response.json();
+					alertMessage = responseData.message;
+					await new Promise((resolve) => setTimeout(resolve, 2000));
+					alertMessage = null;
+				}
+				loading = false;
+				return response;
+			} else {
+				alertMessage = 'Survey not found';
+				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = null;
 			}
 		} catch (error) {
 			console.log(error);
+			return error;
 		}
 	}
 </script>
@@ -137,9 +168,15 @@
 	</div>
 
 	<div class="buttons-container">
-		<button class="link-btn" on:click={startInspection}>Generate SafetyCulture Survey</button>
-		<button class="link-btn" on:click={attachPDFToDeal}>Attach SafetyCulture PDF to Deal</button>
-		<button class="link-btn" on:click={updateCustomField}>Update Custom Field</button>
+		<button disabled={loading} class="link-btn" on:click={startInspection}
+			>Generate SafetyCulture Survey</button
+		>
+		<button disabled={(status == undefined) | loading} class="link-btn" on:click={attachPDFToDeal}
+			>Attach SafetyCulture PDF to Deal</button
+		>
+		<button disabled={(status == undefined) | loading} class="link-btn" on:click={updateCustomField}
+			>Update Custom Fields</button
+		>
 	</div>
 </div>
 
@@ -185,6 +222,10 @@
 		font-size: 16px;
 		&:hover {
 			background-color: #9f9f9f;
+		}
+		&:disabled {
+			cursor: default;
+			background-color: rgb(101, 101, 101);
 		}
 	}
 </style>
