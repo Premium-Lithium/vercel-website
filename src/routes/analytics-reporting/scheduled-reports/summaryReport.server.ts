@@ -23,14 +23,13 @@ enum Sites {
 export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["date"], period: MatomoAPIOpts["period"]) {
     // use graph API to send an email to everyone on recipients list
 
-    const template = await (await fetch(origin + "/summaryTemplate.mjml")).text()
+    const template = await (await fetch(origin + "/email-templates/summaryTemplate.mjml")).text()
 
     // construct email template
     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
 
     for (const recipient of summary) {
         // send email
-        console.log(recipient)
         const templateBody = mjml2html(template).html
         nunjucks.configure({ autoescape: true });
         const renderedEmail = nunjucks.renderString(templateBody, {
@@ -76,7 +75,6 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
             console.log(mailAttempt);
             return mailAttempt
         }
-        return storeSummary
 
     }
 
@@ -92,13 +90,14 @@ async function constructSummaryReport(date: MatomoAPIOpts["date"], period: Matom
     // calculate key values from them
     // iterate through to build full results table
 
-    const storeSummary = await getSummary(Sites.DEV, "yesterday", "month");
-    const siteSummary = await getSummary(Sites.WEB, "yesterday", "month");
+    const storeSummary = await getSummary(Sites.STORE, date, period);
+    const siteSummary = await getSummary(Sites.WEB, date, period);
 
 
     // header data
     const summaryHeader = {
         totalRevenue: {
+            prefix: storeSummary.totalRevenue.prefix,
             val: storeSummary.totalRevenue.value + siteSummary.totalRevenue.value,
             title: "Revenue"
         },
@@ -119,14 +118,6 @@ async function constructSummaryReport(date: MatomoAPIOpts["date"], period: Matom
             title: "Express orders"
         },
     }
-    console.log(summaryHeader)
-    // store summary data
-    // use MJML 
-
-    // site summary data
-
-
-    // construct MJML file
 
     return { summaryHeader, storeSummary, siteSummary };
 }
