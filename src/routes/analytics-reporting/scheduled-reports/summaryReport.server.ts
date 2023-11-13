@@ -3,7 +3,7 @@
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
 
-import mjml2html from 'mjml';
+import { populateEmailTemplateWith } from "$lib/file-utils";
 
 import type { MatomoAPIOpts } from "../scripts/matomoTypes";
 
@@ -29,20 +29,23 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
 
     for (const recipient of summary) {
+        
         // send email
-        const { html } = await mjml2html(mjmlString);
+        //const { html } = await mjml2html(mjmlString);
+        
         //const templateBody = mjml2html(template).html
         //nunjucks.configure({ autoescape: true });
-        const renderedEmail = "<h1>aaaaaaaaaa</h1>"//nunjucks.renderString(templateBody, {
-        //     name: recipient.name,
-        //     energiserModeString: "overall energiser performance",
-        //     date: date,
-        //     period: period,
-        //     summaryHeader: summaryHeader,
-        //     storeReport: storeSummary,
-        //     siteReport: siteSummary,
-        // });
-        
+        const nunjucksData = {
+            name: recipient.name,
+            energiserModeString: "overall energiser performance",
+            date: date,
+            period: period,
+            summaryHeader: summaryHeader,
+            storeReport: storeSummary,
+            siteReport: siteSummary,
+        }
+        //const renderedEmail = "<h1>aaaaaaaaaa</h1>"//nunjucks.renderString(templateBody, );
+        const renderedEmail = await populateEmailTemplateWith(nunjucksData, origin + "/email-templates/summaryTemplate.mjml")
         const mailBody = `
             total: ${summaryHeader.totalRevenue}<br>
             consultations: ${summaryHeader.consultations}<br>
@@ -70,12 +73,12 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
             body: JSON.stringify(emailData)
         }
         const mailEndpoint = origin + "/send-mail"
-//         const mailAttempt = await fetch(mailEndpoint, options)
-//         if (mailAttempt.status === 200) {
-//         } else {
-//             console.log(mailAttempt);
-//             return mailAttempt
-//         }
+        const mailAttempt = await fetch(mailEndpoint, options)
+        if (mailAttempt.status === 200) {
+        } else {
+            console.log(mailAttempt);
+            return mailAttempt
+        }
 
     }
 

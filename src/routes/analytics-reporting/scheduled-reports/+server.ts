@@ -26,7 +26,7 @@ export const GET: RequestHandler = async ({url}) => {
     
     let msgBody = "Test message please ignore"
 
-    //const monthReport = await emailSummaryReport(origin, "yesterday", "month")
+
     
     msgBody = JSON.stringify(dailyReport)
     return new Response(msgBody, {
