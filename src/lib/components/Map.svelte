@@ -3,8 +3,13 @@
 		latLongOfMarker,
 		markersOnMap,
 		colourOfMapMarker,
-	} from '$lib/MapStores.js';
+		installationStores,
+		currentInstallation,
+		navigateMarkers,
+		selectedInstallation
 
+	} from '$lib/MapStores.js';
+	import { get } from 'svelte/store'
 	import mapboxgl from 'mapbox-gl';
 	import 'mapbox-gl/dist/mapbox-gl.css';
 	export let search = true;
@@ -12,13 +17,12 @@
 	export let projectsArr;
 	export let filtersArr = [];
 	export let directionsArr = [];
-	export let selectedMarker;
-	let selectedInstallation;
 	let installations: Array<Installation> = [];
 	const API_TOKEN =
 		'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 	$latLongOfMarker = { latitude: null, longitude: null };
 	$markersOnMap = [];
+	$currentInstallation;
 	const styles = [
 		'mapbox://styles/mapbox/streets-v12', // 0
 		'mapbox://styles/mapbox/outdoors-v12', // 1
@@ -61,6 +65,7 @@
 		endDate: String;
 		id: Number;
 		createdDate: String;
+		
 		// Other values ie timeframe etc.
 		constructor(
 			name: String,
@@ -71,7 +76,7 @@
 			startDate: String,
 			endDate: String,
 			id: Number,
-			createdDate: String
+			createdDate: String,
 		) {
 			this.name = name;
 			this.status = status;
@@ -93,7 +98,7 @@
 			this.createdDate = createdDate;
 		}
 	}
-
+	
 	onMount(() => {
 		const mapboxGlAccessToken =
 			'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -135,26 +140,33 @@
 				});
 				map.addControl(search);
 			}
+			
 			if (projectsArr) {
 				installations = await createMarkers(projectsArr);
+				installationStores.set(installations);
+				/*
 				if(selectedMarker){
 					for (let i in installations){
 						if(installations[i].id === selectedMarker.id){
-							selectedInstallation = installations[i]
+							currentInstallation = installations[i]
 						}
 					}
 					//find installations with matching id
-					selectedInstallation.marker.togglePopup();
-					
+					currentInstallation.marker.togglePopup();
+				}*/
+			}
+			if ($navigateMarkers) {
+				
+				if($selectedInstallation.length > 1){
+					getDirectionsFromInstallations($selectedInstallation);
+					navigateMarkers.set(false);
 				}
 			}
-
-			if (directionsArr) {
-				getDirections(directionsArr);
-			}
+			
 			map.resize();
 		});
 	});
+	
 
 	function handleMarkerClick(installation) {
 		dispatch('markerClick', { installation });
@@ -176,7 +188,7 @@
 				projectsArr[i].createdDate
 			);
 			installations.push(install);
-
+			$installationStores.push(install);
 		}
 		addMarkers(installations)
 		return installations;
@@ -205,7 +217,9 @@
 					markerArr[i].marker.setPopup(popup).addTo(map);
 				// Add an event listener for the click event
 				markerArr[i].marker.getElement().addEventListener('click', () => {
-					handleMarkerClick(markerArr[i]);
+					markerArr[i].marker.togglePopup()
+					currentInstallation.set(markerArr[i]);
+					$selectedInstallation.push(markerArr[i]);
 				});
 				markerArr[i].marker.getElement().style.cursor = 'pointer';
 			}
@@ -240,9 +254,64 @@
 		}
 	}
 
+	// coordsArr are  [[lon, lat],...]
+	// coord string 
+	export async function getDirectionsFromInstallations(installations) {
+		let coordsArr = []
+		installations.map(function(element){
+			coordsArr.push([element.lon, element.lat])
+		})
+		let coordinates = ""
+		let coord = ""
+		for(let i in coordsArr){
+			coord = coordsArr[i][0] + "," + coordsArr[i][1]
+			if(i != coordsArr.length - 1){
+				coord = coord + ";"
+			}
+			coordinates = coordinates + coord
+		}
+		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordinates}?geometries=geojson&access_token=${API_TOKEN}&overview=full`;
+		try {
+			const directionsResponse = await fetch(endpoint, { method: 'GET' });
+			if (directionsResponse.ok) {
+				const res = await directionsResponse.json();
+				console.log(res);
+				const route = res.routes[0].geometry.coordinates;
+				const geojson = {
+					type: 'Feature',
+					properties: {},
+					geometry: {
+						type: 'LineString',
+						coordinates: route
+					}
+				};
+				map.addLayer({
+					id: 'route',
+					type: 'line',
+					source: {
+						type: 'geojson',
+						data: geojson
+					},
+					layout: {
+						'line-join': 'round',
+						'line-cap': 'round'
+					},
+					paint: {
+						'line-color': '#ab1bcf',
+						'line-width': 5,
+						'line-opacity': 0.75
+					}
+				});
+			}
+		} catch (error) {
+			console.error("Error: " + error);
+		}
+	}
+
+
 	// directions are  [[lon, lat],...]
 	export async function getDirections(directions) {
-		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${directions[0][0]},${directions[0][1]};${directions[1][0]},${directions[1][1]}?geometries=geojson&access_token=${API_TOKEN}`;
+		const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${directions[0][0]},${directions[0][1]};${directions[1][0]},${directions[1][1]};${directions[2][0]},${directions[2][1]}?geometries=geojson&access_token=${API_TOKEN}`;
 		try {
 			const directionsResponse = await fetch(endpoint, { method: 'GET' });
 			if (directionsResponse.ok) {
