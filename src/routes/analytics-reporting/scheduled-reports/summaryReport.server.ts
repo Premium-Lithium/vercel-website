@@ -28,19 +28,19 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
     // construct email template
     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
 
-//     for (const recipient of summary) {
-//         // send email
-//         const templateBody = mjml2html(template).html
-//         nunjucks.configure({ autoescape: true });
-//         const renderedEmail = nunjucks.renderString(templateBody, {
-//             name: recipient.name,
-//             energiserModeString: "overall energiser performance",
-//             date: date,
-//             period: period,
-//             summaryHeader: summaryHeader,
-//             storeReport: storeSummary,
-//             siteReport: siteSummary,
-//         });
+    for (const recipient of summary) {
+        // send email
+        const templateBody = mjml2html(template).html
+        nunjucks.configure({ autoescape: true });
+        const renderedEmail = nunjucks.renderString(templateBody, {
+            name: recipient.name,
+            energiserModeString: "overall energiser performance",
+            date: date,
+            period: period,
+            summaryHeader: summaryHeader,
+            storeReport: storeSummary,
+            siteReport: siteSummary,
+        });
         
 //         const mailBody = `
 //             total: ${summaryHeader.totalRevenue}<br>
