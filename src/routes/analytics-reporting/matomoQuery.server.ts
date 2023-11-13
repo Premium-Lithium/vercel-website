@@ -20,7 +20,6 @@ export async function matomoAPICall (queryparams: Array<Array<string>>) {
     queryparams.push(["token_auth", MATOMO_API_KEY]);
 
     const queryString = genQueryString(baseURL, queryparams);
-    console.log(queryString)
     const res = await fetch(queryString);
     const data = await res.json();
     return data;
