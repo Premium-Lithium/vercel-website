@@ -23,14 +23,14 @@ enum Sites {
 export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["date"], period: MatomoAPIOpts["period"]) {
     // use graph API to send an email to everyone on recipients list
 
-    const template = await (await fetch(origin + "/email-templates/summaryTemplate.mjml")).text()
+    const mjmlString = await (await fetch(origin + "/email-templates/summaryTemplate.mjml")).text()
 
     // construct email template
     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
 
     for (const recipient of summary) {
         // send email
-        const mjml = await mjml2html(template);
+        const { html } = await mjml2html(mjmlString);
         //const templateBody = mjml2html(template).html
         //nunjucks.configure({ autoescape: true });
         const renderedEmail = "<h1>aaaaaaaaaa</h1>"//nunjucks.renderString(templateBody, {
