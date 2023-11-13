@@ -65,7 +65,9 @@ async function sendMail(sender, recipients, subject, mail_body, content_type, da
         };
 
         const apiUrl = `/v1.0/users/${sender}/sendMail`;
+
         const response = await fetch(`https://graph.microsoft.com${apiUrl}`, options);
+
         if (response.status !== 202) {
             mailAttempt.success = false;
             mailAttempt.message = `Error: Microsoft Graph API request failed with status ${response.status} ${response.statusText}`;
