@@ -13,6 +13,21 @@ const fieldNames = {
     inProgress: "In Progress Checklist"
 }
 
+export async function POST({ request }) {
+    try {
+        const { dealId } = await request.json();
+        
+        const dealData = await fetchDealData(dealId);
+        let checklistData = getChecklistData(dealData[0]);
+        let stageName = dealData[1];
+
+        return json([checklistData, stageName]);
+    } catch (error) {
+        console.log("Error:", error);
+        return json({ error: "Can't get checkListData" })
+    }
+}
+
 async function fetchDealData(dealId) {
     try {
         const pdDealsApi = new pipedrive.DealsApi(pd);
@@ -42,19 +57,6 @@ function getChecklistData(dealData) {
 }
 
 
-export async function POST({ request }) {
-    try {
-        const { dealId } = await request.json();
-        const dealData = await fetchDealData(dealId);
-        let checklistData = getChecklistData(dealData[0]);
-        let stageName = dealData[1];
-
-        return json([checklistData, stageName]);
-    } catch (error) {
-        console.log("Error:", error);
-        return json({ error: "Can't get checkListData" })
-    }
-}
 // request = fieldName, data
 // GetKeyFrom fieldName
 // Use that key to get the actual field

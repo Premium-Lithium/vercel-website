@@ -2,10 +2,7 @@
 	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
-	import pipedrive from 'pipedrive';
-	import { json } from '@sveltejs/kit';
 	import ProgressBar from '$lib/components/ProgressBar.svelte';
-	import CircleProgressBar from '$lib/components/CircleProgressBar.svelte';
 
 	let sdk;
 	let currentStage;
@@ -16,8 +13,7 @@
 		assigned: 0,
 		inProgress: 0
 	};
-	const dealId = $page.url.searchParams.get('id');
-	//const dealId = $page.url.pathname.split('/deal/')[1]; //https://premiumlithium.pipedrive.com/deal/7142
+	const dealId = $page.url.searchParams.get('selectedIds');
 
 	const fieldNames = {
 		assigned: 'Assigned Checklist',
@@ -62,7 +58,7 @@
 
 	
 	onMount(() => {
-
+		console.log(dealId)
 		if (dealId) {
 			retrieveDealChecklist();
 			getHeight()
@@ -78,9 +74,7 @@
 		sdk = await new AppExtensionsSDK().initialize();
 		await sdk.execute('resize', { height: 100 });
 	});
-	//  http://localhost:3000/installation-panel?dealId=7083
 
-	// TODO - show current checked checklist and display it on the Panel.
 	async function retrieveDealChecklist() {
 		try {
 			const response = await fetch('/installation-panel', {
