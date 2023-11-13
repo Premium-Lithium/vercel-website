@@ -2,8 +2,8 @@
 
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
-// import nunjucks, { render } from "nunjucks"
-// import mjml2html from "mjml"
+import nunjucks, { render } from "nunjucks"
+import mjml2html from "mjml"
 
 import type { MatomoAPIOpts } from "../scripts/matomoTypes";
 
@@ -21,12 +21,12 @@ enum Sites {
 // send to relevent people
 
 export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["date"], period: MatomoAPIOpts["period"]) {
-//     // use graph API to send an email to everyone on recipients list
+    // use graph API to send an email to everyone on recipients list
 
-//     const template = await (await fetch(origin + "/email-templates/summaryTemplate.mjml")).text()
+    const template = await (await fetch(origin + "/email-templates/summaryTemplate.mjml")).text()
 
-//     // construct email template
-//     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
+    // construct email template
+    const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
 
 //     for (const recipient of summary) {
 //         // send email
@@ -79,7 +79,7 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
 //     }
 
 
-//     return [summaryHeader, storeSummary, siteSummary];
+    return [summaryHeader, storeSummary, siteSummary];
 
 }
 
