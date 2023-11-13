@@ -17,13 +17,18 @@ export const config: Config = {
 // then requests will trigger an email
 
 export const GET: RequestHandler = async ({url}) => {
-
     const origin = url.origin;
+    // current: send daily overall report to me for evaluation
+    const dailyReport = await emailSummaryReport(origin, "yesterday", "day");
+
+    // TODO: if it is monday generate report for last week
+    // if it is 1st, generate report for last month
+    
     let msgBody = "Test message please ignore"
 
-    msgBody = JSON.stringify(await getSummary(1, "yesterday", "month"));
-    const res = await emailSummaryReport(origin)
-    msgBody = JSON.stringify(res)
+    //const monthReport = await emailSummaryReport(origin, "yesterday", "month")
+    
+    msgBody = JSON.stringify(dailyReport)
     return new Response(msgBody, {
         
     });

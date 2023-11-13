@@ -111,7 +111,7 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
     });
     // if there is an error, leave at defaults
     if (metaData.result === "error") {
-        console.log(metaData.message);
+        console.log("error", metaData.message);
     } else {
         summaryData.conversionRate.value = metaData.conversion_rate;
         summaryData.sessions.value = metaData.nb_visits;
@@ -128,7 +128,7 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
         ],
     });
     if (unbouncedMetaData.result === "error") {
-        console.log(unbouncedMetaData.message);
+        console.log("Error", unbouncedMetaData.message);
     } else {
         summaryData.unBouncedSessions.value = unbouncedMetaData.nb_visits;
     }
@@ -136,6 +136,11 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
 
     
     const bookingData = await getBookingDetails(siteId, date, period)
+
+    // if revenue not directly tracked, to help with historicdata
+    if (summaryData.totalRevenue.value === 0) {
+        summaryData.totalRevenue.value = bookingData.totalConsultationValue
+    }
 
     summaryData.consultationsBooked.value = bookingData.consultationsBooked;
     summaryData.totalConsultationValue.value = bookingData.totalConsultationValue;
@@ -146,8 +151,6 @@ export async function getSummary(siteId: number, date?: string, period?: MatomoA
     summaryData.expressNum.value = bookingData.expressNum;
     summaryData.expressVal.value = bookingData.expressVal;
 
-    
-    //console.log(orderData)
     // query events API for order types
 
     return summaryData;

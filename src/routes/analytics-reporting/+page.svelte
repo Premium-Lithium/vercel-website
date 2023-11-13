@@ -242,6 +242,9 @@
 			(bookingData.survey.val + bookingData.consultation.val) / (sessionData.totalTime / 60)
 		);
 	}
+
+
+	let templatetext = ""
 </script>
 
 <body>

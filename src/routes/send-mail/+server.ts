@@ -4,7 +4,7 @@ import { sendMail } from './logic.js';
 
 // IMPORTANT
 /*
-    The object that is passed to thisAPI endpoint is a lie
+    The object that is passed to this API endpoint is a lie
     instead of being used as an object, passed as an object, etc
     the object is destructured , making the order of properties matter
     this is terrible, thanks I hate it

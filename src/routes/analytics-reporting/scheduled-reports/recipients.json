@@ -1,8 +1,13 @@
+
 {
     "summary": [
         {
             "name": "Andrew",
             "email": "andrew.packer@premiumlithium.com"
+        },
+        {
+            "name": "AlexR",
+            "email": "alexander.roskoss@premiumlithium.com"
         }
     ]
 }
