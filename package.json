@@ -56,7 +56,6 @@
 		"@turf/boolean-point-in-polygon": "^6.5.0",
 		"@turf/helpers": "^6.5.0",
 		"@turf/points-within-polygon": "^6.5.0",
-		"@types/mjml": "^4.7.4",
 		"@types/nunjucks": "^3.2.5",
 		"@types/three": "^0.155.1",
 		"@vercel/postgres": "^0.4.0",
