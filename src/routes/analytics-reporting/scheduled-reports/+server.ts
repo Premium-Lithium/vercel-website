@@ -18,20 +18,17 @@ export const config: Config = {
 
 export const GET: RequestHandler = async ({url}) => {
     const origin = url.origin;
+    // current: send daily overall report to me for evaluation
+    const dailyReport = await emailSummaryReport(origin, "yesterday", "day");
 
-    // set date to get report for (in matomo syntax)
-    // TODO: add weekly and monthly reports
-    const date = "yesterday";
-    const period = "day";
-    //const yesterdayReport = await emailSummaryReport(origin, date, period)
-
-
+    // TODO: if it is monday generate report for last week
+    // if it is 1st, generate report for last month
     
     let msgBody = "Test message please ignore"
 
-    const monthReport = await emailSummaryReport(origin, "yesterday", "month")
+    //const monthReport = await emailSummaryReport(origin, "yesterday", "month")
     
-    msgBody = JSON.stringify(monthReport)
+    msgBody = JSON.stringify(dailyReport)
     return new Response(msgBody, {
         
     });
