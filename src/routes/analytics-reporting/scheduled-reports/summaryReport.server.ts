@@ -3,6 +3,7 @@
 import { getSummary } from "./logic/summaryReportLogic.server";
 import { summary } from './recipients.json'
 import nunjucks from 'nunjucks';
+import { supabase } from "$lib/supabase";
 
 import type { MatomoAPIOpts } from "../scripts/matomoTypes";
 
@@ -23,12 +24,23 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
     // use graph API to send an email to everyone on recipients list
 
     const njkString = await (await fetch(origin + "/email-templates/summaryTemplate.njk")).text()
+    // get recipients from supbase and log details to console
 
+
+    let { data: analytics_report_recipients, error } = await supabase
+        .from('analytics_report_recipients')
+        .select('*')
+
+    console.log("email address and stuff")
+    console.log(analytics_report_recipients)
+    console.log(error)
+    console.log("done")
+    return
     // construct email template
     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
 
     for (const recipient of summary) {
-        
+
         // send email
 
         nunjucks.configure({ autoescape: true });
@@ -42,7 +54,7 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
             siteReport: siteSummary,
         }
         console.log(nunjucksData)
-        const renderedEmail = nunjucks.renderString(njkString, nunjucksData );
+        const renderedEmail = nunjucks.renderString(njkString, nunjucksData);
         const mailBody = `
             total: ${summaryHeader.totalRevenue}<br>
             consultations: ${summaryHeader.consultations}<br>
@@ -63,7 +75,7 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
             mail_body: renderedEmail,
             content_type: "HTML"
         }
-        
+
         const options = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
@@ -109,7 +121,7 @@ async function constructSummaryReport(date: MatomoAPIOpts["date"], period: Matom
         surveys: {
             val: storeSummary.surveysBooked.value + siteSummary.surveysBooked.value,
             title: "Surveys"
-        }, 
+        },
         preorders: {
             val: storeSummary.preorderNum.value + siteSummary.preorderNum.value,
             title: "Pre-orders"
@@ -118,7 +130,7 @@ async function constructSummaryReport(date: MatomoAPIOpts["date"], period: Matom
             val: storeSummary.expressNum.value + siteSummary.expressNum.value,
             title: "Express orders"
         },
-    }  
+    }
 
     return { summaryHeader, storeSummary, siteSummary };
 }
