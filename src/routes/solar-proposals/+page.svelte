@@ -179,7 +179,7 @@
 			</div>
 		{/key}
 	{:else}
-		<Auth redirectUrl={`/solar-proposal`} />
+		<Auth redirectUrl={`/solar-proposals`} />
 	{/if}
 </div>
 
