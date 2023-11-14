@@ -5,6 +5,7 @@
 
 import { json } from '@sveltejs/kit';
 import validate from '$lib/validation-utils.js';
+import { generatePostcardFor } from './logic';
 
 
 const schema = {
@@ -33,10 +34,15 @@ export async function POST({ request }) {
     }
 
     try {
-        // todo: generate postcard images here
+        const customerId = requestData.customerId;
+        console.log("Generating postcard for customer:", customerId);
+
+        const postcard = generatePostcardFor(customerId);
+
+        // todo: check that the postcard was generated correctly
 
         return json(
-            { message: true },
+            { message: `Successfully generated postcard content for customer id ${customerId}` },
             { status: 200 }
         );
 
