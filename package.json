@@ -63,6 +63,8 @@
 		"ajv-formats": "^2.1.1",
 		"cheerio": "1.0.0-rc.12",
 		"docxtemplater": "^3.40.2",
+		"docxtemplater-image-hyperlink-module-free": "^1.0.2",
+		"docxtemplater-image-module": "^3.1.0",
 		"html-to-docx": "^1.8.0",
 		"isomorphic-fetch": "^3.0.0",
 		"juice": "^9.1.0",

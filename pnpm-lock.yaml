@@ -77,6 +77,12 @@ dependencies:
   docxtemplater:
     specifier: ^3.40.2
     version: 3.40.2
+  docxtemplater-image-hyperlink-module-free:
+    specifier: ^1.0.2
+    version: 1.0.2
+  docxtemplater-image-module:
+    specifier: ^3.1.0
+    version: 3.1.0
   html-to-docx:
     specifier: ^1.8.0
     version: 1.8.0
@@ -2262,6 +2268,22 @@ packages:
     dependencies:
       esutils: 2.0.3
     dev: true
+
+  /docxtemplater-image-hyperlink-module-free@1.0.2:
+    resolution: {integrity: sha512-+F3RAyRWewE3B6zY6c6u1p/7xVktXo92+kDnv05WSN+XIt1JidcyJ+R3hLd5SQAAS3aBzMkT/xgAbkDGz7cCzA==}
+    dependencies:
+      xmldom: 0.6.0
+    dev: false
+
+  /docxtemplater-image-module@3.1.0:
+    resolution: {integrity: sha512-dFzuGOhCXgZpzAO7hGJvGbjzUCvid+3L4lSjbBta+TnXuBb/55pqDQWeRZ38yMviu+QTaYreSHHdYHF1XvQlBA==}
+    deprecated: |-
+      This module has been deprecated, No new releases will be made to it.
+
+      There is an up to date paid version of the module which you can find on https://docxtemplater.com/modules/image/
+    dependencies:
+      xmldom: 0.1.31
+    dev: false
 
   /docxtemplater@3.40.2:
     resolution: {integrity: sha512-8gzx4kz2QQPyuFwKIOWVy1frOqlaSOefckeI5HxZz5eVsePWwh0kfqmEfKn/bSNe6uftU9jEsTJiHGOaYgDKSw==}
@@ -6238,6 +6260,17 @@ packages:
       '@oozcitak/dom': 1.15.5
       '@oozcitak/infra': 1.0.5
       '@oozcitak/util': 8.3.3
+    dev: false
+
+  /xmldom@0.1.31:
+    resolution: {integrity: sha512-yS2uJflVQs6n+CyjHoaBmVSqIDevTAWrzMmjG1Gc7h1qQ7uVozNhEPJAwZXWyGQ/Gafo3fCwrcaokezLPupVyQ==}
+    engines: {node: '>=0.1'}
+    deprecated: Deprecated due to CVE-2021-21366 resolved in 0.5.0
+    dev: false
+
+  /xmldom@0.6.0:
+    resolution: {integrity: sha512-iAcin401y58LckRZ0TkI4k0VSM1Qg0KGSc3i8rU+xrxe19A/BN1zHyVSJY7uoutVlaTSzYyk/v5AmkewAP7jtg==}
+    engines: {node: '>=10.0.0'}
     dev: false
 
   /xtend@4.0.2:

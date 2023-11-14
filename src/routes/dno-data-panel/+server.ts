@@ -5,7 +5,7 @@ import { supabase } from '$lib/supabase.ts';
 import { openSolarAPI } from '$lib/crm/opensolar-utils.js';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
-
+import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
@@ -85,57 +85,102 @@ async function getDnoDetailsFrom(dnoCode: string) {
 }
 
 async function generateDnoApplicationFrom(PLNumber: string) {
-
-    
     const customerName = await crm.getPersonNameFor(PLNumber);
-    const customerAddress = await crm.getCustomFieldDataFor(PLNumber, 'Address of Property');
+    const customerAddress = await crm.getAddressFor(PLNumber);
     const customerPostcode = await fetchPostcodeFromAddress(customerAddress); // get from custom field
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
     const customerTelephone = (await crm.getPersonTelephoneFor(PLNumber))[0].value;
     const customerMpan = await crm.getMpanFor(PLNumber);
 
-    // TO DO - checks if a design exist on openSolar 
-    const test = await openSolar.searchForProjectFrom('Premium Lithium Limited, The Stone')
-    console.log(test)
-
-    return test
-    //const dnoCompanyCode = await getNetworkOperatorFromPostCode(customerPostcode);
-    const dnoCompanyCode = "NPG"
-    const dnoCompanyDetailsData = await getDnoDetailsFrom(dnoCompanyCode);
-    if (dnoCompanyCode) {
-        const fieldsToUpdate = {
-            'dno_company.name': dnoCompanyDetailsData.name,
-            'dno_company.address': dnoCompanyDetailsData.address,
-            'dno_company.email': dnoCompanyDetailsData.email,
-            'customer.name': customerName,
-            'customer.address': customerAddress,
-            'customer.postcode': customerPostcode,
-            'customer.contact_person': '',
-            'customer.telephone': customerTelephone,
-            'customer.email': customerEmail,
-            'customer.mpan': customerMpan,
-            'installer.contact_person': '',
-            'installer.telephone': '',
-            'manufacturer.name': '',
-            'energy_code': '',
+    console.log(customerAddress)
+    return(customerAddress)
+    // Checks if a project exist with the same PLNumber or same address
+    let matchingProjectId = null;
+    /*
+    const searchFromPL = await openSolar.searchForProjectFromRef(PLNumber);
+    if (!searchFromPL) {
+        const searchFromAddress = await openSolar.searchForProjectFromAddress(customerAddress);
+        if (!searchFromAddress) {
+            console.log("open solar project not found")
+            return json({ message: `Cannot find project for ${PLNumber}`, status: 500 })
+        } else {
+            matchingProjectId = searchFromAddress
         }
-        const g99DocxTemplate = await getG99TemplateDocx()
-        const content = await g99DocxTemplate.arrayBuffer()
-
-        const zip = new PizZip(content)
-        const doc = new Docxtemplater(zip)
-        doc.render(fieldsToUpdate)
-        const buff = doc.getZip().generate({ type: 'nodebuffer' })
-        const filePath = `/tmp/G99_${customerName}.docx`
-        fs.writeFileSync(filePath, buff)
-        //const addFileRequest = await crm.attachFileFor(PLNumber, filePath)
-        fs.unlinkSync(filePath);
-        console.log('DNO Application Form Generated')
-        return json({ message: 'DNO Application Generated', status: 200 })
     } else {
-        console.log('Network Operator Not Found')
-        return json({ message: 'Network Operator Not Found', status: 500 })
+        matchingProjectId = searchFromPL
+    }*/
+    matchingProjectId = '3331806'
+    // Checks if the matching project has a design or not
+    const designFound = await openSolar.searchForDesignFrom(matchingProjectId)
+
+    if (!designFound) {
+        console.log("open solar design not found")
+        return json({ message: `Cannot find design for ${PLNumber}`, status: 500 })
+    } else {
+        const projectData = await openSolar.getProjectDetailsFrom(matchingProjectId);
+        const ImgFilePath = '/tmp/panel_layout.jpeg'
+        await downloadSystemImageFrom(projectData, ImgFilePath)
+        const imageFileContent = fs.readFileSync(ImgFilePath);
+        const dnoCompanyCode = "NPG"
+        const dnoCompanyDetailsData = await getDnoDetailsFrom(dnoCompanyCode);
+        if (dnoCompanyCode) {
+            const fieldsToUpdate = {
+                'dno_company.name': dnoCompanyDetailsData.name,
+                'dno_company.address': dnoCompanyDetailsData.address,
+                'dno_company.email': dnoCompanyDetailsData.email,
+                'customer.name': customerName,
+                'customer.address': customerAddress,
+                'customer.postcode': customerPostcode,
+                'customer.contact_person': '',
+                'customer.telephone': customerTelephone,
+                'customer.email': customerEmail,
+                'customer.mpan': customerMpan,
+                'installer.contact_person': '',
+                'installer.telephone': '',
+                'manufacturer.name': '',
+                'energy_code': '',
+                'panel_layout': ImgFilePath
+            }
+            const g99DocxTemplate = await getG99TemplateDocx()
+            const content = await g99DocxTemplate.arrayBuffer()
+
+            //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
+            const imageOpts = {
+                centered: true, 
+                fileType: "docx",
+                getImage: function (tagValue, tagName) {
+                    return fs.readFileSync(tagValue);
+                },
+                getSize: function (img, tagValue, tagName) {
+                    return [300, 300];
+                },
+                getProps: function(tagValue, tagName) {
+                    if (tagName === 'panel_layout') {
+                        return imageFileContent;
+                    }
+                    return null;
+                }
+            };
+
+            const zip = new PizZip(content)
+            const doc = new Docxtemplater(zip, {
+                modules: [new ImageModule(imageOpts)],
+            })
+            doc.render(fieldsToUpdate)
+            const buff = doc.getZip().generate({ type: 'nodebuffer' })
+            const DocxFilePath = `/tmp/G99_${customerName}.docx`
+            fs.writeFileSync(DocxFilePath, buff)
+            const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
+            fs.unlinkSync(DocxFilePath);
+            fs.unlinkSync(ImgFilePath);
+            console.log('DNO Application Form Generated')
+            return json({ message: 'DNO Application Generated', status: 200 })
+        } else {
+            console.log('Network Operator Not Found')
+            return json({ message: 'Network Operator Not Found', status: 500 })
+        }
     }
+
 }
 
 async function getNetworkOperatorFromPostCode(postcode: string) {
@@ -152,20 +197,18 @@ async function getNetworkOperatorFromPostCode(postcode: string) {
     return ((match !== undefined) ? (match?.slice(34, -5)) : undefined)
 }
 
-async function downloadSystemImageFrom(projectData) {
+async function downloadSystemImageFrom(projectData, filePath) {
     const projectId = projectData.id
-    const uuid = projectData.fields.systems[0].uuid
+    const uuid = projectData.systems[0].uuid
 
     const buff = await openSolar.getBufferImageFrom(projectId, uuid, [500, 500])
 
-    const addressName = (projectData.fields.address).split(' ').join('_')
-    const filePath = `${addressName}_Layout.jpeg`
+    //const addressName = (projectData.address).split(' ').join('_')
     fs.writeFileSync(filePath, buff)
-    return json({message: 'Panel Design Found and Downloaded', status: 200})
+    return json({ message: 'Panel Design Found and Downloaded', status: 200 })
 }
 
 async function createOpenSolarProjectFrom(PLNumber: string) {
-
     const customerAddress = await crm.getCustomFieldDataFor(PLNumber, 'Address of Property');
     const customerLongLat = await fetchLongLatFrom(customerAddress)
     // perhaps also post code
@@ -175,9 +218,9 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
     }
     try {
         await openSolar.startProjectFrom(PLNumber, addressObject)
-        return json({message: 'Project succesfully created.', status: 200})
+        return json({ message: 'Project succesfully created.', status: 200 })
     } catch (error) {
-        return json({message: 'Error creating project.', status: 500})
+        return json({ message: 'Error creating project.', status: 500 })
     }
-    
+
 }

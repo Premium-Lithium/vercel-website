@@ -74,19 +74,20 @@ export class openSolarAPI {
                 'Authorization': `Bearer ${this.token}`,
             }
         })
-        const responseData = await response.json()
-        for (const i in responseData) {
-            const projectId = responseData[i].id
+        const projectList = await response.json()
+        for (const i in projectList) {
+            const projectId = projectList[i].id
             const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/${projectId}`, {
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
                 }
             })
-            const responseData = await response.json()
-            if(responseData.identifier && (responseData.identifier).includes(PLNumber)){
-                console.log("Found with PL", responseData)
+            const projectDetail = await response.json()
+            if (projectDetail.identifier && (projectDetail.identifier).includes(PLNumber) && (projectDetail.systems).length != 0) {
+                return projectDetail.id
             }
         }
+        return null
     }
     async searchForProjectFromAddress(address: string) {
         const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/`, {
@@ -94,19 +95,28 @@ export class openSolarAPI {
                 'Authorization': `Bearer ${this.token}`,
             }
         })
-        let found = false
-        const responseData = await response.json()
-        // Iteratively saerch for the identifier
-
-
-        // Checks from address
-        for (const i in responseData) {
-            const projectAddress = responseData[i].address
+        const projectList = await response.json()
+        for (const i in projectList) {
+            const projectAddress = projectList[i].address
             if (projectAddress && projectAddress.includes(address)) {
-                console.log(projectAddress)
-                console.log("found: ", responseData[i].id)
-                found = true
+                return projectList[i].id
             }
+        }
+        return null
+    }
+
+    async searchForDesignFrom(projectId: string) {
+        const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/${projectId}`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+            }
+        })
+        const projectDetail = await response.json()
+        if((projectDetail.systems).length != 0) {
+            console.log("Design Found")
+            return projectDetail.systems[0].uuid
+        } else {
+            return null
         }
     }
 }

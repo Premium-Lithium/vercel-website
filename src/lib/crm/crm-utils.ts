@@ -67,6 +67,20 @@ export class CRM {
 		return dealData.person_id.phone
 	}
 
+	async getAddressFor(PLNumber: string) {
+		const dealData = await this.getDealDataFor(PLNumber)
+		const addressObject = {
+			property_address: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1'],
+			area_1: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_admin_area_level_1'],
+			area_2: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_admin_area_level_2'],
+			formatted_address: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_formatted_address'],
+			postcode: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'],
+			country: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_country']
+		}
+		return addressObject;
+		
+	}
+
 	async getPLNumberFor(dealId: string) {
 		const dealRequest = await this.pdDealsApi.getDeal(dealId)
 		return readCustomDealField('PL Number', dealRequest.data)
