@@ -41,6 +41,8 @@ export class openSolarAPI {
         const bodyData = {
             identifier: PLNumber,
             address: addressObject.address,
+            country: addressObject.country,
+            zip: addressObject.zip,
             lat: addressObject.longLat[1],
             lon: addressObject.longLat[0]
         }
@@ -54,6 +56,7 @@ export class openSolarAPI {
         }
         const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/`, options)
         const responseData = await response.json()
+        console.log(responseData)
         console.log('Project created.')
         return responseData
     }
@@ -112,11 +115,26 @@ export class openSolarAPI {
             }
         })
         const projectDetail = await response.json()
-        if((projectDetail.systems).length != 0) {
+        if ((projectDetail.systems).length != 0) {
             console.log("Design Found")
             return projectDetail.systems[0].uuid
         } else {
             return null
         }
+    }
+
+    async getCountryData(countryName: string) {
+        const response = await fetch(`https://api.opensolar.com/api/countries/`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+            }
+        })
+        const countryList = await response.json()
+        for(const i in countryList) {
+            if((countryList[i].name).includes(countryName)) {
+                return countryList[i]
+            }
+        }
+        return null
     }
 }
