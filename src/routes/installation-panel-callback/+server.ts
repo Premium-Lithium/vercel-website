@@ -19,12 +19,10 @@ function initAPIClient({ accessToken = '', refreshToken = '' }) {
     const client = new ApiClient();
     const oAuth2 = client.authentications.oauth2;
 
-    oAuth2.clientId = process.env.PIPEDRIVE_SS_PANEL_CLIENT_ID;
-    oAuth2.clientSecret = process.env.PIPEDRIVE_SS_PANEL_CLIENT_SECRET;
-    //oAuth2.redirectUri = process.env.PIPEDRIVE_SS_PANEL_REDIRECT_URI;
-    //oAuth2.clientId = "caceda3f2e17e511"
-    //oAuth2.clientSecret = "b42dec4831e659b7de50f067f70d81f339753d93"
-    oAuth2.redirectUri = "https://vercel-website-liart.vercel.app/site-survey-panel-callback"
+    oAuth2.clientId = process.env.PIPEDRIVE_INST_PANEL_CLIENT_ID;
+    oAuth2.clientSecret = process.env.PIPEDRIVE_INST_PANEL_CLIENT_SECRET;
+    //oAuth2.redirectUri = process.env.PIPEDRIVE_INST_PANEL_REDIRECT_URI;
+    oAuth2.redirectUri = "https://28c6-148-252-140-35.ngrok-free.app/installation-panel-callback"
     if (accessToken)
         oAuth2.accessToken = accessToken;
     if (refreshToken)

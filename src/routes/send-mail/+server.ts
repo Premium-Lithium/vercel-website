@@ -33,7 +33,7 @@ const schema = {
 export async function POST({ request }) {
     if (!request.body)
         return json({ message: "No request body found" }, { status: 400 });
- 
+
     const requestData = await request.json();
     const validationErrors = validate(requestData, schema);
 
