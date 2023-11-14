@@ -20,7 +20,6 @@ export async function POST({ request }) {
         let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber);
-            //console.log(await getNetworkOperatorFromPostCode('YO1 7NP'))
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         }
@@ -110,8 +109,8 @@ async function generateDnoApplicationFrom(PLNumber: string) {
         const ImgFilePath = '/tmp/panel_layout.jpeg'
         await downloadSystemImageFrom(projectData, ImgFilePath)
         const imageFileContent = fs.readFileSync(ImgFilePath);
-        //const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
-        const dnoName = 'Fire'
+        const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
+        
         let dnoCompanyDetailsData = {
             name: "",
             address: "",
