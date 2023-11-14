@@ -1,11 +1,23 @@
 <script>
+	import { page } from '$app/stores'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
-
-	const headingThreshold = 15
-	const minimumMountableSpace = 16
 	let awaitingResponse = false
 	let errorMessage = ''
+
+	let left, right, bottom, top, map
+
+	const urlParams = $page.url.searchParams
+	left = urlParams.get('left') || ''
+	bottom = urlParams.get('bottom') || ''
+	right = urlParams.get('right') || ''
+	top = urlParams.get('top') || ''
+
+	let southFacing = false
+	let minimumRoofSize = 16
+	let southFacingThreshold = 15
+
+	$: console.log(southFacing)
 
 	onMount(async () => {
 		// let streetWays = data.elements.filter((x) => {
@@ -37,22 +49,21 @@
 
 	function getHousesWithDetails(elements) {
 		return elements.filter((x) => {
-			return (
-				x.type == 'way' &&
-				x.tags?.building == 'house' &&
-				x.tags['addr:city'] &&
-				x.tags['addr:housenumber'] &&
-				x.tags['addr:postcode'] &&
-				x.tags['addr:street']
-			)
+			return x.type == 'way' && x.tags?.building == 'house'
 		})
 	}
 
 	function getHouseNames(elements) {
-		return elements.map(
-			(x) =>
-				`${x.tags['addr:housenumber']} ${x.tags['addr:street']}, ${x.tags['addr:city']}, ${x.tags['addr:postcode']}`
-		)
+		return elements.map(async (x) => {
+			if (
+				x.house.way.tags['addr:housenumber'] &&
+				x.house.way.tags['addr:street'] &&
+				x.house.way.tags['addr:city'] &&
+				x.house.way.tags['addr:postcode']
+			)
+				return `${x.house.way.tags['addr:housenumber']} ${x.house.way.tags['addr:street']}, ${x.house.way.tags['addr:city']} ${x.house.way.tags['addr:postcode']}, UK`
+			return (await geocodeLatLngs([x]))[0].geocode.results[0]['formatted_address']
+		})
 	}
 
 	function getEastToWestStreets(elements) {
@@ -103,10 +114,11 @@
 	}
 
 	function getSoutherlyRoofSections(roofSegmentStats) {
+		if (!southFacing) return roofSegmentStats
 		return roofSegmentStats.filter((segment) => {
 			return (
-				segment.azimuthDegrees >= 180 - headingThreshold &&
-				segment.azimuthDegrees <= 180 + headingThreshold
+				segment.azimuthDegrees >= 180 - southFacingThreshold &&
+				segment.azimuthDegrees <= 180 + southFacingThreshold
 			)
 		})
 	}
@@ -116,7 +128,36 @@
 		roofSegments.forEach((x) => {
 			totalSpace += x.stats.areaMeters2
 		})
-		return totalSpace >= minimumMountableSpace
+		return totalSpace >= minimumRoofSize
+	}
+
+	async function geocodeLatLngs(nodes) {
+		let promises = []
+		let results = []
+		nodes.forEach(async (x) => {
+			if (
+				x.house.way.tags['addr:housenumber'] &&
+				x.house.way.tags['addr:postcode'] &&
+				x.house.way.tags['addr:street']
+			) {
+				return
+			}
+			let res = fetch(`${$page.url.pathname}/geocoding`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					lat: getMeanLatLon(x.house.nodes).lat,
+					lon: getMeanLatLon(x.house.nodes).lon
+				})
+			})
+
+			promises.push(
+				res.then(async (result) => results.push({ node: x, geocode: await result.json() }))
+			)
+		})
+
+		await Promise.all(promises)
+		return results
 	}
 
 	async function handleSubmit(event) {
@@ -128,8 +169,7 @@
 		const right = formData.get('right')
 		const top = formData.get('top')
 
-		// Replace the hardcoded values with the user input
-		let res = await fetch('/solar-turk/find-suitable-houses', {
+		let res = await fetch($page.url.pathname, {
 			method: 'POST',
 			body: JSON.stringify({
 				left: parseFloat(left.toString()),
@@ -154,9 +194,12 @@
 		let latLongOfHouses = buildingNodes.map((x) => {
 			return { house: x, latLon: getMeanLatLon(x.nodes) }
 		})
+
+		console.log(latLongOfHouses)
+
 		let promises = latLongOfHouses.map(async (x, i) => {
 			try {
-				let response = await fetch('/solar-turk/google-solar', {
+				let response = await fetch(`${$page.url.pathname}/google-solar`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -181,6 +224,7 @@
 		let suitableHouses = []
 
 		let housesWithASouthernRoof = googleSolarResults.filter((x) => {
+			if (!x.solarResult) return false
 			return getSoutherlyRoofSections(x.solarResult.solarPotential.roofSegmentStats).length
 		})
 
@@ -200,12 +244,13 @@
 			let { data, error } = await supabase.from('south_facing_houses').upsert(
 				{
 					roof_details: { buildingStats, maxArrayAreaMeters2, roofSegmentStats, wholeRoofStats },
-					address: getHouseNames([x.house.way])[0],
+					address: await getHouseNames([x])[0],
 					lat_lon: { lat: latLon.lat, lon: latLon.lon }
 				},
-				{ onConflict: 'lat_lon', ignoreDuplicates: true }
+				{ onConflict: 'lat_lon, address', ignoreDuplicates: true }
 			)
 		})
+
 		awaitingResponse = false
 	}
 </script>
@@ -213,27 +258,60 @@
 <div class="container">
 	<form on:submit={handleSubmit}>
 		<label for="left">Left Longitude:</label>
-		<input type="number" step="any" id="left" name="left" required />
+		<input type="number" step="any" id="left" name="left" bind:value={left} required />
 
 		<label for="bottom">Bottom Latitude:</label>
-		<input type="number" step="any" id="bottom" name="bottom" required />
+		<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
 
 		<label for="right">Right Longitude:</label>
-		<input type="number" step="any" id="right" name="right" required />
+		<input type="number" step="any" id="right" name="right" bind:value={right} required />
 
 		<label for="top">Top Latitude:</label>
-		<input type="number" step="any" id="top" name="top" required />
+		<input type="number" step="any" id="top" name="top" bind:value={top} required />
 
-		<button type="submit" disabled={awaitingResponse}
-			>{`${awaitingResponse ? 'Searching...' : 'Find Suitable Houses'}`}</button
-		>
+		<button type="submit" disabled={awaitingResponse}>
+			{`${awaitingResponse ? 'Searching...' : 'Find Suitable Houses'}`}
+		</button>
 	</form>
 	{#if errorMessage != ''}
 		<p style="color: red">{errorMessage}</p>
 	{/if}
+
+	<div class="options">
+		<label for="minimumRoofSize">Minimum Roof Size (m²)</label>
+		<input type="number" id="minimumRoofSize" name="minimumRoofSize" bind:value={minimumRoofSize} />
+		<label for="southFacing">South Facing</label>
+		<input type="checkbox" id="southFacing" name="southFacing" bind:checked={southFacing} />
+		{#if southFacing}
+			<label for="southFacingThreshold"
+				>South Facing Threshold <br /> (degrees from due south)</label
+			>
+			<input
+				type="number"
+				id="southFacingThreshold"
+				name="southFacingThreshold"
+				bind:value={southFacingThreshold}
+			/>
+		{/if}
+	</div>
 </div>
 
 <style>
+	.options {
+		width: fit-content;
+		height: fit-content;
+		align-self: center;
+		display: flex;
+		flex-direction: column;
+		align-items: left;
+		margin: 0px 10vw 0px 10vw;
+	}
+	.container {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
 	form {
 		max-width: 300px;
 		margin: 2rem auto;
@@ -251,12 +329,17 @@
 		color: #333;
 	}
 
-	input {
+	input[type='number'] {
 		width: 100%;
 		margin-bottom: 1rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
 		font-size: 24px;
+	}
+
+	input[type='checkbox'] {
+		width: fit-content;
+		margin-bottom: 1rem;
 	}
 
 	button {
