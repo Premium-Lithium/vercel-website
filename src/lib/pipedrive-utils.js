@@ -11,7 +11,7 @@ const dealFieldsRequest = await pdDealFieldsApi.getDealFields();
 // Just get the field object
 function getField(fieldName) {
 	if (dealFieldsRequest.success === false) {
-		console.log(`Could not read deal value for ${fieldName} because deal fields request failed.`);
+		console.log(`Could not read value for field '${fieldName}' because pipedrive fields request failed.`);
 		return null;
 	}
 
@@ -20,7 +20,7 @@ function getField(fieldName) {
 	const field = allFields.find((f) => f.name === fieldName);
 
 	if (field === undefined) {
-		console.log(`Could not find deal field with name '${fieldName}'. Is this spelled correctly?`);
+		console.log(`Could not find pipedrive field with name '${fieldName}'. Is this spelled correctly?`);
 		return null;
 	}
 
