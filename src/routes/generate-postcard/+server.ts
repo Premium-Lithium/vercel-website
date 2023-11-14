@@ -14,7 +14,7 @@ const schema = {
         customerId: {
             type: "string",
             format: "uuid",
-            errorMessage: "some error processing customer id"
+            errorMessage: "'customerId' must be a universally unique identifier according to RFC4122"
         },
     }
 }
