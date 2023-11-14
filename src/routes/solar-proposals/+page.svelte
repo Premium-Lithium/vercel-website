@@ -3,12 +3,20 @@
 	import Auth from '$lib/components/Auth.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
+	import { DataArrayTexture } from 'three'
 
 	let uniqueIdentifier = undefined
 	let projects = []
 	let numOfProjects = 25
 	let awaitingResponse = false
 	let isAuthenticated = false
+
+	onMount(async () => {
+		const { data, error } = await supabase.auth.getSession()
+		console.log(data)
+		if (data.session == null) isAuthenticated = false
+		else isAuthenticated = true
+	})
 
 	async function populateProjectList() {
 		let workerData = await getWorkerData(uniqueIdentifier)
@@ -171,7 +179,7 @@
 			</div>
 		{/key}
 	{:else}
-		<Auth />
+		<Auth redirectUrl={`${$page.url.host}/solar-proposal`} />
 	{/if}
 </div>
 

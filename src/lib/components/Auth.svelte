@@ -1,13 +1,17 @@
 <script>
+	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
 	import { supabase } from '$lib/supabase'
+	export let redirectUrl
 	let email = ''
 	let password = ''
 	let error = null
 	let loading = false
 	let forgottenPassword = false
+	let sentResetEmail = false
 
 	async function handleLogin() {
+		error = ''
 		if (forgottenPassword) {
 			handleResetPassword()
 			return
@@ -20,13 +24,20 @@
 			error = err.message
 		} finally {
 			loading = false
+			goto(redirectUrl)
 		}
 	}
 
 	async function handleSignup() {
 		try {
 			loading = true
-			const { error } = await supabase.auth.signUp({ email, password })
+			const { error } = await supabase.auth.signUp({
+				email,
+				password,
+				options: {
+					emailRedirectTo: redirectUrl
+				}
+			})
 			if (error) throw error
 		} catch (err) {
 			error = err.message
@@ -39,32 +50,40 @@
 			redirectTo: `${$page.url.host}/auth/reset-password`
 		})
 		if (err) error = err.message
+		else {
+			sentResetEmail = true
+		}
 	}
 </script>
 
 <div class="container">
-	<form on:submit|preventDefault={handleLogin}>
-		<input type="email" bind:value={email} placeholder="Email" />
-		{#if !forgottenPassword}
-			<input type="password" bind:value={password} placeholder="Password" />
-		{/if}
-		{#if error}
-			<p style="color: red;">{error}</p>
-		{/if}
+	{#if sentResetEmail}
+		<p>If an account for that email exists, we've sent you an email to reset your password</p>
+	{:else}
+		<form on:submit|preventDefault={handleLogin}>
+			<input type="email" bind:value={email} placeholder="Email" />
+			{#if !forgottenPassword}
+				<input type="password" bind:value={password} placeholder="Password" />
+			{/if}
+			{#if error}
+				<p style="color: red;">{error}</p>
+			{/if}
 
-		<button type="submit" disabled={loading}
-			>{forgottenPassword ? 'Reset Password' : 'Login'}</button
+			<button type="submit" disabled={loading}
+				>{forgottenPassword ? 'Reset Password' : 'Login'}</button
+			>
+			{#if !forgottenPassword}
+				<button type="button" on:click={handleSignup} disabled={loading}>Sign Up</button>
+			{/if}
+		</form>
+		<button
+			on:click={() => {
+				forgottenPassword = !forgottenPassword
+				error = ''
+			}}
+			class="forgot-password">Forgot password?</button
 		>
-		{#if !forgottenPassword}
-			<button type="button" on:click={handleSignup} disabled={loading}>Sign Up</button>
-		{/if}
-	</form>
-	<button
-		on:click={() => {
-			forgottenPassword = !forgottenPassword
-		}}
-		class="forgot-password">Forgot password?</button
-	>
+	{/if}
 </div>
 
 <style>
