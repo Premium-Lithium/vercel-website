@@ -1,7 +1,7 @@
 // complete and email summary report
 
 import { getSummary } from "./logic/summaryReportLogic.server";
-import { summary } from './recipients.json'
+
 import nunjucks from 'nunjucks';
 import { supabase } from "$lib/supabase";
 
@@ -26,20 +26,22 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
     const njkString = await (await fetch(origin + "/email-templates/summaryTemplate.njk")).text()
     // get recipients from supbase and log details to console
 
-
-    let { data: analytics_report_recipients, error } = await supabase
+    // get emails for people who should recieve the energiser summary report
+    let { data: recipients, error } = await supabase
         .from('analytics_report_recipients')
-        .select('*')
+        .select("name, email")
+        .eq("energiser_report", true)
 
-    console.log("email address and stuff")
-    console.log(analytics_report_recipients)
-    console.log(error)
-    console.log("done")
-    return
+    if (error) {
+        console.log(error)
+    }
     // construct email template
     const { summaryHeader, storeSummary, siteSummary } = await constructSummaryReport(date, period);
 
-    for (const recipient of summary) {
+    if (recipients === null) {
+        return "No recipients found";
+    }
+    for (const recipient of recipients) {
 
         // send email
 
@@ -53,7 +55,7 @@ export async function emailSummaryReport(origin: string, date: MatomoAPIOpts["da
             storeReport: storeSummary,
             siteReport: siteSummary,
         }
-        console.log(nunjucksData)
+
         const renderedEmail = nunjucks.renderString(njkString, nunjucksData);
         const mailBody = `
             total: ${summaryHeader.totalRevenue}<br>
