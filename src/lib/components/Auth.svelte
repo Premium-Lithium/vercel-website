@@ -1,8 +1,9 @@
 <script>
-	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
 	import { supabase } from '$lib/supabase'
 	export let redirectUrl
+	export let authenticated = false
+	export let supabaseAuth = undefined
 	let email = ''
 	let password = ''
 	let error = null
@@ -18,13 +19,19 @@
 		}
 		try {
 			loading = true
-			const { error } = await supabase.auth.signInWithPassword({ email, password })
+			const { data, error } = await supabase.auth.signInWithPassword({
+				email,
+				password
+			})
 			if (error) throw error
+			else {
+				supabaseAuth = data
+				authenticated = true
+			}
 		} catch (err) {
 			error = err.message
 		} finally {
 			loading = false
-			goto(redirectUrl)
 		}
 	}
 

@@ -3,13 +3,13 @@
 	import Auth from '$lib/components/Auth.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
-	import { DataArrayTexture } from 'three'
 
 	let uniqueIdentifier = undefined
 	let projects = []
 	let numOfProjects = 25
 	let awaitingResponse = false
 	let isAuthenticated = false
+	let supabaseAuth = undefined
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
@@ -17,6 +17,11 @@
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
 	})
+
+	$: if (isAuthenticated && supabaseAuth) {
+		uniqueIdentifier = supabaseAuth.user.id
+		populateProjectList()
+	}
 
 	async function populateProjectList() {
 		let workerData = await getWorkerData(uniqueIdentifier)
@@ -179,7 +184,7 @@
 			</div>
 		{/key}
 	{:else}
-		<Auth redirectUrl={`/solar-proposals`} />
+		<Auth redirectUrl={`/solar-proposals`} bind:authenticated={isAuthenticated} bind:supabaseAuth />
 	{/if}
 </div>
 
