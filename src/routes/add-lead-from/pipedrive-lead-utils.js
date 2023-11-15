@@ -2,7 +2,7 @@ import pipedrive from 'pipedrive';
 import { pd, getField, getOptionIdFor } from '$lib/pipedrive-utils.js'
 
 
-async function captureLeadFrom(leadSourceName, leadData) { // `labelName` is the name of a pipedrive label
+async function captureLeadFrom(leadSourceName, leadData) {
     let result = {
         success: true,
         message: `Successfully processed lead.`
@@ -22,16 +22,16 @@ async function captureLeadFrom(leadSourceName, leadData) { // `labelName` is the
         return result;
     }
 
-    // Add a new Deal to pipedrive
-    const dealId = await addDealToPipedrive(
+    // Add a new Lead to pipedrive
+    const leadId = await addLeadToPipedrive(
         leadData,
         leadSourceName,
         personId,
     );
 
-    if(dealId === null) {
+    if(leadId === null) {
         result.success = false;
-        result.message = "Failed to add Deal to Pipedrive.";
+        result.message = "Failed to add Lead to Pipedrive.";
         return result;
     }
 
@@ -97,19 +97,18 @@ async function addPersonToPipedrive(name, emailAddress, phone, ageRange) {
 }
 
 
-async function addDealToPipedrive(lead, leadSourceName, personId) {
-    // Start by making sure that we always add a deal containing the minimum amount of information
+async function addLeadToPipedrive(lead, leadSourceName, personId) {
+    // Start by making sure that we always add a lead containing the minimum amount of information
     let data = {
         title: lead.name,
-        person_id: personId,
-        // pipeline_id: 31 // todo: look up the name of the stage on pipedrive NOT NEEDED FOR LEADS
+        person_id: personId
     };
 
     let noteContent = "";
 
     // Then add as many custom fields as we have
 
-    // 1. Address
+    // Address
     let fieldName = "Address of Property";
     let leadKeyName = "postcode";
     if(lead[leadKeyName] !== null) {
@@ -121,19 +120,7 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
             noteContent += `<b>${fieldName}: ${lead[leadKeyName]}<b><br>`;
     }
 
-    // 2. Lead Source ID
-    fieldName = "Lead Source ID";
-    leadKeyName = "prid";
-    if(lead[leadKeyName] !== null) {
-        const field = getField(fieldName);
-
-        if(field !== null)
-            data[field.key] = lead[leadKeyName];
-        else
-            noteContent += `<li><b>${fieldName}: ${lead[leadKeyName]}</b></li><br>`;
-    }
-
-    // 3. Lead Source
+    // Lead Source
     fieldName = "Lead Source";
     const field = getField(fieldName);
     if(field !== null)
@@ -162,7 +149,7 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
             noteContent += `<li><b>${fieldName}: ${lead[leadKeyName]}</b><li><br>`;
     }
 
-    // 5. Nature of Enquiry
+    // Nature of Enquiry
     fieldName = "Nature of Enquiry";
     leadKeyName = "natureOfEnquiry";
     if(lead[leadKeyName] !== null) {
@@ -208,20 +195,20 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
     */
 
     const leadsApi = new pipedrive.LeadsApi(pd);
-    const newDeal = await leadsApi.addLead(data);
+    const newLead = await leadsApi.addLead(data);
 
-    if(newDeal.success === false) {
-        console.log(`Error adding deal: ${JSON.stringify(newDeal)}`);
+    if(newLead.success === false) {
+        console.log(`Error adding lead: ${JSON.stringify(newLead)}`);
         return null;
     }
 
     // If there were any fields that we couldn't find, then capture this information in a note
     if(noteContent != "") {
-        noteContent = "The following info could not be added to the deal because fields could not be found:<br>" + noteContent;
+        noteContent = "The following info could not be added to the lead because fields could not be found:<br>" + noteContent;
 
         let noteOptions = pipedrive.AddNoteRequest.constructFromObject({
             content: noteContent,
-            dealId: newDeal.data.id
+            leadId: newLead.data.id
         });
 
         const notes = new pipedrive.NotesApi(pd);
@@ -231,7 +218,7 @@ async function addDealToPipedrive(lead, leadSourceName, personId) {
             console.log("Failed to add note to new lead");
     }
 
-    return newDeal.data.id;
+    return newLead.data.id;
 }
 
 
