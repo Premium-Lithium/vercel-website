@@ -1,12 +1,7 @@
-// todo: endpoint responsible for creating a "postcard" object, containing:
-// * front image (jpg)
-// * back image (jpg)
-// * address
-
 import { json } from '@sveltejs/kit';
 import validate from '$lib/validation-utils.js';
-import { generatePostcardFor } from './logic';
-import { Buffer } from 'buffer';
+import { generatePostcardFor, getCustomerDetailsFor } from './logic';
+import { STANNP_API_KEY } from '$env/static/private';
 
 
 const schema = {
@@ -35,66 +30,15 @@ export async function POST({ request }) {
     }
 
     try {
-        const customerId = requestData.customerId;
-        console.log("Generating postcard for customer:", customerId);
-
-        // 1. Create the actual content
+        const customerId: string = requestData.customerId;
         const postcard = await generatePostcardFor(customerId);
 
-        // 2. Convert the content into a form that can be sent to Stannp
-        console.log("converting to base64");
-        const streamToBuffer = async (stream) => {
-            const chunks = [];
-            for await (let chunk of stream) {
-                chunks.push(chunk instanceof Buffer ? chunk : Buffer.from(chunk));
-            }
-            return Buffer.concat(chunks);
-        };
+        const customer = await getCustomerDetailsFor(customerId);
+        console.log("Generating postcard for customer:", customer.title + " " + customer.firstname + " " + customer.lastname);
 
-        const blobToBuffer = async (blob) => {
-            const stream = blob.stream();
-            return await streamToBuffer(stream);
-        };
+        const sendAttempt = await sendPostcardTo(customer, postcard);
 
-        // Usage
-        const frontBuffer = await blobToBuffer(postcard.front);
-        const frontBase64 = frontBuffer.toString('base64');
-
-        const backBuffer = await blobToBuffer(postcard.back);
-        const backBase64 = backBuffer.toString('base64');
-
-        // 3. Send the data to Stannp
-        const stannpPayload = {
-            test: true,
-            size: 'A5',
-            front: frontBase64,
-            back: backBase64,
-            recipient: {
-                title: 'Mr',
-                firstname: 'Lewis',
-                lastname: 'Bowes',
-                address1: '5 Whittam Road, Whalley',
-                address2: 'Lancashire',
-                city: 'Clitheroe',
-                postcode: 'BB7 9SB',
-                country: 'GB'
-            }
-        }
-
-        // https://www.stannp.com/uk/direct-mail-api/postcards?lang=python
-        const API_KEY = "f2186ada5b497f22e32752f5";
-
-        // make request to stannp
-        const response = await fetch("https://dash.stannp.com/api/v1/postcards/create?api_key=" + API_KEY, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(stannpPayload)
-        });
-
-        return response;
-
+        return sendAttempt;
         // return json(
         //     { message: `Successfully generated postcard content for customer id ${customerId}` },
         //     { status: 200 }
@@ -104,4 +48,37 @@ export async function POST({ request }) {
         console.error("Error generating postcard:", error);
         return json({ message: "Error generating postcard" }, { status: 500 });
     }
+}
+
+
+// todo: type annotations for parameters here
+async function sendPostcardTo(customer: any, postcard: any) {
+    const frontBase64 = postcard.frontImage.toString('base64');
+    const backBase64 = postcard.backImage.toString('base64');
+
+    const recipient =  { ...customer };
+    console.log(recipient);
+
+    const stannpPayload = {
+        test: true,
+        size: 'A5',
+        front: frontBase64,
+        back: backBase64,
+        recipient: customer
+    };
+
+    // https://www.stannp.com/uk/direct-mail-api/postcards?lang=python
+    // const API_KEY = "f2186ada5b497f22e32752f5";
+
+
+    // make request to stannp
+    const response = await fetch("https://dash.stannp.com/api/v1/postcards/create?api_key=" + STANNP_API_KEY, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(stannpPayload)
+    });
+
+    return response;
 }
