@@ -106,9 +106,9 @@ async function generateDnoApplicationFrom(PLNumber: string) {
             id: matchingProjectId,
             uuid: designFound
         }
-        const ImgFilePath = '/tmp/panel_layout.jpeg'
-        await downloadSystemImageFrom(projectData, ImgFilePath)
-        const imageFileContent = fs.readFileSync(ImgFilePath);
+        const panelImagePath = '/tmp/panel_layout.jpeg'
+        await downloadSystemImageFrom(projectData, panelImagePath)
+        const imageFileContent = fs.readFileSync(panelImagePath);
         const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
         
         let dnoCompanyDetailsData = {
@@ -140,7 +140,7 @@ async function generateDnoApplicationFrom(PLNumber: string) {
             'installer.telephone': '',
             'manufacturer.name': '',
             'energy_code': '',
-            'panel_layout': ImgFilePath
+            'panel_layout': panelImagePath
         }
         const g99DocxTemplate = await getG99TemplateDocx()
         const content = await g99DocxTemplate.arrayBuffer()
@@ -149,13 +149,13 @@ async function generateDnoApplicationFrom(PLNumber: string) {
         const imageOpts = {
             centered: true,
             fileType: "docx",
-            getImage: function (tagValue, tagName) {
+            getImage: function (tagValue) {
                 return fs.readFileSync(tagValue);
             },
             getSize: function (img, tagValue, tagName) {
-                return [300, 300];
+                return [500, 500];
             },
-            getProps: function (tagValue, tagName) {
+            getProps: function (tagName) {
                 if (tagName === 'panel_layout') {
                     return imageFileContent;
                 }
@@ -171,7 +171,6 @@ async function generateDnoApplicationFrom(PLNumber: string) {
         const buff = doc.getZip().generate({ type: 'nodebuffer' })
         let DocxFilePath;
 
-
         if (dnoName && dnoDetails) {
             DocxFilePath = `/tmp/G99_${customerName}.docx`
         } else {
@@ -181,7 +180,7 @@ async function generateDnoApplicationFrom(PLNumber: string) {
         fs.writeFileSync(DocxFilePath, buff)
         const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
         fs.unlinkSync(DocxFilePath);
-        fs.unlinkSync(ImgFilePath);
+        fs.unlinkSync(panelImagePath);
         if (dnoName && dnoDetails) {
             console.log('G99 Application Form Generated With DNO Details')
             return json({ message: 'G99 Application Generated With DNO Details', status: 200 })
@@ -191,6 +190,8 @@ async function generateDnoApplicationFrom(PLNumber: string) {
         }
     }
 }
+
+
 
 
 
