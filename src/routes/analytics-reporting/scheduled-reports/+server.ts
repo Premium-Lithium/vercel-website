@@ -1,11 +1,11 @@
 import type { Config } from '@sveltejs/adapter-vercel';
 import type { RequestHandler } from '@sveltejs/kit';
 import { getSummary } from './logic/summaryReportLogic.server';
-import { emailSummaryReport } from './summaryReport.server';
+import { emailSummaryReport } from './summaryReport';
 
 
 export const config: Config = {
-    runtime: "edge"
+
 }
 
 // recieve a get request from vercel cron
