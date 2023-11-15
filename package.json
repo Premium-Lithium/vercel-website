@@ -74,6 +74,7 @@
 		"postprocessing": "^6.33.0",
 		"readline-sync": "^1.4.10",
 		"really-relaxed-json": "^0.3.2",
+		"sharp": "^0.32.6",
 		"shopify-token": "^4.1.0",
 		"svelte-material-icons": "^3.0.5",
 		"svelte-preprocess": "^5.0.4",
