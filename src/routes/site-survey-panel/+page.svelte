@@ -14,7 +14,7 @@
 
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 300 });
+		await sdk.execute('resize', { height: 150 });
 	});
 
 	onMount(() => {
