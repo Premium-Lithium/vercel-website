@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import validate from '$lib/validation-utils.js';
+import type { Postcard, PostcardRecipient } from './types';
 import { generatePostcardFor, getCustomerDetailsFor } from './logic';
 import { STANNP_API_KEY } from '$env/static/private';
 
@@ -31,19 +32,14 @@ export async function POST({ request }) {
 
     try {
         const customerId: string = requestData.customerId;
-        const postcard = await generatePostcardFor(customerId);
+        const postcard: Postcard = await generatePostcardFor(customerId);
 
-        const customer = await getCustomerDetailsFor(customerId);
+        const customer: PostcardRecipient = await getCustomerDetailsFor(customerId);
         console.log("Generating postcard for customer:", customer.title + " " + customer.firstname + " " + customer.lastname);
 
         const sendAttempt = await sendPostcardTo(customer, postcard);
 
-        return sendAttempt;
-        // return json(
-        //     { message: `Successfully generated postcard content for customer id ${customerId}` },
-        //     { status: 200 }
-        // );
-
+        return sendAttempt
     } catch (error) {
         console.error("Error generating postcard:", error);
         return json({ message: "Error generating postcard" }, { status: 500 });
@@ -68,10 +64,6 @@ async function sendPostcardTo(customer: any, postcard: any) {
     };
 
     // https://www.stannp.com/uk/direct-mail-api/postcards?lang=python
-    // const API_KEY = "f2186ada5b497f22e32752f5";
-
-
-    // make request to stannp
     const response = await fetch("https://dash.stannp.com/api/v1/postcards/create?api_key=" + STANNP_API_KEY, {
         method: "POST",
         headers: {
