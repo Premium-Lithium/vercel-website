@@ -88,8 +88,17 @@ async function getPropertyImage_png(customerId: string): Promise<Buffer> {
 
 async function createFront_png(template_png: Buffer, propertyImage_png: Buffer): Promise<Buffer> {
     try {
-        const propertyImage: Sharp = sharp(propertyImage_png);
+        // const propertyImage: Sharp = sharp(propertyImage_png).rotate(-90);
         const templateImage: Sharp = sharp(template_png);
+
+        const metadata = await templateImage.metadata();
+        const templateWidth = metadata.width;
+        const templateHeight = metadata.height;
+
+        // Now resize propertyImage to match templateImage's dimensions
+        const propertyImage: Sharp = sharp(propertyImage_png)
+            .resize(templateHeight)
+            .rotate(260);
 
         const combined: Buffer = await templateImage.composite([{
             input: await propertyImage.toBuffer(),
