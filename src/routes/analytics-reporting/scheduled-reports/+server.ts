@@ -5,7 +5,7 @@ import { emailSummaryReport } from './summaryReport';
 
 
 export const config: Config = {
-    runtime: "edge"
+
 }
 
 // recieve a get request from vercel cron
