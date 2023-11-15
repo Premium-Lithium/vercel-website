@@ -1,5 +1,5 @@
 import pipedrive from 'pipedrive';
-import { pd } from "$lib/pipedrive-utils";
+const pd = new pipedrive.ApiClient();
 let apiToken = pd.authentications.api_key;
 apiToken.apiKey = process.env.PIPEDRIVE_API_TOKEN;
 
