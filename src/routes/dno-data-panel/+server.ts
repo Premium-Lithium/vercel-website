@@ -15,7 +15,12 @@ const MAP_API_TOKEN =
 const crm = new CRM()
 const openSolar = new openSolarAPI()
 
-let projectFound = undefined;
+interface Project {
+    projectId: string
+    uuid: string
+}
+
+let projectFound: Project | undefined = undefined;
 
 export async function POST({ request }) {
     console.log("found:", projectFound)
