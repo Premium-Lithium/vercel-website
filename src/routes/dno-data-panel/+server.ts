@@ -309,7 +309,7 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
         longLat: customerLongLat
     }
     try {
-        await openSolar.startProjectFrom(PLNumber, addressObject)
+        await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
         return json({ message: 'Project succesfully created.', status: 200 })
     } catch (error) {
         return json({ message: 'Error creating project.', status: 500 })
