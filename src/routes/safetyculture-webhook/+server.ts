@@ -6,11 +6,6 @@ import { SurveyDataSource } from '$lib/crm/safetyculture-utils.js';
 const crm = new CRM()
 const surveyDataSource = new SurveyDataSource()
 
-// TO DO: do webhook for site survey too!
-// Check which template does an inspection lies, then attach the PDF to that deal according to that template
-
-
-
 // Triggers: "TRIGGER_EVENT_INSPECTION_COMPLETED"
 // Receives inspection that has been completed 
 export async function POST({ request }) {
