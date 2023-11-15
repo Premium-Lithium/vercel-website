@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { GeneralKPI as KPIBody } from './KPITypes';
 	import { getMatomoAnalytics } from './scripts/matomoAnalytics';
-	import { getPipedriveAnalytics } from './scripts/pipedriveAnalytics';
+
 
     enum siteIDs {
         ENERGISER_WEB = 2,
@@ -41,13 +41,21 @@
 		// load in the values for the previous day
         let day = "yesterday";
         let period = "day"
-        generalKPIs = await getMatomoAnalytics(day, period, siteIDs.SHOPIFY);
-
+        let test = await fetch("kpi/api", {
+            method: "POST",
+            body: "test",
+            headers: {
+                'content-type': 'application/json',
+          
+            }
+        })
+        const resp = await test.json()
+        console.log(resp)
 
 	});
 
     async function getData() {
-        console.log(getPipedriveAnalytics())
+        
     }
 </script>
 <button on:click={getData}>Get data</button>
