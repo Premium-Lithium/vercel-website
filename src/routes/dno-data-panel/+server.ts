@@ -12,16 +12,26 @@ const MAP_API_TOKEN =
 const crm = new CRM()
 const openSolar = new openSolarAPI()
 
+let projectFound = undefined;
 
 export async function POST({ request }) {
+    console.log("found:", projectFound)
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
         let response;
         if (option == 1) {
-            response = await generateDnoApplicationFrom(PLNumber);
+            response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
+        } else {
+            const designFound = await searchForProjectDesign(PLNumber);
+            if (designFound) {
+                projectFound = designFound
+                response = json({ message: "Project already exist", statusCode: 500 })
+            } else {
+                response = json({ message: "Project still undefined", statusCode: 200 })
+            }
         }
         const responseData = await response?.json();
         return json(responseData);
@@ -71,18 +81,12 @@ async function getDnoDetailsFrom(operatorName: string) {
     }
 }
 
-
-async function generateDnoApplicationFrom(PLNumber: string) {
-    const customerName = await crm.getPersonNameFor(PLNumber);
-    const customerAddressObject = await crm.getAddressFor(PLNumber);
-    const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
-    const customerTelephone = (await crm.getPersonTelephoneFor(PLNumber))[0].value;
-    const customerMpan = await crm.getMpanFor(PLNumber);
-
+async function searchForProjectDesign(PLNumber: string) {
     // Checks if a project exist with the same PLNumber or same address
     let matchingProjectId = null;
-
     const searchFromPL = await openSolar.searchForProjectFromRef(PLNumber);
+    const customerAddressObject = await crm.getAddressFor(PLNumber);
+
     if (!searchFromPL) {
         const searchFromAddress = await openSolar.searchForProjectFromAddress(customerAddressObject.property_address);
         if (!searchFromAddress) {
@@ -95,101 +99,111 @@ async function generateDnoApplicationFrom(PLNumber: string) {
         matchingProjectId = searchFromPL
     }
 
-    // Checks if the matching project has a design or not
     const designFound = await openSolar.searchForDesignFrom(matchingProjectId)
 
-    if (!designFound) {
-        console.log("open solar design not found")
-        return json({ message: `Cannot find design for ${PLNumber}`, status: 500 })
+    if (designFound) {
+        return { projectId: matchingProjectId, uuid: designFound }
     } else {
-        const projectData = {
-            id: matchingProjectId,
-            uuid: designFound
-        }
-        const panelImagePath = '/tmp/panel_layout.jpeg'
-        await downloadSystemImageFrom(projectData, panelImagePath)
-        const imageFileContent = fs.readFileSync(panelImagePath);
-        const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
-        
-        let dnoCompanyDetailsData = {
-            name: "",
-            address: "",
-            email: "",
-        }
-
-        // At this stage, even if dno is not found on our database, we still generate DNO Form
-        // But do give indication to include DNO ! 
-        const dnoDetails = await getDnoDetailsFrom(dnoName);
-        if (dnoName && dnoDetails) {
-            // Populates the dnoDetails if we have data for it
-            dnoCompanyDetailsData = dnoDetails
-        }
-
-        const fieldsToUpdate = {
-            'dno_company.name': dnoCompanyDetailsData.name,
-            'dno_company.address': dnoCompanyDetailsData.address,
-            'dno_company.email': dnoCompanyDetailsData.email,
-            'customer.name': customerName,
-            'customer.address': customerAddressObject.property_address,
-            'customer.postcode': customerAddressObject.postcode,
-            'customer.contact_person': '',
-            'customer.telephone': customerTelephone,
-            'customer.email': customerEmail,
-            'customer.mpan': customerMpan,
-            'installer.contact_person': '',
-            'installer.telephone': '',
-            'manufacturer.name': '',
-            'energy_code': '',
-            'panel_layout': panelImagePath
-        }
-        const g99DocxTemplate = await getG99TemplateDocx()
-        const content = await g99DocxTemplate.arrayBuffer()
-
-        //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
-        const imageOpts = {
-            centered: true,
-            fileType: "docx",
-            getImage: function (tagValue) {
-                return fs.readFileSync(tagValue);
-            },
-            getSize: function (img, tagValue, tagName) {
-                return [500, 500];
-            },
-            getProps: function (tagName) {
-                if (tagName === 'panel_layout') {
-                    return imageFileContent;
-                }
-                return null;
-            }
-        };
-
-        const zip = new PizZip(content)
-        const doc = new Docxtemplater(zip, {
-            modules: [new ImageModule(imageOpts)],
-        })
-        doc.render(fieldsToUpdate)
-        const buff = doc.getZip().generate({ type: 'nodebuffer' })
-        let DocxFilePath;
-
-        if (dnoName && dnoDetails) {
-            DocxFilePath = `/tmp/G99_${customerName}.docx`
-        } else {
-            DocxFilePath = `/tmp/G99_${customerName}_WITHOUT_DNO.docx`
-        }
-
-        fs.writeFileSync(DocxFilePath, buff)
-        const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
-        fs.unlinkSync(DocxFilePath);
-        fs.unlinkSync(panelImagePath);
-        if (dnoName && dnoDetails) {
-            console.log('G99 Application Form Generated With DNO Details')
-            return json({ message: 'G99 Application Generated With DNO Details', status: 200 })
-        } else {
-            console.log('G99 Application Form Generated Without DNO Details')
-            return json({ message: 'G99 Application Generated Without DNO Details', status: 200 })
-        }
+        return null
     }
 }
+
+
+async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
+    const customerName = await crm.getPersonNameFor(PLNumber);
+    const customerAddressObject = await crm.getAddressFor(PLNumber);
+    const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
+    const customerTelephone = (await crm.getPersonTelephoneFor(PLNumber))[0].value;
+    const customerMpan = await crm.getMpanFor(PLNumber);
+
+    const projectData = {
+        id: projectFound.projectId,
+        uuid: projectFound.uuid
+    }
+    const panelImagePath = '/tmp/panel_layout.jpeg'
+    await downloadSystemImageFrom(projectData, panelImagePath)
+    const imageFileContent = fs.readFileSync(panelImagePath);
+    const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
+
+    let dnoCompanyDetailsData = {
+        name: "",
+        address: "",
+        email: "",
+    }
+
+    // At this stage, even if dno is not found on our database, we still generate DNO Form
+    // But do give indication to include DNO ! 
+    const dnoDetails = await getDnoDetailsFrom(dnoName);
+    if (dnoName && dnoDetails) {
+        // Populates the dnoDetails if we have data for it
+        dnoCompanyDetailsData = dnoDetails
+    }
+
+    const fieldsToUpdate = {
+        'dno_company.name': dnoCompanyDetailsData.name,
+        'dno_company.address': dnoCompanyDetailsData.address,
+        'dno_company.email': dnoCompanyDetailsData.email,
+        'customer.name': customerName,
+        'customer.address': customerAddressObject.property_address,
+        'customer.postcode': customerAddressObject.postcode,
+        'customer.contact_person': '',
+        'customer.telephone': customerTelephone,
+        'customer.email': customerEmail,
+        'customer.mpan': customerMpan,
+        'installer.contact_person': '',
+        'installer.telephone': '',
+        'manufacturer.name': '',
+        'energy_code': '',
+        'panel_layout': panelImagePath
+    }
+    const g99DocxTemplate = await getG99TemplateDocx()
+    const content = await g99DocxTemplate.arrayBuffer()
+
+    //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
+    const imageOpts = {
+        centered: true,
+        fileType: "docx",
+        getImage: function (tagValue) {
+            return fs.readFileSync(tagValue);
+        },
+        getSize: function (img, tagValue, tagName) {
+            return [500, 500];
+        },
+        getProps: function (tagName) {
+            if (tagName === 'panel_layout') {
+                return imageFileContent;
+            }
+            return null;
+        }
+    };
+
+    const zip = new PizZip(content)
+    const doc = new Docxtemplater(zip, {
+        modules: [new ImageModule(imageOpts)],
+    })
+    doc.render(fieldsToUpdate)
+    const buff = doc.getZip().generate({ type: 'nodebuffer' })
+    let DocxFilePath;
+
+    if (dnoName && dnoDetails) {
+        DocxFilePath = `/tmp/G99_${customerName}.docx`
+    } else {
+        DocxFilePath = `/tmp/G99_${customerName}_WITHOUT_DNO.docx`
+    }
+
+    fs.writeFileSync(DocxFilePath, buff)
+    const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
+    fs.unlinkSync(DocxFilePath);
+    fs.unlinkSync(panelImagePath);
+    if (dnoName && dnoDetails) {
+        console.log('G99 Application Form Generated With DNO Details')
+        return json({ message: 'G99 Application Generated With DNO Details', statusCode: 200 })
+    } else {
+        console.log('G99 Application Form Generated Without DNO Details')
+        return json({ message: 'G99 Application Generated Without DNO Details', statusCode: 200 })
+    }
+}
+
 
 
 
@@ -217,7 +231,7 @@ async function downloadSystemImageFrom(projectData, filePath) {
 
     //const addressName = (projectData.address).split(' ').join('_')
     fs.writeFileSync(filePath, buff)
-    return json({ message: 'Panel Design Found and Downloaded', status: 200 })
+    return json({ message: 'Panel Design Found and Downloaded', statusCode: 200 })
 }
 
 async function createOpenSolarProjectFrom(PLNumber: string) {
@@ -233,9 +247,9 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
     }
     try {
         await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
-        return json({ message: 'Project succesfully created.', status: 200 })
+        return json({ message: 'Project succesfully created.', statusCode: 200 })
     } catch (error) {
-        return json({ message: 'Error creating project.', status: 500 })
+        return json({ message: 'Error creating project.', statusCode: 500 })
     }
 
 }

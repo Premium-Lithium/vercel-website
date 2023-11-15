@@ -3,36 +3,75 @@
 	import { page } from '$app/stores';
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 
+
 	const dealId = $page.url.searchParams.get('selectedIds');
 
-    let alertMessage = null
+	let sdk;
+
+	let alertMessage = null;
+	let loading = false;
+	let projectExist = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
 		await sdk.execute('resize', { height: 300 });
 	});
 
 	onMount(() => {
-		//showDnoData();
-	}); 
+		if (dealId) {
+			searchProjectDesign();
+		}
+	});
 
+	async function searchProjectDesign() {
+		try {
+			alertMessage = 'initializing';
+			loading = true;
+			const response = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId
+				})
+			});
+			if (response.ok) {
+				const responseData = await response.json();
+				console.log(responseData)
+				if (responseData.statusCode === 200) {
+					alertMessage = 'initialized.';
+				} else {
+					projectExist = true;
+					alertMessage = responseData.message;
+				}
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+				alertMessage = null;
+			}
+			loading = false;
+			return response;
+		} catch (error) {
+			console.log(error);
+			alertMessage = error;
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+			alertMessage = null;
+			return error;
+		}
+	}
 
 	async function handleGenerate() {
 		try {
-			alertMessage = "Generating DNO"
+			alertMessage = 'Generating DNO';
 			const response = await fetch('/dno-data-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 1
+					option: 1,
 				})
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				console.log(responseData);
-                alertMessage = responseData.message;
+				alertMessage = responseData.message;
 				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = "";
+				alertMessage = '';
 				return response;
 			}
 		} catch (error) {
@@ -41,9 +80,9 @@
 		}
 	}
 
-	async function generateOpenSolarProject(){
+	async function generateOpenSolarProject() {
 		try {
-			alertMessage = "generating open solar project"
+			alertMessage = 'Generating open solar project';
 			const response = await fetch('/dno-data-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -54,8 +93,9 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
+				alertMessage = responseData.message;
 				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = "";
+				alertMessage = '';
 				return response;
 			}
 		} catch (error) {
@@ -74,15 +114,15 @@
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 	</div>
-	<button class="link-btn" on:click={generateOpenSolarProject}>Start openSolar Project</button>
-	<button class="link-btn" on:click={handleGenerate}>Generate DNO Application</button>
+	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}>Start openSolar Project</button>
+	<button disabled={loading || !projectExist} class="link-btn" on:click={handleGenerate}>Generate DNO Application</button>
 </div>
 
 <style>
 	.dno-panel {
 		padding: 15px;
 		border: 1px solid grey;
-        display: grid;
+		display: grid;
 	}
 
 	.link-btn {

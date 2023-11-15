@@ -75,8 +75,8 @@ dependencies:
     specifier: 1.0.0-rc.12
     version: 1.0.0-rc.12
   docxtemplater:
-    specifier: ^3.40.2
-    version: 3.40.2
+    specifier: ^3.42.0
+    version: 3.42.0
   docxtemplater-image-hyperlink-module-free:
     specifier: ^1.0.2
     version: 1.0.2
@@ -2285,8 +2285,8 @@ packages:
       xmldom: 0.1.31
     dev: false
 
-  /docxtemplater@3.40.2:
-    resolution: {integrity: sha512-8gzx4kz2QQPyuFwKIOWVy1frOqlaSOefckeI5HxZz5eVsePWwh0kfqmEfKn/bSNe6uftU9jEsTJiHGOaYgDKSw==}
+  /docxtemplater@3.42.0:
+    resolution: {integrity: sha512-c7URHdm26QkQebrp7E6uAE0Gzj+q+fHGUhM0LPNdBcqyfYlI4TxxE1XywkS8U0+bLe4C47OCnvyzzubCC+7gew==}
     engines: {node: '>=0.10'}
     dependencies:
       '@xmldom/xmldom': 0.8.10
