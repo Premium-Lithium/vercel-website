@@ -3,9 +3,12 @@ import fs from 'fs';
 import { CRM } from '$lib/crm/crm-utils.js';
 import { supabase } from '$lib/supabase.ts';
 import { openSolarAPI } from '$lib/crm/opensolar-utils.js';
+import { getField } from '$lib/pipedrive-utils';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
+import { convertFile } from 'convert-svg-to-png'
+
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
@@ -115,6 +118,13 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
     const customerTelephone = (await crm.getPersonTelephoneFor(PLNumber))[0].value;
     const customerMpan = await crm.getMpanFor(PLNumber);
+    const existingManufacturer = await crm.getExistingManufacturerFor(PLNumber)
+    const existingManufacturerRef = await crm.getExistingManufacturerRefFor(PLNumber)
+    const existingStorageCapacity = await crm.getExistingStorageCapacityFor(PLNumber)
+    const newManufacturer = await crm.getNewManufacturerFor(PLNumber)
+    const newManufacturerRef = await crm.getNewManufacturerRefFor(PLNumber)
+    const newStorageCapacity = await crm.getNewStorageCapacityFor(PLNumber)
+    const phaseAndPower = await crm.getPhaseAndPowerFor(PLNumber)
 
     const projectData = {
         id: projectFound.projectId,
@@ -154,10 +164,28 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
         'installer.telephone': '',
         'manufacturer.name': '',
         'energy_code': '',
-        'panel_layout': panelImagePath
+        'panel_layout': panelImagePath,
+
+        'manufacturer_existing': existingManufacturer,
+        'manufacturerRef_existing': existingManufacturerRef,
+        'capacityThreePhase_existing': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[1] : '',
+        'capacityPhaseOne_existing': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[1] : '',
+        'storageCapacity_existing': existingStorageCapacity,
+        'manufacturer_new': newManufacturer,
+        'installationDate_new': 'ASAP',
+        'manufacturerRef_new': newManufacturerRef,
+        'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] : '',
+        'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
+        'storageCapacity_new': newStorageCapacity,
+        'schematic': '/tmp/schematic.png'
     }
-    const g99DocxTemplate = await getG99TemplateDocx()
-    const content = await g99DocxTemplate.arrayBuffer()
+
+    const schematic = await generateSchematicFor(PLNumber)
+    let schematicPathSvg = '/tmp/schematic.svg'
+
+    fs.writeFileSync(schematicPathSvg, schematic);
+
+    await convertFile('/tmp/schematic.svg')
 
     //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
     const imageOpts = {
@@ -167,15 +195,23 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
             return fs.readFileSync(tagValue);
         },
         getSize: function (img, tagValue, tagName) {
+            if (tagName === 'schematic') {
+                return [595, 160];
+            }
             return [500, 500];
         },
         getProps: function (tagName) {
             if (tagName === 'panel_layout') {
                 return imageFileContent;
+            } else if (tagName === 'schematic') {
+                return fs.readFileSync('/tmp/schematic.png');
             }
             return null;
         }
     };
+
+    const g99DocxTemplate = await getG99TemplateDocx()
+    const content = await g99DocxTemplate.arrayBuffer()
 
     const zip = new PizZip(content)
     const doc = new Docxtemplater(zip, {
@@ -205,10 +241,6 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
 }
 
 
-
-
-
-
 async function getNetworkOperatorFromPostCode(postcode: string) {
     let res = await fetch(`http://www.ssen.co.uk/distributor-results/Index?distributorTerm=${postcode}`)
     let match;
@@ -223,6 +255,37 @@ async function getNetworkOperatorFromPostCode(postcode: string) {
     return ((match !== undefined) ? (match?.slice(34, -5)) : undefined)
 }
 
+async function generateSchematicFor(PLNumber: string) {
+    let existingSolarSize = 0;
+    const existingPanels = await crm.getCurrentlyHavePanelsFor(PLNumber)
+    if (existingPanels === 'Yes') {
+        existingSolarSize = parseInt(await crm.getExistingSolarArrayGenerationFor(PLNumber))
+    }
+    const existingInverterSize = await crm.getExistingInverterSizeFor(PLNumber); // number
+    const newBatterySize = await crm.getNewBatterySizeFor(PLNumber) // string
+    const newInverterSize = await crm.getNewInverterSizeFor(PLNumber) // string
+    const newPanelGeneration = parseInt(await crm.getNewPanelGenerationFor(PLNumber))
+    const epsForCustomer = await crm.getEPSRequiredFor(PLNumber) // string
+
+    // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
+    let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
+
+    let svgString = fs.readFileSync('static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
+
+    svgString = svgString.replace('[Existing Solar Size kW]', existingSolarSize + 'kW')
+    svgString = svgString.replace('[Existing Inverter Size kW]', existingInverterSize + 'kW')
+    svgString = svgString.replace('[Battery Size kWh]', newBatterySize + 'kWh')
+    svgString = svgString.replace('[New Inverter Size kW]', newInverterSize + 'kW')
+    svgString = svgString.replace('[New Solar Size kW]', newPanelGeneration + 'kW')
+
+    return svgString
+}
+
+// Casts to boolean, returns blank if true, N if false - used to create the string for target schematic file
+function isPartOfSchematic(component: string | number) {
+    return (!!component) ? '' : 'N';
+}
+
 async function downloadSystemImageFrom(projectData, filePath) {
     const projectId = projectData.id
     const uuid = projectData.uuid
@@ -231,7 +294,7 @@ async function downloadSystemImageFrom(projectData, filePath) {
 
     //const addressName = (projectData.address).split(' ').join('_')
     fs.writeFileSync(filePath, buff)
-    return json({ message: 'Panel Design Found and Downloaded', statusCode: 200 })
+    return json({ message: 'Panel Design Found and Downloaded', status: 200 })
 }
 
 async function createOpenSolarProjectFrom(PLNumber: string) {
@@ -246,10 +309,10 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
         longLat: customerLongLat
     }
     try {
-        await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
-        return json({ message: 'Project succesfully created.', statusCode: 200 })
+        await openSolar.startProjectFrom(PLNumber, addressObject)
+        return json({ message: 'Project succesfully created.', status: 200 })
     } catch (error) {
-        return json({ message: 'Error creating project.', statusCode: 500 })
+        return json({ message: 'Error creating project.', status: 500 })
     }
 
 }

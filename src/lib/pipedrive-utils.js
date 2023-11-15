@@ -60,9 +60,15 @@ function readCustomDealField(fieldName, dealData) {
 	const key = field.key;
 	let value = dealData[key];
 
+	// Leave empty fields blank instead of failing
+	if (value === null) {
+		return value
+	}
+
 	// If the field type is an enum, we still need to map the field's value to its readable name
-	if (field.field_type === 'enum')
+	if (field.field_type === 'enum') {
 		value = field.options.find((option) => option.id === parseInt(value)).label;
+	}
 
 	return value;
 }
@@ -93,4 +99,11 @@ function getKeysForCustomFields(fields) {
 	return fieldKeys;
 }
 
-export { pd, readCustomDealField, dealFieldsRequest, getField, getOptionIdFor, getKeysForCustomFields };
+export {
+	pd,
+	readCustomDealField,
+	dealFieldsRequest,
+	getField,
+	getOptionIdFor,
+	getKeysForCustomFields
+};

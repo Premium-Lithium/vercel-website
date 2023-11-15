@@ -35,9 +35,9 @@ export class CRM {
 	async setCustomFields(PLNumber: string, request) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 		let parsedRequest = {}
-		for(const key in request){
+		for (const key in request) {
 			let field = getField(key)
-			if(field.field_type == 'enum') {
+			if (field.field_type == 'enum') {
 				parsedRequest[field.key] = getOptionIdFor(request[key], field)
 			} else {
 				parsedRequest[field.key] = request[key]
@@ -52,6 +52,7 @@ export class CRM {
 		const dealRequest = await this.pdDealsApi.getDeal(dealId)
 		return dealRequest.data
 	}
+
 	async getPersonNameFor(PLNumber: string) {
 		const dealData = await this.getDealDataFor(PLNumber)
 		return dealData.person_id.name
@@ -169,6 +170,84 @@ export class CRM {
 	async getRoofStructureTypeFor(PLNumber: string) {
 		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Roof Structure Type')
 		return fieldResponse;
+	}
+
+	async getExistingManufacturerFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Make')
+		return fieldResponse;
+	}
+
+	async getNewManufacturerFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Manufacturer')
+		return fieldResponse;
+	}
+
+	async getExistingManufacturerRefFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Model Number')
+		return fieldResponse;
+	}
+
+	async getNewManufacturerRefFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Model Number')
+		return fieldResponse;
+	}
+
+	async getExistingStorageCapacityFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Battery size (kWp)')
+		return (fieldResponse !== null) ? fieldResponse : 0;
+	}
+
+	async getNewStorageCapacityFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Battery size (kWh)')
+		return fieldResponse;
+	}
+
+	async getCurrentlyHavePanelsFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Currently Have Solar Panels?')
+		return fieldResponse;
+	}
+
+	async getNumberOfPanelsFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Number of Panels')
+		return fieldResponse;
+	}
+
+	async getNewPanelGenerationFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Solar (kWp)')
+		return fieldResponse;
+	}
+
+	async getExistingSolarArrayGenerationFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
+		return fieldResponse;
+	}
+
+	async getExistingInverterSizeFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Size (kW)')
+		return fieldResponse
+	}
+
+	async getNewInverterSizeFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Inverter size (kWp)')
+		return fieldResponse;
+	}
+
+	async getNewBatterySizeFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Battery size (kWh)')
+		return fieldResponse;
+	}
+
+	async getEPSRequiredFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'EPS Switch')
+		return fieldResponse;
+	}
+
+	// Single/three phase and solar generation are tied together, if you want to know one you also want to know the other, so returning them all as one object
+	async getPhaseAndPowerFor(PLNumber: string) {
+		const phaseType = await this.getCustomFieldDataFor(PLNumber, 'Single Phase or Three Phase')
+		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
+		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'New Solar (kWp)')
+		return [phaseType, existingSolarGen, newSolarGen]
 	}
 
 	async attachFileFor(PLNumber: string, filePath: string) {
