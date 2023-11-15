@@ -56,7 +56,7 @@
 			return error;
 		}
 	}
-	async function startInspection() {
+	async function startSiteSurvey() {
 		try {
 			if (status === undefined) {
 				alertMessage = 'Generating survey';
@@ -67,6 +67,39 @@
 					body: JSON.stringify({
 						dealId: dealId,
 						option: 1
+					})
+				});
+				if (response.ok) {
+					const responseData = await response.json();
+					alertMessage = responseData.message;
+					await new Promise((resolve) => setTimeout(resolve, 2000));
+					showCustomerData();
+					alertMessage = null;
+				}
+				loading = false;
+				return response;
+			} else {
+				alertMessage = 'Error generating duplicate';
+				await new Promise((resolve) => setTimeout(resolve, 2000));
+				alertMessage = null;
+			}
+		} catch (error) {
+			console.log(error);
+			return error;
+		}
+	}
+
+	async function startInstallation() {
+		try {
+			if (status === undefined) {
+				alertMessage = 'Generating installation';
+				loading = true;
+				const response = await fetch('/site-survey-panel', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						dealId: dealId,
+						option: 2
 					})
 				});
 				if (response.ok) {
@@ -104,8 +137,11 @@
 	</div>
 
 	<div class="buttons-container">
-		<button disabled={loading || status == 'Completed'} class="link-btn" on:click={startInspection}
-			>Generate SafetyCulture Survey</button
+		<button disabled={loading || status == 'Completed'} class="link-btn" on:click={startSiteSurvey}
+			>Generate Site Survey</button
+		>
+		<button disabled={loading || status == 'Completed'} class="link-btn" on:click={startInstallation}
+			>Generate Installation</button
 		>
 	</div>
 </div>

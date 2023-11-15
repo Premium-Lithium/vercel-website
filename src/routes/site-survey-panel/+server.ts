@@ -5,7 +5,6 @@ import { SurveyDataSource } from '$lib/crm/safetyculture-utils.js';
 
 const crm = new CRM()
 const surveyDataSource = new SurveyDataSource()
-const templateName = 'PV, Battery and EV Survey';
 
 export async function POST({ request }) {
     try {
@@ -14,9 +13,12 @@ export async function POST({ request }) {
 
         let response;
         if (option === 1) {
-            response = await createInspectionFrom(PLNumber, templateName);
-        } else {
-            response = await getStatusFromInspection(PLNumber, templateName);
+            response = await createInspectionFrom(PLNumber, 'PV, Battery and EV Survey');
+        } else if (option === 2) {
+            response = await createInspectionFrom(PLNumber, 'Installation Form');
+        }
+        else {
+            response = await getStatusFromInspection(PLNumber, 'PV, Battery and EV Survey');
         }
 
         const responseData = await response?.json();
@@ -33,8 +35,8 @@ async function createInspectionFrom(PLNumber: string, templateName: string) {
         const propertyAddress = await crm.getCustomFieldDataFor(PLNumber, 'Address of Property')
         const response = await surveyDataSource.startSurveyFor(PLNumber, personName, propertyAddress, templateName);
         if (response.ok) {
-            console.log('Survey generated successfully.');
-            return json({ message: 'Survey generated.', statusCode: 200 });
+            console.log('Inspection generated successfully.');
+            return json({ message: 'Inspection generated.', statusCode: 200 });
         } else {
             console.error('Error starting inspection with deal data. Status:', response.status);
             return json({ message: 'Error starting inspection with deal data', statusCode: response.status });
