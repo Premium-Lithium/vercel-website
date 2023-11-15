@@ -14,7 +14,7 @@
 
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 300 });
+		await sdk.execute('resize', { height: 150 });
 	});
 
 	onMount(() => {
@@ -89,70 +89,6 @@
 		}
 	}
 
-	async function attachPDFToDeal() {
-		try {
-			if (status != undefined) {
-				alertMessage = 'Attaching PDF';
-				loading = true;
-				const response = await fetch('/site-survey-panel', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						dealId: dealId,
-						option: 2
-					})
-				});
-				if (response.ok) {
-					const responseData = await response.json();
-					inspectedCreated = true; // alert that form is created
-					alertMessage = responseData.message;
-					await new Promise((resolve) => setTimeout(resolve, 2000));
-					alertMessage = null;
-				}
-				loading = false;
-				return response;
-			} else {
-				alertMessage = 'Survey not found';
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = null;
-			}
-		} catch (error) {
-			console.log(error);
-			return error;
-		}
-	}
-
-	async function updateCustomField() {
-		try {
-			if (status != undefined) {
-				alertMessage = 'Updating';
-				loading = true;
-				const response = await fetch('/site-survey-panel', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						dealId: dealId,
-						option: 3
-					})
-				});
-				if (response.ok) {
-					const responseData = await response.json();
-					alertMessage = responseData.message;
-					await new Promise((resolve) => setTimeout(resolve, 2000));
-					alertMessage = null;
-				}
-				loading = false;
-				return response;
-			} else {
-				alertMessage = 'Survey not found';
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = null;
-			}
-		} catch (error) {
-			console.log(error);
-			return error;
-		}
-	}
 </script>
 
 <div class="site-survey-panel">
@@ -168,14 +104,8 @@
 	</div>
 
 	<div class="buttons-container">
-		<button disabled={loading} class="link-btn" on:click={startInspection}
+		<button disabled={loading || status == 'Completed'} class="link-btn" on:click={startInspection}
 			>Generate SafetyCulture Survey</button
-		>
-		<button disabled={(status == undefined) | loading} class="link-btn" on:click={attachPDFToDeal}
-			>Attach SafetyCulture PDF to Deal</button
-		>
-		<button disabled={(status == undefined) | loading} class="link-btn" on:click={updateCustomField}
-			>Update Custom Fields</button
 		>
 	</div>
 </div>
