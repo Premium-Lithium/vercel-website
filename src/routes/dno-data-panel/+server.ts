@@ -95,7 +95,6 @@ async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | n
     } else {
         return null
     }
-    
 }
 
 function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, inverterModelNum: string, inverterManufacturer: string, newInverterSize: string): Array<string> {
@@ -324,7 +323,9 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
         longLat: customerLongLat
     }
     try {
-        await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
+        const createProjectRes = await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
+        crm.setOpenSolarProjectIdFor(PLNumber, createProjectRes.id);
+        crm.attachNoteFor(PLNumber, createProjectRes.url)
         return json({ message: 'Project succesfully created.', status: 200 })
     } catch (error) {
         return json({ message: 'Error creating project.', status: 500 })
