@@ -1,8 +1,23 @@
 {
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Clacks-Overhead",
+          "value": "GNU Terry Pratchett"
+        }
+      ]
+    }
+  ],
   "crons": [
     {
       "path": "/api/installerMatchPulse",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/analytics-reporting/scheduled-reports",
+      "schedule": "0 7 * * *"
     }
   ]
 }
