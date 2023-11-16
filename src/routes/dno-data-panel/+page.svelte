@@ -3,7 +3,6 @@
 	import { page } from '$app/stores';
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 
-
 	const dealId = $page.url.searchParams.get('selectedIds');
 
 	let sdk;
@@ -35,7 +34,7 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				console.log(responseData)
+				console.log(responseData);
 				if (responseData.statusCode === 200) {
 					alertMessage = 'initialized.';
 				} else {
@@ -64,7 +63,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 1,
+					option: 1
 				})
 			});
 			if (response.ok) {
@@ -114,8 +113,12 @@
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 	</div>
-	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}>Start openSolar Project</button>
-	<button disabled={loading || !projectExist} class="link-btn" on:click={handleGenerate}>Generate DNO Application</button>
+	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}
+		>Start openSolar Project</button
+	>
+	<button disabled={loading || !projectExist} class="link-btn" on:click={handleGenerate}
+		>Generate DNO Application</button
+	>
 </div>
 
 <style>

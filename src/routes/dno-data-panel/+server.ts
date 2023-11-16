@@ -22,7 +22,6 @@ interface ProjectData {
 let projectFound: ProjectData | undefined = undefined;
 
 export async function POST({ request }) {
-    console.log("found:", projectFound)
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
@@ -99,6 +98,22 @@ async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | n
     
 }
 
+function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, inverterModelNum: string, inverterManufacturer: string, newInverterSize: string): Array<string> {
+    let validDetails = {
+        'Single Phase or Three Phase': (!!phaseAndPower[0]) ? true : false,
+        'Customer MPAN': (!!customerMpan) ? true : false,
+        'Inverter Model Number': (!!inverterModelNum) ? true : false,
+        'Inverter Manufacturer': (!!inverterManufacturer) ? true : false,
+        'Inverter Size (kWp)': (!!newInverterSize) ? true : false
+    }
+    let missingDetails = []
+    for (let detail in validDetails) {
+        if (validDetails[detail] === false) {
+            missingDetails.push(detail)
+        }
+    }
+    return missingDetails
+}
 
 async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData) {
     const customerName = await crm.getPersonNameFor(PLNumber);
@@ -111,8 +126,15 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     const existingStorageCapacity = await crm.getExistingStorageCapacityFor(PLNumber)
     const newManufacturer = await crm.getNewManufacturerFor(PLNumber)
     const newManufacturerRef = await crm.getNewManufacturerRefFor(PLNumber)
+    const newInverterSize = await crm.getNewInverterSizeFor(PLNumber)
     const newStorageCapacity = await crm.getNewStorageCapacityFor(PLNumber)
     const phaseAndPower = await crm.getPhaseAndPowerFor(PLNumber)
+
+    const missingDetails = validateDnoDetails(phaseAndPower, customerMpan, newManufacturerRef, newManufacturer, newInverterSize)
+
+    if (!!missingDetails.length) {
+        return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400 })
+    }
 
     const projectData = {
         id: projectFound.projectId,
@@ -161,8 +183,8 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'capacityPhaseOne_existing': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[1] : '',
         'storageCapacity_existing': existingStorageCapacity,
         'manufacturer_new': newManufacturer,
-        'installationDate_new': 'ASAP',
         'manufacturerRef_new': newManufacturerRef,
+        'installationDate_new': 'ASAP',
         'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] : '',
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
@@ -220,7 +242,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
 
     // TO DO: send email with the attachments
-    await sendNotificationMailFor(PLNumber, [DocxFilePath, panelImagePath])
+    await sendNotificationMailFor(PLNumber)
 
     fs.unlinkSync(DocxFilePath);
     fs.unlinkSync(panelImagePath);
@@ -263,7 +285,7 @@ async function generateSchematicFor(PLNumber: string) {
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
 
-    let svgString = fs.readFileSync('static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
+    let svgString = fs.readFileSync('/static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
 
     svgString = svgString.replace('[Existing Solar Size kW]', existingSolarSize + 'kW')
     svgString = svgString.replace('[Existing Inverter Size kW]', existingInverterSize + 'kW')
@@ -310,24 +332,15 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
 
 }
 
-async function sendNotificationMailFor(PLNumber: string, attachments) {
-
-    // Read filenames and convert it as attachments
-
-    for(const attachment of attachments) {
-        console.log(attachment)
-        console.log(fs.readFileSync(attachment))
-    }
+async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {
-        sender: 'nicholas.dharmadi@premiumlithium.com',
+        sender: 'info@premiumlithium.com',
         recipients: ['nicholas.dharmadi@premiumlithium.com'],
         subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
         mail_body: `Hi,
         
-        View the attached file`,
+        There is a new form to review for deals`,
         content_type: "HTML",
-        date_time: null,
-        attachments: attachments
     };
 
     try {
@@ -338,8 +351,6 @@ async function sendNotificationMailFor(PLNumber: string, attachments) {
         };
 
         const mailAttempt = await fetch('https://vercel-website-liart.vercel.app/send-mail', options);
-
-        console.log(mailAttempt);
 
         if (mailAttempt.status === 200) {
             console.log(`Email successfully sent`);
