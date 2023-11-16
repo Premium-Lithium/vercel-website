@@ -1,8 +1,9 @@
 <script>
+	import { page } from '$app/stores'
 	import { supabase } from '$lib/supabase'
 
 	let email = ''
-	export let redirectLink
+	export let redirectUrl
 	export let isAuthenticated
 	export let loading = false
 	let errorMessage = ''
@@ -20,7 +21,7 @@
 			email,
 			options: {
 				shouldCreateUser: false,
-				emailRedirectTo: redirectLink
+				emailRedirectTo: `${$page.url.origin}/${redirectUrl}`
 			}
 		})
 		loading = false

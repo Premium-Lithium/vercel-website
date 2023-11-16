@@ -260,11 +260,7 @@
 </script>
 
 {#if !isAuthenticated}
-	<MagicLink
-		bind:isAuthenticated
-		redirectLink={`
-			https://vercel-website-git-solar-turk-premium-lithium.vercel.app/solar-proposals/find-suitable-houses`}
-	/>
+	<MagicLink bind:isAuthenticated redirectUrl={'solar-proposals/find-suitable-houses'} />
 {:else}
 	<div class="container">
 		<form on:submit={handleSubmit}>
