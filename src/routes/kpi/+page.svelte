@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { GeneralKPI as KPIBody } from './KPITypes';
+	import type { KPIBody } from './KPITypes';
 	import { getMatomoAnalytics } from './scripts/matomoAnalytics';
 
 
@@ -38,7 +38,13 @@
         let projectedLeadValue: number; // I have no idea how to track this
 
 	onMount(async () => {
-		// load in the values for the previous day
+		
+        
+
+	});
+
+    async function getData() {
+        // load in the values for the previous day
         let day = "yesterday";
         let period = "day"
         let test = await fetch("kpi/api", {
@@ -51,11 +57,9 @@
         })
         const resp = await test.json()
         console.log(resp)
-
-	});
-
-    async function getData() {
-        
+        // for (const item of resp) {
+        //     console.log(item)
+        // }
     }
 </script>
 <button on:click={getData}>Get data</button>

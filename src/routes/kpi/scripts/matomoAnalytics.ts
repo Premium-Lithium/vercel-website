@@ -3,7 +3,7 @@
 // average page views per visitor: derived
 // average time on site: API.get / avg_time_on_site
 
-import type { GeneralKPI } from "../KPITypes"
+import type { KPIBody } from "../KPITypes"
 
 export async function getMatomoAnalytics(day: string, period: string, site: number) {
     // call to matomo API, needs various matomo utils I built
@@ -21,7 +21,7 @@ export async function getMatomoAnalytics(day: string, period: string, site: numb
         const remainder = (seconds % 60).toString();
         return minutes + " minutes " + remainder + " seconds"
     }
-    const matomoKPIs: Array<GeneralKPI> = [
+    const matomoKPIs: Array<KPIBody> = [
         {
             name: "visits",
             value: data.nb_visits.toLocaleString(),
