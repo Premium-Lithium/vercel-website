@@ -22,7 +22,6 @@ interface ProjectData {
 let projectFound: ProjectData | undefined = undefined;
 
 export async function POST({ request }) {
-    console.log("found:", projectFound)
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
@@ -115,6 +114,22 @@ async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | n
     }
 }
 
+function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, inverterModelNum: string, inverterManufacturer: string, newInverterSize: string): Array<string> {
+    let validDetails = {
+        'Single Phase or Three Phase': (!!phaseAndPower[0]) ? true : false,
+        'Customer MPAN': (!!customerMpan) ? true : false,
+        'Inverter Model Number': (!!inverterModelNum) ? true : false,
+        'Inverter Manufacturer': (!!inverterManufacturer) ? true : false,
+        'Inverter Size (kWp)': (!!newInverterSize) ? true : false
+    }
+    let missingDetails = []
+    for (let detail in validDetails) {
+        if (validDetails[detail] === false) {
+            missingDetails.push(detail)
+        }
+    }
+    return missingDetails
+}
 
 async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData) {
     const customerName = await crm.getPersonNameFor(PLNumber);
@@ -127,8 +142,15 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     const existingStorageCapacity = await crm.getExistingStorageCapacityFor(PLNumber)
     const newManufacturer = await crm.getNewManufacturerFor(PLNumber)
     const newManufacturerRef = await crm.getNewManufacturerRefFor(PLNumber)
+    const newInverterSize = await crm.getNewInverterSizeFor(PLNumber)
     const newStorageCapacity = await crm.getNewStorageCapacityFor(PLNumber)
     const phaseAndPower = await crm.getPhaseAndPowerFor(PLNumber)
+
+    const missingDetails = validateDnoDetails(phaseAndPower, customerMpan, newManufacturerRef, newManufacturer, newInverterSize)
+
+    if (!!missingDetails.length) {
+        return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400 })
+    }
 
     const projectData = {
         id: projectFound.projectId,
@@ -177,8 +199,8 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'capacityPhaseOne_existing': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[1] : '',
         'storageCapacity_existing': existingStorageCapacity,
         'manufacturer_new': newManufacturer,
-        'installationDate_new': 'ASAP',
         'manufacturerRef_new': newManufacturerRef,
+        'installationDate_new': 'ASAP',
         'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] : '',
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
@@ -333,7 +355,7 @@ async function sendNotificationMailFor(PLNumber: string) {
         subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
         mail_body: `Hi,
         
-        There is a new form to review`,
+        There is a new form to review for deals`,
         content_type: "HTML",
     };
 
@@ -345,8 +367,6 @@ async function sendNotificationMailFor(PLNumber: string) {
         };
 
         const mailAttempt = await fetch('https://vercel-website-liart.vercel.app/send-mail', options);
-
-        console.log(mailAttempt);
 
         if (mailAttempt.status === 200) {
             console.log(`Email successfully sent`);
