@@ -1,6 +1,7 @@
 <script>
 	import { page } from '$app/stores'
 	import Auth from '$lib/components/Auth.svelte'
+	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 
@@ -10,6 +11,9 @@
 	let awaitingResponse = false
 	let isAuthenticated = false
 	let supabaseAuth = undefined
+	let modals = []
+
+	$: console.log(awaitingResponse)
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
@@ -39,6 +43,7 @@
 			})
 		)
 		projectData?.forEach((x) => {
+			modals = [...modals, null]
 			projects = [
 				...projects,
 				{ projectId: x.id, address: x.address, latLon: x.lat_lon, status: statusToString(x.status) }
@@ -120,13 +125,10 @@
 		}
 	}
 
-	async function onListClick(project) {
-		if (awaitingResponse) return
+	async function createOpenSolarProject(project, comingFromOpen = false) {
+		if (awaitingResponse & !comingFromOpen) return
 		awaitingResponse = true
-		setTimeout(() => {
-			awaitingResponse = false
-		}, 2000)
-		let res = await fetch($page.url.pathname, {
+		let res = await fetch(`${$page.url.pathname}/open-solar/create-project`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -134,8 +136,7 @@
 					projectId: project.id,
 					address: project.address,
 					latLon: project.latLon,
-					uniqueIdentifier,
-					country_iso2: 'GB'
+					uniqueIdentifier
 				}
 			})
 		})
@@ -151,44 +152,101 @@
 		awaitingResponse = false
 		window.open(`https://app.opensolar.com/#/projects/${data.id}/`, '_blank')?.focus()
 	}
+
+	async function openOpenSolarProject(project, i) {
+		modals[i].close()
+		awaitingResponse = true
+		let workerData = await getWorkerData(uniqueIdentifier)
+		workerData[0]['assigned_projects'].forEach(async (entry) => {
+			if (entry.uuid == project.projectId) {
+				if (entry.openSolarId) {
+					let res = await fetch(`${$page.url.pathname}/open-solar/get-project`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							project: {
+								id: entry.openSolarId
+							}
+						})
+					})
+					res = await res.json()
+					if (res.status == 400) {
+						await createOpenSolarProject(project, true)
+						return
+					}
+					window
+						.open(`https://app.opensolar.com/#/projects/${entry.openSolarId}/`, '_blank')
+						?.focus()
+					awaitingResponse = false
+				} else {
+					await createOpenSolarProject(project, true)
+				}
+			}
+		})
+	}
+
+	async function onListClick(project, i) {
+		modals[i].showModal()
+	}
 </script>
+
+{#if awaitingResponse}
+	<div class="spinner" />
+	<div class="loading-indicator">Loading...</div>
+{/if}
+
+{#each modals as modal, i}
+	<Modal showModal={false} bind:dialog={modal}>
+		<div slot="header">
+			<h3>{projects[i].address}</h3>
+		</div>
+		<div class="button-container">
+			<button on:click={openOpenSolarProject(projects[i], i)}>Open OpenSolar Project</button>
+			<button>Panels are already installed</button>
+			<button>Roof too complicated</button>
+			{#if projects[i].status !== 'completed'}
+				<button on:click|stopPropagation={() => completeProject(projects[i])}
+					>Complete Project</button
+				>
+			{/if}
+		</div>
+	</Modal>
+{/each}
 
 <div class="container">
 	{#if isAuthenticated}
-		{#key projects}
-			{#if awaitingResponse}
-				<div class="spinner" />
-				<div class="loading-indicator">Loading...</div>
-			{/if}
-			<div class="project-list" class:disabled={awaitingResponse}>
-				<ul>
-					<li>
-						<div class="project-header" style="pointer-events: none">
-							<div class="address">Address</div>
-							<div class="status">Status</div>
+		<div class="project-list" class:disabled={awaitingResponse}>
+			<ul>
+				<li>
+					<div class="project-header" style="pointer-events: none">
+						<div class="address">Address</div>
+						<div class="status">Status</div>
+					</div>
+				</li>
+				{#each projects as project, i}
+					<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
+						<div class="project-item">
+							<div class="address">{project.address.split(',')[0]}</div>
+							<div class="status">{project.status}</div>
 						</div>
 					</li>
-					{#each projects as project}
-						<li on:click={() => onListClick(project)} class:disabled={awaitingResponse}>
-							<div class="project-item">
-								<div class="address">{project.address.split(',')[0]}</div>
-								<div class="status">{project.status}</div>
-								{#if project.status !== 'completed'}
-									<button on:click|stopPropagation={() => completeProject(project)}>Complete</button
-									>
-								{/if}
-							</div>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{/key}
+				{/each}
+			</ul>
+		</div>
 	{:else}
 		<Auth redirectUrl={`/solar-proposals`} bind:authenticated={isAuthenticated} bind:supabaseAuth />
 	{/if}
 </div>
 
 <style>
+	.button-container {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+	}
 	.container {
 		background-color: #f2f2f2;
 		width: 100%;
@@ -211,7 +269,7 @@
 		padding: 10px 15px;
 		margin: 5px 0;
 		background-color: #ffffff;
-		border-radius: 5px;
+		border-radius: 4px;
 		transition: background-color 0.3s, box-shadow 0.3s;
 		border-left: 4px solid #35bbed;
 		transition: border-left 0.3s;
@@ -275,5 +333,36 @@
 		pointer-events: none;
 		opacity: 0.5;
 		filter: blur(2px);
+	}
+
+	.button-container button {
+		background-color: #eaeaea;
+		border: 2px solid #35bbed;
+		border-radius: 8px;
+		color: black;
+		padding: 10px 20px;
+		margin-right: 10px;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+	}
+
+	.button-container button:hover {
+		background-color: #dadada;
+	}
+
+	.button-container button:active {
+		background-color: darken(#eaeaea, 20%);
+	}
+
+	.button-container button:last-child {
+		margin-right: 0;
+	}
+
+	.button-container button.disabled {
+		background-color: #ccc;
+	}
+
+	.button-container button.negative {
+		background-color: #e74c3c;
 	}
 </style>
