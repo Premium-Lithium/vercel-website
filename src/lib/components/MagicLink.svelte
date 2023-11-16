@@ -10,7 +10,12 @@
 
 	async function sendMagicEmail() {
 		loading = true
-		if (!email.endsWith('premiumlithium.com')) return
+		errorMessage = ''
+		if (!email.endsWith('premiumlithium.com')) {
+			errorMessage = 'Please provide your Premium Lithium email'
+			loading = false
+			return
+		}
 		const { data, error } = await supabase.auth.signInWithOtp({
 			email,
 			options: {

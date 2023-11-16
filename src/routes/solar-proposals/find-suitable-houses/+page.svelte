@@ -263,7 +263,7 @@
 	<MagicLink
 		bind:isAuthenticated
 		redirectLink={`
-			${$page.url.origin}/solar-proposals/find-suitable-houses`}
+			https://vercel-website-git-solar-turk-premium-lithium.vercel.app/solar-proposals/find-suitable-houses`}
 	/>
 {:else}
 	<div class="container">
