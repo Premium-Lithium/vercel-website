@@ -15,7 +15,11 @@ const MAP_API_TOKEN =
 const crm = new CRM()
 const openSolar = new openSolarAPI()
 
-let projectFound = undefined;
+interface ProjectData {
+    projectId: string,
+    uuid: string
+}
+let projectFound: ProjectData | undefined = undefined;
 
 export async function POST({ request }) {
     console.log("found:", projectFound)
@@ -31,9 +35,9 @@ export async function POST({ request }) {
             const designFound = await searchForProjectDesign(PLNumber);
             if (designFound) {
                 projectFound = designFound
-                response = json({ message: "Project already exist", statusCode: 500 })
+                response = json({ message: "Design found", statusCode: 500 })
             } else {
-                response = json({ message: "Project still undefined", statusCode: 200 })
+                response = json({ message: "Design not found", statusCode: 200 })
             }
         }
         const responseData = await response?.json();
@@ -84,7 +88,7 @@ async function getDnoDetailsFrom(operatorName: string) {
     }
 }
 
-async function searchForProjectDesign(PLNumber: string) {
+async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | null> {
     // Checks if a project exist with the same PLNumber or same address
     let matchingProjectId = null;
     const searchFromPL = await openSolar.searchForProjectFromRef(PLNumber);
@@ -94,7 +98,7 @@ async function searchForProjectDesign(PLNumber: string) {
         const searchFromAddress = await openSolar.searchForProjectFromAddress(customerAddressObject.property_address);
         if (!searchFromAddress) {
             console.log("open solar project not found")
-            return json({ message: `Cannot find project for ${PLNumber}`, status: 500 })
+            return null
         } else {
             matchingProjectId = searchFromAddress
         }
@@ -112,7 +116,7 @@ async function searchForProjectDesign(PLNumber: string) {
 }
 
 
-async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
+async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData) {
     const customerName = await crm.getPersonNameFor(PLNumber);
     const customerAddressObject = await crm.getAddressFor(PLNumber);
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
@@ -130,6 +134,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
         id: projectFound.projectId,
         uuid: projectFound.uuid
     }
+
     const panelImagePath = '/tmp/panel_layout.jpeg'
     await downloadSystemImageFrom(projectData, panelImagePath)
     const imageFileContent = fs.readFileSync(panelImagePath);
@@ -229,6 +234,10 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
 
     fs.writeFileSync(DocxFilePath, buff)
     const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
+
+    // TO DO: send email with the attachments
+    await sendNotificationMailFor(PLNumber, [DocxFilePath, panelImagePath])
+
     fs.unlinkSync(DocxFilePath);
     fs.unlinkSync(panelImagePath);
     if (dnoName && dnoDetails) {
@@ -315,4 +324,48 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
         return json({ message: 'Error creating project.', status: 500 })
     }
 
+}
+
+async function sendNotificationMailFor(PLNumber: string, attachments) {
+
+    // Read filenames and convert it as attachments
+
+    for(const attachment of attachments) {
+        console.log(attachment)
+        console.log(fs.readFileSync(attachment))
+    }
+    const emailData = {
+        sender: 'nicholas.dharmadi@premiumlithium.com',
+        recipients: ['nicholas.dharmadi@premiumlithium.com'],
+        subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
+        mail_body: `Hi,
+        
+        View the attached file`,
+        content_type: "HTML",
+        date_time: null,
+        attachments: attachments
+    };
+
+    try {
+        const options = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(emailData),
+        };
+
+        const mailAttempt = await fetch('https://vercel-website-liart.vercel.app/send-mail', options);
+
+        console.log(mailAttempt);
+
+        if (mailAttempt.status === 200) {
+            console.log(`Email successfully sent`);
+            return json({ message: 'OK', status: 200 });
+        } else {
+            console.error('Error sending mail');
+            return json({ message: 'Error sending mail', status: 500 });
+        }
+    } catch (error) {
+        console.error('Error sending mail:', error);
+        return json({ message: 'Error sending mail', status: 500 });
+    }
 }
