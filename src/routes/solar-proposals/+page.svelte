@@ -195,21 +195,73 @@
 		let awaitingResponse = true
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
-		workerData[0]['assigned_projects'].forEach((entry) => {
+		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (entry.uuid == project.projectId) {
 				entry.status = 'completed'
+				await addOpenSolarLinkToAddress(
+					entry.openSolarId,
+					project.projectId,
+					uniqueIdentifier,
+					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length
+				)
 			}
 		})
 		await updateWorkerData(uniqueIdentifier, workerData[0])
+
 		awaitingResponse = false
 		populateProjectList()
 	}
-</script>
 
-{#if awaitingResponse}
-	<div class="spinner" />
-	<div class="loading-indicator">Loading...</div>
-{/if}
+	async function addOpenSolarLinkToAddress(openSolarId, houseId, workerId, numCompleted) {
+		let { data, error: selectError } = await supabase
+			.from('south_facing_houses')
+			.select('*')
+			.eq('id', houseId)
+		if (selectError) {
+			console.error('Error fetching from south facing houses:', selectError)
+			return
+		}
+		data = data[0]
+		let openSolarProjects = data['open_solar_projects']
+		if (!openSolarProjects) {
+			openSolarProjects = [
+				{
+					workerId,
+					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`
+				}
+			]
+		} else {
+			openSolarProjects = openSolarProjects.filter((x) => {
+				return x.workerId != workerId
+			})
+			openSolarProjects = [
+				...openSolarProjects,
+				{
+					workerId,
+					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`
+				}
+			]
+		}
+		let { error: updateHouseError } = await supabase
+			.from('south_facing_houses')
+			.update({ open_solar_projects: openSolarProjects })
+			.eq('id', houseId)
+
+		if (updateHouseError) {
+			console.error('Error update to south facing houses:', updateHouseError)
+			return
+		}
+
+		let { error: updateWorkerError } = await supabase
+			.from('solar_turk_workers')
+			.update({ completed_projects: numCompleted })
+			.eq('worker_id', workerId)
+		if (updateWorkerError) {
+			console.error('Error update to worker:', updateWorkerError)
+			return
+		}
+	}
+</script>
 
 {#each modals as modal, i}
 	<Modal showModal={false} bind:dialog={modal}>
@@ -233,8 +285,12 @@
 
 <div class="container">
 	{#if isAuthenticated}
+		{#if awaitingResponse}
+			<div class="spinner" />
+			<div class="loading-indicator">Loading...</div>
+		{/if}
 		{#key projects}
-			<h3>Projects</h3>
+			<h3 style="text-align: center;" class:disabled={awaitingResponse}>Projects</h3>
 			<div class="project-list" class:disabled={awaitingResponse}>
 				<ul>
 					<li>
@@ -255,7 +311,7 @@
 					{/each}
 				</ul>
 			</div>
-			<h3>Completed Projects</h3>
+			<h3 style="text-align: center;" class:disabled={awaitingResponse}>Completed Projects</h3>
 			<div class="project-list" class:disabled={awaitingResponse}>
 				<ul>
 					<li>
