@@ -262,7 +262,9 @@
 {#if !isAuthenticated}
 	<MagicLink
 		bind:isAuthenticated
-		redirectLink={`${$page.url.host}/solar-proposals/find-suitable-houses`}
+		redirectLink={`${$page.url.toString().includes('https://') ? '' : 'https://'}${
+			$page.url.host
+		}/solar-proposals/find-suitable-houses`}
 	/>
 {:else}
 	<div class="container">
