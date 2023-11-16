@@ -236,7 +236,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
 
     // TO DO: send email with the attachments
-    await sendNotificationMailFor(PLNumber, [DocxFilePath, panelImagePath])
+    await sendNotificationMailFor(PLNumber)
 
     fs.unlinkSync(DocxFilePath);
     fs.unlinkSync(panelImagePath);
@@ -279,7 +279,7 @@ async function generateSchematicFor(PLNumber: string) {
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
 
-    let svgString = fs.readFileSync('static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
+    let svgString = fs.readFileSync('/static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
 
     svgString = svgString.replace('[Existing Solar Size kW]', existingSolarSize + 'kW')
     svgString = svgString.replace('[Existing Inverter Size kW]', existingInverterSize + 'kW')
@@ -326,24 +326,15 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
 
 }
 
-async function sendNotificationMailFor(PLNumber: string, attachments) {
-
-    // Read filenames and convert it as attachments
-
-    for(const attachment of attachments) {
-        console.log(attachment)
-        console.log(fs.readFileSync(attachment))
-    }
+async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {
-        sender: 'nicholas.dharmadi@premiumlithium.com',
+        sender: 'info@premiumlithium.com',
         recipients: ['nicholas.dharmadi@premiumlithium.com'],
         subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
         mail_body: `Hi,
         
-        View the attached file`,
+        There is a new form to review`,
         content_type: "HTML",
-        date_time: null,
-        attachments: attachments
     };
 
     try {

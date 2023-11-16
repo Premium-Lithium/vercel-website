@@ -7,7 +7,7 @@ import querystring from 'querystring';
 
 //If date_time is provided, schedule mail to be sent on that date_time 
 //Format Time 2019-01-29T20:00:00"
-async function sendMail(sender, recipients, subject, mail_body, content_type, date_time, attachments) {
+async function sendMail(sender, recipients, subject, mail_body, content_type, date_time) {
     console.log("sending mail")
     let mailAttempt = {
         "success": true,
@@ -30,7 +30,6 @@ async function sendMail(sender, recipients, subject, mail_body, content_type, da
                 content: mail_body
             },
             toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
-            attachments: attachments
         }
     };
 
