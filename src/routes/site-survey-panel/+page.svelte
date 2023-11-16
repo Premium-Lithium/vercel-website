@@ -39,7 +39,7 @@
 				const responseData = await response.json();
 				if (responseData.statusCode === 200) {
 					status = responseData.surveyStatus;
-					installationStatus = responseData.installationStatus
+					installationStatus = responseData.installationStatus;
 					alertMessage = 'synced.';
 				} else {
 					alertMessage = responseData.message;
@@ -59,7 +59,7 @@
 	}
 	async function startSiteSurvey() {
 		try {
-			if (status === undefined | status === null) {
+			if ((status === undefined) | (status === null)) {
 				alertMessage = 'Generating survey';
 				loading = true;
 				const response = await fetch('/site-survey-panel', {
@@ -92,7 +92,7 @@
 
 	async function startInstallation() {
 		try {
-			if (installationStatus === undefined | installationStatus === null) {
+			if ((installationStatus === undefined) | (installationStatus === null)) {
 				alertMessage = 'Generating installation';
 				loading = true;
 				const response = await fetch('/site-survey-panel', {
@@ -122,7 +122,6 @@
 			return error;
 		}
 	}
-
 </script>
 
 <div class="site-survey-panel">
@@ -132,29 +131,30 @@
 		</div>
 	{/if}
 
-	<div class="header">
-		
-		
-	</div>
-
+	<div class="header" />
 
 	<div class="buttons-container">
-		<p>Status: {status}</p>
+		<span class="status-text" >Status: {status}</span>
 		<button disabled={loading || status != undefined} class="link-btn" on:click={startSiteSurvey}
 			>Generate Site Survey</button
 		>
-		<p>Status: {installationStatus}</p>
-		<button disabled={loading || installationStatus != undefined} class="link-btn" on:click={startInstallation}
-			>Generate Installation</button
+		<span class="status-text" >Status: {status}</span>
+		<button
+			disabled={loading || installationStatus != undefined}
+			class="link-btn"
+			on:click={startInstallation}>Generate Installation</button
 		>
 	</div>
 </div>
 
 <style>
+	.status-text {
+		padding: 10px 0;
+		font-weight: bold
+	}
 	.site-survey-panel {
 		padding: 15px;
 		border: 0px solid grey;
-		text-align: center;
 	}
 
 	.header {
@@ -172,6 +172,7 @@
 		background-color: #4ba6d1;
 		border: 1px solid black;
 		border-radius: 10px;
+		margin: 5px 0;
 	}
 
 	.buttons-container {
@@ -179,6 +180,7 @@
 	}
 
 	.link-btn {
+		margin: 5px 0;
 		background-color: #c6c6c6;
 		width: 100%;
 		color: black;
