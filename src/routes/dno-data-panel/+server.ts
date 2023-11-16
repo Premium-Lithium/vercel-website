@@ -23,7 +23,6 @@ interface Project {
 let projectFound: Project | undefined = undefined;
 
 export async function POST({ request }) {
-    console.log("found:", projectFound)
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
@@ -32,7 +31,16 @@ export async function POST({ request }) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
-        } else {
+        } else if (option === 3) {
+            const dnoFound = await searchForDnoApplication(PLNumber, dealId)
+            console.log(dnoFound)
+            if (dnoFound) {
+                return json({ message: 'DNO Application Found', statusCode: 200 })
+            }
+            return json({ message: "DNO Application not Found", statusCode: 500 })
+        }else if (option === 4) {
+            response = await buildContractFrom(PLNumber, projectFound);
+        }else {
             const designFound = await searchForProjectDesign(PLNumber);
             if (designFound) {
                 projectFound = designFound
@@ -320,4 +328,18 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
         return json({ message: 'Error creating project.', status: 500 })
     }
 
+}
+
+async function searchForDnoApplication(PLNumber:string, dealId: string) {
+    const customerName = await crm.getPersonNameFor(PLNumber)
+    const dnoFile = await crm.getFileFor(dealId, `G99_${customerName}.docx`)
+
+    if (dnoFile) {
+        return(dnoFile)
+    }
+    return(null)
+}
+
+async function buildContractFrom(PLNumber: string, projectFound: Project | undefined) {
+    
 }

@@ -79,7 +79,6 @@ export class CRM {
 			country: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_country']
 		}
 		return addressObject;
-		
 	}
 
 	async getPLNumberFor(dealId: string) {
@@ -90,6 +89,16 @@ export class CRM {
 	async getCustomFieldDataFor(PLNumber: string, fieldName: string) {
 		const dealData = await this.getDealDataFor(PLNumber)
 		return readCustomDealField(fieldName, dealData)
+	}
+
+	async getFileFor(dealId: string, fileName: string) {
+		const dealFiles = await this.pdDealsApi.getDealFiles(dealId)
+		const file = dealFiles.data.find((f) => f.name.includes(fileName));
+		if (file === undefined) {
+			console.log(`Could not find deal file with name '${fileName}'. Is this spelled correctly?`);
+			return null;
+		}
+		return file
 	}
 
 	async setMpanFor(PLNumber: string, value: string) {

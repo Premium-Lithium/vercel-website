@@ -3,7 +3,6 @@
 	import { page } from '$app/stores';
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 
-
 	const dealId = $page.url.searchParams.get('selectedIds');
 
 	let sdk;
@@ -11,6 +10,7 @@
 	let alertMessage = null;
 	let loading = false;
 	let projectExist = false;
+	let dnoExist = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
 		await sdk.execute('resize', { height: 300 });
@@ -19,6 +19,7 @@
 	onMount(() => {
 		if (dealId) {
 			searchProjectDesign();
+			searchForDno();
 		}
 	});
 
@@ -35,7 +36,7 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				console.log(responseData)
+				console.log(responseData);
 				if (responseData.statusCode === 200) {
 					alertMessage = 'initialized.';
 				} else {
@@ -64,7 +65,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 1,
+					option: 1
 				})
 			});
 			if (response.ok) {
@@ -103,6 +104,66 @@
 			return error;
 		}
 	}
+
+	async function searchForDno() {
+		try {
+			alertMessage = 'initializing';
+			loading = true;
+			const response = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 3
+				})
+			});
+			if (response.ok) {
+				const responseData = await response.json();
+				console.log(responseData);
+				if (responseData.statusCode === 200) {
+					alertMessage = 'dno found';
+					dnoExist = true;
+				} else {
+					dnoExist = false;
+					alertMessage = responseData.message;
+				}
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+				alertMessage = null;
+			}
+			loading = false;
+			return response;
+		} catch (error) {
+			console.log(error);
+			alertMessage = error;
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+			alertMessage = null;
+			return error;
+		}
+	}
+
+	async function contractBuilder() {
+		try {
+			alertMessage = 'Building contract documents';
+			const res = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 4
+				})
+			});
+			if (res.ok) {
+				const resData = await res.json();
+				alertMessage = resData.message;
+				await new Promise((resolve) => setTimeout(resolve, 2000));
+				alertMessage = '';
+				return res;
+			}
+		} catch (error) {
+			console.log(error);
+			return error;
+		}
+	}
 </script>
 
 <div class="dno-panel">
@@ -114,8 +175,15 @@
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 	</div>
-	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}>Start openSolar Project</button>
-	<button disabled={loading || !projectExist} class="link-btn" on:click={handleGenerate}>Generate DNO Application</button>
+	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}
+		>Start openSolar Project</button
+	>
+	<button disabled={loading || !projectExist} class="link-btn" on:click={handleGenerate}
+		>Generate DNO Application</button
+	>
+	<button disabled={loading || !dnoExist} class="link-btn" on:click={contractBuilder}
+		>Build Contracts</button
+	>
 </div>
 
 <style>
