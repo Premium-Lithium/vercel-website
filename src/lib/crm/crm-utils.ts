@@ -92,6 +92,16 @@ export class CRM {
 		return readCustomDealField(fieldName, dealData)
 	}
 
+	async getOpenSolarProjectIdFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'OpenSolar Project ID')
+		return fieldResponse
+	}
+
+	async setOpenSolarProjectIdFor(PLNumber: string, value: string) {
+		const updateDealRequest = await this.setCustomField(PLNumber, 'OpenSolar Project ID', value)
+		return updateDealRequest
+	}
+
 	async setMpanFor(PLNumber: string, value: string) {
 		const updateDealRequest = await this.setCustomField(PLNumber, 'MPAN number', value)
 		return updateDealRequest;

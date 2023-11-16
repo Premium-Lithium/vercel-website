@@ -3,7 +3,7 @@ export class openSolarAPI {
     token;
     organisationId;
     constructor() {
-        this.token = 's_SVCFQ5RYUJMFJ46AVCCD2C4SOJ2K5YLN' // My token (Nicholas) as the machine user
+        this.token = 's_OZATKMZINPGPGYTS2XFB42LT2KQSKZM6' // My token (Peter) as the machine user
         this.organisationId = 52668 // Premium Lithium's ORG ID
     }
 
@@ -86,8 +86,10 @@ export class openSolarAPI {
                 }
             })
             const projectDetail = await response.json()
+            console.log((projectDetail.identifier && (projectDetail.identifier).includes(PLNumber)))
             if (projectDetail.identifier && (projectDetail.identifier).includes(PLNumber) && (projectDetail.systems).length != 0) {
                 return projectDetail.id
+
             }
         }
         return null

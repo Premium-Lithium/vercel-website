@@ -89,30 +89,14 @@ async function getDnoDetailsFrom(operatorName: string) {
 }
 
 async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | null> {
-    // Checks if a project exist with the same PLNumber or same address
-    let matchingProjectId = null;
-    const searchFromPL = await openSolar.searchForProjectFromRef(PLNumber);
-    const customerAddressObject = await crm.getAddressFor(PLNumber);
-
-    if (!searchFromPL) {
-        const searchFromAddress = await openSolar.searchForProjectFromAddress(customerAddressObject.property_address);
-        if (!searchFromAddress) {
-            console.log("open solar project not found")
-            return null
-        } else {
-            matchingProjectId = searchFromAddress
-        }
-    } else {
-        matchingProjectId = searchFromPL
-    }
-
-    const designFound = await openSolar.searchForDesignFrom(matchingProjectId)
-
+    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
+    const designFound = await openSolar.searchForDesignFrom(projectId)
     if (designFound) {
-        return { projectId: matchingProjectId, uuid: designFound }
+        return { projectId: projectId, uuid: designFound }
     } else {
         return null
     }
+    
 }
 
 
