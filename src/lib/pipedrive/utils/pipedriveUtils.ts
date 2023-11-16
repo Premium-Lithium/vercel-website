@@ -88,12 +88,7 @@ function filterDealsByFieldKey(deals: Array<any>, fieldKey: string, fieldValue: 
     }
     return filteredDeals;
 }
-// filter 
 
-// get possible values for a field if enum, otherwise return false
-async function getFieldValues(name: string) {
-
-}
 
 // get key for field
 async function getFieldKey(name: string) {
@@ -102,10 +97,6 @@ async function getFieldKey(name: string) {
     return fieldKey;
 }
 
-// get value for field from field name for a given deal/lead
-async function getFieldValue(name: string, deal: {}) {
-    // 
-}
 
 // get field data from field name
 async function getFieldData(name: string) {

@@ -9,7 +9,7 @@ import type { KPIBody } from "../KPITypes";
 let leadSourceData: Array<LeadSourceData> = [
     {
         title: "Consultation booking",
-        pipedriveSources: ["Consultation Booking", "Energiser - Consultation", ],
+        pipedriveSources: ["Consultation Booking", "Energiser - Consultation",],
     },
     {
         title: "Survey booking",
@@ -26,7 +26,7 @@ let leadSourceData: Array<LeadSourceData> = [
     },
     {
         title: "Contact us enquiries",
-        pipedriveSources: ["Contact Us Webform", ],
+        pipedriveSources: ["Contact Us Webform",],
     },
     {
         title: "Energiser",
@@ -51,31 +51,17 @@ let opts = {
 }
 
 export async function POST({ request }: RequestEvent) {
+    // add date filtering
+    console.log(request.body)
     resetPipedriveApiData();
-    // const leads = await getAllLeads();
-    // const filteredLeads = await filterDealsByField(leads.data, "Lead Source", "DDS")
-    // const deals = await getAllDeals();
-    // const filteredDeals = await filterDealsByField(deals.data, "Lead Source", "DDS")
-    // const key = await getFieldKey("Lead Source")
-    // let leadSources = []
-    // for (const lead of leads.data) {
-    //     leadSources.push(lead["source_name"])
-    // }
-    // const allDeals = await getAllDeals();
-    // const testDeals = await getAllDeals();
-    // const allLeads = await getAllLeads();
-    // const allFields = await getAllFields();
-    // const fieldData = await getFieldData("Lead Source")
-    // const fieldKey = await getFieldKey("Lead Source")
-    // return json([allDeals, allLeads, allFields, fieldData, fieldKey])
-    // return json([filteredLeads, filteredDeals, leads, deals])
-    // return json([leadSources, leads, allFields]);
+
     const leadData = await getLeadSourceCounts()
     return json(leadData);
 }
 
 
 async function getLeadSourceCounts() {
+    let energisers = []
     const leads = await getAllLeads();
     const deals = await getAllDeals();
     let kpiData: Array<KPIBody> = []
@@ -84,29 +70,38 @@ async function getLeadSourceCounts() {
         // data for each lead source category
         // for each pipedrive source, filter leads and deals
         for (const pipedriveSource of source.pipedriveSources) {
+            
             const filteredLeads = await filterDealsByFieldName(leads.data, "Lead Source", pipedriveSource);
             const filteredDeals = await filterDealsByFieldName(deals.data, "Lead Source", pipedriveSource);
             if (filteredLeads) {
                 sourceCount += filteredLeads.length;
+                console.log("lead", pipedriveSource, "count", filteredLeads.length)
             }
             if (filteredDeals) {
                 sourceCount += filteredDeals.length;
+                console.log("deal", pipedriveSource, "count", filteredDeals.length)
             }
+            console.log(source.title, "count", sourceCount, "searchstring", pipedriveSource)
+            if (source.title === "Energiser") {
+                energisers.push(filteredDeals);
+            }
+
         }
         if (source.altField) {
             if (source.altField.fieldKey) {
+                console.log("alt field", source.title)
                 const filteredLeads = filterDealsByFieldKey(leads.data, source.altField.fieldKey, source.altField.fieldValue)
                 if (filteredLeads) sourceCount += filteredLeads.length;
                 const filteredDeals = filterDealsByFieldKey(deals.data, source.altField.fieldKey, source.altField.fieldValue)
                 if (filteredDeals) sourceCount += filteredDeals.length;
             } else if (source.altField.fieldName) {
+                console.log("alt field", source.title)
                 const filteredLeads = await filterDealsByFieldName(leads.data, source.altField.fieldName, source.altField.fieldValue)
                 if (filteredLeads) sourceCount += filteredLeads.length;
                 const filteredDeals = await filterDealsByFieldName(deals.data, source.altField.fieldName, source.altField.fieldValue)
                 if (filteredDeals) sourceCount += filteredDeals.length;
             }
         }
-        source
         // construct KPI
         const kpi: KPIBody = {
             name: source.title,
@@ -114,5 +109,6 @@ async function getLeadSourceCounts() {
         }
         kpiData.push(kpi);
     }
+    //return energisers
     return kpiData;
 }

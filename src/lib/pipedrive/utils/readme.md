@@ -42,10 +42,14 @@ It may be that the pipedrive client contains these optimisations already, but I 
 
 **getAllDeals(options)** - return a list of all deals in an object with the default pipedrive metadata. See pipedrive API reference for options
 
-**getAllFields(options)** - return a list of all deal fields with all thier associated data
+**filterDealsByFieldName(deals_or_leads, field_name, field_value)** - for a given list of deals or leads, filter to only those where the stated field name matches the stated value
 
-**filterDealsByField(deals_or_leads, field_name, field_value)** - for a given list of deals or leads, filter to only those where the stated field matches the stated value
+**filterDealsByFieldKey(deals_or_leads, field_key, field_value)** - for a given list of deals or leads, filter to only those where the stated field key matches the stated value
 
 **getFieldKey(field_name)** - for a named field, get the key that represents that field in a deal
+
+**getFieldData(fieldName)** - for a named field, get the data associated
+
+**getAllFields(options)** - return a list of all deal fields with all thier associated data
 
 **fetchAllPaginated(pipedrive_api_function, options?)** - for a given pipedrive API function, return all results with pagination concatenated and metadata from the last paginated request. 
