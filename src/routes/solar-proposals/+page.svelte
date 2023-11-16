@@ -13,8 +13,6 @@
 	let supabaseAuth = undefined
 	let modals = []
 
-	$: console.log(awaitingResponse)
-
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
@@ -42,8 +40,9 @@
 				return await getProjectData(id, uniqueIdentifier)
 			})
 		)
+		projects = []
 		projectData?.forEach((x) => {
-			modals = [...modals, null]
+			modals = modals.length > projects.length ? [...modals] : [...modals, null]
 			projects = [
 				...projects,
 				{ projectId: x.id, address: x.address, latLon: x.lat_lon, status: statusToString(x.status) }
@@ -90,9 +89,12 @@
 		}
 	}
 
+	// in_progress -> In progress
+	// not_started -> Not started
+	// completed -> Completed
 	function statusToString(status) {
 		let split = status.split('_')
-		return `${split[0][0].toUpperCase()}${split[0].slice(1)} ${split[1]}`
+		return `${split[0][0].toUpperCase()}${split[0].slice(1)}${split[1] ? ` ${split[1]}` : ''}`
 	}
 
 	async function createNewWorker(workerId, numOfProjects) {
@@ -188,6 +190,20 @@
 	async function onListClick(project, i) {
 		modals[i].showModal()
 	}
+
+	async function completeProject(project, i) {
+		let awaitingResponse = true
+		modals[i].close()
+		let workerData = await getWorkerData(uniqueIdentifier)
+		workerData[0]['assigned_projects'].forEach((entry) => {
+			if (entry.uuid == project.projectId) {
+				entry.status = 'completed'
+			}
+		})
+		await updateWorkerData(uniqueIdentifier, workerData[0])
+		awaitingResponse = false
+		populateProjectList()
+	}
 </script>
 
 {#if awaitingResponse}
@@ -201,44 +217,79 @@
 			<h3>{projects[i].address}</h3>
 		</div>
 		<div class="button-container">
-			<button on:click={openOpenSolarProject(projects[i], i)}>Open OpenSolar Project</button>
-			<button>Panels are already installed</button>
-			<button>Roof too complicated</button>
-			{#if projects[i].status !== 'completed'}
-				<button on:click|stopPropagation={() => completeProject(projects[i])}
-					>Complete Project</button
-				>
-			{/if}
+			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
+				>Open OpenSolar Project</button
+			>
+			<button class="warning">Panels are already installed</button>
+			<button class="warning">Roof is too complicated</button>
+			<button class="modal-button" on:click|stopPropagation={() => completeProject(projects[i], i)}
+				>{projects[i].status.toLowerCase() == 'completed'
+					? 'Recomplete Project'
+					: 'Complete Project'}</button
+			>
 		</div>
 	</Modal>
 {/each}
 
 <div class="container">
 	{#if isAuthenticated}
-		<div class="project-list" class:disabled={awaitingResponse}>
-			<ul>
-				<li>
-					<div class="project-header" style="pointer-events: none">
-						<div class="address">Address</div>
-						<div class="status">Status</div>
-					</div>
-				</li>
-				{#each projects as project, i}
-					<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
-						<div class="project-item">
-							<div class="address">{project.address.split(',')[0]}</div>
-							<div class="status">{project.status}</div>
+		{#key projects}
+			<h3>Projects</h3>
+			<div class="project-list" class:disabled={awaitingResponse}>
+				<ul>
+					<li>
+						<div class="project-header" style="pointer-events: none">
+							<div class="address">Address</div>
+							<div class="status">Status</div>
 						</div>
 					</li>
-				{/each}
-			</ul>
-		</div>
+					{#each projects as project, i}
+						{#if project.status.toLowerCase() != 'completed'}
+							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
+								<div class="project-item">
+									<div class="address">{project.address.split(',')[0]}</div>
+									<div class="status">{project.status}</div>
+								</div>
+							</li>
+						{/if}
+					{/each}
+				</ul>
+			</div>
+			<h3>Completed Projects</h3>
+			<div class="project-list" class:disabled={awaitingResponse}>
+				<ul>
+					<li>
+						<div class="project-header" style="pointer-events: none">
+							<div class="address">Address</div>
+							<div class="status">Status</div>
+						</div>
+					</li>
+					{#each projects as project, i}
+						{#if project.status.toLowerCase() == 'completed'}
+							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
+								<div class="project-item">
+									<div class="address">{project.address.split(',')[0]}</div>
+									<div class="status">{project.status}</div>
+								</div>
+							</li>
+						{/if}
+					{/each}
+				</ul>
+			</div>
+		{/key}
 	{:else}
 		<Auth redirectUrl={`/solar-proposals`} bind:authenticated={isAuthenticated} bind:supabaseAuth />
 	{/if}
 </div>
 
 <style>
+	h3 {
+		margin: 8px;
+	}
+	.warning {
+		border: 2px solid #f9bf3b;
+		padding: 5px 10px;
+	}
 	.button-container {
 		width: 100%;
 		height: 100%;
@@ -250,7 +301,11 @@
 	.container {
 		background-color: #f2f2f2;
 		width: 100%;
-		height: 100%;
+		min-height: 100%;
+		height: fit-content;
+		position: absolute;
+		top: 0;
+		left: 0;
 	}
 	ul {
 		list-style: none;
@@ -258,7 +313,7 @@
 	}
 
 	.project-list {
-		padding: 20px;
+		padding: 10px;
 		background-color: #f2f2f2;
 		border-radius: 10px;
 		max-width: 600px;
@@ -337,13 +392,16 @@
 
 	.button-container button {
 		background-color: #eaeaea;
-		border: 2px solid #35bbed;
 		border-radius: 8px;
 		color: black;
-		padding: 10px 20px;
 		margin-right: 10px;
 		cursor: pointer;
 		transition: background-color 0.3s ease;
+	}
+
+	.modal-button {
+		padding: 10px 20px;
+		border: 2px solid #35bbed;
 	}
 
 	.button-container button:hover {
