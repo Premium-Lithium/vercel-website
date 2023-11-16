@@ -10,6 +10,7 @@
 	let loading = false
 	let forgottenPassword = false
 	let sentResetEmail = false
+	let sentSignupEmail = false
 
 	async function handleLogin() {
 		error = ''
@@ -46,6 +47,9 @@
 				}
 			})
 			if (error) throw error
+			else {
+				sentSignupEmail = true
+			}
 		} catch (err) {
 			error = err.message
 		} finally {
@@ -65,7 +69,9 @@
 
 <div class="container">
 	{#if sentResetEmail}
-		<p>If an account for that email exists, we've sent you an email to reset your password</p>
+		<p>If an account for {email} exists, we've sent you an email to reset your password</p>
+	{:else if sentSignupEmail}
+		<p>Check your emails for verification to create your account.</p>
 	{:else}
 		<form on:submit|preventDefault={handleLogin}>
 			<input type="email" bind:value={email} placeholder="Email" />

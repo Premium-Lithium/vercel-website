@@ -13,7 +13,6 @@
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
-		console.log(data)
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
 	})
@@ -135,7 +134,8 @@
 					projectId: project.id,
 					address: project.address,
 					latLon: project.latLon,
-					uniqueIdentifier
+					uniqueIdentifier,
+					country_iso2: 'GB'
 				}
 			})
 		})
@@ -171,7 +171,7 @@
 					{#each projects as project}
 						<li on:click={() => onListClick(project)} class:disabled={awaitingResponse}>
 							<div class="project-item">
-								<div class="address">{project.address}</div>
+								<div class="address">{project.address.split(',')[0]}</div>
 								<div class="status">{project.status}</div>
 								{#if project.status !== 'completed'}
 									<button on:click|stopPropagation={() => completeProject(project)}>Complete</button
@@ -217,8 +217,12 @@
 		transition: border-left 0.3s;
 		display: grid;
 		grid-template-columns: 3fr 1fr 1fr;
+		gap: 12px;
 	}
 
+	.project-header {
+		font-weight: 600;
+	}
 	.project-item:hover {
 		border-left: 32px solid #35bbed;
 		transition: border-left 0.3s;

@@ -1,5 +1,6 @@
 <script>
 	import { page } from '$app/stores'
+	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 	let awaitingResponse = false
@@ -17,9 +18,12 @@
 	let minimumRoofSize = 16
 	let southFacingThreshold = 15
 
-	$: console.log(southFacing)
+	let isAuthenticated = false
 
 	onMount(async () => {
+		const { data, error } = await supabase.auth.getSession()
+		if (data.session == null) isAuthenticated = false
+		else isAuthenticated = true
 		// let streetWays = data.elements.filter((x) => {
 		// 	return x.type == 'way' && x.tags?.highway == 'residential';
 		// });
@@ -255,46 +259,58 @@
 	}
 </script>
 
-<div class="container">
-	<form on:submit={handleSubmit}>
-		<label for="left">Left Longitude:</label>
-		<input type="number" step="any" id="left" name="left" bind:value={left} required />
+{#if !isAuthenticated}
+	<MagicLink
+		bind:isAuthenticated
+		redirectLink={`${$page.url.host}/solar-proposals/find-suitable-houses`}
+	/>
+{:else}
+	<div class="container">
+		<form on:submit={handleSubmit}>
+			<label for="left">Left Longitude:</label>
+			<input type="number" step="any" id="left" name="left" bind:value={left} required />
 
-		<label for="bottom">Bottom Latitude:</label>
-		<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
+			<label for="bottom">Bottom Latitude:</label>
+			<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
 
-		<label for="right">Right Longitude:</label>
-		<input type="number" step="any" id="right" name="right" bind:value={right} required />
+			<label for="right">Right Longitude:</label>
+			<input type="number" step="any" id="right" name="right" bind:value={right} required />
 
-		<label for="top">Top Latitude:</label>
-		<input type="number" step="any" id="top" name="top" bind:value={top} required />
+			<label for="top">Top Latitude:</label>
+			<input type="number" step="any" id="top" name="top" bind:value={top} required />
 
-		<button type="submit" disabled={awaitingResponse}>
-			{`${awaitingResponse ? 'Searching...' : 'Find Suitable Houses'}`}
-		</button>
-	</form>
-	{#if errorMessage != ''}
-		<p style="color: red">{errorMessage}</p>
-	{/if}
+			<button type="submit" disabled={awaitingResponse}>
+				{`${awaitingResponse ? 'Searching...' : 'Find Suitable Houses'}`}
+			</button>
+		</form>
+		{#if errorMessage != ''}
+			<p style="color: red">{errorMessage}</p>
+		{/if}
 
-	<div class="options">
-		<label for="minimumRoofSize">Minimum Roof Size (m²)</label>
-		<input type="number" id="minimumRoofSize" name="minimumRoofSize" bind:value={minimumRoofSize} />
-		<label for="southFacing">South Facing</label>
-		<input type="checkbox" id="southFacing" name="southFacing" bind:checked={southFacing} />
-		{#if southFacing}
-			<label for="southFacingThreshold"
-				>South Facing Threshold <br /> (degrees from due south)</label
-			>
+		<div class="options">
+			<label for="minimumRoofSize">Minimum Roof Size (m²)</label>
 			<input
 				type="number"
-				id="southFacingThreshold"
-				name="southFacingThreshold"
-				bind:value={southFacingThreshold}
+				id="minimumRoofSize"
+				name="minimumRoofSize"
+				bind:value={minimumRoofSize}
 			/>
-		{/if}
+			<label for="southFacing">South Facing</label>
+			<input type="checkbox" id="southFacing" name="southFacing" bind:checked={southFacing} />
+			{#if southFacing}
+				<label for="southFacingThreshold"
+					>South Facing Threshold <br /> (degrees from due south)</label
+				>
+				<input
+					type="number"
+					id="southFacingThreshold"
+					name="southFacingThreshold"
+					bind:value={southFacingThreshold}
+				/>
+			{/if}
+		</div>
 	</div>
-</div>
+{/if}
 
 <style>
 	.options {
