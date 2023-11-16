@@ -37,16 +37,38 @@
 	}
 </script>
 
-<form on:submit|preventDefault={updatePassword}>
-	<input type="password" bind:value={password} placeholder="New Password" required />
+<div class="container">
+	<form on:submit|preventDefault={updatePassword}>
+		<input type="password" bind:value={password} placeholder="New Password" required />
 
-	{#if error}
-		<p style="color: red;">{error}</p>
-	{/if}
+		{#if error}
+			<p style="color: red;">{error}</p>
+		{/if}
 
-	{#if success}
-		<p style="color: green;">Password updated successfully. Redirecting to login...</p>
-	{:else}
-		<button type="submit" disabled={loading}>Update Password</button>
-	{/if}
-</form>
+		{#if success}
+			<p style="color: green;">Password updated successfully. Redirecting to login...</p>
+		{:else}
+			<button type="submit" disabled={loading}>Update Password</button>
+		{/if}
+	</form>
+</div>
+
+<style>
+	.container {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		top: 0;
+		left: 0;
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+</style>

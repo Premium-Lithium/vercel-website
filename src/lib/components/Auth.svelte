@@ -107,6 +107,7 @@
 		justify-content: center;
 		flex-direction: column;
 		align-items: center;
+		margin: 12px;
 	}
 
 	.forgot-password {
@@ -118,6 +119,5 @@
 		flex-direction: column;
 		width: fit-content;
 		gap: 1rem;
-		margin-top: 1rem;
 	}
 </style>

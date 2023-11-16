@@ -344,7 +344,7 @@
 	}
 	.warning {
 		border: 2px solid #f9bf3b;
-		padding: 5px 10px;
+		padding: 5px 0px;
 	}
 	.button-container {
 		width: 100%;
