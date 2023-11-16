@@ -334,7 +334,7 @@
 			</div>
 		{/key}
 	{:else}
-		<Auth redirectUrl={`/solar-proposals`} bind:authenticated={isAuthenticated} bind:supabaseAuth />
+		<Auth redirectUrl={`solar-proposals`} bind:authenticated={isAuthenticated} bind:supabaseAuth />
 	{/if}
 </div>
 

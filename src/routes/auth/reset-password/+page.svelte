@@ -2,6 +2,7 @@
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 	import { goto } from '$app/navigation'
+	import { page } from '$app/stores'
 
 	let password = ''
 	let error = null
@@ -18,16 +19,16 @@
 	})
 
 	async function updatePassword() {
-		await supabase.auth.exchangeCodeForSession(code)
 		try {
 			loading = true
-			const { error } = await supabase.auth.updateUser(accessToken, {
-				password: password
+			const { error } = await supabase.auth.updateUser({
+				password
 			})
 			if (error) throw error
 			success = true
 			// Redirect after successful password update
-			setTimeout(() => goto(next), 3000) // redirect to login page
+			await supabase.auth.signOut()
+			setTimeout(() => goto(`${$page.url.origin}/${next}`), 1000) // redirect to login page
 		} catch (err) {
 			error = err.message
 		} finally {

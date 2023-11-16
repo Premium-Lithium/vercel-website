@@ -1,6 +1,7 @@
 <script>
 	import { page } from '$app/stores'
 	import { supabase } from '$lib/supabase'
+	import { onMount } from 'svelte'
 	export let redirectUrl
 	export let authenticated = false
 	export let supabaseAuth = undefined
@@ -11,7 +12,6 @@
 	let forgottenPassword = false
 	let sentResetEmail = false
 	let sentSignupEmail = false
-
 	async function handleLogin() {
 		error = ''
 		if (forgottenPassword) {
@@ -43,7 +43,7 @@
 				email,
 				password,
 				options: {
-					emailRedirectTo: redirectUrl
+					emailRedirectTo: `${$page.url.origin}/${redirectUrl}`
 				}
 			})
 			if (error) throw error
@@ -58,7 +58,7 @@
 	}
 	async function handleResetPassword() {
 		const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${$page.url.host}/auth/reset-password`
+			redirectTo: `${$page.url.origin}/auth/reset-password/?next=${redirectUrl}`
 		})
 		if (err) error = err.message
 		else {
