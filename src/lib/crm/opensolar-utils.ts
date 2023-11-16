@@ -20,7 +20,6 @@ export class openSolarAPI {
         }
         const response = await fetch('https://api.opensolar.com/api-token-auth/', options)
         const responseData = await response.json()
-        console.log(responseData)
         return responseData
     }
     // projectId, uuid, dimension: [width, height]
@@ -56,7 +55,6 @@ export class openSolarAPI {
         }
         const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/`, options)
         const responseData = await response.json()
-        console.log(responseData)
         console.log('Project created.')
         return responseData
     }
@@ -86,7 +84,6 @@ export class openSolarAPI {
                 }
             })
             const projectDetail = await response.json()
-            console.log((projectDetail.identifier && (projectDetail.identifier).includes(PLNumber)))
             if (projectDetail.identifier && (projectDetail.identifier).includes(PLNumber) && (projectDetail.systems).length != 0) {
                 return projectDetail.id
 
@@ -111,6 +108,9 @@ export class openSolarAPI {
     }
 
     async searchForDesignFrom(projectId: string) {
+        if (!projectId) {
+            return null
+        }
         const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/${projectId}`, {
             headers: {
                 'Authorization': `Bearer ${this.token}`,

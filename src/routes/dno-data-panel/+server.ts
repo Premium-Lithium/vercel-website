@@ -25,15 +25,15 @@ export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
+        projectFound = searchForProjectDesign(PLNumber)
         let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else {
-            const designFound = await searchForProjectDesign(PLNumber);
+            const designFound = await searchForProjectExistance(PLNumber);
             if (designFound) {
-                projectFound = designFound
                 response = json({ message: "Design found", statusCode: 500 })
             } else {
                 response = json({ message: "Design not found", statusCode: 200 })
@@ -85,6 +85,12 @@ async function getDnoDetailsFrom(operatorName: string) {
         console.error('Error fetching operator details:', error);
         return null;
     }
+}
+
+async function searchForProjectExistance(PLNumber: string): boolean {
+    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
+    const projectExists = (await openSolar.getProjectDetailsFrom(projectId) ? true : false)
+    return projectExists
 }
 
 async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | null> {
