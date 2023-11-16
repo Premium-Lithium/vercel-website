@@ -32,7 +32,7 @@ export async function POST({ request }) {
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else {
-            const designFound = await searchForProjectExistance(PLNumber);
+            const designFound = searchForProjectExistance(PLNumber);
             if (designFound) {
                 response = json({ message: "Design found", statusCode: 500 })
             } else {
