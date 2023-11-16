@@ -14,13 +14,21 @@ export async function POST({ request }) {
         let response;
         if (option === 1) {
             response = await createInspectionFrom(PLNumber, 'PV, Battery and EV Survey');
+            const inspectionData = await surveyDataSource.searchInspectionFrom(PLNumber, 'PV, Battery and EV Survey');
+            const link = `https://app.eu.safetyculture.com/inspection/${inspectionData.audit_id}`
+            await crm.attachNoteFor(PLNumber, `Site Survey Form has been created for this deal.\n ${link}`)
         } else if (option === 2) {
             response = await createInspectionFrom(PLNumber, 'Installation Form');
+            const inspectionData = await surveyDataSource.searchInspectionFrom(PLNumber, 'Installation Form');
+            const link = `https://app.eu.safetyculture.com/inspection/${inspectionData.audit_id}`
+            await crm.attachNoteFor(PLNumber, `Inspection Form has been created for this deal.\n ${link}`)
         }
         else {
-            response = await getStatusFromInspection(PLNumber, 'PV, Battery and EV Survey');
+            const surveyResponse = await surveyDataSource.getInspectionStatusFor(PLNumber, 'PV, Battery and EV Survey');
+            const installationResponse = await surveyDataSource.getInspectionStatusFor(PLNumber, 'Installation Form');
+            response = new Response(JSON.stringify({surveyStatus: surveyResponse, installationStatus: installationResponse, statusCode: 200}));
+            
         }
-
         const responseData = await response?.json();
         return json(responseData);
     } catch (error) {
@@ -28,7 +36,6 @@ export async function POST({ request }) {
         return json({ message: "Internal server error", statusCode: 500 });
     }
 }
-
 async function createInspectionFrom(PLNumber: string, templateName: string) {
     try {
         const personName = await crm.getPersonNameFor(PLNumber);
@@ -49,7 +56,7 @@ async function createInspectionFrom(PLNumber: string, templateName: string) {
 
 async function getStatusFromInspection(PLNumber: string, templateName: string) {
     try {
-        const status = await surveyDataSource.getSurveyStatusFor(PLNumber, templateName);
+        const status = await surveyDataSource.getInspectionStatusFor(PLNumber, templateName);
         let statusResponse;
         if (status) {
             if (status === 'Completed')

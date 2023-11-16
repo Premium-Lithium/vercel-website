@@ -77,16 +77,6 @@ export class CRM {
 		return fieldResponse
 	}
 
-	async setExistingInverterFor(PLNumber: string, value: string) {
-		const updateDealRequest = await this.setCustomField(PLNumber, 'Existing Inverter - Make/Model/Size', value)
-		return updateDealRequest;
-	}
-
-	async getExistingInverterFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Make/Model/Size')
-		return fieldResponse
-	}
-
 	async setRoofPitchFor(PLNumber: string, value: string) {
 		const updateDealRequest = await this.setCustomField(PLNumber, 'Pitch', value)
 		return updateDealRequest;

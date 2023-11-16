@@ -366,7 +366,7 @@ export class SurveyDataSource {
         return this.fetchAnswersFromAField(PLNumber, 'Roof Type ', templateName)
     }
 
-    async getSurveyStatusFor(PLNumber: string, templateName: string) {
+    async getInspectionStatusFor(PLNumber: string, templateName: string) {
         const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
         if (targetInspection) {
             const completed = targetInspection.audit_data.date_completed
