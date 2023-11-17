@@ -3,7 +3,6 @@ import fs from 'fs';
 import { CRM } from '$lib/crm/crm-utils.js';
 import { supabase } from '$lib/supabase.ts';
 import { openSolarAPI } from '$lib/crm/opensolar-utils.js';
-import { getField } from '$lib/pipedrive-utils';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
@@ -197,6 +196,9 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 
     const schematic = await generateSchematicFor(PLNumber)
+    if (schematic === null) {
+        return json({ message: 'Schematic not found', statusCode: 503 })
+    }
     let schematicPathSvg = '/tmp/schematic.svg'
 
     fs.writeFileSync(schematicPathSvg, schematic);
@@ -290,8 +292,18 @@ async function generateSchematicFor(PLNumber: string) {
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
 
-    let svgString = fs.readFileSync('/static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
+    // TODO Get from supabase instead
+    // let svgString = fs.readFileSync('/static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
+    const { data, error } = await supabase
+        .storage
+        .from('schematic_templates')
+        .download(targetSchematic)
 
+    if (error) {
+        return null
+    }
+
+    let svgString = await data?.text()
     svgString = svgString.replace('[Existing Solar Size kW]', existingSolarSize + 'kW')
     svgString = svgString.replace('[Existing Inverter Size kW]', existingInverterSize + 'kW')
     svgString = svgString.replace('[Battery Size kWh]', newBatterySize + 'kWh')
