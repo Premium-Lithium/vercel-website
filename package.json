@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@auth0/auth0-spa-js": "^2.1.2",
 		"@azure/identity": "^3.3.2",
+		"@googlemaps/js-api-loader": "^1.16.2",
 		"@mapbox/mapbox-gl-draw": "^1.4.3",
 		"@microsoft/microsoft-graph-client": "^3.0.7",
 		"@pipedrive/app-extensions-sdk": "^0.9.0",
@@ -74,6 +75,7 @@
 		"postprocessing": "^6.33.3",
 		"readline-sync": "^1.4.10",
 		"really-relaxed-json": "^0.3.2",
+		"sass": "^1.69.5",
 		"shopify-token": "^4.1.0",
 		"svelte-material-icons": "^3.0.5",
 		"svelte-preprocess": "^5.1.0",
