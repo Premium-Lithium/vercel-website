@@ -305,28 +305,32 @@
 
 {#each modals as modal, i}
 	<Modal showModal={false} bind:dialog={modal}>
-		<div slot="header">
+		<div class="modal" slot="header">
 			<h3>{projects[i].address}</h3>
 		</div>
 		<div class="button-container">
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
 			>
-			<button
-				class="warning-button"
-				on:click|stopPropagation={() => panelsAlreadyInstalledClicked(projects[i], i)}
-				>Panels are already installed</button
-			>
-			<button
-				class="warning-button"
-				on:click|stopPropagation={() => roofTooComplicatedClicked(projects[i], i)}
-				>Roof is too complicated</button
-			>
-			<button class="modal-button" on:click|stopPropagation={() => completeProject(projects[i], i)}
-				>{projects[i].status.toLowerCase() == 'completed'
-					? 'Recomplete Project'
-					: 'Complete Project'}</button
-			>
+			{#if projects[i].status.toLowerCase() != 'not started'}
+				<button
+					class="warning-button"
+					on:click|stopPropagation={() => panelsAlreadyInstalledClicked(projects[i], i)}
+					>Panels are already installed</button
+				>
+				<button
+					class="warning-button"
+					on:click|stopPropagation={() => roofTooComplicatedClicked(projects[i], i)}
+					>Roof is too complicated</button
+				>
+				<button
+					class="modal-button"
+					on:click|stopPropagation={() => completeProject(projects[i], i)}
+					>{projects[i].status.toLowerCase() == 'completed'
+						? 'Recomplete Project'
+						: 'Complete Project'}</button
+				>
+			{/if}
 		</div>
 	</Modal>
 {/each}
@@ -390,6 +394,11 @@
 	h3 {
 		margin: 32px 8px 8px 8px;
 	}
+
+	.modal > h3 {
+		margin: 8px 8px 16px 8px;
+	}
+
 	.warning-button {
 		border: 2px solid #f9bf3b;
 		padding: 5px 10px;
