@@ -26,7 +26,7 @@ export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
-        projectFound  = await searchForProjectDesign(PLNumber)
+        projectFound = await searchForProjectDesign(PLNumber)
         let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
@@ -34,16 +34,15 @@ export async function POST({ request }) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else if (option === 3) {
             const dnoFound = await searchForDnoApplication(PLNumber, dealId)
-            console.log(dnoFound)
             if (dnoFound) {
                 return json({ message: 'DNO Application Found', statusCode: 200 })
             }
             return json({ message: "DNO Application not Found", statusCode: 500 })
-        }else if (option === 4) {
+        } else if (option === 4) {
             response = await buildContractFrom(PLNumber, projectFound);
-        }else {
+        } else {
             const designFound = searchForProjectExistance(PLNumber);
-            if (designFound) {
+            if (await designFound) {
                 response = json({ message: "Design found", statusCode: 500 })
             } else {
                 response = json({ message: "Design not found", statusCode: 200 })
@@ -88,6 +87,9 @@ async function getDnoDetailsFrom(operatorName: string) {
         const { data, error } = await supabase
             .from('network_operator')
             .select('operator_details');
+        if (error) {
+            return null
+        }
 
         const desiredOperator = data.find(operator => operator.operator_details.name === operatorName);
         return desiredOperator?.operator_details || null;
@@ -97,19 +99,19 @@ async function getDnoDetailsFrom(operatorName: string) {
     }
 }
 
-async function searchForProjectExistance(PLNumber: string): boolean {
+async function searchForProjectExistance(PLNumber: string): Promise<boolean> {
     const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
     const projectExists = (await openSolar.getProjectDetailsFrom(projectId) ? true : false)
     return projectExists
 }
 
-async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | null> {
+async function searchForProjectDesign(PLNumber: string): Promise<Project | undefined> {
     const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
     const designFound = await openSolar.searchForDesignFrom(projectId)
     if (designFound) {
         return { projectId: projectId, uuid: designFound }
     } else {
-        return null
+        return undefined
     }
 }
 
@@ -130,7 +132,7 @@ function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, 
     return missingDetails
 }
 
-async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData) {
+async function generateDnoApplicationFrom(PLNumber: string, projectFound: Project | undefined) {
     const customerName = await crm.getPersonNameFor(PLNumber);
     const customerAddressObject = await crm.getAddressFor(PLNumber);
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
@@ -151,9 +153,9 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400 })
     }
 
-    const projectData = {
-        id: projectFound.projectId,
-        uuid: projectFound.uuid
+    const projectData: Project = {
+        projectId: projectFound?.projectId,
+        uuid: projectFound?.uuid
     }
 
     const panelImagePath = '/tmp/panel_layout.jpeg'
@@ -329,8 +331,8 @@ function isPartOfSchematic(component: string | number) {
     return (!!component) ? '' : 'N';
 }
 
-async function downloadSystemImageFrom(projectData, filePath) {
-    const projectId = projectData.id
+async function downloadSystemImageFrom(projectData: Project, filePath: string) {
+    const projectId = projectData.projectId
     const uuid = projectData.uuid
 
     const buff = await openSolar.getBufferImageFrom(projectId, uuid, [500, 500])
@@ -362,18 +364,18 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
 
 }
 
-async function searchForDnoApplication(PLNumber:string, dealId: string) {
+async function searchForDnoApplication(PLNumber: string, dealId: string) {
     const customerName = await crm.getPersonNameFor(PLNumber)
     const dnoFile = await crm.getFileFor(dealId, `G99_${customerName}.docx`)
 
     if (dnoFile) {
-        return(dnoFile)
+        return (dnoFile)
     }
-    return(null)
+    return (null)
 }
 
 async function buildContractFrom(PLNumber: string, projectFound: Project | undefined) {
-    
+
 }
 
 

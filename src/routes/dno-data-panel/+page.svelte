@@ -180,8 +180,8 @@
 	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button
 	>
-	<button disabled={loading || !projectExist} class="link-btn" on:click={handleGenerate}
-		>Generate DNO Application</button
+	<button disabled={loading || !projectExist || dnoExist} class="link-btn" on:click={handleGenerate}
+		>{(!dnoExist) ? `Generate DNO Application` : `DNO already exists for this project`}</button
 	>
 	<button disabled={loading || !dnoExist} class="link-btn" on:click={contractBuilder}
 		>Build Contracts</button
