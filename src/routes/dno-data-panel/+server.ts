@@ -25,7 +25,7 @@ export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
-        projectFound = searchForProjectDesign(PLNumber)
+        projectFound  = await searchForProjectDesign(PLNumber)
         let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
