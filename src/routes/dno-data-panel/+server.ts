@@ -146,7 +146,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 
     const panelImagePath = '/tmp/panel_layout.jpeg'
-    await downloadSystemImageFrom(projectData, panelImagePath)
+    const systemImageResponse = await downloadSystemImageFrom(projectData, panelImagePath)
     const imageFileContent = fs.readFileSync(panelImagePath);
     const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
 
@@ -354,7 +354,7 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
 async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {
         sender: 'info@premiumlithium.com',
-        recipients: ['nicholas.dharmadi@premiumlithium.com'],
+        recipients: ['test@premiumlithium.com'],
         subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
         mail_body: `Hi,
         
