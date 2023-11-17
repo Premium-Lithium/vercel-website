@@ -91,6 +91,16 @@ export class CRM {
 		return readCustomDealField(fieldName, dealData)
 	}
 
+	async getOpenSolarProjectIdFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'OpenSolar Project ID')
+		return fieldResponse
+	}
+
+	async setOpenSolarProjectIdFor(PLNumber: string, value: string) {
+		const updateDealRequest = await this.setCustomField(PLNumber, 'OpenSolar Project ID', value)
+		return updateDealRequest
+	}
+
 	async getFileFor(dealId: string, fileName: string) {
 		const dealFiles = await this.pdDealsApi.getDealFiles(dealId)
 		const file = dealFiles.data.find((f) => f.name.includes(fileName));
@@ -108,16 +118,6 @@ export class CRM {
 
 	async getMpanFor(PLNumber: string) {
 		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'MPAN number')
-		return fieldResponse
-	}
-
-	async setExistingInverterFor(PLNumber: string, value: string) {
-		const updateDealRequest = await this.setCustomField(PLNumber, 'Existing Inverter - Make/Model/Size', value)
-		return updateDealRequest;
-	}
-
-	async getExistingInverterFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Make/Model/Size')
 		return fieldResponse
 	}
 
@@ -182,12 +182,12 @@ export class CRM {
 	}
 
 	async getExistingManufacturerFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Make')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Manufacturer')
 		return fieldResponse;
 	}
 
 	async getNewManufacturerFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Manufacturer')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Manufacturer')
 		return fieldResponse;
 	}
 
@@ -202,12 +202,12 @@ export class CRM {
 	}
 
 	async getExistingStorageCapacityFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Battery size (kWp)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Battery size (kWh)')
 		return (fieldResponse !== null) ? fieldResponse : 0;
 	}
 
 	async getNewStorageCapacityFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Battery size (kWh)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Battery size (kWh)')
 		return fieldResponse;
 	}
 
@@ -222,7 +222,7 @@ export class CRM {
 	}
 
 	async getNewPanelGenerationFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Solar (kWp)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
 		return fieldResponse;
 	}
 
@@ -237,12 +237,12 @@ export class CRM {
 	}
 
 	async getNewInverterSizeFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Inverter size (kWp)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter size (kWp)')
 		return fieldResponse;
 	}
 
 	async getNewBatterySizeFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'New Battery size (kWh)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Battery size (kWh)')
 		return fieldResponse;
 	}
 
@@ -255,7 +255,7 @@ export class CRM {
 	async getPhaseAndPowerFor(PLNumber: string) {
 		const phaseType = await this.getCustomFieldDataFor(PLNumber, 'Single Phase or Three Phase')
 		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
-		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'New Solar (kWp)')
+		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
 		return [phaseType, existingSolarGen, newSolarGen]
 	}
 

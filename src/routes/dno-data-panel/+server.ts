@@ -3,11 +3,11 @@ import fs from 'fs';
 import { CRM } from '$lib/crm/crm-utils.js';
 import { supabase } from '$lib/supabase.ts';
 import { openSolarAPI } from '$lib/crm/opensolar-utils.js';
-import { getField } from '$lib/pipedrive-utils';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
-import { convertFile } from 'convert-svg-to-png'
+import pkg from 'convert-svg-to-png'
+const { convertFile } = pkg;
 
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -26,6 +26,7 @@ export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
+        projectFound  = await searchForProjectDesign(PLNumber)
         let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
@@ -41,12 +42,11 @@ export async function POST({ request }) {
         }else if (option === 4) {
             response = await buildContractFrom(PLNumber, projectFound);
         }else {
-            const designFound = await searchForProjectDesign(PLNumber);
+            const designFound = searchForProjectExistance(PLNumber);
             if (designFound) {
-                projectFound = designFound
-                response = json({ message: "Project already exist", statusCode: 500 })
+                response = json({ message: "Design found", statusCode: 500 })
             } else {
-                response = json({ message: "Project still undefined", statusCode: 200 })
+                response = json({ message: "Design not found", statusCode: 200 })
             }
         }
         const responseData = await response?.json();
@@ -97,35 +97,40 @@ async function getDnoDetailsFrom(operatorName: string) {
     }
 }
 
-async function searchForProjectDesign(PLNumber: string) {
-    // Checks if a project exist with the same PLNumber or same address
-    let matchingProjectId = null;
-    const searchFromPL = await openSolar.searchForProjectFromRef(PLNumber);
-    const customerAddressObject = await crm.getAddressFor(PLNumber);
+async function searchForProjectExistance(PLNumber: string): boolean {
+    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
+    const projectExists = (await openSolar.getProjectDetailsFrom(projectId) ? true : false)
+    return projectExists
+}
 
-    if (!searchFromPL) {
-        const searchFromAddress = await openSolar.searchForProjectFromAddress(customerAddressObject.property_address);
-        if (!searchFromAddress) {
-            console.log("open solar project not found")
-            return json({ message: `Cannot find project for ${PLNumber}`, status: 500 })
-        } else {
-            matchingProjectId = searchFromAddress
-        }
-    } else {
-        matchingProjectId = searchFromPL
-    }
-
-    const designFound = await openSolar.searchForDesignFrom(matchingProjectId)
-
+async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | null> {
+    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
+    const designFound = await openSolar.searchForDesignFrom(projectId)
     if (designFound) {
-        return { projectId: matchingProjectId, uuid: designFound }
+        return { projectId: projectId, uuid: designFound }
     } else {
         return null
     }
 }
 
+function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, inverterModelNum: string, inverterManufacturer: string, newInverterSize: string): Array<string> {
+    let validDetails = {
+        'Single Phase or Three Phase': (!!phaseAndPower[0]) ? true : false,
+        'Customer MPAN': (!!customerMpan) ? true : false,
+        'Inverter Model Number': (!!inverterModelNum) ? true : false,
+        'Inverter Manufacturer': (!!inverterManufacturer) ? true : false,
+        'Inverter Size (kWp)': (!!newInverterSize) ? true : false
+    }
+    let missingDetails = []
+    for (let detail in validDetails) {
+        if (validDetails[detail] === false) {
+            missingDetails.push(detail)
+        }
+    }
+    return missingDetails
+}
 
-async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
+async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData) {
     const customerName = await crm.getPersonNameFor(PLNumber);
     const customerAddressObject = await crm.getAddressFor(PLNumber);
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
@@ -136,15 +141,23 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
     const existingStorageCapacity = await crm.getExistingStorageCapacityFor(PLNumber)
     const newManufacturer = await crm.getNewManufacturerFor(PLNumber)
     const newManufacturerRef = await crm.getNewManufacturerRefFor(PLNumber)
+    const newInverterSize = await crm.getNewInverterSizeFor(PLNumber)
     const newStorageCapacity = await crm.getNewStorageCapacityFor(PLNumber)
     const phaseAndPower = await crm.getPhaseAndPowerFor(PLNumber)
+
+    const missingDetails = validateDnoDetails(phaseAndPower, customerMpan, newManufacturerRef, newManufacturer, newInverterSize)
+
+    if (!!missingDetails.length) {
+        return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400 })
+    }
 
     const projectData = {
         id: projectFound.projectId,
         uuid: projectFound.uuid
     }
+
     const panelImagePath = '/tmp/panel_layout.jpeg'
-    await downloadSystemImageFrom(projectData, panelImagePath)
+    const systemImageResponse = await downloadSystemImageFrom(projectData, panelImagePath)
     const imageFileContent = fs.readFileSync(panelImagePath);
     const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
 
@@ -185,8 +198,8 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
         'capacityPhaseOne_existing': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[1] : '',
         'storageCapacity_existing': existingStorageCapacity,
         'manufacturer_new': newManufacturer,
-        'installationDate_new': 'ASAP',
         'manufacturerRef_new': newManufacturerRef,
+        'installationDate_new': 'ASAP',
         'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] : '',
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
@@ -194,6 +207,9 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
     }
 
     const schematic = await generateSchematicFor(PLNumber)
+    if (schematic === null) {
+        return json({ message: 'Schematic not found', statusCode: 503 })
+    }
     let schematicPathSvg = '/tmp/schematic.svg'
 
     fs.writeFileSync(schematicPathSvg, schematic);
@@ -242,6 +258,10 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound) {
 
     fs.writeFileSync(DocxFilePath, buff)
     const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
+
+    // TO DO: send email with the attachments
+    await sendNotificationMailFor(PLNumber)
+
     fs.unlinkSync(DocxFilePath);
     fs.unlinkSync(panelImagePath);
     if (dnoName && dnoDetails) {
@@ -283,8 +303,18 @@ async function generateSchematicFor(PLNumber: string) {
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
 
-    let svgString = fs.readFileSync('static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
+    // TODO Get from supabase instead
+    // let svgString = fs.readFileSync('/static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
+    const { data, error } = await supabase
+        .storage
+        .from('schematic_templates')
+        .download(targetSchematic)
 
+    if (error) {
+        return null
+    }
+
+    let svgString = await data?.text()
     svgString = svgString.replace('[Existing Solar Size kW]', existingSolarSize + 'kW')
     svgString = svgString.replace('[Existing Inverter Size kW]', existingInverterSize + 'kW')
     svgString = svgString.replace('[Battery Size kWh]', newBatterySize + 'kWh')
@@ -322,7 +352,9 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
         longLat: customerLongLat
     }
     try {
-        await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
+        const createProjectRes = await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
+        crm.setOpenSolarProjectIdFor(PLNumber, createProjectRes.id);
+        crm.attachNoteFor(PLNumber, createProjectRes.url)
         return json({ message: 'Project succesfully created.', status: 200 })
     } catch (error) {
         return json({ message: 'Error creating project.', status: 500 })
@@ -342,4 +374,38 @@ async function searchForDnoApplication(PLNumber:string, dealId: string) {
 
 async function buildContractFrom(PLNumber: string, projectFound: Project | undefined) {
     
+}
+
+
+async function sendNotificationMailFor(PLNumber: string) {
+    const emailData = {
+        sender: 'info@premiumlithium.com',
+        recipients: ['test@premiumlithium.com'],
+        subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
+        mail_body: `Hi,
+        
+        There is a new form to review for deals`,
+        content_type: "HTML",
+    };
+
+    try {
+        const options = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(emailData),
+        };
+
+        const mailAttempt = await fetch('https://vercel-website-liart.vercel.app/send-mail', options);
+
+        if (mailAttempt.status === 200) {
+            console.log(`Email successfully sent`);
+            return json({ message: 'OK', status: 200 });
+        } else {
+            console.error('Error sending mail');
+            return json({ message: 'Error sending mail', status: 500 });
+        }
+    } catch (error) {
+        console.error('Error sending mail:', error);
+        return json({ message: 'Error sending mail', status: 500 });
+    }
 }

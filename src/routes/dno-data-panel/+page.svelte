@@ -36,7 +36,6 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				console.log(responseData);
 				if (responseData.statusCode === 200) {
 					alertMessage = 'initialized.';
 				} else {
