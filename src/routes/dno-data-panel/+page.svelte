@@ -59,6 +59,7 @@
 
 	async function handleGenerate() {
 		try {
+			loading = true;
 			alertMessage = 'Generating DNO';
 			const response = await fetch('/dno-data-panel', {
 				method: 'POST',
@@ -69,6 +70,7 @@
 				})
 			});
 			if (response.ok) {
+				loading = false;
 				const responseData = await response.json();
 				alertMessage = responseData.message;
 				await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -76,6 +78,7 @@
 				return response;
 			}
 		} catch (error) {
+			loading = false;
 			console.log(error);
 			return error;
 		}
