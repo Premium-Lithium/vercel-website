@@ -6,7 +6,8 @@ import { openSolarAPI } from '$lib/crm/opensolar-utils.js';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
-import { convertFile } from 'convert-svg-to-png'
+import pkg from 'convert-svg-to-png'
+const { convertFile } = pkg;
 
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
