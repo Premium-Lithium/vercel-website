@@ -1,9 +1,12 @@
 <script>
 	import { page } from '$app/stores'
 	import Auth from '$lib/components/Auth.svelte'
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte'
+	import Loading from '$lib/components/Loading.svelte'
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
+	import { DirectionalLight } from 'three'
 
 	let uniqueIdentifier = undefined
 	let projects = []
@@ -12,6 +15,9 @@
 	let isAuthenticated = false
 	let supabaseAuth = undefined
 	let modals = []
+	let alreadyPanelsModal, roofTooComplicatedModal
+	let selectedProject = null
+	let selectedProjectIndex = null
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
@@ -114,7 +120,7 @@
 			{
 				worker_id: workerId,
 				assigned_projects: data.map((x) => {
-					return { uuid: x.id, status: 'not_started', openSolarId: null }
+					return { uuid: x.id, status: 'not_started', openSolarId: null, flags: [] }
 				})
 			}
 		])
@@ -152,6 +158,7 @@
 		})
 		await updateWorkerData(uniqueIdentifier, workerData[0])
 		awaitingResponse = false
+		populateProjectList()
 		window.open(`https://app.opensolar.com/#/projects/${data.id}/`, '_blank')?.focus()
 	}
 
@@ -188,6 +195,8 @@
 	}
 
 	async function onListClick(project, i) {
+		selectedProject = project
+		selectedProjectIndex = i
 		modals[i].showModal()
 	}
 
@@ -196,7 +205,10 @@
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (entry.uuid == project.projectId) {
+			if (
+				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
+				entry.status == 'completed'
+			) {
 				entry.status = 'completed'
 				await addOpenSolarLinkToAddress(
 					entry.openSolarId,
@@ -261,6 +273,34 @@
 			return
 		}
 	}
+
+	async function panelsAlreadyInstalledClicked(project, i) {
+		let workerData = await getWorkerData(uniqueIdentifier)
+		workerData[0]['assigned_projects'].forEach(async (entry) => {
+			if (
+				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
+				entry.status == 'completed'
+			) {
+				entry.flags = [...entry.flags, 'PANELS_ALREADY_INSTALLED']
+			}
+		})
+		await updateWorkerData(uniqueIdentifier, workerData[0])
+		modals[i].close()
+	}
+
+	async function roofTooComplicatedClicked(project, i) {
+		let workerData = await getWorkerData(uniqueIdentifier)
+		workerData[0]['assigned_projects'].forEach(async (entry) => {
+			if (
+				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
+				entry.status == 'completed'
+			) {
+				entry.flags = [...entry.flags, 'ROOF_TOO_COMPLICATED']
+			}
+		})
+		await updateWorkerData(uniqueIdentifier, workerData[0])
+		modals[i].close()
+	}
 </script>
 
 {#each modals as modal, i}
@@ -272,8 +312,16 @@
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
 			>
-			<button class="warning">Panels are already installed</button>
-			<button class="warning">Roof is too complicated</button>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => panelsAlreadyInstalledClicked(projects[i], i)}
+				>Panels are already installed</button
+			>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => roofTooComplicatedClicked(projects[i], i)}
+				>Roof is too complicated</button
+			>
 			<button class="modal-button" on:click|stopPropagation={() => completeProject(projects[i], i)}
 				>{projects[i].status.toLowerCase() == 'completed'
 					? 'Recomplete Project'
@@ -340,11 +388,11 @@
 
 <style>
 	h3 {
-		margin: 8px;
+		margin: 32px 8px 8px 8px;
 	}
-	.warning {
+	.warning-button {
 		border: 2px solid #f9bf3b;
-		padding: 5px 0px;
+		padding: 5px 10px;
 	}
 	.button-container {
 		width: 100%;
@@ -387,6 +435,7 @@
 		display: grid;
 		grid-template-columns: 3fr 1fr 1fr;
 		gap: 12px;
+		text-wrap: nowrap;
 	}
 
 	.project-header {
