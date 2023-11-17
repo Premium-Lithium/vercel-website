@@ -35,7 +35,6 @@ export async function POST({ request }) {
         const postcard: Postcard = await generatePostcardFor(customerId);
 
         const customer: PostcardRecipient = await getCustomerDetailsFor(customerId);
-        console.log("Generating postcard for customer:", customer.title + " " + customer.firstname + " " + customer.lastname);
 
         const sendAttempt = await sendPostcardTo(customer, postcard);
 
