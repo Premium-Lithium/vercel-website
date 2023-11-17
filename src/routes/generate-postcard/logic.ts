@@ -49,8 +49,9 @@ async function getImage(imageName: string): Promise<Buffer | null> {
 
 
 async function fetchPostcardResource(name: string): Promise<Blob | null> {
-    // const response = await supabase.storage.from('postcard-resources').createSignedUrl('postcard-template.png', 60); // public
+    // const response: any = await supabase.storage.from('postcard-resources').createSignedUrl('postcard-template.png', 60); // public
     const response: any = await supabase.storage.from('postcard-resources').download(name); // private
+
     const data: Blob = response.data;
 
     if(response.error) {
@@ -112,12 +113,25 @@ async function getSvg(svgName: string): Promise<string> {
 
 
 async function getPropertyImage(customerId: string): Promise<Buffer> {
-    // todo: use the open solar api to get the image of the property using the customer's id
-    const propertyImage = await getImage('pl-hq.png');
+    const url = "https://api.opensolar.com/api/orgs/52668/projects/3341427/systems/3B40614E-903E-4248-ACAC-E87D09E42E31/image/?width=500&height=500";
+    const token = "s_SVCFQ5RYUJMFJ46AVCCD2C4SOJ2K5YLN";
 
-    // todo: handle case where property image is not found
+    const openSolarResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
 
-    return propertyImage;
+    if(!openSolarResponse.ok) {
+        // todo: handle case where property image is not found - return a placeholder image
+        return null;
+    }
+
+    const screenshot = await openSolarResponse.arrayBuffer();
+    const buffer = Buffer.from(screenshot);
+
+    return buffer;
 }
 
 
@@ -133,7 +147,8 @@ async function addImageToSvgRegion(id: string, image: Buffer, canvas: Svg): Prom
     const regionBoundingBox: Box = region.bbox();
     const dimensions = await getImageDimensions(image); // Assuming imageBuffer is your image data
 
-    const placedImage = canvas.image(`data:image/png;base64,${imageBase64}`);
+    const imageType = getImageType(image);
+    const placedImage = canvas.image(`data:image/${imageType};base64,${imageBase64}`);
 
     // Calculate image size by comparing aspect ratios
     const imageAspectRatio = dimensions.width / dimensions.height;
@@ -171,6 +186,19 @@ async function getImageDimensions(image: Buffer): Promise<{ width: number, heigh
         console.error("Error retrieving image metadata:", error);
         return null;
     }
+}
+
+
+function getImageType(image: Buffer): string {
+    const jpgSignature = Buffer.from([0xFF, 0xD8, 0xFF]);
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+
+    if (image.slice(0, 3).equals(jpgSignature))
+        return 'jpeg';
+    else if (image.slice(0, 8).equals(pngSignature))
+        return 'png';
+    else
+        return 'unknown'; // or throw an error, up to your use case
 }
 
 
@@ -214,9 +242,9 @@ export function getCustomerDetailsFor(customerId: string): PostcardRecipient {
     // todo: get customer address information from supabase
 
     return {
-        title: 'Mr',
-        firstname: 'Lewis',
-        lastname: 'Bowes',
+        title: 'The',
+        firstname: 'Homeowner',
+        lastname: '',
         address1: '5 Whittam Road, Whalley',
         address2: 'Lancashire',
         city: 'Clitheroe',
