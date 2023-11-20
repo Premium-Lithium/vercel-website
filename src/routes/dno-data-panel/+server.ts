@@ -34,16 +34,13 @@ export async function POST({ request }) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
-        } else {
+        } else { // Only comes here when initialising the panel
             if (projectId) {
                 if (projectFound) {
-                    // Enable DNO Application, Disable Start OS Project
                     return json({message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false] })
                 }
-                // Disable DNO Application, Disable Start OS Project
                 return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true]})
             }
-            // Disable DNO Application, Enable Start OS Project
             return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true]})
         }
         const responseData = await response?.json();
@@ -320,7 +317,6 @@ async function downloadSystemImageFrom(projectData, filePath) {
 
     const buff = await openSolar.getBufferImageFrom(projectId, uuid, [500, 500])
 
-    //const addressName = (projectData.address).split(' ').join('_')
     fs.writeFileSync(filePath, buff)
     return json({ message: 'Panel Design Found and Downloaded', status: 200 })
 }
