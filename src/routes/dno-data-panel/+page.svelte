@@ -94,6 +94,7 @@
 				alertMessage = responseData.message;
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = '';
+				location.reload()
 				return response;
 			}
 		} catch (error) {
