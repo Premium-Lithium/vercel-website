@@ -53,7 +53,21 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
         return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true]})
     }
     return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true]})
+}
 
+async function getOpenSolarProject(PLNumber: string): Promise<string | null> { 
+    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
+    if(projectId)
+        return projectId
+    return null
+}
+
+async function getOpenSolarProjectDetails(projectId: string): Promise< ProjectData | null> {
+    const designFound = await openSolar.searchForDesignFrom(projectId)
+    if (designFound) {
+        return { projectId: projectId, uuid: designFound }
+    }
+    return null
 }
 
 async function fetchLongLatFrom(address: string) {
@@ -189,8 +203,8 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
         'schematic': '/tmp/schematic.png',
-        'date': `${date.toString()}`,
-        'signatory': ``
+        'date': `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`,
+        'signatory': ``, // TODO
     }
 
     const schematic = await generateSchematicFor(PLNumber)
@@ -345,21 +359,6 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
     } catch (error) {
         return json({ message: 'Error creating project.', status: 500 })
     }
-}
-
-async function getOpenSolarProject(PLNumber: string): Promise<string | null> { 
-    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
-    if(projectId)
-        return projectId
-    return null
-}
-
-async function getOpenSolarProjectDetails(projectId: string): Promise< ProjectData | null> {
-    const designFound = await openSolar.searchForDesignFrom(projectId)
-    if (designFound) {
-        return { projectId: projectId, uuid: designFound }
-    }
-    return null
 }
 
 async function sendNotificationMailFor(PLNumber: string) {

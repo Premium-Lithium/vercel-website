@@ -19,7 +19,7 @@
 
 	onMount(() => {
 		if (dealId) {
-			searchProjectDesign();
+			searchProjectDesign(); // TODO check if DNO has been created and disable button if it has
 		}
 	});
 
