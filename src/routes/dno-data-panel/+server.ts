@@ -25,14 +25,14 @@ export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
-        projectFound  = await searchForProjectDesign(PLNumber)
+        projectFound = await searchForProjectExistance(PLNumber)
         let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else {
-            const designFound = searchForProjectExistance(PLNumber);
+            const designFound = await searchForProjectDesign(PLNumber);
             if (designFound) {
                 response = json({ message: "Design found", statusCode: 500 })
             } else {
@@ -87,10 +87,13 @@ async function getDnoDetailsFrom(operatorName: string) {
     }
 }
 
-async function searchForProjectExistance(PLNumber: string): boolean {
+async function searchForProjectExistance(PLNumber: string) {
     const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
-    const projectExists = (await openSolar.getProjectDetailsFrom(projectId) ? true : false)
-    return projectExists
+    if(projectId) {
+        const projectExists = await openSolar.getProjectDetailsFrom(projectId)
+        return projectExists
+    }
+    return null
 }
 
 async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | null> {
@@ -344,7 +347,7 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
     try {
         const createProjectRes = await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
         crm.setOpenSolarProjectIdFor(PLNumber, createProjectRes.id);
-        crm.attachNoteFor(PLNumber, createProjectRes.url)
+        crm.attachNoteFor(PLNumber, `OpenSolar Project has been created for this deal. https://app.opensolar.com/#/projects/${createProjectRes.id}/design`)
         return json({ message: 'Project succesfully created.', status: 200 })
     } catch (error) {
         return json({ message: 'Error creating project.', status: 500 })
