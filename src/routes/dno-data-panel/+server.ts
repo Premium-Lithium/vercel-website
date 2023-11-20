@@ -7,6 +7,7 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 import pkg from 'convert-svg-to-png'
+import { patchDocument } from 'docx'
 const { convertFile } = pkg;
 
 const MAP_API_TOKEN =
@@ -375,9 +376,8 @@ async function searchForDnoApplication(PLNumber: string, dealId: string) {
 }
 
 async function buildContractFrom(PLNumber: string, projectFound: Project | undefined) {
-
+    
 }
-
 
 async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {

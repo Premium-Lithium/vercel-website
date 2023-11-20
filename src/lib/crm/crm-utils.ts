@@ -9,7 +9,7 @@ export class CRM {
 
 	constructor() {
 		this.pdDealsApi = new pipedrive.DealsApi(pd);
-		this.pdFilesApi = new pipedrive.FilesApi(pd)
+		this.pdFilesApi = new pipedrive.FilesApi(pd);
 		this.pdNotesApi = new pipedrive.NotesApi(pd);
 	}
 	async getDealIdFromPL(PLNumber: string) {
