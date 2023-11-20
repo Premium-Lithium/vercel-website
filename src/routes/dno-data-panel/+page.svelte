@@ -7,9 +7,11 @@
 
 	let sdk;
 
-	let alertMessage = null;
+	let dealStatus: string = "";
+	let alertMessage: string = "";
+	let openSolarBtnDisable = true;
+	let dnoApplicationBtnDisable = true;
 	let loading = false;
-	let projectExist = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
 		await sdk.execute('resize', { height: 300 });
@@ -34,14 +36,9 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
-				if (responseData.statusCode === 200) {
-					alertMessage = 'initialized.';
-				} else {
-					projectExist = true;
-					alertMessage = responseData.message;
-				}
-				await new Promise((resolve) => setTimeout(resolve, 1000));
-				alertMessage = null;
+				alertMessage = responseData.message;
+				dealStatus = responseData.status;
+				[openSolarBtnDisable, dnoApplicationBtnDisable] = responseData.buttonDisable;
 			}
 			loading = false;
 			return response;
@@ -112,11 +109,12 @@
 	{/if}
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
+		<p>Deal Status: {dealStatus}</p>
 	</div>
-	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}
+	<button disabled={openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button
 	>
-	<button disabled={loading || !projectExist} class="link-btn" on:click={handleGenerate}
+	<button disabled={dnoApplicationBtnDisable} class="link-btn" on:click={handleGenerate}
 		>Generate DNO Application</button
 	>
 </div>

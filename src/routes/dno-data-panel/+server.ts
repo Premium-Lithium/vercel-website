@@ -19,25 +19,32 @@ interface ProjectData {
     projectId: string,
     uuid: string
 }
-let projectFound: ProjectData | undefined = undefined;
+let projectFound: ProjectData | null = null;
 
 export async function POST({ request }) {
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
-        projectFound = await searchForProjectExistance(PLNumber)
+        const projectId = await getOpenSolarProject(PLNumber)
+        if (projectId !== null) {
+            projectFound = await getOpenSolarProjectDetails(projectId)
+        }
         let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else {
-            const designFound = await searchForProjectDesign(PLNumber);
-            if (designFound) {
-                response = json({ message: "Design found", statusCode: 500 })
-            } else {
-                response = json({ message: "Design not found", statusCode: 200 })
+            if (projectId) {
+                if (projectFound) {
+                    // Enable DNO Application, Disable Start OS Project
+                    return json({message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false] })
+                }
+                // Disable DNO Application, Disable Start OS Project
+                return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true]})
             }
+            // Disable DNO Application, Enable Start OS Project
+            return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true]})
         }
         const responseData = await response?.json();
         return json(responseData);
@@ -84,25 +91,6 @@ async function getDnoDetailsFrom(operatorName: string) {
     } catch (error) {
         console.error('Error fetching operator details:', error);
         return null;
-    }
-}
-
-async function searchForProjectExistance(PLNumber: string) {
-    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
-    if(projectId) {
-        const projectExists = await openSolar.getProjectDetailsFrom(projectId)
-        return projectExists
-    }
-    return null
-}
-
-async function searchForProjectDesign(PLNumber: string): Promise<ProjectData | null> {
-    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
-    const designFound = await openSolar.searchForDesignFrom(projectId)
-    if (designFound) {
-        return { projectId: projectId, uuid: designFound }
-    } else {
-        return null
     }
 }
 
@@ -356,7 +344,21 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
     } catch (error) {
         return json({ message: 'Error creating project.', status: 500 })
     }
+}
 
+async function getOpenSolarProject(PLNumber: string): Promise<string | null> { 
+    const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
+    if(projectId)
+        return projectId
+    return null
+}
+
+async function getOpenSolarProjectDetails(projectId: string): Promise< ProjectData | null> {
+    const designFound = await openSolar.searchForDesignFrom(projectId)
+    if (designFound) {
+        return { projectId: projectId, uuid: designFound }
+    }
+    return null
 }
 
 async function sendNotificationMailFor(PLNumber: string) {
