@@ -118,7 +118,6 @@ export class openSolarAPI {
         })
         const projectDetail = await response.json()
         if ((projectDetail.systems).length != 0) {
-            console.log("Design Found")
             return projectDetail.systems[0].uuid
         } else {
             return null

@@ -7,7 +7,7 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 import pkg from 'convert-svg-to-png'
-import { patchDocument } from 'docx'
+import { patchDocument, Table, TableCell, TableRow, PatchType, TextRun, VerticalAlign, TextDirection } from 'docx'
 const { convertFile } = pkg;
 
 const MAP_API_TOKEN =
@@ -375,8 +375,40 @@ async function searchForDnoApplication(PLNumber: string, dealId: string) {
     return (null)
 }
 
+async function getContractTemplate() {
+    const { data, error } = await supabase
+        .storage
+        .from('contract_template')
+        .download('contract_template.docx')
+    if (error) {
+        return null
+    }
+    return data
+}
+
+/**
+ * Builds contract form using data from PipeDrive and OpenSolar
+ * @param PLNumber identifier for deal
+ * @param projectFound project on OpenSolar
+ * @returns success if document created properly, error if template not found, required data not found, document failed to upload
+ */
 async function buildContractFrom(PLNumber: string, projectFound: Project | undefined) {
+    const contractRes = await getContractTemplate()
+    if (contractRes === null) 
+        return json({message: "Could not retrieve contract template", statusCode: 404})
+    const contractTemplate = await contractRes.text()
+    // fs.writeFileSync("/tmp/contract-template.docx", contractTemplate, {encoding: 'utf-8', flag: 'w'})
     
+    patchDocument(fs.readFileSync(contractTemplate), {
+        patches: {
+            test: {
+                type: PatchType.PARAGRAPH,
+                children: [new TextRun("Test")]
+            }
+        }
+    })
+
+    return json({message: "Success Test", status: 200})
 }
 
 async function sendNotificationMailFor(PLNumber: string) {
