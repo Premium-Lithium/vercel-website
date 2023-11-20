@@ -397,8 +397,15 @@ async function buildContractFrom(PLNumber: string, projectFound: Project | undef
     if (contractRes === null) 
         return json({message: "Could not retrieve contract template", statusCode: 404})
     const contractTemplate = await contractRes.arrayBuffer()
-    const path = `/tmp/contract_template.docx`
-    fs.writeFileSync(path, Buffer.from(contractTemplate), {encoding: 'utf-8', flag: 'w'})
+    // const path = `/tmp/contract_template.docx` // Actual location for production
+    const path = `./static/contract_template.docx` // Location for testing so we can read the document without uploading
+    fs.writeFileSync(path, Buffer.from(contractTemplate), {encoding: 'utf-8', flag: 'w'}) 
+
+    // Getting the contract contents from pipedrive
+    const contractData = await getContractDataFor(PLNumber, projectFound)
+    console.log(contractData)
+
+    // Patching reference: https://docx.js.org/#/usage/patcher?id=patches
     patchDocument(fs.readFileSync(path), {
         patches: {
             test: {
@@ -409,6 +416,15 @@ async function buildContractFrom(PLNumber: string, projectFound: Project | undef
     })
 
     return json({message: "Success Test", status: 200})
+}
+
+async function getContractDataFor(PLNumber: string, projectFound: Project | undefined) {
+    const dealId = await crm.getDealIdFromPL(PLNumber)
+    return {
+        customerName: await crm.getPersonNameFor(PLNumber),
+        customerAddress: await crm.getAddressFor(PLNumber),
+        signatory: await crm.getDealDataFor(PLNumber).ownerName
+    }
 }
 
 async function sendNotificationMailFor(PLNumber: string) {
