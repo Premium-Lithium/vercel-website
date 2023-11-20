@@ -396,10 +396,10 @@ async function buildContractFrom(PLNumber: string, projectFound: Project | undef
     const contractRes = await getContractTemplate()
     if (contractRes === null) 
         return json({message: "Could not retrieve contract template", statusCode: 404})
-    const contractTemplate = await contractRes.text()
-    // fs.writeFileSync("/tmp/contract-template.docx", contractTemplate, {encoding: 'utf-8', flag: 'w'})
-    
-    patchDocument(fs.readFileSync(contractTemplate), {
+    const contractTemplate = await contractRes.arrayBuffer()
+    const path = `/tmp/contract_template.docx`
+    fs.writeFileSync(path, Buffer.from(contractTemplate), {encoding: 'utf-8', flag: 'w'})
+    patchDocument(fs.readFileSync(path), {
         patches: {
             test: {
                 type: PatchType.PARAGRAPH,
