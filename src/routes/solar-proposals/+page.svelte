@@ -7,11 +7,18 @@
 
 	let uniqueIdentifier = undefined
 	let projects = []
-	let numOfProjects = 25
 	let awaitingResponse = false
 	let isAuthenticated = false
 	let supabaseAuth = undefined
 	let modals = []
+
+	// PARAMETERS
+
+	const numOfProjects = 25
+	const minSaving = 300.0
+	const maxSaving = 2000.0
+	const minPanels = 4
+	const maxPanels = 24
 
 	$: if (supabaseAuth) {
 		uniqueIdentifier = supabaseAuth.user.id
@@ -180,7 +187,7 @@
 						return
 					}
 					window
-						.open(`https://app.opensolar.com/#/projects/${entry.openSolarId}/`, '_blank')
+						.open(`https://app.opensolar.com/#/projects/${entry.openSolarId}/design`, '_blank')
 						?.focus()
 					awaitingResponse = false
 				} else {
@@ -191,8 +198,6 @@
 	}
 
 	async function onListClick(project, i) {
-		selectedProject = project
-		selectedProjectIndex = i
 		modals[i].showModal()
 	}
 
@@ -202,15 +207,21 @@
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
-				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
-				entry.status == 'completed'
+				entry.uuid == project.projectId &&
+				(entry.status == 'in_progress' || entry.status == 'completed')
 			) {
+				let existingFlags = entry.flags
 				entry.status = 'completed'
+				const { pass, flags } = await performAutomaticAudit(entry.openSolarId)
+				flags.forEach(async (flag) => {
+					await addFlagToProject(project, flag)
+				})
 				await addOpenSolarLinkToAddress(
 					entry.openSolarId,
 					project.projectId,
 					uniqueIdentifier,
-					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length
+					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
+					[...new Set([...existingFlags, ...flags])] // merge flag arrays, removing duplicates
 				)
 			}
 		})
@@ -220,7 +231,39 @@
 		populateProjectList()
 	}
 
-	async function addOpenSolarLinkToAddress(openSolarId, houseId, workerId, numCompleted) {
+	async function performAutomaticAudit(openSolarId) {
+		let flags = []
+		let res = await fetch('solar-proposals/open-solar/get-systems', {
+			method: 'POST',
+			body: JSON.stringify({ openSolarId }),
+			headers: { 'Content-Type': 'application/json' }
+		})
+		if (!res.ok) {
+			console.log(res.statusText)
+		} else {
+			let systems = (await res.json()).systems
+			const totalPanels = systems.reduce((p, v, i, a) => {
+				return p + v.total_module_quantity
+			}, 0)
+			if (totalPanels < minPanels) flags.push('NOT_ENOUGH_PANELS')
+			if (totalPanels > maxPanels) flags.push('TOO_MANY_PANELS')
+
+			const proposedSaving = systems
+				.reduce((p, v, i, a) => {
+					return (
+						p +
+						(v.data.bills.current.bills_yearly[0].annual.total -
+							v.data.bills.proposed['213321'].bills_yearly[0].annual.total)
+					)
+				}, 0)
+				.toFixed(2)
+			if (proposedSaving < minSaving) flags.push('NOT_ENOUGH_SAVING')
+			if (proposedSaving > maxSaving) flags.push('TOO_MUCH_SAVING')
+		}
+		return { pass: flags.length == 0, flags }
+	}
+
+	async function addOpenSolarLinkToAddress(openSolarId, houseId, workerId, numCompleted, flags) {
 		let { data, error: selectError } = await supabase
 			.from('south_facing_houses')
 			.select('*')
@@ -235,7 +278,8 @@
 			openSolarProjects = [
 				{
 					workerId,
-					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`
+					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`,
+					flags
 				}
 			]
 		} else {
@@ -246,7 +290,8 @@
 				...openSolarProjects,
 				{
 					workerId,
-					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`
+					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`,
+					flags
 				}
 			]
 		}
@@ -270,31 +315,28 @@
 		}
 	}
 
-	async function panelsAlreadyInstalledClicked(project, i) {
+	async function addFlagToProject(project, flag) {
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
 				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
 				entry.status == 'completed'
 			) {
-				entry.flags = [...entry.flags, 'PANELS_ALREADY_INSTALLED']
+				if (!entry.flags.includes(flag)) entry.flags = [...entry.flags, flag]
 			}
 		})
 		await updateWorkerData(uniqueIdentifier, workerData[0])
+	}
+
+	async function panelsAlreadyInstalledClicked(project, i) {
+		await addFlagToProject(project, 'PANELS_ALREADY_INSTALLED')
+		await completeProject(project, i)
 		modals[i].close()
 	}
 
 	async function roofTooComplicatedClicked(project, i) {
-		let workerData = await getWorkerData(uniqueIdentifier)
-		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (
-				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
-				entry.status == 'completed'
-			) {
-				entry.flags = [...entry.flags, 'ROOF_TOO_COMPLICATED']
-			}
-		})
-		await updateWorkerData(uniqueIdentifier, workerData[0])
+		await addFlagToProject(project, 'ROOF_TOO_COMPLICATED')
+		await completeProject(project, i)
 		modals[i].close()
 	}
 </script>
