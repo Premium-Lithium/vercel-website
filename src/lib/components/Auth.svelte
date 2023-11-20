@@ -15,7 +15,7 @@
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
-		if (data && !error) {
+		if (data.session && !error) {
 			supabaseAuth = { session: data.session, user: data.session.user }
 		}
 	})
