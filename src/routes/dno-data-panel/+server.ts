@@ -165,6 +165,8 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         dnoCompanyDetailsData = dnoDetails
     }
 
+    const date = new Date();
+
     const fieldsToUpdate = {
         'dno_company.name': dnoCompanyDetailsData.name,
         'dno_company.address': dnoCompanyDetailsData.address,
@@ -193,7 +195,9 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] : '',
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
-        'schematic': '/tmp/schematic.png'
+        'schematic': '/tmp/schematic.png',
+        'date': `${date.toString()}`,
+        'signatory': ``
     }
 
     const schematic = await generateSchematicFor(PLNumber)
