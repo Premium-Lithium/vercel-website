@@ -34,14 +34,8 @@ export async function POST({ request }) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
-        } else { // Only comes here when initialising the panel
-            if (projectId) {
-                if (projectFound) {
-                    return json({message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false] })
-                }
-                return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true]})
-            }
-            return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true]})
+        } else { 
+            return initValidation(projectId, projectFound)
         }
         const responseData = await response?.json();
         return json(responseData);
@@ -49,6 +43,17 @@ export async function POST({ request }) {
         console.log('Error:', error);
         return json({ message: "Internal server error", statusCode: 500 });
     }
+}
+
+async function initValidation(projectId: string | null, projectFound: ProjectData | null) {
+    if (projectId) {
+        if (projectFound) {
+            return json({message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false] })
+        }
+        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true]})
+    }
+    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true]})
+
 }
 
 async function fetchLongLatFrom(address: string) {

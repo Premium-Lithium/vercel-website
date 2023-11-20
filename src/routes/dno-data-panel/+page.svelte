@@ -52,6 +52,7 @@
 	}
 
 	async function handleGenerate() {
+		dnoApplicationBtnDisable = true;
 		try {
 			alertMessage = 'Generating DNO';
 			const response = await fetch('/dno-data-panel', {
@@ -76,6 +77,7 @@
 	}
 
 	async function generateOpenSolarProject() {
+		openSolarBtnDisable = true;
 		try {
 			alertMessage = 'Generating open solar project';
 			const response = await fetch('/dno-data-panel', {
