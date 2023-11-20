@@ -12,6 +12,14 @@
 	let forgottenPassword = false
 	let sentResetEmail = false
 	let sentSignupEmail = false
+
+	onMount(async () => {
+		const { data, error } = await supabase.auth.getSession()
+		if (data && !error) {
+			supabaseAuth = { session: data.session, user: data.session.user }
+		}
+	})
+
 	async function handleLogin() {
 		error = ''
 		if (forgottenPassword) {

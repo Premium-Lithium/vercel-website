@@ -1,12 +1,9 @@
 <script>
 	import { page } from '$app/stores'
 	import Auth from '$lib/components/Auth.svelte'
-	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte'
-	import Loading from '$lib/components/Loading.svelte'
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
-	import { DirectionalLight } from 'three'
 
 	let uniqueIdentifier = undefined
 	let projects = []
@@ -15,20 +12,19 @@
 	let isAuthenticated = false
 	let supabaseAuth = undefined
 	let modals = []
-	let alreadyPanelsModal, roofTooComplicatedModal
-	let selectedProject = null
-	let selectedProjectIndex = null
+
+	$: if (supabaseAuth) {
+		uniqueIdentifier = supabaseAuth.user.id
+		populateProjectList()
+	}
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
-		else isAuthenticated = true
+		else {
+			isAuthenticated = true
+		}
 	})
-
-	$: if (isAuthenticated && supabaseAuth) {
-		uniqueIdentifier = supabaseAuth.user.id
-		populateProjectList()
-	}
 
 	async function populateProjectList() {
 		let workerData = await getWorkerData(uniqueIdentifier)
