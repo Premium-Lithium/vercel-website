@@ -203,7 +203,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
         'schematic': '/tmp/schematic.png',
-        'date': `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`,
+        'date': `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`, // TODO fix
         'signatory': ``, // TODO
     }
 
