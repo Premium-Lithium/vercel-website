@@ -138,7 +138,7 @@
 		<button disabled={loading || status != undefined} class="link-btn" on:click={startSiteSurvey}
 			>Generate Site Survey</button
 		>
-		<span class="status-text" >Status: {status}</span>
+		<span class="status-text" >Status: {installationStatus}</span>
 		<button
 			disabled={loading || installationStatus != undefined}
 			class="link-btn"
