@@ -7,11 +7,8 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 import pkg from 'convert-svg-to-png'
-<<<<<<< HEAD
-import { patchDocument, Table, TableCell, TableRow, PatchType, TextRun, VerticalAlign, TextDirection } from 'docx'
-=======
 import dateFormat from 'dateformat'
->>>>>>> extract-dno
+import { patchDocument, Table, TableCell, TableRow, PatchType, TextRun, VerticalAlign, TextDirection } from 'docx'
 const { convertFile } = pkg;
 
 const MAP_API_TOKEN =
@@ -24,27 +21,20 @@ interface Project {
     projectId: string
     uuid: string
 }
-<<<<<<< HEAD
 
 let projectFound: Project | undefined = undefined;
-=======
-let projectFound: ProjectData | null = null;
->>>>>>> extract-dno
 
 export async function POST({ request }) {
     let response
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
-<<<<<<< HEAD
         projectFound = await searchForProjectDesign(PLNumber)
         let response;
-=======
         const projectId = await getOpenSolarProject(PLNumber)
         if (projectId !== null) {
             projectFound = await getOpenSolarProjectDetails(projectId)
         }
->>>>>>> extract-dno
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
@@ -58,16 +48,13 @@ export async function POST({ request }) {
         } else if (option === 4) {
             response = await buildContractFrom(PLNumber, projectFound);
         } else {
-<<<<<<< HEAD
             const designFound = searchForProjectExistance(PLNumber);
             if (await designFound) {
                 response = json({ message: "Design found", statusCode: 500 })
             } else {
                 response = json({ message: "Design not found", statusCode: 200 })
             }
-=======
             return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber))
->>>>>>> extract-dno
         }
         const responseData = await response?.json();
         return json(responseData);
@@ -138,13 +125,10 @@ async function getDnoDetailsFrom(operatorName: string) {
         const { data, error } = await supabase
             .from('network_operator')
             .select('operator_details');
-<<<<<<< HEAD
         if (error) {
             return null
         }
 
-=======
->>>>>>> extract-dno
         const desiredOperator = data.find(operator => operator.operator_details.name === operatorName);
         return desiredOperator?.operator_details || null;
     } catch (error) {
@@ -153,7 +137,6 @@ async function getDnoDetailsFrom(operatorName: string) {
     }
 }
 
-<<<<<<< HEAD
 async function searchForProjectExistance(PLNumber: string): Promise<boolean> {
     const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
     const projectExists = (await openSolar.getProjectDetailsFrom(projectId) ? true : false)
@@ -170,8 +153,6 @@ async function searchForProjectDesign(PLNumber: string): Promise<Project | undef
     }
 }
 
-=======
->>>>>>> extract-dno
 function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, inverterModelNum: string, inverterManufacturer: string, newInverterSize: string): Array<string> {
     let validDetails = {
         'Single Phase or Three Phase': (!!phaseAndPower[0]) ? true : false,
@@ -487,7 +468,6 @@ async function buildContractFrom(PLNumber: string, projectFound: Project | undef
 
     // Getting the contract contents from pipedrive
     const contractData = await getContractDataFor(PLNumber, projectFound)
-    console.log(contractData)
 
     // Patching reference: https://docx.js.org/#/usage/patcher?id=patches
     patchDocument(fs.readFileSync(path), {
