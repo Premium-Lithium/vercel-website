@@ -7,9 +7,9 @@
 
 	let sdk;
 
-	let dealStatus: string = "";
-	let currentSignatory: string = "";
-	let alertMessage: string = "";
+	let dealStatus: string = '';
+	let currentSignatory: string = '';
+	let alertMessage: string = '';
 	let openSolarBtnDisable = true;
 	let dnoApplicationBtnDisable = true;
 	let loading = false;
@@ -95,7 +95,7 @@
 				alertMessage = responseData.message;
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = '';
-				location.reload()
+				location.reload();
 				return response;
 			}
 		} catch (error) {
@@ -114,7 +114,7 @@
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 		<p>Deal Status: {dealStatus}</p>
-		<p>Current Signatory: {(currentSignatory) ? currentSignatory : 'Not Found'}</p>
+		<p>Current Signatory: {currentSignatory ? currentSignatory : 'Not Found'}</p>
 	</div>
 	<button disabled={openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button

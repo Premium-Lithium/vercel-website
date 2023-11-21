@@ -35,7 +35,7 @@ export async function POST({ request }) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
-        } else { 
+        } else {
             return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber))
         }
         const responseData = await response?.json();
@@ -50,23 +50,23 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
     if (projectId) {
         if (projectFound) {
             if (dnoCreated) {
-                return json({message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await getCurrentPipedriveUser() })
+                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await getCurrentPipedriveUser() })
             }
-            return json({message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await getCurrentPipedriveUser() })
+            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await getCurrentPipedriveUser() })
         }
         return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await getCurrentPipedriveUser() })
     }
     return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await getCurrentPipedriveUser() })
 }
 
-async function getOpenSolarProject(PLNumber: string): Promise<string | null> { 
+async function getOpenSolarProject(PLNumber: string): Promise<string | null> {
     const projectId = await crm.getOpenSolarProjectIdFor(PLNumber);
-    if(projectId)
+    if (projectId)
         return projectId
     return null
 }
 
-async function getOpenSolarProjectDetails(projectId: string): Promise< ProjectData | null> {
+async function getOpenSolarProjectDetails(projectId: string): Promise<ProjectData | null> {
     const designFound = await openSolar.searchForDesignFrom(projectId)
     if (designFound)
         return { projectId: projectId, uuid: designFound }
@@ -210,7 +210,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'storageCapacity_new': newStorageCapacity,
         'schematic': '/tmp/schematic.png',
         'date': `${dateFormat(date), 'dd/mm/yyyy'}`,
-        'signatory': `${(pdUser) ? pdUser : '' }`,
+        'signatory': `${(pdUser) ? pdUser : ''}`,
     }
 
     const schematic = await generateSchematicFor(PLNumber)
@@ -288,7 +288,7 @@ async function getCurrentPipedriveUser(): Promise<string | null> {
     const req = {
         method: "GET",
         headers: { 'Content-Type': 'application/json' },
-        }
+    }
     const res = await fetch('https://api.pipedrive.com/v1/users/me', req)
     if (res.ok) {
         return res.data.name
@@ -313,9 +313,8 @@ async function getNetworkOperatorFromPostCode(postcode: string) {
 async function generateSchematicFor(PLNumber: string) {
     let existingSolarSize = 0;
     const existingPanels = await crm.getCurrentlyHavePanelsFor(PLNumber)
-    if (existingPanels === 'Yes') {
+    if (existingPanels === 'Yes')
         existingSolarSize = parseInt(await crm.getExistingSolarArrayGenerationFor(PLNumber))
-    }
     const existingInverterSize = await crm.getExistingInverterSizeFor(PLNumber); // number
     const newBatterySize = await crm.getNewBatterySizeFor(PLNumber) // string
     const newInverterSize = await crm.getNewInverterSizeFor(PLNumber) // string
