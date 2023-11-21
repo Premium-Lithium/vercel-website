@@ -382,11 +382,13 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
 async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {
         sender: 'info@premiumlithium.com',
-        recipients: ['test@premiumlithium.com'],
+        recipients: ['peter.gillingham@premiumlithium.com'],
         subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
         mail_body: `Hi,
         
-        There is a new form to review for deals`,
+        There is a new form to review for the following deal:
+        
+        https://premiumlithium.pipedrive.com/deal/${await crm.getDealIdFromPL(PLNumber)}`,
         content_type: "HTML",
     };
 
