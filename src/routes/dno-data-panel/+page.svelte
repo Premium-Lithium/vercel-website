@@ -15,7 +15,7 @@
 	let loading = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 350 });
+		await sdk.execute('resize', { height: 300 });
 	});
 
 	onMount(() => {
@@ -122,7 +122,7 @@
 <style>
 	.dno-panel {
 		padding: 15px;
-		border: 1px solid grey;
+		/* border: 1px solid grey; */
 		display: grid;
 	}
 
