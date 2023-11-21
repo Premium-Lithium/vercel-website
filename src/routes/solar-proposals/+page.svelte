@@ -11,6 +11,7 @@
 	let isAuthenticated = false
 	let supabaseAuth = undefined
 	let modals = []
+	const flagsVisibleToWorker = ['PANELS_ALREADY_INSTALLED', 'ROOF_TOO_COMPLICATED']
 
 	// PARAMETERS
 
@@ -221,7 +222,7 @@
 					project.projectId,
 					uniqueIdentifier,
 					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
-					[...new Set([...existingFlags, ...flags])] // merge flag arrays, removing duplicates
+					[...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])] // merge flag arrays, removing duplicates
 				)
 			}
 		})
@@ -233,7 +234,7 @@
 
 	async function performAutomaticAudit(openSolarId) {
 		let flags = []
-		let res = await fetch('solar-proposals/open-solar/get-systems', {
+		let res = await fetch('/solar-proposals/open-solar/get-systems', {
 			method: 'POST',
 			body: JSON.stringify({ openSolarId }),
 			headers: { 'Content-Type': 'application/json' }
@@ -278,7 +279,7 @@
 			openSolarProjects = [
 				{
 					workerId,
-					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`,
+					openSolarId: openSolarId,
 					flags
 				}
 			]
@@ -290,7 +291,7 @@
 				...openSolarProjects,
 				{
 					workerId,
-					openSolarLink: `https://app.opensolar.com/#/projects/${openSolarId}/`,
+					openSolarId: openSolarId,
 					flags
 				}
 			]
