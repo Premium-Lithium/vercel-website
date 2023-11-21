@@ -203,12 +203,12 @@ export class CRM {
 
 	async getExistingStorageCapacityFor(PLNumber: string) {
 		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Battery size (kWh)')
-		return (fieldResponse !== null) ? fieldResponse : 0;
+		return (fieldResponse) ? fieldResponse : 0;
 	}
 
 	async getNewStorageCapacityFor(PLNumber: string) {
 		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Battery size (kWh)')
-		return fieldResponse;
+		return (fieldResponse) ? fieldResponse : 0;
 	}
 
 	async getCurrentlyHavePanelsFor(PLNumber: string) {
@@ -237,7 +237,7 @@ export class CRM {
 	}
 
 	async getNewInverterSizeFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter size (kWp)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kWp)')
 		return fieldResponse;
 	}
 
@@ -264,6 +264,15 @@ export class CRM {
 
 		const addFileRequest = await this.pdFilesApi.addFile(filePath, { 'dealId': dealId })
 		return addFileRequest;
+	}
+
+	// Gets files, returns it if exists, null if otherwise
+	async getFilesFor(PLNumber: string) {
+		const dealId = await this.getDealIdFromPL(PLNumber)
+
+		const getFileRequest = await this.pdDealsApi.getDealFiles(dealId)
+
+		return await getFileRequest.data
 	}
 
 	async attachNoteFor(PLNumber: string, content: string) {

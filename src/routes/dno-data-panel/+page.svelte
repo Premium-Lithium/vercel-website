@@ -7,13 +7,17 @@
 
 	let sdk;
 
-	let alertMessage = null;
+	let dealStatus: string = '';
+	let currentSignatory: string = '';
+	let alertMessage: string = '';
+	let openSolarBtnDisable = true;
+	let dnoApplicationBtnDisable = true;
 	let loading = false;
 	let projectExist = false;
 	let dnoExist = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 300 });
+		await sdk.execute('resize', { height: 350 });
 	});
 
 	onMount(() => {
@@ -36,10 +40,91 @@
 			});
 			if (response.ok) {
 				const responseData = await response.json();
+				alertMessage = responseData.message;
+				dealStatus = responseData.status;
+				currentSignatory = responseData.currentSignatory;
+				[openSolarBtnDisable, dnoApplicationBtnDisable] = responseData.buttonDisable;
+			}
+			loading = false;
+			return response;
+		} catch (error) {
+			console.log(error);
+			alertMessage = error;
+			return error;
+		}
+	}
+
+	async function handleGenerate() {
+		dnoApplicationBtnDisable = true;
+		try {
+			loading = true;
+			alertMessage = 'Generating DNO';
+			const response = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 1
+				})
+			});
+			if (response.ok) {
+				loading = false;
+				const responseData = await response.json();
+				alertMessage = responseData.message;
+				if (responseData.statusCode === 400) dnoApplicationBtnDisable = false;
+				return response;
+			}
+		} catch (error) {
+			loading = false;
+			console.log(error);
+			return error;
+		}
+	}
+
+	async function generateOpenSolarProject() {
+		openSolarBtnDisable = true;
+		try {
+			alertMessage = 'Generating open solar project';
+			const response = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 2
+				})
+			});
+			if (response.ok) {
+				const responseData = await response.json();
+				alertMessage = responseData.message;
+				if (responseData.statusCode === 200) location.reload();
+				return response;
+			}
+		} catch (error) {
+			console.log(error);
+			return error;
+		}
+	}
+
+	async function searchForDno() {
+		try {
+			alertMessage = 'initializing';
+			loading = true;
+			const response = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 3
+				})
+			});
+			if (response.ok) {
+				const responseData = await response.json();
+				console.log(responseData);
 				if (responseData.statusCode === 200) {
-					alertMessage = 'initialized.';
+					alertMessage = 'dno found';
+					dnoExist = true;
 				} else {
-					projectExist = true;
+					dnoExist = false;
 					alertMessage = responseData.message;
 				}
 				await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -56,50 +141,23 @@
 		}
 	}
 
-	async function handleGenerate() {
+	async function contractBuilder() {
 		try {
-			loading = true;
-			alertMessage = 'Generating DNO';
-			const response = await fetch('/dno-data-panel', {
+			alertMessage = 'Building contract documents';
+			const res = await fetch('/dno-data-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 1
+					option: 4
 				})
 			});
-			if (response.ok) {
-				loading = false;
-				const responseData = await response.json();
-				alertMessage = responseData.message;
+			if (res.ok) {
+				const resData = await res.json();
+				alertMessage = resData.message;
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				alertMessage = '';
-				return response;
-			}
-		} catch (error) {
-			loading = false;
-			console.log(error);
-			return error;
-		}
-	}
-
-	async function generateOpenSolarProject() {
-		try {
-			alertMessage = 'Generating open solar project';
-			const response = await fetch('/dno-data-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 2
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				alertMessage = responseData.message;
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = '';
-				return response;
+				return res;
 			}
 		} catch (error) {
 			console.log(error);
@@ -176,11 +234,13 @@
 	{/if}
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
+		<p>Deal Status: {dealStatus}</p>
+		<p>Current Signatory: {currentSignatory ? currentSignatory : 'Not Found'}</p>
 	</div>
-	<button disabled={loading || projectExist} class="link-btn" on:click={generateOpenSolarProject}
+	<button disabled={openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button
 	>
-	<button disabled={loading || !projectExist || dnoExist} class="link-btn" on:click={handleGenerate}
+	<button disabled={dnoApplicationBtnDisable || dnoExist} class="link-btn" on:click={handleGenerate}
 		>{(!dnoExist) ? `Generate DNO Application` : `DNO already exists for this project`}</button
 	>
 	<button disabled={loading || !dnoExist} class="link-btn" on:click={contractBuilder}
