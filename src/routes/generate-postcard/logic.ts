@@ -84,17 +84,82 @@ async function createFront(customerId: string, qrCode: Buffer): Promise<Buffer> 
 	// 3. Place the property image in the right place
 	if (propertyImage !== null) {
 		const positionedPropertyImage = await addImageToSvgRegion('#_Bolt_', propertyImage, canvas)
-
 		if (positionedPropertyImage !== null) positionedPropertyImage.back()
 	}
 
 	if (qrCode !== null) {
-		const positionedQrCode = await addImageToSvgRegion('#_QRCode_', qrCode, canvas)
-
+		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
 		if (positionedQrCode !== null) positionedQrCode.front()
 	}
 
+	const openSolarId = await getOpenSolarIdFromCustomerId(customerId)
+	if (!openSolarId) {
+		console.log("Couldn't find openSolarId")
+		return
+	}
+
+	const saving = await getSaving(openSolarId)
+	const numPanels = await getNumPanels(openSolarId)
+	console.log('Saving', saving, 'NumPanels', numPanels)
+	if (saving && numPanels) {
+		const positionedCustomerInfo = await addTextToSvgRegion(
+			'#Customer-info',
+			`${numPanels} Solar panels, saving you £${saving}`,
+			canvas
+		)
+		// if (positionedCustomerInfo !== null) positionedCustomerInfo.front()
+		console.log(positionedCustomerInfo)
+	}
+
 	return canvasToPng(canvas)
+}
+
+async function getSaving(openSolarId: number) {
+	let res = await fetch(
+		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
+		{
+			method: 'POST',
+			body: JSON.stringify({ openSolarId }),
+			headers: { 'Content-Type': 'application/json' }
+		}
+	)
+	if (!res.ok) {
+		console.log('Error fetching systems')
+		return
+	}
+	const systems = (await res.json()).systems
+	const proposedSaving = systems
+		.reduce((p, v, i, a) => {
+			return (
+				p +
+				(v.data.bills.current.bills_yearly[0].annual.total -
+					v.data.bills.proposed['213321'].bills_yearly[0].annual.total)
+			)
+		}, 0)
+		.toFixed(2)
+	return proposedSaving
+}
+
+async function getNumPanels(openSolarId: number) {
+	let res = await fetch(
+		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
+		{
+			method: 'POST',
+			body: JSON.stringify({ openSolarId }),
+			headers: { 'Content-Type': 'application/json' }
+		}
+	)
+	if (!res.ok) {
+		console.log('Error fetching systems')
+		return
+	}
+
+	let systems = (await res.json()).systems
+	const totalPanels = systems.reduce((p, v, i, a) => {
+		return p + v.total_module_quantity
+	}, 0)
+
+	return totalPanels
 }
 
 async function getSvg(svgName: string): Promise<string> {
@@ -132,6 +197,16 @@ async function getPropertyImage(customerId: string): Promise<Buffer> {
 	const buffer = Buffer.from(screenshot)
 
 	return buffer
+}
+
+function addTextToSvgRegion(id: string, text: string, canvas: Svg) {
+	let region = canvas.findOne(id)
+	if (!region) {
+		console.log(`Could not find region with id '${id}'`)
+		return null
+	}
+	console.log(region.node.childNodes[0].childNodes[0])
+	region.node.childNodes[0].childNodes[0].data = text
 }
 
 async function addImageToSvgRegion(id: string, image: Buffer, canvas: Svg): Promise<Image | null> {
@@ -223,7 +298,7 @@ async function createBack(qrCode: Buffer): Promise<Buffer> {
 	const canvas: Svg = SVG(backTemplate)
 
 	if (qrCode !== null) {
-		const positionedQrCode = await addImageToSvgRegion('#_QRCode_', qrCode, canvas)
+		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
 
 		if (positionedQrCode !== null) positionedQrCode.front()
 	}
@@ -250,7 +325,7 @@ async function getOpenSolarIdFromCustomerId(customerId: string): Promise<number 
 async function getOpenSolarSystemUUID(openSolarId: number): Promise<string | undefined> {
 	// todo: change url before merge
 	const res = await fetch(
-		'https://vercel-website-git-solar-turk-premium-lithium.vercel.app/solar-proposals/open-solar/get-systems',
+		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
 		{
 			method: 'POST',
 			body: JSON.stringify({ openSolarId }),
@@ -264,7 +339,39 @@ async function getOpenSolarSystemUUID(openSolarId: number): Promise<string | und
 	return (await res.json()).systems[0].uuid
 }
 
-export async function getCustomerDetailsFor(customerId: string): PostcardRecipient {
+function splitAddressIntoFields(addressComponents): {
+	line1: string
+	line2: string
+	city: string
+	postcode: string
+} {
+	let fields = { line1: '', line2: '', city: '', postcode: '' }
+
+	addressComponents.forEach((x) => {
+		switch (x.types[0]) {
+			case 'street_number':
+				fields.line1 = x['long_name']
+				break
+			case 'route':
+				fields.line1 = fields.line1.concat(` ${x['long_name']}`)
+				break
+			case 'locality':
+				fields.line2 = x['long_name']
+				break
+			case 'postal_town':
+				fields.city = x['long_name']
+				break
+			case 'postal_code':
+				fields.postcode = x['long_name']
+				break
+		}
+	})
+	return fields
+}
+
+export async function getCustomerDetailsFor(
+	customerId: string
+): Promise<PostcardRecipient | undefined> {
 	// todo: get customer address information from supabase
 	const { data, error } = await supabase
 		.from('south_facing_houses')
@@ -272,16 +379,17 @@ export async function getCustomerDetailsFor(customerId: string): PostcardRecipie
 		.eq('id', customerId)
 	if (error) {
 		console.log('Error fetching address from supabase for id: ', customerId)
+		return undefined
 	}
-
+	let address = splitAddressIntoFields(data[0].address['address_components'])
 	return {
 		title: 'The',
 		firstname: 'Homeowner',
 		lastname: '',
-		address1: '5 Whittam Road, Whalley',
-		address2: 'Lancashire',
-		city: 'Clitheroe',
-		postcode: 'BB7 9SB',
+		address1: address.line1,
+		address2: address.line2,
+		city: address.city,
+		postcode: address.postcode,
 		country: 'GB'
 	}
 }
