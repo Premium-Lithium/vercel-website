@@ -232,7 +232,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         return json({ message: 'New Battery or Solar Panel Required on PipeDrive for Schematic'})
     }
     let schematicPathSvg = '/tmp/schematic.svg'
-    let schematicPathPng = '/tmp/schematic.svg'
+    let schematicPathPng = '/tmp/schematic.png'
 
     fs.writeFileSync(schematicPathSvg, schematic);
 
