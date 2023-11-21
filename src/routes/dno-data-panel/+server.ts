@@ -228,7 +228,10 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     const schematic = await generateSchematicFor(PLNumber)
     if (schematic === null) {
         return json({ message: 'Schematic not found', statusCode: 503 })
+    } else if (!schematic) {
+        return json({ message: 'New Battery or Solar Panel Required on PipeDrive for Schematic'})
     }
+
     let schematicPathSvg = '/tmp/schematic.svg'
 
     fs.writeFileSync(schematicPathSvg, schematic);
@@ -333,6 +336,10 @@ async function generateSchematicFor(PLNumber: string) {
 
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
+    
+    if (targetSchematic === "NEP-NNP-NB-NCO.svg") {
+        return // not applicable and missing details
+    }
 
     const { data, error } = await supabase
         .storage
@@ -394,8 +401,8 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
 
 async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {
-        sender: 'info@premiumlithium.com',
-        recipients: ['peter.gillingam@premiumlithium.com'],
+        sender: 'dno@premiumlithium.com',
+        recipients: ['dno@premiumlithium.com'],
         subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
         mail_body: `Hi,
         

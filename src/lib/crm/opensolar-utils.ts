@@ -1,10 +1,12 @@
+import { OPEN_SOLAR_ORG_ID, OPEN_SOLAR_TOKEN } from "$env/static/private";
 
 export class openSolarAPI {
     token;
     organisationId;
-    constructor() {
-        this.token = 's_OZATKMZINPGPGYTS2XFB42LT2KQSKZM6' // My token (Peter) as the machine user
-        this.organisationId = 52668 // Premium Lithium's ORG ID
+
+    constructor(openSolarToken?: string, openSolarOrgID?: string) {
+        this.token = openSolarToken || OPEN_SOLAR_TOKEN
+        this.organisationId = openSolarOrgID || OPEN_SOLAR_ORG_ID
     }
 
     async authenticate(username: string, password: string) {
