@@ -172,8 +172,6 @@
 		const bottom = formData.get('bottom')
 		const right = formData.get('right')
 		const top = formData.get('top')
-
-		console.log($page.url)
 		let res = await fetch(`${$page.url.origin}/solar-proposals/find-suitable-houses`, {
 			method: 'POST',
 			body: JSON.stringify({
@@ -245,7 +243,6 @@
 			let latLon = getMeanLatLon(x.house.nodes)
 			let { buildingStats, roofSegmentStats, wholeRoofStats, maxArrayAreaMeters2 } =
 				x.solarResult.solarPotential
-			console.log(await getHouseNames([x])[0])
 			let { data, error } = await supabase.from('south_facing_houses').upsert(
 				{
 					roof_details: { buildingStats, maxArrayAreaMeters2, roofSegmentStats, wholeRoofStats },
