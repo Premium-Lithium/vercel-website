@@ -200,19 +200,21 @@
 
 		console.log(latLongOfHouses)
 		let promises = latLongOfHouses.map(async (x, i) => {
-			try {
-				let response = await fetch(`${$page.url.origin}/solar-proposals/google-solar`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
-				})
-				let data = await response.json()
-				return { solarResult: data, house: x.house }
-			} catch (error) {
-				console.error('Error with fetch for house:', x.house, error)
-			}
+			setTimeout(async () => {
+				try {
+					let response = await fetch(`${$page.url.origin}/solar-proposals/google-solar`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
+					})
+					let data = await response.json()
+					return { solarResult: data, house: x.house }
+				} catch (error) {
+					console.error('Error with fetch for house:', x.house, error)
+				}
+			}, i * 200)
 		})
 		let googleSolarResults = []
 		try {
