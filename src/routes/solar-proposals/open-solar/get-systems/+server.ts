@@ -5,7 +5,7 @@ export async function POST({ request }) {
 	const { openSolarId } = await request.json()
 
 	let res = await fetch(
-		`https://api.opensolar.com/api/orgs/52668/projects/${openSolarId}/systems/details`,
+		`https://api.opensolar.com/api/orgs/99066/projects/${openSolarId}/systems/details`,
 		{
 			method: 'GET',
 			headers: {
