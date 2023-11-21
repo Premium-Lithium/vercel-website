@@ -1,14 +1,14 @@
 import { json } from '@sveltejs/kit';
-import fs from 'fs';
+import fs, { readFile } from 'fs';
 import { CRM } from '$lib/crm/crm-utils.js';
 import { supabase } from '$lib/supabase.ts';
 import { openSolarAPI } from '$lib/crm/opensolar-utils.js';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
-import pkg from 'convert-svg-to-png'
 import dateFormat from 'dateformat'
-const { convertFile } = pkg;
+import svg2img from 'svg2img'
+
 
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -231,12 +231,14 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     } else if (!schematic) {
         return json({ message: 'New Battery or Solar Panel Required on PipeDrive for Schematic'})
     }
-
     let schematicPathSvg = '/tmp/schematic.svg'
+    let schematicPathPng = '/tmp/schematic.svg'
 
     fs.writeFileSync(schematicPathSvg, schematic);
 
-    await convertFile('/tmp/schematic.svg')
+    svg2img(schematicPathSvg, function(error, outputBuffer) {
+        fs.writeFileSync(schematicPathPng, outputBuffer)  
+    });
 
     //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
     const imageOpts = {
@@ -255,7 +257,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
             if (tagName === 'panel_layout') {
                 return imageFileContent;
             } else if (tagName === 'schematic') {
-                return fs.readFileSync('/tmp/schematic.png');
+                return fs.readFileSync(schematicPathPng);
             }
             return null;
         }
