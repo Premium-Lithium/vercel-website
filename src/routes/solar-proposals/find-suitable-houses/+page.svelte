@@ -66,7 +66,7 @@
 				x.house.way.tags['addr:postcode']
 			)
 				return `${x.house.way.tags['addr:housenumber']} ${x.house.way.tags['addr:street']}, ${x.house.way.tags['addr:city']} ${x.house.way.tags['addr:postcode']}, UK`
-			return (await geocodeLatLngs([x]))[0].geocode.results[0]['formatted_address']
+			return (await geocodeLatLngs([x]))[0].geocode.results[0]
 		})
 	}
 
@@ -146,7 +146,7 @@
 			) {
 				return
 			}
-			let res = fetch(`${$page.url.pathname}/geocoding`, {
+			let res = fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -172,8 +172,7 @@
 		const bottom = formData.get('bottom')
 		const right = formData.get('right')
 		const top = formData.get('top')
-
-		let res = await fetch($page.url.pathname, {
+		let res = await fetch(`${$page.url.origin}/solar-proposals/find-suitable-houses`, {
 			method: 'POST',
 			body: JSON.stringify({
 				left: parseFloat(left.toString()),
@@ -200,22 +199,27 @@
 		})
 
 		console.log(latLongOfHouses)
-
-		let promises = latLongOfHouses.map(async (x, i) => {
-			try {
-				let response = await fetch(`${$page.url.pathname}/google-solar`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
-				})
-				let data = await response.json()
-				return { solarResult: data, house: x.house }
-			} catch (error) {
-				console.error('Error with fetch for house:', x.house, error)
-			}
-		})
+		let promises = latLongOfHouses.map(
+			(x, i) =>
+				new Promise((resolve) =>
+					setTimeout(async () => {
+						try {
+							let response = await fetch(`${$page.url.origin}/solar-proposals/google-solar`, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
+							})
+							let data = await response.json()
+							resolve({ solarResult: data, house: x.house })
+						} catch (error) {
+							console.error('Error with fetch for house:', x.house, error)
+							resolve(null)
+						}
+					}, i * 201)
+				)
+		)
 		let googleSolarResults = []
 		try {
 			googleSolarResults = await Promise.all(promises)
@@ -228,7 +232,7 @@
 		let suitableHouses = []
 
 		let housesWithASouthernRoof = googleSolarResults.filter((x) => {
-			if (!x.solarResult) return false
+			if (x.solarResult.error) return false
 			return getSoutherlyRoofSections(x.solarResult.solarPotential.roofSegmentStats).length
 		})
 
@@ -249,9 +253,9 @@
 				{
 					roof_details: { buildingStats, maxArrayAreaMeters2, roofSegmentStats, wholeRoofStats },
 					address: await getHouseNames([x])[0],
-					lat_lon: { lat: latLon.lat, lon: latLon.lon }
+					lat_lon: latLon
 				},
-				{ onConflict: 'lat_lon, address', ignoreDuplicates: true }
+				{ onConflict: 'address', ignoreDuplicates: true }
 			)
 		})
 

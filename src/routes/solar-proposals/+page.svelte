@@ -93,7 +93,7 @@
 		})
 		return {
 			id: houseData?.id,
-			address: houseData?.address,
+			address: houseData?.address['formatted_address'],
 			lat_lon: houseData?.lat_lon,
 			status: projectStatus
 		}
