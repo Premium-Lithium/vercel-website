@@ -199,23 +199,27 @@
 		})
 
 		console.log(latLongOfHouses)
-		let promises = latLongOfHouses.map(async (x, i) => {
-			setTimeout(async () => {
-				try {
-					let response = await fetch(`${$page.url.origin}/solar-proposals/google-solar`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
-					})
-					let data = await response.json()
-					return { solarResult: data, house: x.house }
-				} catch (error) {
-					console.error('Error with fetch for house:', x.house, error)
-				}
-			}, i * 200)
-		})
+		let promises = latLongOfHouses.map(
+			(x, i) =>
+				new Promise((resolve) =>
+					setTimeout(async () => {
+						try {
+							let response = await fetch(`${$page.url.origin}/solar-proposals/google-solar`, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
+							})
+							let data = await response.json()
+							resolve({ solarResult: data, house: x.house })
+						} catch (error) {
+							console.error('Error with fetch for house:', x.house, error)
+							resolve(null)
+						}
+					}, i * 200)
+				)
+		)
 		let googleSolarResults = []
 		try {
 			googleSolarResults = await Promise.all(promises)
