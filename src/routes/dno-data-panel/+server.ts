@@ -42,7 +42,7 @@ export async function POST({ request }) {
         return json(responseData);
     } catch (error) {
         console.log('Error:', error);
-        return json({ message: 'Internal Server Error', statusCode: 500 });
+        return json({ message: 'DNO: Internal Server Error', statusCode: 500 });
     }
 }
 
@@ -107,7 +107,7 @@ async function getDnoDetailsFrom(operatorName: string) {
         const { data, error } = await supabase
             .from('network_operator')
             .select('operator_details');
-        const desiredOperator = data.find(operator => operator.operator_details.name === operatorName);
+        const desiredOperator = data?.find(operator => operator.operator_details.name === operatorName);
         return desiredOperator?.operator_details || null;
     } catch (error) {
         console.error('Error fetching operator details:', error);
