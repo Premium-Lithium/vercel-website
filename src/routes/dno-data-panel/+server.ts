@@ -7,6 +7,7 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 import pkg from 'convert-svg-to-png'
+import dateFormat from 'dateformat'
 const { convertFile } = pkg;
 
 const MAP_API_TOKEN =
@@ -203,7 +204,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
         'schematic': '/tmp/schematic.png',
-        'date': `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`, // TODO fix
+        'date': `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`, // TODO fix
         'signatory': ``, // TODO
     }
 
