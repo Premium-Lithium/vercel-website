@@ -55,7 +55,6 @@ export class openSolarAPI {
         }
         const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/`, options)
         const responseData = await response.json()
-        console.log('Project created.')
         return responseData
     }
 
@@ -117,9 +116,7 @@ export class openSolarAPI {
             }
         })
         const projectDetail = await response.json()
-        console.log(projectDetail)
         if ((projectDetail.systems).length != 0) {
-            console.log("Design Found")
             return projectDetail.systems[0].uuid
         } else {
             return null

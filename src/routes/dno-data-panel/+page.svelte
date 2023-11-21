@@ -8,6 +8,7 @@
 	let sdk;
 
 	let dealStatus: string = "";
+	let currentSignatory: string = "";
 	let alertMessage: string = "";
 	let openSolarBtnDisable = true;
 	let dnoApplicationBtnDisable = true;
@@ -19,7 +20,7 @@
 
 	onMount(() => {
 		if (dealId) {
-			searchProjectDesign(); // TODO check if DNO has been created and disable button if it has
+			searchProjectDesign();
 		}
 	});
 
@@ -38,6 +39,7 @@
 				const responseData = await response.json();
 				alertMessage = responseData.message;
 				dealStatus = responseData.status;
+				currentSignatory = responseData.currentSignatory;
 				[openSolarBtnDisable, dnoApplicationBtnDisable] = responseData.buttonDisable;
 			}
 			loading = false;
@@ -112,6 +114,7 @@
 	<div class="header">
 		<p>Selected ID: {dealId}</p>
 		<p>Deal Status: {dealStatus}</p>
+		<p>Current Signatory: {(currentSignatory) ? currentSignatory : 'Not Found'}</p>
 	</div>
 	<button disabled={openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button

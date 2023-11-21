@@ -257,6 +257,15 @@ export class CRM {
 		return addFileRequest;
 	}
 
+	// Gets files, returns it if exists, null if otherwise
+	async getFilesFor(PLNumber: string) {
+		const dealId = await this.getDealIdFromPL(PLNumber)
+
+		const getFileRequest = await this.pdDealsApi.getDealFiles(dealId)
+
+		return await getFileRequest.data
+	}
+
 	async attachNoteFor(PLNumber: string, content: string) {
 		const noteRequest = {
 			dealId: await this.getDealIdFromPL(PLNumber),

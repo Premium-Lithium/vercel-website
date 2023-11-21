@@ -36,7 +36,7 @@ export async function POST({ request }) {
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else { 
-            return initValidation(projectId, projectFound)
+            return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber))
         }
         const responseData = await response?.json();
         return json(responseData);
@@ -46,14 +46,17 @@ export async function POST({ request }) {
     }
 }
 
-async function initValidation(projectId: string | null, projectFound: ProjectData | null) {
+async function initValidation(projectId: string | null, projectFound: ProjectData | null, dnoCreated: boolean) {
     if (projectId) {
         if (projectFound) {
-            return json({message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false] })
+            if (dnoCreated) {
+                return json({message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await getCurrentPipedriveUser() })
+            }
+            return json({message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await getCurrentPipedriveUser() })
         }
-        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true]})
+        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await getCurrentPipedriveUser() })
     }
-    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true]})
+    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await getCurrentPipedriveUser() })
 }
 
 async function getOpenSolarProject(PLNumber: string): Promise<string | null> { 
@@ -65,9 +68,8 @@ async function getOpenSolarProject(PLNumber: string): Promise<string | null> {
 
 async function getOpenSolarProjectDetails(projectId: string): Promise< ProjectData | null> {
     const designFound = await openSolar.searchForDesignFrom(projectId)
-    if (designFound) {
+    if (designFound)
         return { projectId: projectId, uuid: designFound }
-    }
     return null
 }
 
@@ -93,6 +95,9 @@ async function getG99TemplateDocx() {
         .storage
         .from('g99_form_template')
         .download('G99_template.docx')
+    if (error) {
+        return null
+    }
     return data
 }
 
@@ -102,7 +107,6 @@ async function getDnoDetailsFrom(operatorName: string) {
         const { data, error } = await supabase
             .from('network_operator')
             .select('operator_details');
-
         const desiredOperator = data.find(operator => operator.operator_details.name === operatorName);
         return desiredOperator?.operator_details || null;
     } catch (error) {
@@ -174,6 +178,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 
     const date = new Date();
+    const pdUser = await getCurrentPipedriveUser();
 
     const fieldsToUpdate = {
         'dno_company.name': dnoCompanyDetailsData.name,
@@ -204,8 +209,8 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
         'storageCapacity_new': newStorageCapacity,
         'schematic': '/tmp/schematic.png',
-        'date': `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`, // TODO fix
-        'signatory': ``, // TODO
+        'date': `${dateFormat(date), 'dd/mm/yyyy'}`,
+        'signatory': `${(pdUser) ? pdUser : '' }`,
     }
 
     const schematic = await generateSchematicFor(PLNumber)
@@ -242,6 +247,10 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     };
 
     const g99DocxTemplate = await getG99TemplateDocx()
+    if (!g99DocxTemplate) {
+        return json({ message: 'DNO Template Not Found', statusCode: 404 })
+    }
+
     const content = await g99DocxTemplate.arrayBuffer()
 
     const zip = new PizZip(content)
@@ -275,6 +284,17 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 }
 
+async function getCurrentPipedriveUser(): Promise<string | null> {
+    const req = {
+        method: "GET",
+        headers: { 'Content-Type': 'application/json' },
+        }
+    const res = await fetch('https://api.pipedrive.com/v1/users/me', req)
+    if (res.ok) {
+        return res.data.name
+    }
+    return null
+}
 
 async function getNetworkOperatorFromPostCode(postcode: string) {
     let res = await fetch(`http://www.ssen.co.uk/distributor-results/Index?distributorTerm=${postcode}`)
@@ -305,8 +325,6 @@ async function generateSchematicFor(PLNumber: string) {
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
 
-    // TODO Get from supabase instead
-    // let svgString = fs.readFileSync('/static/schematic_templates/' + targetSchematic, { encoding: 'utf8', flag: 'r' });
     const { data, error } = await supabase
         .storage
         .from('schematic_templates')
@@ -393,4 +411,14 @@ async function sendNotificationMailFor(PLNumber: string) {
         console.error('Error sending mail:', error);
         return json({ message: 'Error sending mail', status: 500 });
     }
+}
+
+async function checkIfDNOCreatedFor(PLNumber: string): Promise<boolean> {
+    const files = await crm.getFilesFor(PLNumber)
+    for (let file in files) {
+        if (files[file].name.includes('G99')) {
+            return true
+        }
+    }
+    return false
 }
