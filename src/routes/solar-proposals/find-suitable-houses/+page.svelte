@@ -217,7 +217,7 @@
 							console.error('Error with fetch for house:', x.house, error)
 							resolve(null)
 						}
-					}, i * 200)
+					}, i * 201)
 				)
 		)
 		let googleSolarResults = []
@@ -232,7 +232,7 @@
 		let suitableHouses = []
 
 		let housesWithASouthernRoof = googleSolarResults.filter((x) => {
-			if (!x.solarResult) return false
+			if (x.solarResult.error) return false
 			return getSoutherlyRoofSections(x.solarResult.solarPotential.roofSegmentStats).length
 		})
 
