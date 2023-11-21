@@ -11,6 +11,16 @@ export class SurveyDataSource {
         this.organisationId = 'role_b660120a576a483a9b1f380e4ad7f572'
     }
 
+    async getTemplateNameFor(templateId: string) {
+        const response = await fetch(`https://api.safetyculture.io/templates/v1/templates/${templateId}`, {
+            headers: {
+                'Authorization': `Bearer ${this.accessToken}`
+            }
+        })
+        const responseData = await response.json()
+        return responseData.template.name
+    }
+
     async getTemplateIdFor(templateName: string) {
         const response = await fetch('https://api.safetyculture.io/templates/search?order=desc&archived=false&owner=all', {
             headers: {
@@ -55,6 +65,7 @@ export class SurveyDataSource {
                 }
             }
         }
+        console.log('No reference found.')
         return null
     }
 
@@ -285,11 +296,12 @@ export class SurveyDataSource {
             body: JSON.stringify(bodyData)
         }
         const response = await fetch('https://api.safetyculture.io/audits', options)
-        const responseData = await response.json() 
+        const responseData = await response.json()
         const shareResponse = await this.shareInspection(responseData.audit_id, this.organisationId) // Makes sure everyone in organisation have access to edit,delete
         console.log(shareResponse)
         return shareResponse
     }
+
 
     async shareInspection(auditId: string, userId: string) {
         const bodyData = {
@@ -354,7 +366,7 @@ export class SurveyDataSource {
         return this.fetchAnswersFromAField(PLNumber, 'Roof Type ', templateName)
     }
 
-    async getSurveyStatusFor(PLNumber: string, templateName: string) {
+    async getInspectionStatusFor(PLNumber: string, templateName: string) {
         const targetInspection = await this.searchInspectionFrom(PLNumber, templateName)
         if (targetInspection) {
             const completed = targetInspection.audit_data.date_completed
@@ -398,4 +410,37 @@ export class SurveyDataSource {
         const responseData = await response.json()
         return responseData
     }
+
+    async getWebhookList() {
+        const options = {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                authorization: `Bearer ${this.accessToken}`
+            }
+        };
+        const response = await fetch('https://api.safetyculture.io/webhooks/v1/webhooks', options)
+        const responseData = await response.json()
+        return responseData
+    }
+
+    async updateWebhookFor(webhookId: string, triggerEvents, destinationUrl: string) {
+        const options = {
+            method: 'PUT',
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+                authorization: `Bearer ${this.accessToken}`
+            },
+            body: JSON.stringify({trigger_events: triggerEvents, url: destinationUrl})
+        };
+
+        const response = await fetch(`https://api.safetyculture.io/webhooks/v1/webhooks/${webhookId}`, options)
+        const responseData = await response.json()
+        console.log(responseData)
+        return responseData
+    }
 }
+
+
+
