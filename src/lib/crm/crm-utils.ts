@@ -194,12 +194,12 @@ export class CRM {
 
 	async getExistingStorageCapacityFor(PLNumber: string) {
 		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Battery size (kWh)')
-		return (fieldResponse !== null) ? fieldResponse : 0;
+		return (fieldResponse) ? fieldResponse : 0;
 	}
 
 	async getNewStorageCapacityFor(PLNumber: string) {
 		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Battery size (kWh)')
-		return fieldResponse;
+		return (fieldResponse) ? fieldResponse : 0;
 	}
 
 	async getCurrentlyHavePanelsFor(PLNumber: string) {
@@ -228,7 +228,7 @@ export class CRM {
 	}
 
 	async getNewInverterSizeFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter size (kWp)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kWp)')
 		return fieldResponse;
 	}
 

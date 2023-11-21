@@ -15,7 +15,7 @@
 	let loading = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 300 });
+		await sdk.execute('resize', { height: 350 });
 	});
 
 	onMount(() => {
@@ -47,8 +47,6 @@
 		} catch (error) {
 			console.log(error);
 			alertMessage = error;
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-			alertMessage = null;
 			return error;
 		}
 	}
@@ -68,8 +66,7 @@
 			if (response.ok) {
 				const responseData = await response.json();
 				alertMessage = responseData.message;
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = '';
+				if (responseData.statusCode === 400) dnoApplicationBtnDisable = false;
 				return response;
 			}
 		} catch (error) {
@@ -93,9 +90,7 @@
 			if (response.ok) {
 				const responseData = await response.json();
 				alertMessage = responseData.message;
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = '';
-				location.reload();
+				if (responseData.statusCode === 200) location.reload();
 				return response;
 			}
 		} catch (error) {

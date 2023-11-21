@@ -23,6 +23,7 @@ interface ProjectData {
 let projectFound: ProjectData | null = null;
 
 export async function POST({ request }) {
+    let response
     try {
         const { dealId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
@@ -30,7 +31,6 @@ export async function POST({ request }) {
         if (projectId !== null) {
             projectFound = await getOpenSolarProjectDetails(projectId)
         }
-        let response;
         if (option == 1) {
             response = await generateDnoApplicationFrom(PLNumber, projectFound);
         } else if (option == 2) {
@@ -42,7 +42,7 @@ export async function POST({ request }) {
         return json(responseData);
     } catch (error) {
         console.log('Error:', error);
-        return json({ message: "Internal server error", statusCode: 500 });
+        return json({ message: 'Internal Server Error', statusCode: 500 });
     }
 }
 
@@ -147,10 +147,16 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     const newStorageCapacity = await crm.getNewStorageCapacityFor(PLNumber)
     const phaseAndPower = await crm.getPhaseAndPowerFor(PLNumber)
 
+    // This array doesn't get caught by the check later on so validating it here
+    if (!phaseAndPower[1])
+        phaseAndPower[1] = ''
+    if (!phaseAndPower[2])
+        phaseAndPower[2] = ''
+
     const missingDetails = validateDnoDetails(phaseAndPower, customerMpan, newManufacturerRef, newManufacturer, newInverterSize)
 
     if (!!missingDetails.length) {
-        return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400 })
+        return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400, buttonDisable: [true, false] })
     }
 
     const projectData = {
@@ -191,26 +197,32 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'customer.telephone': customerTelephone,
         'customer.email': customerEmail,
         'customer.mpan': customerMpan,
-        'installer.contact_person': '',
-        'installer.telephone': '',
+        'installer.contact_person': 'dno@premiumlithium.com',
+        'installer.telephone': '08006448899',
         'manufacturer.name': '',
         'energy_code': '',
         'panel_layout': panelImagePath,
 
         'manufacturer_existing': existingManufacturer,
         'manufacturerRef_existing': existingManufacturerRef,
-        'capacityThreePhase_existing': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[1] : '',
-        'capacityPhaseOne_existing': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[1] : '',
-        'storageCapacity_existing': existingStorageCapacity,
+        'capacityThreePhase_existing': (phaseAndPower[0] === 'Three Phase' && existingManufacturer) ? phaseAndPower[1] + 'kw' : '',
+        'capacityPhaseOne_existing': (phaseAndPower[0] === 'Single phase' && existingManufacturer) ? phaseAndPower[1] + 'kw' : '',
+        'storageCapacity_existing': (existingStorageCapacity) ? existingStorageCapacity + 'kw' : '',
         'manufacturer_new': newManufacturer,
         'manufacturerRef_new': newManufacturerRef,
         'installationDate_new': 'ASAP',
-        'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] : '',
-        'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] : '',
-        'storageCapacity_new': newStorageCapacity,
+        'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] + 'kw' : '',
+        'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] + 'kw' : '',
+        'storageCapacity_new': (newStorageCapacity) ? newStorageCapacity + 'kw' : '',
         'schematic': '/tmp/schematic.png',
-        'date': `${dateFormat(date), 'dd/mm/yyyy'}`,
+        'date': `${dateFormat(date, 'dd/mm/yyyy')}`,
         'signatory': `${(pdUser) ? pdUser : ''}`,
+    }
+
+    for (let key in fieldsToUpdate) {
+        if (!fieldsToUpdate[key]) {
+            fieldsToUpdate[key] = '';
+        }
     }
 
     const schematic = await generateSchematicFor(PLNumber)
@@ -269,8 +281,6 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
 
     fs.writeFileSync(DocxFilePath, buff)
     const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
-
-    // TO DO: send email with the attachments
     await sendNotificationMailFor(PLNumber)
 
     fs.unlinkSync(DocxFilePath);
@@ -360,6 +370,9 @@ async function downloadSystemImageFrom(projectData, filePath) {
 
 async function createOpenSolarProjectFrom(PLNumber: string) {
     const customerAddressObject = await crm.getAddressFor(PLNumber);
+    if (customerAddressObject.formatted_address === null) {
+        return json({ message: 'Address not found for deal', status: 200 })
+    }
     const customerLongLat = await fetchLongLatFrom(customerAddressObject.property_address)
     const countryData = await openSolar.getCountryData(customerAddressObject.country) // open Solar takes country url data
 
@@ -382,13 +395,13 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
 async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {
         sender: 'info@premiumlithium.com',
-        recipients: ['peter.gillingham@premiumlithium.com'],
+        recipients: ['peter.gillingam@premiumlithium.com'],
         subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
         mail_body: `Hi,
         
         There is a new form to review for the following deal:
         
-        https://premiumlithium.pipedrive.com/deal/${await crm.getDealIdFromPL(PLNumber)}`,
+        <a href = https://premiumlithium.pipedrive.com/deal/${await crm.getDealIdFromPL(PLNumber)}>PipeDrive Deal ${PLNumber}</a>`,
         content_type: "HTML",
     };
 
