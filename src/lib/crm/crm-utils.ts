@@ -275,7 +275,7 @@ export class CRM {
 	async getCurrentUser() {
 		const user = await this.pdUsersApi.getCurrentUser()
 		if (user.success)
-			return user.name
+			return user.data.name
 		return null
 	}
 
