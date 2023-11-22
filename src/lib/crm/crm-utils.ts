@@ -73,7 +73,6 @@ export class CRM {
 	async getPersonAddressFor(PLNumber: string) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 		const personAttachedToDeal = await this.pdDealsApi.getDealPersons(dealId)
-		console.log(personAttachedToDeal)
 		if (personAttachedToDeal.postal_address) {
 			const addressObject = {
 				property_address: personAttachedToDeal.postal_address,
