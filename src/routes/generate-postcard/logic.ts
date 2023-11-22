@@ -132,7 +132,7 @@ async function getPropertyImage(customerId: string): Promise<Buffer> {
 	const openSolarSystemUUID = await getOpenSolarSystemUUID(openSolarId)
 	if (!openSolarSystemUUID) return undefined
 
-	const url = `https://api.opensolar.com/api/orgs/52668/projects/${openSolarId}/systems/${openSolarSystemUUID}/image/?width=500&height=500`
+	const url = `https://api.opensolar.com/api/orgs/99066/projects/${openSolarId}/systems/${openSolarSystemUUID}/image/?width=500&height=500`
 	const token = 's_SVCFQ5RYUJMFJ46AVCCD2C4SOJ2K5YLN'
 
 	const openSolarResponse = await fetch(url, {
@@ -143,8 +143,7 @@ async function getPropertyImage(customerId: string): Promise<Buffer> {
 	})
 
 	if (!openSolarResponse.ok) {
-		// todo: handle case where property image is not found - return a placeholder image
-		return null
+		throw new Error(openSolarResponse.statusText)
 	}
 
 	const screenshot = await openSolarResponse.arrayBuffer()
