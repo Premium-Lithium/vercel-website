@@ -9,7 +9,6 @@ import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 import dateFormat from 'dateformat'
 import svg2img from 'svg2img'
 
-
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
 
@@ -50,13 +49,13 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
     if (projectId) {
         if (projectFound) {
             if (dnoCreated) {
-                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await getCurrentPipedriveUser() })
+                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser() })
             }
-            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await getCurrentPipedriveUser() })
+            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await crm.getCurrentUser() })
         }
-        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await getCurrentPipedriveUser() })
+        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser() })
     }
-    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await getCurrentPipedriveUser() })
+    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await crm.getCurrentUser() })
 }
 
 async function getOpenSolarProject(PLNumber: string): Promise<string | null> {
@@ -184,7 +183,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 
     const date = new Date();
-    const pdUser = await getCurrentPipedriveUser();
+    const pdUser = await crm.getCurrentUser();
 
     const fieldsToUpdate = {
         'dno_company.name': dnoCompanyDetailsData.name,
@@ -229,15 +228,15 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     if (schematic === null) {
         return json({ message: 'Schematic not found', statusCode: 503 })
     } else if (!schematic) {
-        return json({ message: 'New Battery or Solar Panel Required on PipeDrive for Schematic'})
+        return json({ message: 'New Battery or Solar Panel Required on PipeDrive for Schematic' })
     }
     let schematicPathSvg = '/tmp/schematic.svg'
     let schematicPathPng = '/tmp/schematic.png'
 
     fs.writeFileSync(schematicPathSvg, schematic);
 
-    svg2img(schematicPathSvg, function(error, outputBuffer) {
-        fs.writeFileSync(schematicPathPng, outputBuffer)  
+    svg2img(schematicPathSvg, function (error, outputBuffer) {
+        fs.writeFileSync(schematicPathPng, outputBuffer)
     });
 
     //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
@@ -299,18 +298,6 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 }
 
-async function getCurrentPipedriveUser(): Promise<string | null> {
-    const req = {
-        method: "GET",
-        headers: { 'Content-Type': 'application/json' },
-    }
-    const res = await fetch('https://api.pipedrive.com/v1/users/me', req)
-    if (res.ok) {
-        return res.data.name
-    }
-    return null
-}
-
 async function getNetworkOperatorFromPostCode(postcode: string) {
     let res = await fetch(`http://www.ssen.co.uk/distributor-results/Index?distributorTerm=${postcode}`)
     let match;
@@ -338,7 +325,7 @@ async function generateSchematicFor(PLNumber: string) {
 
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
-    
+
     if (targetSchematic === "NEP-NNP-NB-NCO.svg") {
         return // not applicable and missing details
     }

@@ -6,11 +6,13 @@ export class CRM {
 	pdDealsApi;
 	pdFilesApi;
 	pdNotesApi;
+	pdUsersApi;
 
 	constructor() {
 		this.pdDealsApi = new pipedrive.DealsApi(pd);
-		this.pdFilesApi = new pipedrive.FilesApi(pd)
+		this.pdFilesApi = new pipedrive.FilesApi(pd);
 		this.pdNotesApi = new pipedrive.NotesApi(pd);
+		this.pdUsersApi = new pipedrive.UsersApi(pd);
 	}
 	async getDealIdFromPL(PLNumber: string) {
 		const dealFound = await this.pdDealsApi.searchDeals(PLNumber) //Returns array of deal found 
@@ -68,7 +70,28 @@ export class CRM {
 		return dealData.person_id.phone
 	}
 
+	async getPersonAddressFor(PLNumber: string) {
+		const dealId = await this.getDealIdFromPL(PLNumber)
+		const personAttachedToDeal = await this.pdDealsApi.getDealPersons(dealId)
+		if (personAttachedToDeal.postal_address) {
+			const addressObject = {
+				property_address: personAttachedToDeal.postal_address,
+				area_1: personAttachedToDeal.postal_address_admin_area_level_1,
+				area_2: personAttachedToDeal.postal_address_admin_area_level_2,
+				formatted_address: personAttachedToDeal.postal_address_formatted_address,
+				postcode: personAttachedToDeal.postal_address_postal_code,
+				country: personAttachedToDeal.postal_address_country
+			}
+			return addressObject
+		}
+		return null
+	}
+
+	// multiple places to find address - person or custom field - so try both
 	async getAddressFor(PLNumber: string) {
+		const personAddress = await this.getPersonAddressFor(PLNumber)
+		if (personAddress)
+			return personAddress
 		const dealData = await this.getDealDataFor(PLNumber)
 		const addressObject = {
 			property_address: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1'],
@@ -78,8 +101,7 @@ export class CRM {
 			postcode: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'],
 			country: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_country']
 		}
-		return addressObject;
-
+		return addressObject
 	}
 
 	async getPLNumberFor(dealId: string) {
@@ -248,6 +270,13 @@ export class CRM {
 		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
 		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
 		return [phaseType, existingSolarGen, newSolarGen]
+	}
+
+	async getCurrentUser() {
+		const user = await this.pdUsersApi.getCurrentUser()
+		if (user.success)
+			return user.data.name
+		return null
 	}
 
 	async attachFileFor(PLNumber: string, filePath: string) {
