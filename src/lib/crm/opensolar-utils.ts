@@ -31,6 +31,7 @@ export class openSolarAPI {
         const response = await fetch(`https://api.opensolar.com/api/orgs/${this.organisationId}/projects/${projectId}/systems/${uuid}/image/?width=${width}&height=${height}`, {
             headers: {
                 'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'image/jpeg',
             }
         })
         const imageBuffer = await response.arrayBuffer()
