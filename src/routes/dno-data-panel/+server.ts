@@ -31,7 +31,7 @@ export async function POST({ request }) {
             projectFound = await getOpenSolarProjectDetails(projectId)
         }
         if (option == 1) {
-            response = await generateDnoApplicationFrom(PLNumber, projectFound);
+            response = await generateDnoApplicationFrom(PLNumber, projectFound, userId);
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else {
@@ -131,7 +131,7 @@ function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, 
     return missingDetails
 }
 
-async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData) {
+async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData, userId) {
     const customerName = await crm.getPersonNameFor(PLNumber);
     const customerAddressObject = await crm.getAddressFor(PLNumber);
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
@@ -183,7 +183,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 
     const date = new Date();
-    const pdUser = await crm.getCurrentUser();
+    const pdUser = await crm.getCurrentUser(userId);
 
     const fieldsToUpdate = {
         'dno_company.name': dnoCompanyDetailsData.name,
