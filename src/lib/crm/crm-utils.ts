@@ -273,10 +273,20 @@ export class CRM {
 	}
 
 	async getCurrentUser() {
-		const user = await this.pdUsersApi.getCurrentUser()
-		if (user.success)
-			return user.data.name
+		const req = {
+			method: "GET",
+			headers: { 'Content-Type': 'application/json' },
+		}
+		const res = await fetch('https://api.pipedrive.com/v1/users/me', req)
+		console.log("User Res: ", res)
+		if (res.ok) {
+			return res.data.name
+		}
 		return null
+		// const user = await this.pdUsersApi.getCurrentUser()
+		// if (user.success)
+		// 	return user.data.name
+		// return null
 	}
 
 	async attachFileFor(PLNumber: string, filePath: string) {
