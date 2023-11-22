@@ -5,7 +5,7 @@ export async function POST({ request }) {
 	const { project } = await request.json()
 	let postcode = project.address.split(', ').at(-2).split(' ')
 	postcode = `${postcode[1]} ${postcode[2]}`
-	let res = await fetch(`https://api.opensolar.com/api/orgs/52668/projects/`, {
+	let res = await fetch(`https://api.opensolar.com/api/orgs/99066/projects/`, {
 		method: 'POST',
 		headers: {
 			Authorization: 'Bearer s_IK65BN2IG56EVZ2GSH5NI5APGMKBCY5H',
