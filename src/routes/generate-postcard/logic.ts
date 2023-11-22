@@ -133,7 +133,7 @@ async function getPropertyImage(customerId: string): Promise<Buffer> {
 	if (!openSolarSystemUUID) return undefined
 
 	const url = `https://api.opensolar.com/api/orgs/99066/projects/${openSolarId}/systems/${openSolarSystemUUID}/image/?width=500&height=500`
-	const token = 's_SVCFQ5RYUJMFJ46AVCCD2C4SOJ2K5YLN'
+	const token = 's_IK65BN2IG56EVZ2GSH5NI5APGMKBCY5H'
 
 	const openSolarResponse = await fetch(url, {
 		method: 'GET',
