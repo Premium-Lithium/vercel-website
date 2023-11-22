@@ -272,21 +272,13 @@ export class CRM {
 		return [phaseType, existingSolarGen, newSolarGen]
 	}
 
-	async getCurrentUser() {
-		const req = {
-			method: "GET",
-			headers: { 'Content-Type': 'application/json' },
-		}
-		const res = await fetch('https://api.pipedrive.com/v1/users/me', req)
-		console.log("User Res: ", res)
-		if (res.ok) {
-			return res.data.name
+	async getCurrentUser(userId: string) {
+		if (userId) {
+			const user = await this.pdUsersApi.getUser(parseInt(userId))
+			if (user.success)
+				return user.data.name
 		}
 		return null
-		// const user = await this.pdUsersApi.getCurrentUser()
-		// if (user.success)
-		// 	return user.data.name
-		// return null
 	}
 
 	async attachFileFor(PLNumber: string, filePath: string) {

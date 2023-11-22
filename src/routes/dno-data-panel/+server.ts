@@ -24,7 +24,7 @@ let projectFound: ProjectData | null = null;
 export async function POST({ request }) {
     let response
     try {
-        const { dealId, option } = await request.json();
+        const { dealId, userId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
         const projectId = await getOpenSolarProject(PLNumber)
         if (projectId !== null) {
@@ -35,7 +35,7 @@ export async function POST({ request }) {
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else {
-            return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber))
+            return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber), userId)
         }
         const responseData = await response?.json();
         return json(responseData);
@@ -45,17 +45,17 @@ export async function POST({ request }) {
     }
 }
 
-async function initValidation(projectId: string | null, projectFound: ProjectData | null, dnoCreated: boolean) {
+async function initValidation(projectId: string | null, projectFound: ProjectData | null, dnoCreated: boolean, userId: string) {
     if (projectId) {
         if (projectFound) {
             if (dnoCreated) {
-                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser() })
+                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser(userId) })
             }
-            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await crm.getCurrentUser() })
+            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await crm.getCurrentUser(userId) })
         }
-        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser() })
+        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser(userId) })
     }
-    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await crm.getCurrentUser() })
+    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await crm.getCurrentUser(userId) })
 }
 
 async function getOpenSolarProject(PLNumber: string): Promise<string | null> {
