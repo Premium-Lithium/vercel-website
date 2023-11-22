@@ -32,7 +32,8 @@
 					editable: true,
 					fillOpacity: 0.4,
 					fillColor: '#fff',
-					strokeColor: '#35bbed'
+					strokeColor: '#35bbed',
+					draggable: true
 				},
 				drawingControlOptions: { drawingModes: [] }
 			})
@@ -342,7 +343,7 @@
 				/>
 			{/if}
 		</div>
-		<GoogleMap bind:map bind:loader />
+		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
 	</div>
 {/if}
 
