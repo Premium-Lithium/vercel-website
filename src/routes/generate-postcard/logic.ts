@@ -5,14 +5,28 @@ import { Buffer } from 'buffer'
 import { createSVGWindow } from 'svgdom'
 import { SVG, Svg, Box, Image, registerWindow, namespaces } from '@svgdotjs/svg.js'
 
-export async function generatePostcardFor(customerId: string): Promise<Postcard> {
-	const qrCode = await generateQRCode(customerId)
-	const front = await createFront(customerId, qrCode)
-	const back = await createBack(qrCode)
+let openSolarId: number | undefined = undefined
 
-	return {
-		frontImage: front,
-		backImage: back
+export async function generatePostcardFor(customerId) {
+	try {
+		let qrCode
+		;[openSolarId, qrCode] = await Promise.all([
+			getOpenSolarIdFromCustomerId(customerId),
+			generateQRCode(customerId)
+		])
+
+		const [front, back] = await Promise.all([
+			createFront(customerId, qrCode),
+			createBack(customerId, qrCode)
+		])
+
+		return {
+			frontImage: front,
+			backImage: back
+		}
+	} catch (error) {
+		console.error('Error generating postcard:', error)
+		throw error
 	}
 }
 
@@ -25,13 +39,6 @@ async function generateQRCode(customerId: string): Promise<Buffer> {
 	// handle case where code is not found and return a placeholder image
 
 	return buffer
-}
-
-async function getImage(imageName: string): Promise<Buffer | null> {
-	const imageData: Blob | null = await fetchPostcardResource(imageName)
-
-	// todo: return a placeholder image if the image data could not be found
-	return await bufferFromBlob(imageData)
 }
 
 async function bufferFromBlob(blob: Blob) {
@@ -60,58 +67,6 @@ async function fetchPostcardResource(name: string): Promise<Blob | null> {
 	}
 
 	return data
-}
-
-async function createFront(customerId: string, qrCode: Buffer): Promise<Buffer> {
-	const window = createSVGWindow()
-	const document = window.document
-	registerWindow(window, document)
-
-	// Front of postcard
-	const template = await getSvg('flyer-front.svg')
-	if (template === null) {
-		// todo: handle condition where the template could not be fetched
-	}
-
-	// 2. Load the SVG document with the template
-	const canvas: Svg = SVG(template)
-
-	const propertyImage = await getPropertyImage(customerId)
-	if (propertyImage === null) {
-		// todo: handle case where we couldn't fetch the property image
-	}
-
-	// 3. Place the property image in the right place
-	if (propertyImage !== null) {
-		const positionedPropertyImage = await addImageToSvgRegion('#_Bolt_', propertyImage, canvas)
-		if (positionedPropertyImage !== null) positionedPropertyImage.back()
-	}
-
-	if (qrCode !== null) {
-		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
-		if (positionedQrCode !== null) positionedQrCode.front()
-	}
-
-	const openSolarId = await getOpenSolarIdFromCustomerId(customerId)
-	if (!openSolarId) {
-		console.log("Couldn't find openSolarId")
-		return
-	}
-
-	const saving = await getSaving(openSolarId)
-	const numPanels = await getNumPanels(openSolarId)
-	console.log('Saving', saving, 'NumPanels', numPanels)
-	if (saving && numPanels) {
-		const positionedCustomerInfo = await addTextToSvgRegion(
-			'#Customer-info',
-			`${numPanels} Solar panels, saving you £${saving}`,
-			canvas
-		)
-		// if (positionedCustomerInfo !== null) positionedCustomerInfo.front()
-		console.log(positionedCustomerInfo)
-	}
-
-	return canvasToPng(canvas)
 }
 
 async function getSaving(openSolarId: number) {
@@ -173,7 +128,6 @@ async function getSvg(svgName: string): Promise<string> {
 }
 
 async function getPropertyImage(customerId: string): Promise<Buffer> {
-	const openSolarId = await getOpenSolarIdFromCustomerId(customerId)
 	if (!openSolarId) return undefined
 	const openSolarSystemUUID = await getOpenSolarSystemUUID(openSolarId)
 	if (!openSolarSystemUUID) return undefined
@@ -205,8 +159,9 @@ function addTextToSvgRegion(id: string, text: string, canvas: Svg) {
 		console.log(`Could not find region with id '${id}'`)
 		return null
 	}
-	console.log(region.node.childNodes[0].childNodes[0])
 	region.node.childNodes[0].childNodes[0].data = text
+
+	return region.node.childNodes[0].childNodes[0]
 }
 
 async function addImageToSvgRegion(id: string, image: Buffer, canvas: Svg): Promise<Image | null> {
@@ -285,7 +240,54 @@ async function canvasToPng(canvas: Svg): Promise<Buffer> {
 	return outputPng
 }
 
-async function createBack(qrCode: Buffer): Promise<Buffer> {
+async function createFront(customerId: string, qrCode: Buffer): Promise<Buffer> {
+	const window = createSVGWindow()
+	const document = window.document
+	registerWindow(window, document)
+
+	const [template, propertyImage] = await Promise.all([
+		getSvg('flyer-front.svg'),
+		getPropertyImage(customerId)
+	])
+	if (template === null) {
+		// todo: handle condition where the template could not be fetched
+	}
+
+	// 2. Load the SVG document with the template
+	const canvas: Svg = SVG(template)
+
+	if (propertyImage === null) {
+		// todo: handle case where we couldn't fetch the property image
+	}
+
+	if (propertyImage !== null) {
+		const positionedPropertyImage = await addImageToSvgRegion('#_Bolt_', propertyImage, canvas)
+		if (positionedPropertyImage !== null) positionedPropertyImage.back()
+	}
+
+	if (qrCode !== null) {
+		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
+		if (positionedQrCode !== null) positionedQrCode.front()
+	}
+
+	if (!openSolarId) {
+		console.log('no openSolarId')
+		return
+	}
+
+	const [saving, numPanels] = await Promise.all([getSaving(openSolarId), getNumPanels(openSolarId)])
+	if (saving && numPanels) {
+		await addTextToSvgRegion(
+			'#SAVING_AND_NUM_PANELS',
+			`${numPanels} Solar panels, saving you £${saving}`,
+			canvas
+		)
+	}
+
+	return canvasToPng(canvas)
+}
+
+async function createBack(customerId: string, qrCode: Buffer): Promise<Buffer> {
 	const window = createSVGWindow()
 	const document = window.document
 	registerWindow(window, document)
@@ -301,6 +303,25 @@ async function createBack(qrCode: Buffer): Promise<Buffer> {
 		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
 
 		if (positionedQrCode !== null) positionedQrCode.front()
+	}
+	if (!openSolarId) {
+		console.log('no openSolarId')
+		return
+	}
+
+	const [saving, numPanels] = await Promise.all([getSaving(openSolarId), getNumPanels(openSolarId)])
+	if (saving && numPanels) {
+		await addTextToSvgRegion('#NUM_PANELS', `${numPanels} Solar panels`, canvas)
+
+		await addTextToSvgRegion('#SAVING', `saving you £${saving}`, canvas)
+
+		await addTextToSvgRegion('#SAVING_STANDALONE', `£${saving}!`, canvas)
+
+		let numPanelsStandalone = await addTextToSvgRegion(
+			'#NUM_PANELS_STANDALONE',
+			`${numPanels}`,
+			canvas
+		)
 	}
 
 	return canvasToPng(canvas)
@@ -318,7 +339,6 @@ async function getOpenSolarIdFromCustomerId(customerId: string): Promise<number 
 	let openSolarIds = data[0]['open_solar_projects'].filter((x) => {
 		return x.flags.length == 0
 	})
-	console.log(openSolarIds)
 	return openSolarIds[0].openSolarId
 }
 
