@@ -1,17 +1,20 @@
 import { json } from '@sveltejs/kit'
 import validate from '$lib/validation-utils.js'
-import type { Postcard, PostcardRecipient } from './types'
 import { generatePostcardFor, getCustomerDetailsFor } from './logic'
 import { STANNP_API_KEY } from '$env/static/private'
 
 const schema = {
 	type: 'object',
-	required: ['customerId'],
+	required: ['customerId', 'test'],
 	properties: {
 		customerId: {
 			type: 'string',
 			format: 'uuid',
 			errorMessage: "'customerId' must be a universally unique identifier according to RFC4122"
+		},
+		test: {
+			type: 'boolean',
+			errorMessage: "'test' must be a boolean"
 		}
 	}
 }
@@ -29,11 +32,12 @@ export async function POST({ request }) {
 
 	try {
 		const customerId: string = requestData.customerId
-		const postcard: Postcard = await generatePostcardFor(customerId)
+		const [postcard, customer] = await Promise.all([
+			generatePostcardFor(customerId),
+			getCustomerDetailsFor(customerId)
+		])
 
-		const customer: PostcardRecipient = await getCustomerDetailsFor(customerId)
-
-		const sendAttempt = await sendPostcardTo(customer, postcard)
+		const sendAttempt = await sendPostcardTo(customer, postcard, requestData.test)
 
 		return sendAttempt
 	} catch (error) {
@@ -43,15 +47,12 @@ export async function POST({ request }) {
 }
 
 // todo: type annotations for parameters here
-async function sendPostcardTo(customer: any, postcard: any) {
+async function sendPostcardTo(customer: any, postcard: any, test: boolean = true) {
 	const frontBase64 = postcard.frontImage.toString('base64')
 	const backBase64 = postcard.backImage.toString('base64')
 
-	const recipient = { ...customer }
-	console.log(recipient)
-
 	const stannpPayload = {
-		test: true,
+		test,
 		size: 'A5',
 		front: frontBase64,
 		back: backBase64,
