@@ -41,15 +41,15 @@
 									lat: 53.95922,
 									lng: -1.0761
 								},
-								zoom: 17,
+								zoom: 15,
 								zoomControl: false,
 								zoomControlOptions: {
 									position: CONTROL_POSITION
 								},
-								minZoom: 15,
+								minZoom: 10,
 								disableDefaultUI: true,
 								tilt: 0,
-								mapTypeId: 'satellite',
+								mapTypeId: 'hybrid',
 								disableDoubleClickZoom: true,
 								mapId: '6f6816d6bb1eeac4',
 								draggableCursor: 'pointer'
