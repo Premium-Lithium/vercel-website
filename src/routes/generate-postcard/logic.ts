@@ -346,7 +346,7 @@ async function getOpenSolarIdFromCustomerId(customerId: string): Promise<number 
 async function getOpenSolarSystemUUID(openSolarId: number): Promise<string | undefined> {
 	// todo: change url before merge
 	const res = await fetch(
-		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
+		'https://vercel-website-git-postcard-sending-endpoint-premium-lithium.vercel.app/solar-proposals/open-solar/get-systems',
 		{
 			method: 'POST',
 			body: JSON.stringify({ openSolarId }),
