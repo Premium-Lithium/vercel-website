@@ -29,7 +29,7 @@ async function sendMail(sender, recipients, subject, mail_body, content_type, da
                 contentType: content_type,
                 content: mail_body
             },
-            toRecipients: recipients.map(email => ({ emailAddress: { address: email } }))
+            toRecipients: recipients.map(email => ({ emailAddress: { address: email } })),
         }
     };
 

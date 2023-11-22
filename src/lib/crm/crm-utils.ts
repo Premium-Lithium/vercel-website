@@ -6,11 +6,13 @@ export class CRM {
 	pdDealsApi;
 	pdFilesApi;
 	pdNotesApi;
+	pdUsersApi;
 
 	constructor() {
 		this.pdDealsApi = new pipedrive.DealsApi(pd);
-		this.pdFilesApi = new pipedrive.FilesApi(pd)
+		this.pdFilesApi = new pipedrive.FilesApi(pd);
 		this.pdNotesApi = new pipedrive.NotesApi(pd);
+		this.pdUsersApi = new pipedrive.UsersApi(pd);
 	}
 	async getDealIdFromPL(PLNumber: string) {
 		const dealFound = await this.pdDealsApi.searchDeals(PLNumber) //Returns array of deal found 
@@ -35,9 +37,9 @@ export class CRM {
 	async setCustomFields(PLNumber: string, request) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 		let parsedRequest = {}
-		for(const key in request){
+		for (const key in request) {
 			let field = getField(key)
-			if(field.field_type == 'enum') {
+			if (field.field_type == 'enum') {
 				parsedRequest[field.key] = getOptionIdFor(request[key], field)
 			} else {
 				parsedRequest[field.key] = request[key]
@@ -52,9 +54,54 @@ export class CRM {
 		const dealRequest = await this.pdDealsApi.getDeal(dealId)
 		return dealRequest.data
 	}
+
 	async getPersonNameFor(PLNumber: string) {
 		const dealData = await this.getDealDataFor(PLNumber)
 		return dealData.person_id.name
+	}
+
+	async getPersonEmailFor(PLNumber: string) {
+		const dealData = await this.getDealDataFor(PLNumber)
+		return dealData.person_id.email
+	}
+
+	async getPersonTelephoneFor(PLNumber: string) {
+		const dealData = await this.getDealDataFor(PLNumber)
+		return dealData.person_id.phone
+	}
+
+	async getPersonAddressFor(PLNumber: string) {
+		const dealId = await this.getDealIdFromPL(PLNumber)
+		const personAttachedToDeal = await this.pdDealsApi.getDealPersons(dealId)
+		if (personAttachedToDeal.postal_address) {
+			const addressObject = {
+				property_address: personAttachedToDeal.postal_address,
+				area_1: personAttachedToDeal.postal_address_admin_area_level_1,
+				area_2: personAttachedToDeal.postal_address_admin_area_level_2,
+				formatted_address: personAttachedToDeal.postal_address_formatted_address,
+				postcode: personAttachedToDeal.postal_address_postal_code,
+				country: personAttachedToDeal.postal_address_country
+			}
+			return addressObject
+		}
+		return null
+	}
+
+	// multiple places to find address - person or custom field - so try both
+	async getAddressFor(PLNumber: string) {
+		const personAddress = await this.getPersonAddressFor(PLNumber)
+		if (personAddress)
+			return personAddress
+		const dealData = await this.getDealDataFor(PLNumber)
+		const addressObject = {
+			property_address: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1'],
+			area_1: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_admin_area_level_1'],
+			area_2: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_admin_area_level_2'],
+			formatted_address: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_formatted_address'],
+			postcode: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'],
+			country: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_country']
+		}
+		return addressObject
 	}
 
 	async getPLNumberFor(dealId: string) {
@@ -65,6 +112,16 @@ export class CRM {
 	async getCustomFieldDataFor(PLNumber: string, fieldName: string) {
 		const dealData = await this.getDealDataFor(PLNumber)
 		return readCustomDealField(fieldName, dealData)
+	}
+
+	async getOpenSolarProjectIdFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'OpenSolar Project ID')
+		return fieldResponse
+	}
+
+	async setOpenSolarProjectIdFor(PLNumber: string, value: string) {
+		const updateDealRequest = await this.setCustomField(PLNumber, 'OpenSolar Project ID', value)
+		return updateDealRequest
 	}
 
 	async setMpanFor(PLNumber: string, value: string) {
@@ -137,11 +194,107 @@ export class CRM {
 		return fieldResponse;
 	}
 
-	async attachPdfFor(PLNumber: string, filePath: string) {
+	async getExistingManufacturerFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Manufacturer')
+		return fieldResponse;
+	}
+
+	async getNewManufacturerFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Manufacturer')
+		return fieldResponse;
+	}
+
+	async getExistingManufacturerRefFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Model Number')
+		return fieldResponse;
+	}
+
+	async getNewManufacturerRefFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Model Number')
+		return fieldResponse;
+	}
+
+	async getExistingStorageCapacityFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Battery size (kWh)')
+		return (fieldResponse) ? fieldResponse : 0;
+	}
+
+	async getNewStorageCapacityFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Battery size (kWh)')
+		return (fieldResponse) ? fieldResponse : 0;
+	}
+
+	async getCurrentlyHavePanelsFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Currently Have Solar Panels?')
+		return fieldResponse;
+	}
+
+	async getNumberOfPanelsFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Number of Panels')
+		return fieldResponse;
+	}
+
+	async getNewPanelGenerationFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
+		return fieldResponse;
+	}
+
+	async getExistingSolarArrayGenerationFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
+		return fieldResponse;
+	}
+
+	async getExistingInverterSizeFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Size (kW)')
+		return fieldResponse
+	}
+
+	async getNewInverterSizeFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kWp)')
+		return fieldResponse;
+	}
+
+	async getNewBatterySizeFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Battery size (kWh)')
+		return fieldResponse;
+	}
+
+	async getEPSRequiredFor(PLNumber: string) {
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'EPS Switch')
+		return fieldResponse;
+	}
+
+	// Single/three phase and solar generation are tied together, if you want to know one you also want to know the other, so returning them all as one object
+	async getPhaseAndPowerFor(PLNumber: string) {
+		const phaseType = await this.getCustomFieldDataFor(PLNumber, 'Single Phase or Three Phase')
+		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
+		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
+		return [phaseType, existingSolarGen, newSolarGen]
+	}
+
+	async getCurrentUser(userId: string) {
+		if (userId) {
+			const user = await this.pdUsersApi.getUser(parseInt(userId))
+			if (user.success)
+				return user.data.name
+		}
+		return null
+	}
+
+	async attachFileFor(PLNumber: string, filePath: string) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 
 		const addFileRequest = await this.pdFilesApi.addFile(filePath, { 'dealId': dealId })
 		return addFileRequest;
+	}
+
+	// Gets files, returns it if exists, null if otherwise
+	async getFilesFor(PLNumber: string) {
+		const dealId = await this.getDealIdFromPL(PLNumber)
+
+		const getFileRequest = await this.pdDealsApi.getDealFiles(dealId)
+
+		return await getFileRequest.data
 	}
 
 	async attachNoteFor(PLNumber: string, content: string) {
