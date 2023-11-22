@@ -245,7 +245,7 @@ async function createFront(customerId: string, qrCode: Buffer): Promise<Buffer> 
 	registerWindow(window, document)
 
 	const [template, propertyImage] = await Promise.all([
-		getSvg('flyer-front.svg'),
+		getSvg('solar-proposal-flyer-front.svg'),
 		getPropertyImage(customerId)
 	])
 	if (template === null) {
@@ -293,7 +293,7 @@ async function createBack(customerId: string, qrCode: Buffer): Promise<Buffer> {
 	const document = window.document
 	registerWindow(window, document)
 
-	const backTemplate = await getSvg('flyer-back.svg')
+	const backTemplate = await getSvg('solar-proposal-flyer-back.svg')
 	if (backTemplate === null) {
 		// todo: handle condition where the template could not be fetched
 	}
