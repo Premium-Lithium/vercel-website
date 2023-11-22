@@ -256,16 +256,18 @@ async function createFront(customerId: string, qrCode: Buffer): Promise<Buffer> 
 	// 2. Load the SVG document with the template
 	const canvas: Svg = SVG(template)
 
-	if (propertyImage === null) {
-		// todo: handle case where we couldn't fetch the property image
-	}
-
-	if (propertyImage !== null) {
+	if (!propertyImage) {
+		console.log("can't find property image")
+		throw new Error("can't find property image")
+	} else {
 		const positionedPropertyImage = await addImageToSvgRegion('#_Bolt_', propertyImage, canvas)
 		if (positionedPropertyImage !== null) positionedPropertyImage.back()
 	}
 
-	if (qrCode !== null) {
+	if (!qrCode) {
+		console.log("can't find qrcode")
+		throw new Error("can't find qrcode")
+	} else {
 		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
 		if (positionedQrCode !== null) positionedQrCode.front()
 	}
