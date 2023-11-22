@@ -1,37 +1,37 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
-	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
+	import { onMount } from 'svelte'
+	import { page } from '$app/stores'
+	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk'
 
-	const dealId = $page.url.searchParams.get('selectedIds');
-	const userId = $page.url.searchParams.get('userId');
+	const dealId = $page.url.searchParams.get('selectedIds')
+	const userId = $page.url.searchParams.get('userId')
 
-	let sdk;
+	let sdk
 
-	let dealStatus: string = '';
-	let currentSignatory: string = '';
-	let alertMessage: string = '';
-	let openSolarBtnDisable = true;
-	let dnoApplicationBtnDisable = true;
-	let contractButtonDisable = true;
-	let loading = false;
-	let dnoExist = false;
+	let dealStatus: string = ''
+	let currentSignatory: string = ''
+	let alertMessage: string = ''
+	let buttonDisable = {
+		openSolarBtnDisable: true,
+		dnoApplicationBtnDisable: true,
+		getDesignImageBtnDisable: true
+	}
+	let loading = false
 	onMount(async () => {
-		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 300 });
-	});
+		sdk = await new AppExtensionsSDK().initialize()
+		await sdk.execute('resize', { height: 300 })
+	})
 
 	onMount(() => {
 		if (dealId) {
-			searchProjectDesign();
-			searchForDno();
+			searchProjectDesign()
 		}
-	});
+	})
 
 	async function searchProjectDesign() {
 		try {
-			alertMessage = 'initializing';
-			loading = true;
+			alertMessage = 'initializing'
+			loading = true
 			const response = await fetch('/dno-data-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -39,28 +39,27 @@
 					dealId: dealId,
 					userId: userId
 				})
-			});
+			})
 			if (response.ok) {
-				const responseData = await response.json();
-				alertMessage = responseData.message;
-				dealStatus = responseData.status;
-				currentSignatory = responseData.currentSignatory;
-				[openSolarBtnDisable, dnoApplicationBtnDisable, contractButtonDisable] = responseData.buttonDisable;
+				const responseData = await response.json()
+				alertMessage = responseData.message
+				dealStatus = responseData.status
+				currentSignatory = responseData.currentSignatory
+				buttonDisable = responseData.buttonDisable
 			}
-			loading = false;
-			return response;
+			loading = false
+			return response
 		} catch (error) {
-			console.log(error);
-			alertMessage = error;
-			return error;
+			console.log(error)
+			alertMessage = error
+			return error
 		}
 	}
 
 	async function handleGenerate() {
-		dnoApplicationBtnDisable = true;
+		buttonDisable.dnoApplicationBtnDisable = true
 		try {
-			loading = true;
-			alertMessage = 'Generating DNO';
+			alertMessage = 'Generating DNO'
 			const response = await fetch('/dno-data-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -69,25 +68,23 @@
 					userId: userId,
 					option: 1
 				})
-			});
+			})
 			if (response.ok) {
-				loading = false;
-				const responseData = await response.json();
-				alertMessage = responseData.message;
-				if (responseData.statusCode === 400) dnoApplicationBtnDisable = false;
-				return response;
+				const responseData = await response.json()
+				alertMessage = responseData.message
+				if (responseData.statusCode === 400) buttonDisable.dnoApplicationBtnDisable = false
+				return response
 			}
 		} catch (error) {
-			loading = false;
-			console.log(error);
-			return error;
+			console.log(error)
+			return error
 		}
 	}
 
 	async function generateOpenSolarProject() {
-		openSolarBtnDisable = true;
+		buttonDisable.openSolarBtnDisable = true
 		try {
-			alertMessage = 'Generating open solar project';
+			alertMessage = 'Generating open solar project'
 			const response = await fetch('/dno-data-panel', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -96,16 +93,64 @@
 					userId: userId,
 					option: 2
 				})
-			});
+			})
 			if (response.ok) {
-				const responseData = await response.json();
-				alertMessage = responseData.message;
-				if (responseData.statusCode === 200) location.reload();
-				return response;
+				const responseData = await response.json()
+				alertMessage = responseData.message
+				if (responseData.statusCode === 200) location.reload()
+				return response
 			}
 		} catch (error) {
-			console.log(error);
-			return error;
+			console.log(error)
+			return error
+		}
+	}
+
+	async function getDesignImage() {
+		buttonDisable.getDesignImageBtnDisable = true
+		try {
+			alertMessage = 'Getting image from OpenSolar'
+			const response = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					userId: userId,
+					option: 3
+				})
+			})
+			if (response.ok) {
+				const responseData = await response.json()
+				alertMessage = responseData.message
+				return response
+			}
+		} catch (error) {
+			console.log(error)
+			return error
+		}
+	}
+
+	async function contractBuilder() {
+		try {
+			alertMessage = 'Building contract documents';
+			const res = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					option: 3
+				})
+			});
+			if (res.ok) {
+				const resData = await res.json();
+				alertMessage = resData.message;
+				await new Promise((resolve) => setTimeout(resolve, 2000));
+				alertMessage = '';
+				return res;
+			}
+		} catch (error) {
+			console.log(error)
+			return error
 		}
 	}
 
@@ -145,14 +190,17 @@
 		<p>Deal Status: {dealStatus}</p>
 		<p>Current Signatory: {currentSignatory ? currentSignatory : 'Not Found'}</p>
 	</div>
-	<button disabled={loading || openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
+	<button disabled={buttonDisable.openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button
 	>
-	<button disabled={loading || dnoApplicationBtnDisable} class="link-btn" on:click={handleGenerate}
+	<button disabled={buttonDisable.loading || dnoApplicationBtnDisable} class="link-btn" on:click={handleGenerate}
 		>{(!dnoExist) ? `Generate DNO Application` : `DNO already exists for this project`}</button
 	>
 	<button disabled={loading || contractButtonDisable} class="link-btn" on:click={contractBuilder}
 		>Build Contracts</button
+	>
+	<button disabled={buttonDisable.getDesignImageBtnDisable} class="link-btn" on:click={getDesignImage}
+		>Get OpenSolar Design Image</button
 	>
 </div>
 
