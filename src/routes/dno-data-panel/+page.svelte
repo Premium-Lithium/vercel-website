@@ -4,6 +4,7 @@
 	import AppExtensionsSDK from '@pipedrive/app-extensions-sdk';
 
 	const dealId = $page.url.searchParams.get('selectedIds');
+	const userId = $page.url.searchParams.get('userId');
 
 	let sdk;
 
@@ -17,7 +18,7 @@
 	let dnoExist = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
-		await sdk.execute('resize', { height: 350 });
+		await sdk.execute('resize', { height: 300 });
 	});
 
 	onMount(() => {
@@ -35,7 +36,8 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					dealId: dealId
+					dealId: dealId,
+					userId: userId
 				})
 			});
 			if (response.ok) {
@@ -64,6 +66,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
+					userId: userId,
 					option: 1
 				})
 			});
@@ -90,6 +93,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
+					userId: userId,
 					option: 2
 				})
 			});
@@ -251,7 +255,7 @@
 <style>
 	.dno-panel {
 		padding: 15px;
-		border: 1px solid grey;
+		/* border: 1px solid grey; */
 		display: grid;
 	}
 

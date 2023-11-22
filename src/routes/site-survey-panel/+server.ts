@@ -34,7 +34,7 @@ export async function POST({ request }) {
         return json(responseData);
     } catch (error) {
         console.log('Error:', error);
-        return json({ message: "Internal server error", statusCode: 500 });
+        return json({ message: "Site Survey: Internal server error", statusCode: 500 });
     }
 }
 async function createInspectionFrom(PLNumber: string, templateName: string) {
