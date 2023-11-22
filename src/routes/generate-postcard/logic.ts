@@ -71,7 +71,7 @@ async function fetchPostcardResource(name: string): Promise<Blob | null> {
 
 async function getSaving(openSolarId: number) {
 	let res = await fetch(
-		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
+		'https://vercel-website-git-postcard-sending-endpoint-premium-lithium.vercel.app/solar-proposals/open-solar/get-systems',
 		{
 			method: 'POST',
 			body: JSON.stringify({ openSolarId }),
@@ -97,7 +97,7 @@ async function getSaving(openSolarId: number) {
 
 async function getNumPanels(openSolarId: number) {
 	let res = await fetch(
-		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
+		'https://vercel-website-git-postcard-sending-endpoint-premium-lithium.vercel.app/solar-proposals/open-solar/get-systems',
 		{
 			method: 'POST',
 			body: JSON.stringify({ openSolarId }),
