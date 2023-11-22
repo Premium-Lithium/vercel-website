@@ -4,6 +4,10 @@ import type { Postcard, PostcardRecipient } from './types.ts'
 import { Buffer } from 'buffer'
 import { createSVGWindow } from 'svgdom'
 import { SVG, Svg, Box, Image, registerWindow, namespaces } from '@svgdotjs/svg.js'
+import {
+	PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN,
+	PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+} from '$env/static/public'
 
 let openSolarId: number | undefined = undefined
 
@@ -32,7 +36,7 @@ export async function generatePostcardFor(customerId) {
 
 async function generateQRCode(customerId: string): Promise<Buffer> {
 	let qrCode = await fetch(
-		`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://vercel-website-liart.vercel.app/solar-proposals/${customerId}`
+		`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://customer-info-page.vercel.app/qr-landing?Id=${customerId}`
 	)
 	qrCode = await qrCode.blob()
 	let buffer = await bufferFromBlob(qrCode)
@@ -74,7 +78,10 @@ async function getSaving(openSolarId: number) {
 		'https://vercel-website-git-postcard-sending-endpoint-premium-lithium.vercel.app/solar-proposals/open-solar/get-systems',
 		{
 			method: 'POST',
-			body: JSON.stringify({ openSolarId }),
+			body: JSON.stringify({
+				openSolarId,
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+			}),
 			headers: { 'Content-Type': 'application/json' }
 		}
 	)
@@ -100,7 +107,10 @@ async function getNumPanels(openSolarId: number) {
 		'https://vercel-website-git-postcard-sending-endpoint-premium-lithium.vercel.app/solar-proposals/open-solar/get-systems',
 		{
 			method: 'POST',
-			body: JSON.stringify({ openSolarId }),
+			body: JSON.stringify({
+				openSolarId,
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+			}),
 			headers: { 'Content-Type': 'application/json' }
 		}
 	)
@@ -132,8 +142,8 @@ async function getPropertyImage(customerId: string): Promise<Buffer> {
 	const openSolarSystemUUID = await getOpenSolarSystemUUID(openSolarId)
 	if (!openSolarSystemUUID) return undefined
 
-	const url = `https://api.opensolar.com/api/orgs/99066/projects/${openSolarId}/systems/${openSolarSystemUUID}/image/?width=500&height=500`
-	const token = 's_IK65BN2IG56EVZ2GSH5NI5APGMKBCY5H'
+	const url = `https://api.opensolar.com/api/orgs/${PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID}/projects/${openSolarId}/systems/${openSolarSystemUUID}/image/?width=500&height=500`
+	const token = PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN
 
 	const openSolarResponse = await fetch(url, {
 		method: 'GET',
@@ -349,7 +359,10 @@ async function getOpenSolarSystemUUID(openSolarId: number): Promise<string | und
 		'https://vercel-website-git-postcard-sending-endpoint-premium-lithium.vercel.app/solar-proposals/open-solar/get-systems',
 		{
 			method: 'POST',
-			body: JSON.stringify({ openSolarId }),
+			body: JSON.stringify({
+				openSolarId,
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+			}),
 			headers: { 'Content-Type': 'application/json' }
 		}
 	)

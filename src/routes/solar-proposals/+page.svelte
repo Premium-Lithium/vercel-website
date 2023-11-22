@@ -1,5 +1,6 @@
 <script>
 	import { page } from '$app/stores'
+	import { PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID } from '$env/static/public'
 	import Auth from '$lib/components/Auth.svelte'
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
@@ -149,7 +150,8 @@
 					address: project.address,
 					latLon: project.latLon,
 					uniqueIdentifier
-				}
+				},
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
 			})
 		})
 		let data = await res.json()
@@ -179,7 +181,8 @@
 						body: JSON.stringify({
 							project: {
 								id: entry.openSolarId
-							}
+							},
+							openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
 						})
 					})
 					res = await res.json()
@@ -236,7 +239,10 @@
 		let flags = []
 		let res = await fetch('/solar-proposals/open-solar/get-systems', {
 			method: 'POST',
-			body: JSON.stringify({ openSolarId }),
+			body: JSON.stringify({
+				openSolarId,
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+			}),
 			headers: { 'Content-Type': 'application/json' }
 		})
 		if (!res.ok) {
