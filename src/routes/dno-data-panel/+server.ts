@@ -16,12 +16,12 @@ const MAP_API_TOKEN =
 const crm = new CRM()
 const openSolar = new openSolarAPI()
 
-interface Project {
+interface ProjectData {
     projectId: string
     uuid: string
 }
 
-let projectFound: Project | undefined = undefined;
+let projectFound: ProjectData | undefined = undefined;
 
 export async function POST({ request }) {
     let response
@@ -29,7 +29,6 @@ export async function POST({ request }) {
         const { dealId, userId, option } = await request.json();
         const PLNumber = await crm.getPLNumberFor(dealId);
         projectFound = await searchForProjectDesign(PLNumber)
-        let response;
         const projectId = await getOpenSolarProject(PLNumber)
         if (projectId !== null) {
             projectFound = await getOpenSolarProjectDetails(projectId)
@@ -39,18 +38,10 @@ export async function POST({ request }) {
         } else if (option == 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
         } else if (option === 3) {
-            const dnoFound = await searchForDnoApplication(PLNumber, dealId)
-            if (dnoFound) {
-                return json({ message: 'DNO Application Found', statusCode: 200 })
-            }
-            return json({ message: "DNO Application not Found", statusCode: 500 })
-        } else if (option === 4) {
             response = await buildContractFrom(PLNumber, projectFound);
         } else {
             return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber), userId)
         }
-        const responseData = await response?.json();
-        return json(responseData);
     } catch (error) {
         console.log('Error:', error);
         return json({ message: 'DNO: Internal Server Error', statusCode: 500 });
@@ -61,13 +52,13 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
     if (projectId) {
         if (projectFound) {
             if (dnoCreated) {
-                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser(userId) })
+                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true, false], currentSignatory: await crm.getCurrentUser(userId) })
             }
-            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await crm.getCurrentUser(userId) })
+            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false, true], currentSignatory: await crm.getCurrentUser(userId) })
         }
-        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser(userId) })
+        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true, true], currentSignatory: await crm.getCurrentUser(userId) })
     }
-    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await crm.getCurrentUser(userId) })
+    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true, true], currentSignatory: await crm.getCurrentUser(userId) })
 }
 
 async function getOpenSolarProject(PLNumber: string): Promise<string | null> {
@@ -445,12 +436,12 @@ async function getContractTemplate() {
  */
 async function buildContractFrom(PLNumber: string, projectFound: Project | undefined) {
     const contractRes = await getContractTemplate()
-    if (contractRes === null) 
-        return json({message: "Could not retrieve contract template", statusCode: 404})
+    if (contractRes === null)
+        return json({ message: "Could not retrieve contract template", statusCode: 404 })
     const contractTemplate = await contractRes.arrayBuffer()
     // const path = `/tmp/contract_template.docx` // Actual location for production
     const path = `./static/contract_template.docx` // Location for testing so we can read the document without uploading
-    fs.writeFileSync(path, Buffer.from(contractTemplate), {encoding: 'utf-8', flag: 'w'}) 
+    fs.writeFileSync(path, Buffer.from(contractTemplate), { encoding: 'utf-8', flag: 'w' })
 
     // Getting the contract contents from pipedrive
     const contractData = await getContractDataFor(PLNumber, projectFound)
@@ -465,7 +456,7 @@ async function buildContractFrom(PLNumber: string, projectFound: Project | undef
         }
     })
 
-    return json({message: "Success Test", status: 200})
+    return json({ message: "Success Test", status: 200 })
 }
 
 async function getContractDataFor(PLNumber: string, projectFound: Project | undefined) {

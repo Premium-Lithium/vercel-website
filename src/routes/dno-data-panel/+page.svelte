@@ -13,8 +13,8 @@
 	let alertMessage: string = '';
 	let openSolarBtnDisable = true;
 	let dnoApplicationBtnDisable = true;
+	let contractButtonDisable = true;
 	let loading = false;
-	let projectExist = false;
 	let dnoExist = false;
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize();
@@ -45,7 +45,7 @@
 				alertMessage = responseData.message;
 				dealStatus = responseData.status;
 				currentSignatory = responseData.currentSignatory;
-				[openSolarBtnDisable, dnoApplicationBtnDisable] = responseData.buttonDisable;
+				[openSolarBtnDisable, dnoApplicationBtnDisable, contractButtonDisable] = responseData.buttonDisable;
 			}
 			loading = false;
 			return response;
@@ -109,42 +109,6 @@
 		}
 	}
 
-	async function searchForDno() {
-		try {
-			alertMessage = 'initializing';
-			loading = true;
-			const response = await fetch('/dno-data-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 3
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				console.log(responseData);
-				if (responseData.statusCode === 200) {
-					alertMessage = 'dno found';
-					dnoExist = true;
-				} else {
-					dnoExist = false;
-					alertMessage = responseData.message;
-				}
-				await new Promise((resolve) => setTimeout(resolve, 1000));
-				alertMessage = null;
-			}
-			loading = false;
-			return response;
-		} catch (error) {
-			console.log(error);
-			alertMessage = error;
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-			alertMessage = null;
-			return error;
-		}
-	}
-
 	async function contractBuilder() {
 		try {
 			alertMessage = 'Building contract documents';
@@ -153,67 +117,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					dealId: dealId,
-					option: 4
-				})
-			});
-			if (res.ok) {
-				const resData = await res.json();
-				alertMessage = resData.message;
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-				alertMessage = '';
-				return res;
-			}
-		} catch (error) {
-			console.log(error);
-			return error;
-		}
-	}
-
-	async function searchForDno() {
-		try {
-			alertMessage = 'initializing';
-			loading = true;
-			const response = await fetch('/dno-data-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
 					option: 3
-				})
-			});
-			if (response.ok) {
-				const responseData = await response.json();
-				console.log(responseData);
-				if (responseData.statusCode === 200) {
-					alertMessage = 'dno found';
-					dnoExist = true;
-				} else {
-					dnoExist = false;
-					alertMessage = responseData.message;
-				}
-				await new Promise((resolve) => setTimeout(resolve, 1000));
-				alertMessage = null;
-			}
-			loading = false;
-			return response;
-		} catch (error) {
-			console.log(error);
-			alertMessage = error;
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-			alertMessage = null;
-			return error;
-		}
-	}
-
-	async function contractBuilder() {
-		try {
-			alertMessage = 'Building contract documents';
-			const res = await fetch('/dno-data-panel', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					dealId: dealId,
-					option: 4
 				})
 			});
 			if (res.ok) {
@@ -241,13 +145,13 @@
 		<p>Deal Status: {dealStatus}</p>
 		<p>Current Signatory: {currentSignatory ? currentSignatory : 'Not Found'}</p>
 	</div>
-	<button disabled={openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
+	<button disabled={loading || openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button
 	>
-	<button disabled={dnoApplicationBtnDisable || dnoExist} class="link-btn" on:click={handleGenerate}
+	<button disabled={loading || dnoApplicationBtnDisable} class="link-btn" on:click={handleGenerate}
 		>{(!dnoExist) ? `Generate DNO Application` : `DNO already exists for this project`}</button
 	>
-	<button disabled={loading || !dnoExist} class="link-btn" on:click={contractBuilder}
+	<button disabled={loading || contractButtonDisable} class="link-btn" on:click={contractBuilder}
 		>Build Contracts</button
 	>
 </div>
