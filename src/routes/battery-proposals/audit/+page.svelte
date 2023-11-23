@@ -4,7 +4,7 @@
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 
-	const batteryProposalsTableName = 'existing-solar-customers'
+	const batteryProposalsTableName = 'existing-solar-properties'
 	const failedAuditTableName = 'AND-ME'
 	const passedAuditTableName = 'ME-TOO'
 
