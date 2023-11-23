@@ -11,7 +11,6 @@ import libre from 'libreoffice-convert'
 import PDFMerger from 'pdf-merger-js'
 import { patchDocument, Table, TableCell, TableRow, PatchType, TextRun, VerticalAlign, TextDirection } from 'docx'
 import svg2img from 'svg2img'
-import mammoth from 'mammoth';
 
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
