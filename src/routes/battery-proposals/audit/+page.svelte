@@ -66,8 +66,10 @@
 		}, true)
 		if (anyFlags) {
 			// upload to failedAudit db
+			// or just change audit-status
 		} else {
 			// upload to passedAudit db
+			// or just change audit-status
 		}
 	}
 
