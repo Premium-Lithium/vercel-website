@@ -1,5 +1,5 @@
-import { OPEN_SOLAR_ORG_ID, OPEN_SOLAR_TOKEN } from "$env/static/private";
-
+import { OPEN_SOLAR_ORG_ID } from "$env/static/private";
+const OPEN_SOLAR_TOKEN = "s_T3QUSPPX7GIKVYPBDRUAVXVBOSU6OELA"; // TODO make machine user so that this token doesn't expire, and then put it into env
 export class openSolarAPI {
     token;
     organisationId;
