@@ -463,7 +463,6 @@ async function buildContractFrom(PLNumber: string, projectFound: ProjectData | u
             }
         }
     })
-
     return json({ message: "Success Test", status: 200 })
 }
 
@@ -525,7 +524,7 @@ async function checkIfDNOCreatedFor(PLNumber: string): Promise<boolean> {
 // Get Single or Three Phase from pipedrive X
 // With Single/Three Phase, get datasheet from supabase and write to a PDF file X
 // Get DNO document from pipedrive and write to a docx file X
-// Convert DNO document to PDF
+// Convert DNO document to PDF 
 // Merge DNO PDF and Datasheet PDF
 // Upload to PipeDrive
 // Send to relevant DNO email (use temporary email for now)
@@ -543,7 +542,7 @@ async function createDnoPdf(PLNumber: string) {
         return ({ message: "Error - Failed to find Network Operator on Database", statusCode: 400 })
     const datasheet = await getDatasheetPathFor(customerPhase)
     if (!datasheet)
-        return ({ message: "Error - Failed to find Schematic on Database" })
+        return ({ message: "Error - Failed to find Datasheet on Database" })
     await crm.downloadPipedriveFileTo(fileId, dnoDocxPath)
     await convertDocToPdf(dnoDocxPath, dnoPdfPath)
 
