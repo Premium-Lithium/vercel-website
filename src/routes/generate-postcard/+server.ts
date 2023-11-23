@@ -5,7 +5,7 @@ import { STANNP_API_KEY } from '$env/static/private'
 
 const schema = {
 	type: 'object',
-	required: ['customerId', 'test', 'proposal'],
+	required: ['customerId', 'proposal'],
 	properties: {
 		customerId: {
 			type: 'string',
@@ -37,12 +37,19 @@ export async function POST({ request }) {
 
 	try {
 		const customerId: string = requestData.customerId
+		const proposal: string = requestData.proposal
+
 		const [postcard, customer] = await Promise.all([
-			generatePostcardFor(customerId),
+			generatePostcardFor(customerId, proposal),
 			getCustomerDetailsFor(customerId)
 		])
 
-		const sendAttempt = await sendPostcardTo(customer, postcard, requestData.test)
+		// 'test' has to explicitly be set to false in the endpoint to trigger the mailer
+		let test = true
+		if("test" in requestData)
+			test = requestData.test
+
+		const sendAttempt = await sendPostcardTo(customer, postcard, test)
 
 		return sendAttempt
 	} catch (error) {
@@ -55,6 +62,10 @@ export async function POST({ request }) {
 async function sendPostcardTo(customer: any, postcard: any, test: boolean = true) {
 	const frontBase64 = postcard.frontImage.toString('base64')
 	const backBase64 = postcard.backImage.toString('base64')
+
+	// todo: remove this in production
+	test = true
+	// ===============================
 
 	const stannpPayload = {
 		test,
