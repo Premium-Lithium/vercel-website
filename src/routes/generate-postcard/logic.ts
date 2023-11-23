@@ -11,7 +11,7 @@ import {
 
 let openSolarId: number | undefined = undefined
 
-export async function generatePostcardFor(customerId) {
+export async function generatePostcardFor(customerId, proposal) {
 	try {
 		let qrCode
 		;[openSolarId, qrCode] = await Promise.all([

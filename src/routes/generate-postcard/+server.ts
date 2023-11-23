@@ -5,7 +5,7 @@ import { STANNP_API_KEY } from '$env/static/private'
 
 const schema = {
 	type: 'object',
-	required: ['customerId', 'test'],
+	required: ['customerId', 'test', 'proposal'],
 	properties: {
 		customerId: {
 			type: 'string',
@@ -15,6 +15,11 @@ const schema = {
 		test: {
 			type: 'boolean',
 			errorMessage: "'test' must be a boolean"
+		},
+		proposal: {
+			type: 'string',
+			enum: ['battery', 'solar'],
+			errorMessage: "'postcardType' must be one of 'solar', or 'battery'"
 		}
 	}
 }
