@@ -240,7 +240,7 @@
 
 	.image {
 		width: 100%;
-		max-height: 100%;
+		max-height: 60vh;
 	}
 
 	.audit-legend {
@@ -276,10 +276,12 @@
 	.audit-options > * > input {
 		width: 30px;
 		height: 30px;
+		/* make checkbox red when not checked*/
 		filter: invert(50%) sepia(100%) saturate(10000%) hue-rotate(-20deg);
 	}
 
 	.audit-options > * > input:checked {
+		/* make checkbox green when checked*/
 		filter: hue-rotate(-80deg);
 	}
 
