@@ -4,7 +4,7 @@
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 
-	const batteryProposalsTableName = 'REPLACE-ME'
+	const batteryProposalsTableName = 'existing-solar-customers'
 	const failedAuditTableName = 'AND-ME'
 	const passedAuditTableName = 'ME-TOO'
 
@@ -108,7 +108,7 @@
 				class="image"
 			/>
 			<div class="address">
-				<p class="address-text">14 Quartz Point, The Stonebow</p>
+				<p class="address-text">{currentHouseToAudit?.address['formatted-address']}</p>
 			</div>
 		</div>
 		<div class="legend">
