@@ -1,6 +1,6 @@
 import { pd, getField, getOptionIdFor, readCustomDealField } from '$lib/pipedrive-utils';
 import pipedrive from 'pipedrive';
-
+import fs from 'fs';
 
 export class CRM {
 	pdDealsApi;
@@ -135,13 +135,18 @@ export class CRM {
 		return file
 	}
 
+	async downloadPipedriveFileTo(fileId: string, path: string) {
+		const file = await this.pdFilesApi.downloadFile(fileId)
+		fs.writeFileSync(path, Buffer.from(file))
+	}
+
 	async setMpanFor(PLNumber: string, value: string) {
-		const updateDealRequest = await this.setCustomField(PLNumber, 'MPAN number', value)
+		const updateDealRequest = await this.setCustomField(PLNumber, 'MPAN', value)
 		return updateDealRequest;
 	}
 
 	async getMpanFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'MPAN number')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'MPAN')
 		return fieldResponse
 	}
 
@@ -261,7 +266,7 @@ export class CRM {
 	}
 
 	async getNewInverterSizeFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kWp)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kW)')
 		return fieldResponse;
 	}
 
@@ -281,6 +286,16 @@ export class CRM {
 		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
 		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
 		return [phaseType, existingSolarGen, newSolarGen]
+	}
+
+	async getNetworkOperatorFor(PLNumber: string) {
+		const fieldResponse = this.getCustomFieldDataFor(PLNumber, "Network Operator Code")
+		return fieldResponse
+	}
+
+	async setNetworkOperatorCodeFor(PLNumber: string, networkOperator: string) {
+		const updateDealRequest = this.setCustomField(PLNumber, "Network Operator Code", networkOperator)
+		return updateDealRequest
 	}
 
 	async getCurrentUser(userId: string) {
