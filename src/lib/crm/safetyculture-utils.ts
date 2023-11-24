@@ -173,7 +173,6 @@ export class SurveyDataSource {
         let parsedResponse = "[" + responseData + "]"
         let responseObject = JSON.parse(toJson(parsedResponse))
         const foundResult = responseObject.find(item => item.result.question_id === fieldId)
-
         // If responses, still needs to map
         if ('list_answer' in foundResult.result) {
             const targetId = foundResult.result.list_answer.responses[0]
@@ -183,7 +182,10 @@ export class SurveyDataSource {
             const targetId = foundResult.result.question_answer.responses[0];
             const label = await this.getLabelFromResponseId(targetId, templateName)
             return label
-        } else if (foundResult.result.text_answer.answer === "") {
+        } else if ('datetime_answer' in foundResult.result) {
+            return foundResult.result.datetime_answer.answer
+        }
+        else if (foundResult.result.text_answer.answer === "") {
             return undefined;
         } else {
             return foundResult.result.text_answer.answer;
@@ -228,6 +230,9 @@ export class SurveyDataSource {
                 const label = await this.getLabelFromResponseId(targetId, templateName)
                 const questionLabel = await this.getLabelFromItemId(foundResults[i].result.question_id, templateName)
                 answerObject[questionLabel] = label
+            } else if ('datetime_answer' in foundResults[i].result) {
+                const questionLabel = await this.getLabelFromItemId(foundResults[i].result.question_id, templateName)
+                answerObject[questionLabel] = foundResults[i].result.datetime_answer.answer
             } else if (foundResults[i].result.text_answer.answer === "") {
                 const questionLabel = await this.getLabelFromItemId(foundResults[i].result.question_id, templateName)
                 answerObject[questionLabel] = null
@@ -432,7 +437,7 @@ export class SurveyDataSource {
                 'content-type': 'application/json',
                 authorization: `Bearer ${this.accessToken}`
             },
-            body: JSON.stringify({trigger_events: triggerEvents, url: destinationUrl})
+            body: JSON.stringify({ trigger_events: triggerEvents, url: destinationUrl })
         };
 
         const response = await fetch(`https://api.safetyculture.io/webhooks/v1/webhooks/${webhookId}`, options)
