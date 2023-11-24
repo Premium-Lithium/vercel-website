@@ -19,7 +19,7 @@
 		buildPDFContractDisable: true,
 	}
 	let loading = false
-	const hideSection = false
+	const hideSection = true
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize()
 		await sdk.execute('resize', { height: 480 })
@@ -177,7 +177,7 @@
 			if (res.ok) {
 				const resData = await res.json();
 				alertMessage = resData.message;
-				buttonDisable = responseData.buttonDisable
+				buttonDisable = resData.buttonDisable
 				return res;
 			}
 		} catch (error) {

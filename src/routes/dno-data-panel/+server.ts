@@ -7,10 +7,8 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 import dateFormat from 'dateformat'
-import libre from 'libreoffice-convert'
-import PDFMerger from 'pdf-merger-js'
 import { patchDocument, Table, TableCell, TableRow, PatchType, TextRun, VerticalAlign, TextDirection } from 'docx'
-// import svg2img from 'svg2img'
+import { convertFile } from 'convert-svg-to-png';
 
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -34,19 +32,24 @@ export async function POST({ request }) {
         if (projectId !== null) {
             projectFound = await getOpenSolarProjectDetails(projectId)
         }
-        // TODO change this to a switch statement
-        if (option === 1) {
-            response = await generateDnoApplicationFrom(PLNumber, userId);
-        } else if (option === 2) {
-            response = await createOpenSolarProjectFrom(PLNumber);
-        } else if (option === 3) {
-            response = await uploadDesignImage(PLNumber, projectFound)
-        } else if (option === 4) {
-            response = await buildContractFrom(PLNumber, projectFound, userId)
-        } else if (option === 5) {
-            response = await createDnoPdf(PLNumber)
-        } else {
-            return initValidation(PLNumber, projectId, projectFound, await checkIfDNOCreatedFor(PLNumber), userId)
+        switch (option) {
+            case 1:
+                response = await generateDnoApplicationFrom(PLNumber, userId);
+                break;
+            case 2:
+                response = await createOpenSolarProjectFrom(PLNumber);
+                break;
+            case 3:
+                response = await uploadDesignImage(PLNumber, projectFound);
+                break;
+            case 4:
+                response = await buildContractFrom(PLNumber, projectFound, userId);
+                break;
+            case 5:
+                response = await createDnoPdf(PLNumber);
+                break;
+            default:
+                return initValidation(PLNumber, projectId, projectFound, await checkIfDNOCreatedFor(PLNumber), userId)
         }
         return new Response(JSON.stringify(response))
     } catch (error) {
@@ -265,14 +268,9 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
     } else if (!schematic) {
         return json({ message: 'New Battery or Solar Panel Required on PipeDrive for Schematic' })
     }
-    let schematicPathSvg = '/tmp/schematic.svg'
-    let schematicPathPng = '/tmp/schematic.png'
 
-    fs.writeFileSync(schematicPathSvg, schematic);
-
-    svg2img(schematicPathSvg, function (error, outputBuffer) {
-        fs.writeFileSync(schematicPathPng, outputBuffer)
-    });
+    const schematicPathSvg = '/tmp/schematic.svg'
+    const schematicPathPng = await convertFile(schematicPathSvg)
 
     //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
     const imageOpts = {
@@ -544,7 +542,10 @@ async function createDnoPdf(PLNumber: string) {
     if (!datasheet)
         return ({ message: "Error - Failed to find Datasheet on Database" })
     await crm.downloadPipedriveFileTo(fileId, dnoDocxPath)
-    await convertDocToPdf(dnoDocxPath, dnoPdfPath)
+    const convert = await convertDocToPdf(dnoDocxPath, dnoPdfPath)
+    if (!convert) {
+        return json({ message: "Could not convert PDF", statusCode: 400 })
+    }
 
     return ({ message: "DNO Application with Datasheets created", statusCode: 200 })
 }
@@ -574,17 +575,14 @@ async function getDatasheetPathFor(phase: string) {
     return null
 }
 
-async function convertDocToPdf(docPath: string, pdfPath: string) {
+async function convertDocToPdf(docPath: string, pdfPath: string): Promise<boolean> {
     pdfPath = './static/pdf.pdf'
-    let pdfBuffer: Buffer
-    const docxBuffer = await fs.readFileSync(docPath)
-    await libre.convert(docxBuffer, '.pdf', undefined, (err, data) => {
+    docxConverter(docPath, pdfPath, (err, result) => {
         if (err) {
             console.log(err)
-            return null
         }
-        pdfBuffer = data
+        if (result)
+            return true
     })
-    // It complains but its fine - it never gets here if it fails
-    fs.writeFileSync(pdfPath, pdfBuffer)
+    return false
 }
