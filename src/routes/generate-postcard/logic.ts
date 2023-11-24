@@ -9,35 +9,68 @@ import {
 	PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
 } from '$env/static/public'
 
-let openSolarId: number | undefined = undefined
+let openSolarId: number | undefined
 
-export async function generatePostcardFor(customerId, proposal) {
+export async function generatePostcardFor(customerId: string, proposalType: string) {
+	if(proposalType == 'solar')
+		openSolarId = await getOpenSolarIdFromCustomerId(customerId)
+
 	try {
-		let qrCode
-		;[openSolarId, qrCode] = await Promise.all([
-			getOpenSolarIdFromCustomerId(customerId),
-			generateQRCode(customerId)
-		])
+		const route = proposalType == 'solar' ? 'solar' : 'report'
+		const landingPageUrl = `https://energiser.ai/${route}?Id=${customerId}`
+		const qrCode = await generateQRCodeFor(landingPageUrl);
+		const savingsGbp_str = `£${(await getPotentialSavingFor(customerId, proposalType))?.toFixed(0)}`
 
 		const [front, back] = await Promise.all([
-			createFront(customerId, qrCode),
-			createBack(customerId, qrCode)
+			createFront(customerId, qrCode, savingsGbp_str, proposalType),
+			createBack(customerId, qrCode, savingsGbp_str, proposalType)
 		])
 
-		return {
+		const postcard: Postcard = {
 			frontImage: front,
 			backImage: back
 		}
+
+		await savePostcardToSupabase(customerId, postcard, proposalType);
+
+		return postcard
+
 	} catch (error) {
 		console.error('Error generating postcard:', error)
 		throw error
 	}
 }
 
-async function generateQRCode(customerId: string): Promise<Buffer> {
-	let qrCode = await fetch(
-		`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://customer-info-page.vercel.app/qr-landing?Id=${customerId}`
-	)
+async function savePostcardToSupabase(customerId: string, postcard: Postcard, proposalType: string) {
+	// todo: consider combing both sides into one image
+	uploadBufferToBucket(postcard.frontImage, `${customerId}_front.png`, 'output-flyer-images', proposalType)
+
+	// const destTableName = proposalType == 'solar' ? 'south_facing_houses' : 'existing-solar-properties'
+}
+
+
+async function uploadBufferToBucket(buffer: Buffer, fileName: string, bucketName: string, proposalType: string) {
+    const filePath = `${proposalType}/${fileName}`; // Replace with your desired file path
+
+    let { error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, buffer, {
+            contentType: 'image/jpeg',
+            upsert: true
+        });
+
+    if (error) {
+        console.error('Upload error:', error);
+        return false;
+    }
+
+    return true;
+}
+
+
+async function generateQRCodeFor(url: string): Promise<Buffer> {
+	let qrCode = await fetch(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${url}`)
+
 	qrCode = await qrCode.blob()
 	let buffer = await bufferFromBlob(qrCode)
 	// handle case where code is not found and return a placeholder image
@@ -73,36 +106,54 @@ async function fetchPostcardResource(name: string): Promise<Blob | null> {
 	return data
 }
 
-async function getSaving(openSolarId: number) {
-	let res = await fetch(
-		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
-		{
-			method: 'POST',
-			body: JSON.stringify({
-				openSolarId,
-				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
-			}),
-			headers: { 'Content-Type': 'application/json' }
+async function getPotentialSavingFor(customerId: string, proposalType: string): Promise<number | undefined>  {
+	let proposedSaving = 0;
+
+	if(proposalType == 'solar') {
+		// const openSolarId = await getOpenSolarIdFromCustomerId(customerId);
+
+		let res = await fetch(
+			'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
+			{
+				method: 'POST',
+				body: JSON.stringify({
+					openSolarId,
+					openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+				}),
+				headers: { 'Content-Type': 'application/json' }
+			}
+		)
+		if (!res.ok) {
+			console.log('Error fetching systems')
+			return
 		}
-	)
-	if (!res.ok) {
-		console.log('Error fetching systems')
-		return
+		const systems = (await res.json()).systems
+
+		proposedSaving = systems
+			.reduce((p, v, i, a) => {
+				return (
+					p +
+					(v.data.bills.current.bills_yearly[0].annual.total -
+						v.data.bills.proposed['213321'].bills_yearly[0].annual.total)
+				)
+			}, 0)
+		}
+	else if(proposalType == 'battery') {
+		// todo: read the supabase table to get the savings value for customerId
+		const { data, error } = await supabase
+			.from('existing-solar-properties')
+			.select('potential_savings_with_battery_gbp')
+			.eq('id', customerId)
+
+		// todo: handle case where record could not be found
+
+		proposedSaving = data[0].potential_savings_with_battery_gbp
 	}
-	const systems = (await res.json()).systems
-	const proposedSaving = systems
-		.reduce((p, v, i, a) => {
-			return (
-				p +
-				(v.data.bills.current.bills_yearly[0].annual.total -
-					v.data.bills.proposed['213321'].bills_yearly[0].annual.total)
-			)
-		}, 0)
-		.toFixed(2)
+
 	return proposedSaving
 }
 
-async function getNumPanels(openSolarId: number) {
+async function getPotentialNumPanels(openSolarId: number | undefined) {
 	let res = await fetch(
 		'https://vercel-website-liart.vercel.app/solar-proposals/open-solar/get-systems',
 		{
@@ -137,27 +188,53 @@ async function getSvg(svgName: string): Promise<string> {
 	return svgString
 }
 
-async function getPropertyImage(customerId: string): Promise<Buffer> {
-	if (!openSolarId) return undefined
-	const openSolarSystemUUID = await getOpenSolarSystemUUID(openSolarId)
-	if (!openSolarSystemUUID) return undefined
+async function getPropertyImage(customerId: string, proposalType: string): Promise<Buffer | undefined> {
+	let buffer: Buffer | undefined
 
-	const url = `https://api.opensolar.com/api/orgs/${PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID}/projects/${openSolarId}/systems/${openSolarSystemUUID}/image/?width=500&height=500`
-	const token = PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN
+	if(proposalType == 'solar') {
+		// const openSolarId: number | undefined = await getOpenSolarIdFromCustomerId(customerId)
 
-	const openSolarResponse = await fetch(url, {
-		method: 'GET',
-		headers: {
-			'Authorization': `Bearer ${token}`
+		if (!openSolarId)
+			return undefined
+
+		const openSolarSystemUUID = await getOpenSolarSystemUUID(openSolarId)
+		if (!openSolarSystemUUID) return undefined
+
+		const url = `https://api.opensolar.com/api/orgs/${PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID}/projects/${openSolarId}/systems/${openSolarSystemUUID}/image/?width=500&height=500`
+		const token = PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN
+
+		const openSolarResponse = await fetch(url, {
+			method: 'GET',
+			headers: {
+				'Authorization': `Bearer ${token}`
+			}
+		})
+
+		if (!openSolarResponse.ok) {
+			throw new Error(openSolarResponse.statusText)
 		}
-	})
 
-	if (!openSolarResponse.ok) {
-		throw new Error(openSolarResponse.statusText)
+		const screenshot = await openSolarResponse.arrayBuffer()
+		buffer = Buffer.from(screenshot)
 	}
+	else if(proposalType == 'battery') {
+		// 1. get link from supabse
+		const { data, error } = await supabase
+			.from('existing-solar-properties')
+			.select('screenshot_url')
+			.eq('id', customerId)
 
-	const screenshot = await openSolarResponse.arrayBuffer()
-	const buffer = Buffer.from(screenshot)
+		// 2. download result
+		const screenshotUrl = data[0].screenshot_url
+
+		const supabaseResponse = await fetch(screenshotUrl)
+
+		if (!supabaseResponse.ok)
+			throw new Error(supabaseResponse.statusText)
+
+		const screenshot = await supabaseResponse.arrayBuffer()
+		buffer = Buffer.from(screenshot)
+	}
 
 	return buffer
 }
@@ -232,7 +309,7 @@ function getImageType(image: Buffer): string {
 
 	if (image.slice(0, 3).equals(jpgSignature)) return 'jpeg'
 	else if (image.slice(0, 8).equals(pngSignature)) return 'png'
-	else return 'unknown' // or throw an error, up to your use case
+	else return 'unknown'
 }
 
 async function canvasToPng(canvas: Svg): Promise<Buffer> {
@@ -249,90 +326,97 @@ async function canvasToPng(canvas: Svg): Promise<Buffer> {
 	return outputPng
 }
 
-async function createFront(customerId: string, qrCode: Buffer): Promise<Buffer> {
+async function createFront(customerId: string, qrCode: Buffer, savingsGbp_str: string, proposalType: string): Promise<Buffer | undefined> {
 	const window = createSVGWindow()
 	const document = window.document
 	registerWindow(window, document)
 
-	const [template, propertyImage] = await Promise.all([
-		getSvg('solar-proposal-flyer-front.svg'),
-		getPropertyImage(customerId)
-	])
+	let template
+	if(proposalType == 'battery') {
+		const frontVariant = 4 // todo: randomly generate this
+		template = await getSvg(`battery-proposal-flyer-front-${frontVariant}.svg`);
+	}
+	else
+		template = await getSvg('solar-proposal-flyer-front.svg');
+
 	if (template === null) {
 		// todo: handle condition where the template could not be fetched
 	}
 
-	// 2. Load the SVG document with the template
 	const canvas: Svg = SVG(template)
+
+	// Property image
+	const propertyImage = await getPropertyImage(customerId, proposalType)
 
 	if (!propertyImage) {
 		console.log("can't find property image")
 		throw new Error("can't find property image")
 	} else {
-		const positionedPropertyImage = await addImageToSvgRegion('#_Bolt_', propertyImage, canvas)
-		if (positionedPropertyImage !== null) positionedPropertyImage.back()
+		const positionedPropertyImage = await addImageToSvgRegion('#BOLT', propertyImage, canvas)
+
+		if (positionedPropertyImage !== null)
+			positionedPropertyImage.back()
 	}
 
+	// QR Code
 	if (!qrCode) {
 		console.log("can't find qrcode")
 		throw new Error("can't find qrcode")
 	} else {
-		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
-		if (positionedQrCode !== null) positionedQrCode.front()
+		const positionedQrCode = await addImageToSvgRegion('#QR_CODE', qrCode, canvas)
+
+		if (positionedQrCode !== null)
+			positionedQrCode.front()
 	}
 
-	if (!openSolarId) {
-		console.log('no openSolarId')
-		return
+	// Potential benefits
+	const infoTagId = proposalType == 'solar' ? '#SAVING_AND_NUM_PANELS' : '#SAVING'
+	let infoContents = savingsGbp_str
+
+	if(proposalType == 'solar') {
+		const numPanels = await getPotentialNumPanels(openSolarId)
+		infoContents = `${numPanels} solar panels, saving you ${savingsGbp_str}`
 	}
 
-	const [saving, numPanels] = await Promise.all([getSaving(openSolarId), getNumPanels(openSolarId)])
-	if (saving && numPanels) {
-		await addTextToSvgRegion(
-			'#SAVING_AND_NUM_PANELS',
-			`${numPanels} Solar panels, saving you £${saving}`,
-			canvas
-		)
-	}
+	await addTextToSvgRegion(infoTagId, `${infoContents}`, canvas)
 
 	return canvasToPng(canvas)
 }
 
-async function createBack(customerId: string, qrCode: Buffer): Promise<Buffer> {
+async function createBack(customerId: string, qrCode: Buffer, savingsGbp_str: string, proposalType: string): Promise<Buffer> {
 	const window = createSVGWindow()
 	const document = window.document
 	registerWindow(window, document)
 
-	const backTemplate = await getSvg('solar-proposal-flyer-back.svg')
-	if (backTemplate === null) {
+	const template = await getSvg(`${proposalType}-proposal-flyer-back.svg`);
+	if (template === null) {
 		// todo: handle condition where the template could not be fetched
 	}
 
-	const canvas: Svg = SVG(backTemplate)
+	const canvas: Svg = SVG(template)
 
-	if (qrCode !== null) {
-		const positionedQrCode = await addImageToSvgRegion('#_QR_', qrCode, canvas)
+	// Potential savings
+	await addTextToSvgRegion('#SAVING', `${savingsGbp_str}`, canvas)
 
-		if (positionedQrCode !== null) positionedQrCode.front()
-	}
-	if (!openSolarId) {
-		console.log('no openSolarId')
-		return
-	}
+	// Proposal-specific bit for adding potential number of panels to solar proposal
+	if(proposalType == 'solar') {
+		// QR Code
+		if (!qrCode) {
+			console.log("can't find qrcode")
+			throw new Error("can't find qrcode")
+		} else {
+			const positionedQrCode = await addImageToSvgRegion('#QR_CODE', qrCode, canvas)
 
-	const [saving, numPanels] = await Promise.all([getSaving(openSolarId), getNumPanels(openSolarId)])
-	if (saving && numPanels) {
+			if (positionedQrCode !== null)
+				positionedQrCode.front()
+		}
+
+		const numPanels = await getPotentialNumPanels(openSolarId)
+
+		await addTextToSvgRegion('#NUM_PANELS', `${numPanels}`, canvas)
 		await addTextToSvgRegion('#NUM_PANELS', `${numPanels} Solar panels`, canvas)
-
-		await addTextToSvgRegion('#SAVING', `saving you £${saving}`, canvas)
-
-		await addTextToSvgRegion('#SAVING_STANDALONE', `£${saving}!`, canvas)
-
-		let numPanelsStandalone = await addTextToSvgRegion(
-			'#NUM_PANELS_STANDALONE',
-			`${numPanels}`,
-			canvas
-		)
+		await addTextToSvgRegion('#SAVING', `saving you ${savingsGbp_str}`, canvas)
+		await addTextToSvgRegion('#SAVING_STANDALONE', `${savingsGbp_str} per year!`, canvas)
 	}
 
 	return canvasToPng(canvas)
@@ -343,6 +427,7 @@ async function getOpenSolarIdFromCustomerId(customerId: string): Promise<number 
 		.from('south_facing_houses')
 		.select('*')
 		.eq('id', customerId)
+
 	if (error) {
 		console.log('Error fetching from south_facing_houses')
 		return undefined
@@ -404,13 +489,16 @@ function splitAddressIntoFields(addressComponents): {
 }
 
 export async function getCustomerDetailsFor(
-	customerId: string
+	customerId: string,
+	proposalType: string
 ): Promise<PostcardRecipient | undefined> {
-	// todo: get customer address information from supabase
+	const tableName = proposalType == 'solar' ? 'south_facing_houses' : 'existing-solar-properties'
+
 	const { data, error } = await supabase
-		.from('south_facing_houses')
+		.from(tableName)
 		.select('address')
 		.eq('id', customerId)
+
 	if (error) {
 		console.log('Error fetching address from supabase for id: ', customerId)
 		return undefined
