@@ -1,13 +1,28 @@
 <script>
+	import Modal from '$lib/components/Modal.svelte'
 	import { page } from '$app/stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
+	import { default as template } from './Template.kml'
+	import { generateUUID } from 'three/src/math/MathUtils'
+	import JSZip from 'jszip'
 	let awaitingResponse = false
 	let errorMessage = ''
+	let outputKmls = []
 
-	let left, right, bottom, top, targetArea, map, loader, drawingManager, spherical
+	let left,
+		right,
+		bottom,
+		top,
+		targetArea,
+		map,
+		loader,
+		drawingManager,
+		spherical,
+		saveKmlModal,
+		kmlCollectionPrefix
 
 	const urlParams = $page.url.searchParams
 	left = urlParams.get('left') || ''
@@ -17,6 +32,7 @@
 
 	let isAuthenticated = false
 	let polygons = []
+	let grid = undefined
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
@@ -60,7 +76,7 @@
 		})
 	})
 
-	function handleSubmit(event) {
+	async function handleSubmit(event) {
 		awaitingResponse = true
 		errorMessage = ''
 		const formData = new FormData(event.target)
@@ -69,7 +85,7 @@
 		const right = formData.get('right')
 		const top = formData.get('top')
 		const targetArea = formData.get('targetArea')
-		breakDownIntoGrid(left, bottom, top, right, targetArea * 1000000)
+		grid = breakDownIntoGrid(left, bottom, top, right, targetArea * 1000000)
 		awaitingResponse = false
 	}
 
@@ -113,9 +129,50 @@
 					map,
 					bounds: grid[row][col]
 				})
-				polygons.push(polygon)
+				polygons = [...polygons, polygon]
 			}
 		}
+		return grid
+	}
+
+	async function saveKml() {
+		saveKmlModal.close()
+
+		const zip = new JSZip()
+		for (let y = 0; y < grid.length; y++) {
+			for (let x = 0; x < grid[0].length; x++) {
+				let res = await fetch(template)
+				let kml = await res.text()
+				let uuid = generateUUID()
+				kml = kml
+					.replace('COORDINATE-LIST', boundsToCoordinates(grid[y][x]))
+					.replace('ID-X', uuid)
+					.replace('NAME-X', `${kmlCollectionPrefix}-${x}-${y}`)
+					.replace('Template', `${kmlCollectionPrefix}-${x}-${y}`)
+				const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' })
+				zip.file(`${kmlCollectionPrefix}-${x}-${y}.kml`, blob)
+			}
+		}
+
+		zip.generateAsync({ type: 'blob' }).then(function (content) {
+			const url = URL.createObjectURL(content)
+
+			const a = document.createElement('a')
+			a.href = url
+			a.download = 'kmlFiles.zip'
+			document.body.appendChild(a)
+			a.click()
+
+			// Clean up
+			document.body.removeChild(a)
+			URL.revokeObjectURL(url)
+		})
+	}
+
+	function boundsToCoordinates(bounds) {
+		let northEast = bounds.getNorthEast()
+		let southWest = bounds.getSouthWest()
+		return `${southWest.lng()},${southWest.lat()},0 ${northEast.lng()},${southWest.lat()},0 ${northEast.lng()},${northEast.lat()},0 ${southWest.lng()},${northEast.lat()},0 ${southWest.lng()},${southWest.lat()},0 `
 	}
 
 	function getRandomColor() {
@@ -128,8 +185,17 @@
 	}
 </script>
 
+<Modal showModal={false} bind:dialog={saveKmlModal}>
+	<form on:submit={saveKml}>
+		<label for="name">Collection name: </label>
+		<input type="text" id="name" name="name" bind:value={kmlCollectionPrefix} required />
+		<button type="submit" disabled={awaitingResponse}>
+			{`${awaitingResponse ? 'Saving KML files...' : 'Save KML files'}`}
+		</button>
+	</form>
+</Modal>
 {#if isAuthenticated}
-	<MagicLink bind:isAuthenticated redirectUrl={'solar-proposals/find-suitable-houses'} />
+	<MagicLink bind:isAuthenticated redirectUrl={'/battery-proposals/define-project-area'} />
 {:else}
 	<div class="container">
 		<form on:submit={handleSubmit}>
@@ -159,10 +225,14 @@
 				{`${awaitingResponse ? 'Splitting up regions...' : 'Define project regions'}`}
 			</button>
 		</form>
+
 		{#if errorMessage != ''}
 			<p style="color: red">{errorMessage}</p>
 		{/if}
 		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
+		{#if polygons.length}
+			<button disabled={polygons.length == 0} on:click={saveKmlModal.showModal()}>Save KMLS</button>
+		{/if}
 	</div>
 {/if}
 

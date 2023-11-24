@@ -104,6 +104,9 @@ dependencies:
   isomorphic-fetch:
     specifier: ^3.0.0
     version: 3.0.0
+  jszip:
+    specifier: ^3.10.1
+    version: 3.10.1
   juice:
     specifier: ^9.1.0
     version: 9.1.0

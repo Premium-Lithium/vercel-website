@@ -70,6 +70,7 @@
 		"docxtemplater-image-hyperlink-module-free": "^1.0.2",
 		"html-to-docx": "^1.8.0",
 		"isomorphic-fetch": "^3.0.0",
+		"jszip": "^3.10.1",
 		"juice": "^9.1.0",
 		"langchain": "^0.0.151",
 		"langsmith": "^0.0.36",
