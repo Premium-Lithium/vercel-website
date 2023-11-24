@@ -59,6 +59,9 @@ dependencies:
   '@turf/points-within-polygon':
     specifier: ^6.5.0
     version: 6.5.0
+  '@types/google-maps':
+    specifier: ^3.2.6
+    version: 3.2.6
   '@types/mjml':
     specifier: ^4.7.4
     version: 4.7.4
@@ -858,13 +861,13 @@ packages:
       core-js: 2.6.12
     dev: false
 
-  /@jimp/plugin-blur@0.16.13(@jimp/custom@0.16.13):
+  /@jimp/plugin-blur@0.16.13(@jimp/custom@0.6.8):
     resolution: {integrity: sha512-PvLrfa8vkej3qinlebyhLpksJgCF5aiysDMSVhOZqwH5nQLLtDE9WYbnsofGw4r0VVpyw3H/ANCIzYTyCtP9Cg==}
     peerDependencies:
       '@jimp/custom': '>=0.3.5'
     dependencies:
       '@babel/runtime': 7.22.15
-      '@jimp/custom': 0.16.13
+      '@jimp/custom': 0.6.8
       '@jimp/utils': 0.16.13
     dev: false
 
@@ -888,13 +891,13 @@ packages:
       '@jimp/utils': 0.16.13
     dev: false
 
-  /@jimp/plugin-color@0.16.13(@jimp/custom@0.16.13):
+  /@jimp/plugin-color@0.16.13(@jimp/custom@0.6.8):
     resolution: {integrity: sha512-xW+9BtEvoIkkH/Wde9ql4nAFbYLkVINhpgAE7VcBUsuuB34WUbcBl/taOuUYQrPEFQJ4jfXiAJZ2H/rvKjCVnQ==}
     peerDependencies:
       '@jimp/custom': '>=0.3.5'
     dependencies:
       '@babel/runtime': 7.22.15
-      '@jimp/custom': 0.16.13
+      '@jimp/custom': 0.6.8
       '@jimp/utils': 0.16.13
       tinycolor2: 1.6.0
     dev: false
@@ -1259,7 +1262,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.15
       '@jimp/custom': 0.16.13
-      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.16.13)
+      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.6.8)
       '@jimp/plugin-resize': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/utils': 0.16.13
     dev: false
@@ -1273,7 +1276,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.15
       '@jimp/custom': 0.16.13
-      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.16.13)
+      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.6.8)
       '@jimp/plugin-resize': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/utils': 0.16.13
     dev: false
@@ -1286,9 +1289,9 @@ packages:
       '@babel/runtime': 7.22.15
       '@jimp/custom': 0.16.13
       '@jimp/plugin-blit': 0.16.13(@jimp/custom@0.16.13)
-      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.16.13)
+      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.6.8)
       '@jimp/plugin-circle': 0.16.13(@jimp/custom@0.16.13)
-      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.16.13)
+      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.6.8)
       '@jimp/plugin-contain': 0.16.13(@jimp/custom@0.16.13)(@jimp/plugin-blit@0.16.13)(@jimp/plugin-resize@0.16.13)(@jimp/plugin-scale@0.16.13)
       '@jimp/plugin-cover': 0.16.13(@jimp/custom@0.16.13)(@jimp/plugin-crop@0.16.13)(@jimp/plugin-resize@0.16.13)(@jimp/plugin-scale@0.16.13)
       '@jimp/plugin-crop': 0.16.13(@jimp/custom@0.16.13)
@@ -2136,6 +2139,16 @@ packages:
 
   /@types/estree@1.0.1:
     resolution: {integrity: sha512-LG4opVs2ANWZ1TJoKc937iMmNstM/d0ae1vNbnBvBhqCSezgVUOzcLCqbI5elV8Vy6WKwKjaqR+zO9VKirBBCA==}
+
+  /@types/google-maps@3.2.6:
+    resolution: {integrity: sha512-ySOadZErcnCnNG+Zkmv5n+QG9DyTt7Mkx5Yk1dTjjNPtD8ByFaf+klZ/CxzgYcweduWEijTP0ASkANl57D0PRQ==}
+    dependencies:
+      '@types/google.maps': 3.54.9
+    dev: false
+
+  /@types/google.maps@3.54.9:
+    resolution: {integrity: sha512-kovzglL9eC/zsMnhIpBsiuUDPwhNsRDQzjtKDHZ3D4lYHi7l7IgZPE8/yz+I4Wb96cQXkz2W0DcOiF5RaNPovA==}
+    dev: false
 
   /@types/json-schema@7.0.12:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
