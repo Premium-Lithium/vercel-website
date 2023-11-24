@@ -67,6 +67,7 @@ async function updatePipedriveDealFrom(PLNumber: string, templateName: string) {
             'EPS? ',
             'Eddi?',
             'Any additional comments',
+            'Conducted on',
         ]
         const answerObject = await surveyDataSource.fetchAnswersFromFields(PLNumber, fieldNames, templateName)
 
@@ -86,7 +87,8 @@ async function updatePipedriveDealFrom(PLNumber: string, templateName: string) {
             'Site Survey Comments': answerObject['Any additional comments'],
             'Eddi required': answerObject['Eddi?'],
             'EPS Switch': answerObject['EPS? '],
-            'Site Survey Status': 'Yes'
+            'Site Survey Status': 'Yes',
+            'Site Survey Date': answerObject['Conducted on'],
         }
         console.log('Request', request)
         const updateRequest = await crm.setCustomFields(PLNumber, request)
