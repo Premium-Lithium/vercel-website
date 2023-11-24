@@ -41,9 +41,10 @@ export async function generatePostcardFor(customerId: string, proposalType: stri
 	}
 }
 
+
 async function savePostcardToSupabase(customerId: string, postcard: Postcard, proposalType: string) {
-	// todo: consider combing both sides into one image
-	uploadBufferToBucket(postcard.frontImage, `${customerId}_front.png`, 'output-flyer-images', proposalType)
+	uploadBufferToBucket(postcard.frontImage, `${customerId}/front.png`, 'output-flyer-images', proposalType)
+	uploadBufferToBucket(postcard.backImage, `${customerId}/back.png`, 'output-flyer-images', proposalType)
 
 	// const destTableName = proposalType == 'solar' ? 'south_facing_houses' : 'existing-solar-properties'
 }
@@ -456,62 +457,4 @@ async function getOpenSolarSystemUUID(openSolarId: number): Promise<string | und
 		return undefined
 	}
 	return (await res.json()).systems[0].uuid
-}
-
-function splitAddressIntoFields(addressComponents): {
-	line1: string
-	line2: string
-	city: string
-	postcode: string
-} {
-	let fields = { line1: '', line2: '', city: '', postcode: '' }
-
-	addressComponents.forEach((x) => {
-		switch (x.types[0]) {
-			case 'street_number':
-				fields.line1 = x['long_name']
-				break
-			case 'route':
-				fields.line1 = fields.line1.concat(` ${x['long_name']}`)
-				break
-			case 'locality':
-				fields.line2 = x['long_name']
-				break
-			case 'postal_town':
-				fields.city = x['long_name']
-				break
-			case 'postal_code':
-				fields.postcode = x['long_name']
-				break
-		}
-	})
-	return fields
-}
-
-export async function getCustomerDetailsFor(
-	customerId: string,
-	proposalType: string
-): Promise<PostcardRecipient | undefined> {
-	const tableName = proposalType == 'solar' ? 'south_facing_houses' : 'existing-solar-properties'
-
-	const { data, error } = await supabase
-		.from(tableName)
-		.select('address')
-		.eq('id', customerId)
-
-	if (error) {
-		console.log('Error fetching address from supabase for id: ', customerId)
-		return undefined
-	}
-	let address = splitAddressIntoFields(data[0].address['address_components'])
-	return {
-		title: 'The',
-		firstname: 'Homeowner',
-		lastname: '',
-		address1: address.line1,
-		address2: address.line2,
-		city: address.city,
-		postcode: address.postcode,
-		country: 'GB'
-	}
 }
