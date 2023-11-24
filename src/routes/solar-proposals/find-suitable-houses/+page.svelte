@@ -1,12 +1,13 @@
 <script>
 	import { page } from '$app/stores'
+	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 	let awaitingResponse = false
 	let errorMessage = ''
 
-	let left, right, bottom, top, map
+	let left, right, bottom, top, map, loader, drawingManager
 
 	const urlParams = $page.url.searchParams
 	left = urlParams.get('left') || ''
@@ -24,6 +25,38 @@
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
+		loader.importLibrary('drawing').then(async (d) => {
+			drawingManager = new d.DrawingManager()
+			drawingManager.setOptions({
+				rectangleOptions: {
+					editable: true,
+					fillOpacity: 0.4,
+					fillColor: '#fff',
+					strokeColor: '#35bbed',
+					draggable: true
+				},
+				drawingControlOptions: { drawingModes: [] }
+			})
+			drawingManager.setMap(map)
+			drawingManager.setDrawingMode('rectangle')
+			drawingManager.addListener('rectanglecomplete', (rect) => {
+				drawingManager.setDrawingMode(null)
+				let southWest = rect.bounds.getSouthWest()
+				let northEast = rect.bounds.getNorthEast()
+				left = southWest.lng()
+				bottom = southWest.lat()
+				right = northEast.lng()
+				top = northEast.lat()
+				rect.addListener('bounds_changed', () => {
+					let southWest = rect.bounds.getSouthWest()
+					let northEast = rect.bounds.getNorthEast()
+					left = southWest.lng()
+					bottom = southWest.lat()
+					right = northEast.lng()
+					top = northEast.lat()
+				})
+			})
+		})
 		// let streetWays = data.elements.filter((x) => {
 		// 	return x.type == 'way' && x.tags?.highway == 'residential';
 		// });
@@ -263,7 +296,7 @@
 	}
 </script>
 
-{#if !isAuthenticated}
+{#if isAuthenticated}
 	<MagicLink bind:isAuthenticated redirectUrl={'solar-proposals/find-suitable-houses'} />
 {:else}
 	<div class="container">
@@ -310,6 +343,7 @@
 				/>
 			{/if}
 		</div>
+		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
 	</div>
 {/if}
 

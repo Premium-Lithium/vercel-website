@@ -10,6 +10,8 @@
 	})
 	export let cypressTag = ''
 	export let map
+	export let initialZoom
+	export let minZoom
 
 	export let magnifierOutline = '#ffffff'
 	let CONTROL_POSITION
@@ -41,15 +43,15 @@
 									lat: 53.95922,
 									lng: -1.0761
 								},
-								zoom: 17,
+								zoom: initialZoom,
 								zoomControl: false,
 								zoomControlOptions: {
 									position: CONTROL_POSITION
 								},
-								minZoom: 15,
+								minZoom,
 								disableDefaultUI: true,
 								tilt: 0,
-								mapTypeId: 'satellite',
+								mapTypeId: 'hybrid',
 								disableDoubleClickZoom: true,
 								mapId: '6f6816d6bb1eeac4',
 								draggableCursor: 'pointer'
