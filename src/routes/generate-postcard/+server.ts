@@ -5,7 +5,7 @@ import { STANNP_API_KEY } from '$env/static/private'
 
 const schema = {
 	type: 'object',
-	required: ['customerId', 'proposal'],
+	required: ['customerId', 'proposalType'],
 	properties: {
 		customerId: {
 			type: 'string',
@@ -16,10 +16,10 @@ const schema = {
 			type: 'boolean',
 			errorMessage: "'test' must be a boolean"
 		},
-		proposal: {
+		proposalType: {
 			type: 'string',
 			enum: ['battery', 'solar'],
-			errorMessage: "'postcardType' must be one of 'solar', or 'battery'"
+			errorMessage: "'proposalType' must be one of 'solar', or 'battery'"
 		}
 	}
 }
@@ -37,11 +37,11 @@ export async function POST({ request }) {
 
 	try {
 		const customerId: string = requestData.customerId
-		const proposal: string = requestData.proposal
+		const proposalType: string = requestData.proposalType
 
 		const [postcard, customer] = await Promise.all([
-			generatePostcardFor(customerId, proposal),
-			getCustomerDetailsFor(customerId)
+			generatePostcardFor(customerId, proposalType),
+			getCustomerDetailsFor(customerId, proposalType)
 		])
 
 		// 'test' has to explicitly be set to false in the endpoint to trigger the mailer
@@ -64,7 +64,9 @@ async function sendPostcardTo(customer: any, postcard: any, test: boolean = true
 	const backBase64 = postcard.backImage.toString('base64')
 
 	// todo: remove this in production
+	// ===============================
 	test = true
+	console.log("Sending test postcard")
 	// ===============================
 
 	const stannpPayload = {
