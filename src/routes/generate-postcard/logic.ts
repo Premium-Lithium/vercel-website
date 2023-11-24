@@ -43,29 +43,42 @@ export async function generatePostcardFor(customerId: string, proposalType: stri
 
 
 async function savePostcardToSupabase(customerId: string, postcard: Postcard, proposalType: string) {
-	uploadBufferToBucket(postcard.frontImage, `${customerId}/front.png`, 'output-flyer-images', proposalType)
-	uploadBufferToBucket(postcard.backImage, `${customerId}/back.png`, 'output-flyer-images', proposalType)
+	const publicUrl = await uploadBufferToBucket(postcard.frontImage, `${customerId}/front`, 'output-flyer-images', proposalType)
+	console.log(`publicUrl: ${publicUrl}`);
 
-	// const destTableName = proposalType == 'solar' ? 'south_facing_houses' : 'existing-solar-properties'
+	const { data, error } = await supabase
+		.from('existing-solar-properties')
+		.update({ 'flyer_front_url': publicUrl })
+		.eq('id', customerId)
+
+	uploadBufferToBucket(postcard.backImage, `${customerId}/back`, 'output-flyer-images', proposalType)
 }
 
 
 async function uploadBufferToBucket(buffer: Buffer, fileName: string, bucketName: string, proposalType: string) {
-    const filePath = `${proposalType}/${fileName}`; // Replace with your desired file path
+	const filePath = `${proposalType}/${fileName}`
+	console.log(filePath);
 
-    let { error } = await supabase.storage
+    let { data, error } = await supabase.storage
         .from(bucketName)
         .upload(filePath, buffer, {
             contentType: 'image/jpeg',
             upsert: true
         });
 
+	const justUploaded = await supabase
+		.storage
+		.from(bucketName)
+		.getPublicUrl(filePath)
+
+	console.log(justUploaded.data.publicUrl);
+
     if (error) {
         console.error('Upload error:', error);
         return false;
     }
 
-    return true;
+    return justUploaded.data.publicUrl
 }
 
 
@@ -147,6 +160,8 @@ async function getPotentialSavingFor(customerId: string, proposalType: string): 
 			.eq('id', customerId)
 
 		// todo: handle case where record could not be found
+		if(error)
+			console.log(error)
 
 		proposedSaving = data[0].potential_savings_with_battery_gbp
 	}
