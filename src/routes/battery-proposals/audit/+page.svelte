@@ -114,6 +114,7 @@
 			return []
 		} else {
 			data = data.filter((x) => {
+				if (!x['audit_flags']) return true
 				return !(
 					x['audit_flags'].includes(99) ||
 					x['audit_flags'].includes(0) ||
