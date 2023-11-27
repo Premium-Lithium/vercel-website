@@ -33,51 +33,46 @@
 	let polygons = []
 	let grid = undefined
 
-	$: if (loader) {
-		if (!drawingManager) {
-			loader.importLibrary('drawing').then(async (d) => {
-				drawingManager = new d.DrawingManager()
-				drawingManager.setOptions({
-					rectangleOptions: {
-						editable: true,
-						fillOpacity: 0.4,
-						fillColor: '#fff',
-						strokeColor: '#35bbed',
-						draggable: true
-					},
-					drawingControlOptions: { drawingModes: [] }
-				})
-				drawingManager.setMap(map)
-				drawingManager.setDrawingMode('rectangle')
-				drawingManager.addListener('rectanglecomplete', (rect) => {
-					drawingManager.setDrawingMode(null)
+	onMount(async () => {
+		const { data, error } = await supabase.auth.getSession()
+		if (data.session == null) isAuthenticated = false
+		else isAuthenticated = true
+
+		loader.importLibrary('drawing').then(async (d) => {
+			drawingManager = new d.DrawingManager()
+			drawingManager.setOptions({
+				rectangleOptions: {
+					editable: true,
+					fillOpacity: 0.4,
+					fillColor: '#fff',
+					strokeColor: '#35bbed',
+					draggable: true
+				},
+				drawingControlOptions: { drawingModes: [] }
+			})
+			drawingManager.setMap(map)
+			drawingManager.setDrawingMode('rectangle')
+			drawingManager.addListener('rectanglecomplete', (rect) => {
+				drawingManager.setDrawingMode(null)
+				let southWest = rect.bounds.getSouthWest()
+				let northEast = rect.bounds.getNorthEast()
+				left = southWest.lng()
+				bottom = southWest.lat()
+				right = northEast.lng()
+				top = northEast.lat()
+				rect.addListener('bounds_changed', () => {
 					let southWest = rect.bounds.getSouthWest()
 					let northEast = rect.bounds.getNorthEast()
 					left = southWest.lng()
 					bottom = southWest.lat()
 					right = northEast.lng()
 					top = northEast.lat()
-					rect.addListener('bounds_changed', () => {
-						let southWest = rect.bounds.getSouthWest()
-						let northEast = rect.bounds.getNorthEast()
-						left = southWest.lng()
-						bottom = southWest.lat()
-						right = northEast.lng()
-						top = northEast.lat()
-					})
 				})
 			})
-		}
-		if (!spherical) {
-			loader.importLibrary('geometry').then(async (g) => {
-				spherical = g.spherical
-			})
-		}
-	}
-	onMount(async () => {
-		const { data, error } = await supabase.auth.getSession()
-		if (data.session == null) isAuthenticated = false
-		else isAuthenticated = true
+		})
+		loader.importLibrary('geometry').then(async (g) => {
+			spherical = g.spherical
+		})
 	})
 
 	async function handleSubmit(event) {
