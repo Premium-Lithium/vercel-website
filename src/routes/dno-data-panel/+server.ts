@@ -522,8 +522,7 @@ async function checkIfDNOCreatedFor(PLNumber: string): Promise<boolean> {
 // Get Single or Three Phase from pipedrive X
 // With Single/Three Phase, get datasheet from supabase and write to a PDF file X
 // Get DNO document from pipedrive and write to a docx file X
-// Convert DNO document to PDF 
-// Merge DNO PDF and Datasheet PDF
+// Create a zip of the relevant documents
 // Upload to PipeDrive
 // Send to relevant DNO email (use temporary email for now)
 // Fail on DNO details not found in database and conversion errors
