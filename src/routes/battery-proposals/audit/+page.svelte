@@ -115,12 +115,14 @@
 		} else {
 			data = data.filter((x) => {
 				if (!x['audit_flags']) return true
-				;[0, 2, 20, 21, 22, 23, 24, 99].forEach((i) => {
+				let flagsToExclude = [0, 2, 20, 21, 22, 23, 24, 99]
+				let flagged = false
+				flagsToExclude.forEach((i) => {
 					if (x['audit_flags'].includes(i)) {
-						return false
+						flagged = true
 					}
 				})
-				return true
+				return !flagged
 			})
 			if (randomiseOrder) {
 				return data.sort(() => {
