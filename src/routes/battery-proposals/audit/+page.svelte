@@ -5,8 +5,6 @@
 	import { onMount } from 'svelte'
 
 	const batteryProposalsTableName = 'existing-solar-properties'
-	const failedAuditTableName = 'AND-ME'
-	const passedAuditTableName = 'ME-TOO'
 
 	let allUnauditedHouses = []
 	let currentHouseToAudit = undefined
@@ -65,11 +63,9 @@
 			return p && v
 		}, true)
 		if (anyFlags) {
-			// upload to failedAudit db
-			// or just change audit-status
+			// change audit-status
 		} else {
-			// upload to passedAudit db
-			// or just change audit-status
+			// change audit-status
 		}
 	}
 

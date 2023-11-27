@@ -10,7 +10,6 @@
 	import JSZip from 'jszip'
 	let awaitingResponse = false
 	let errorMessage = ''
-	let outputKmls = []
 
 	let left,
 		right,
@@ -231,7 +230,9 @@
 		{/if}
 		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
 		{#if polygons.length}
-			<button disabled={polygons.length == 0} on:click={saveKmlModal.showModal()}>Save KMLS</button>
+			<button type="submit" disabled={polygons.length == 0} on:click={saveKmlModal.showModal()}
+				>Save KMLS</button
+			>
 		{/if}
 	</div>
 {/if}
@@ -261,18 +262,18 @@
 		background-color: #f9f9f9;
 		display: flex;
 		flex-direction: column;
+		gap: 12px;
 	}
 
 	label {
 		display: block;
-		margin-bottom: 0.5rem;
 		color: #333;
 	}
 
 	input[type='number'] {
 		width: 100%;
-		margin-bottom: 1rem;
 		border: 1px solid #ccc;
+		margin-bottom: 4px;
 		border-radius: 4px;
 		font-size: 24px;
 	}
@@ -291,6 +292,10 @@
 		color: white;
 		cursor: pointer;
 		font-size: 1rem;
+	}
+
+	button[type='submit'] {
+		border-radius: 0px !important;
 	}
 
 	button:hover {
