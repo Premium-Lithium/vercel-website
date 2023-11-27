@@ -115,11 +115,12 @@
 		} else {
 			data = data.filter((x) => {
 				if (!x['audit_flags']) return true
-				return !(
-					x['audit_flags'].includes(99) ||
-					x['audit_flags'].includes(0) ||
-					x['audit_flags'].includes(2)
-				)
+				;[0, 2, 20, 21, 22, 23, 24, 99].forEach((i) => {
+					if (x['audit_flags'].includes(i)) {
+						return false
+					}
+				})
+				return true
 			})
 			if (randomiseOrder) {
 				return data.sort(() => {
