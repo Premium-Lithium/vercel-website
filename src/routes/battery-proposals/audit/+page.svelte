@@ -142,7 +142,11 @@
 						)} saving
 					</p>
 					<p class="array-text">
-						{currentHouseToAudit ? currentHouseToAudit['solar_array_info'].length : ''} arrays
+						{currentHouseToAudit ? currentHouseToAudit['solar_array_info'].length : ''} array{currentHouseToAudit
+							? currentHouseToAudit['solar_array_info'].length == 1
+								? ''
+								: 's'
+							: ''}
 					</p>
 					<p class="meter-squared">
 						{currentHouseToAudit ? Math.round(currentHouseM2) : ''}m² array size
