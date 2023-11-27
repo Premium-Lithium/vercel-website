@@ -20,7 +20,6 @@
 		const { data, error } = await supabase.auth.signInWithOtp({
 			email,
 			options: {
-				shouldCreateUser: false,
 				emailRedirectTo: `${$page.url.origin}/${redirectUrl}`
 			}
 		})

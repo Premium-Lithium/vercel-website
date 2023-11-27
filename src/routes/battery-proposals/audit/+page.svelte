@@ -107,16 +107,26 @@
 	}
 
 	async function loadAllUnauditedHousesFromSupabase(randomiseOrder = true) {
-		const { data, error } = await supabase.from(batteryProposalsTableName).select('*')
+		let { data, error } = await supabase.from(batteryProposalsTableName).select('*')
+
 		if (error) {
 			console.log(`Error fetching from ${batteryProposalsTableName}`)
 			return []
-		} else if (randomiseOrder) {
-			return data.sort(() => {
-				return Math.random() > 0.5 ? 1 : -1
-			})
 		} else {
-			return data
+			data = data.filter((x) => {
+				return !(
+					x['audit_flags'].includes(99) ||
+					x['audit_flags'].includes(0) ||
+					x['audit_flags'].includes(2)
+				)
+			})
+			if (randomiseOrder) {
+				return data.sort(() => {
+					return Math.random() > 0.5 ? 1 : -1
+				})
+			} else {
+				return data
+			}
 		}
 	}
 </script>
@@ -124,8 +134,8 @@
 {#if !isAuthenticated}
 	<MagicLink
 		bind:isAuthenticated
-		redirectUrl={`battery-proposals/audit?startIndex=` + $page.url.searchParams.get('startIndex') ??
-			0}
+		redirectUrl={`battery-proposals/audit?startIndex=` +
+			($page.url.searchParams.get('startIndex') ?? '0')}
 	/>
 {:else}
 	<div class="container">
