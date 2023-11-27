@@ -84,6 +84,7 @@
 		"pipedrive": "^21.2.0",
 		"pizzip": "^3.1.4",
 		"postprocessing": "^6.33.3",
+		"randomcolor": "^0.6.2",
 		"readline-sync": "^1.4.10",
 		"really-relaxed-json": "^0.3.2",
 		"sass": "^1.69.5",
