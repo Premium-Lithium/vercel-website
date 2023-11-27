@@ -13,7 +13,7 @@
 	let loading = false
 	let currentHouseM2 = 0
 
-	currentHousePointer = +$page.url.searchParams.get('startIndex') ?? 0
+	currentHousePointer = +($page.url.searchParams.get('startIndex') ?? '0')
 
 	$: if (currentHouseToAudit)
 		currentHouseM2 = currentHouseToAudit['solar_array_info'].reduce((p, v, i, a) => {
