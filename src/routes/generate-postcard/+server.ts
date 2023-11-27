@@ -40,7 +40,7 @@ export async function POST({ request }) {
 		const customerId: string = requestData.customerId
 		const proposalType: string = requestData.proposalType
 
-		generatePostcardFor(customerId, proposalType)
+		await generatePostcardFor(customerId, proposalType)
 
 		return json({ message: `${proposalType} postcard generated for customer ${customerId}` }, { status: 200 })
 
