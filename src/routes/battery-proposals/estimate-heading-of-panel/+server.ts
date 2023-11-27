@@ -3,7 +3,6 @@ import { json } from '@sveltejs/kit'
 export async function POST({ request }) {
 	if (!request.body) return json({ message: 'Request needs a body' }, { status: 400 })
 	const { coords } = await request.json()
-	console.log(coords)
 	if (coords.length == 1) {
 		const { lat, lon } = coords[0]
 		let res = await fetch(`https://vercel-website-liart.vercel.app/solar-proposals/google-solar`, {
@@ -15,8 +14,6 @@ export async function POST({ request }) {
 		})
 		if (!res.ok) return json({ message: res.statusText }, { status: res.status })
 		let googleSolarData = await res.json()
-
-		console.log(googleSolarData)
 
 		let centers = googleSolarData.solarPotential.roofSegmentStats.map((roof) => {
 			return roof.center
