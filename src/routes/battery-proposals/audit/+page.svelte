@@ -57,13 +57,20 @@
 		}
 	})
 
-	function onSubmit(e) {
+	async function onSubmit(e) {
 		console.log(auditOptions)
 		let anyFlags = !auditOptions.reduce((p, v, i, a) => {
 			return p && v
 		}, true)
 		if (anyFlags) {
-			// change audit-status
+			const { data: existingFlags, error: flagErrors } = await supabase
+				.from(batteryProposalsTableName)
+				.select('audit_errors')
+			console.log(existingFlags)
+
+			// const { data, error } = await supabase
+			// 	.from(batteryProposalsTableName)
+			// 	.update({ 'audit_errors': [] })
 		} else {
 			// change audit-status
 		}

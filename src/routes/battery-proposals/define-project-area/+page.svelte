@@ -162,7 +162,6 @@
 			document.body.appendChild(a)
 			a.click()
 
-			// Clean up
 			document.body.removeChild(a)
 			URL.revokeObjectURL(url)
 		})
