@@ -1,5 +1,6 @@
 <script>
 	import { browser } from '$app/environment'
+	import { page } from '$app/stores'
 	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
@@ -10,6 +11,16 @@
 	let currentHouseToAudit = undefined
 	let currentHousePointer = 0
 	let loading = false
+	let currentHouseM2 = 0
+
+	currentHousePointer = +$page.url.searchParams.get('startIndex') ?? 0
+
+	$: if (currentHouseToAudit)
+		currentHouseM2 = currentHouseToAudit['solar_array_info'].reduce((p, v, i, a) => {
+			return p + v['area_m2']
+		}, 0)
+
+	$: currentHouseToAudit = currentHouseToAudit = allUnauditedHouses[currentHousePointer]
 
 	let isAuthenticated = false
 	let auditOption1, auditOption2, auditOption3, auditOption4, auditOption5, nextButton, auditForm
@@ -19,16 +30,16 @@
 		{ name: 'CORRECT_PANEL_ESTIMATE', value: auditOption3 },
 		{ name: 'CLEAR_AND_SENSIBLE', value: auditOption4 },
 		{ name: 'SHADE_FREE', value: auditOption5 }
-	].map((x) => {
-		if (x.value) return { name: x.name, value: x.value.checked }
+	].map((x, i) => {
+		if (x.value) return { name: x.name, value: x.value.checked, index: i }
 	})
+
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
 		loading = false
-		allUnauditedHouses = await loadAllUnauditedHousesFromSupabase()
-		currentHouseToAudit = await loadHouseFromSupabase(allUnauditedHouses[currentHousePointer])
+		allUnauditedHouses = await loadAllUnauditedHousesFromSupabase(false)
 
 		if (browser) {
 			document.addEventListener('keydown', (event) => {
@@ -58,44 +69,55 @@
 	})
 
 	async function onSubmit(e) {
-		console.log(auditOptions)
 		let anyFlags = !auditOptions.reduce((p, v, i, a) => {
-			return p && v
+			return p && v.value
 		}, true)
 		if (anyFlags) {
-			const { data: existingFlags, error: flagErrors } = await supabase
+			let existingFlags = currentHouseToAudit['audit_flags']
+			let newFlags = [...(existingFlags ?? [])]
+			auditOptions.forEach((x) => {
+				if (!x.value && !newFlags.includes(20 + x.index)) newFlags.push(20 + x.index)
+			})
+			const { data, error } = await supabase
 				.from(batteryProposalsTableName)
-				.select('audit_errors')
-			console.log(existingFlags)
-
-			// const { data, error } = await supabase
-			// 	.from(batteryProposalsTableName)
-			// 	.update({ 'audit_errors': [] })
+				.update({ 'audit_flags': newFlags })
+				.eq('id', currentHouseToAudit.id)
+			if (error) {
+				console.log(error)
+				return
+			}
 		} else {
-			// change audit-status
+			if (currentHouseToAudit && currentHouseM2 > 6 && currentHouseM2 < 40) {
+				const { data, error } = await supabase
+					.from(batteryProposalsTableName)
+					.update({ 'audit_flags': [99] })
+					.eq('id', currentHouseToAudit.id)
+				if (error) {
+					console.log(error)
+					return
+				}
+			}
 		}
+		currentHousePointer += 1
+		auditOption1.checked = true
+		auditOption2.checked = true
+		auditOption3.checked = true
+		auditOption4.checked = true
+		auditOption5.checked = true
 	}
 
-	async function loadHouseFromSupabase(customerId) {
-		const { data, error } = await supabase
-			.from(batteryProposalsTableName)
-			.select('*')
-			.eq('id', customerId)
-		if (error) {
-			console.log(`Error fetching from ${batteryProposalsTableName}`)
-			return null
-		} else return data[0]
-	}
-
-	async function loadAllUnauditedHousesFromSupabase() {
-		const { data, error } = await supabase
-			.from(batteryProposalsTableName)
-			.select('*')
-			.eq('audit_status', 0)
+	async function loadAllUnauditedHousesFromSupabase(randomiseOrder = true) {
+		const { data, error } = await supabase.from(batteryProposalsTableName).select('*')
 		if (error) {
 			console.log(`Error fetching from ${batteryProposalsTableName}`)
 			return []
-		} else return data
+		} else if (randomiseOrder) {
+			return data.sort(() => {
+				return Math.random() > 0.5 ? 1 : -1
+			})
+		} else {
+			return data
+		}
 	}
 </script>
 
@@ -103,19 +125,31 @@
 	<MagicLink bind:isAuthenticated redirectUrl={'battery-proposals/audit'} />
 {:else}
 	<div class="container">
-		<div class="header">
-			<h1>{currentHousePointer + 1} / {allUnauditedHouses.length}</h1>
-		</div>
-		<div class="images">
-			<img
-				src="https://modernize.com/wp-content/uploads/2016/01/Solar-Panels-Cottage-1.jpg"
-				alt=""
-				class="image"
-			/>
-			<div class="address">
-				<p class="address-text">{currentHouseToAudit?.address['formatted-address']}</p>
+		{#key currentHouseToAudit}
+			<div class="header">
+				<h1>{currentHousePointer + 1} / {allUnauditedHouses.length}</h1>
 			</div>
-		</div>
+			<div class="images">
+				<img
+					src={currentHouseToAudit ? currentHouseToAudit['screenshot_url'] : ''}
+					alt=""
+					class="image"
+				/>
+				<div class="house-details">
+					<p class="saving-text">
+						£{Math.round(
+							currentHouseToAudit ? currentHouseToAudit['potential_savings_with_battery_gbp'] : ''
+						)} saving
+					</p>
+					<p class="array-text">
+						{currentHouseToAudit ? currentHouseToAudit['solar_array_info'].length : ''} arrays
+					</p>
+					<p class="meter-squared">
+						{currentHouseToAudit ? Math.round(currentHouseM2) : ''}m² array size
+					</p>
+				</div>
+			</div>
+		{/key}
 		<div class="legend">
 			<ul class="audit-legend">
 				<li class="audit-legend-entry">Does the image show the roof and panels clearly?</li>
@@ -211,7 +245,7 @@
 		background: #0b252f;
 	}
 
-	.address {
+	.house-details {
 		font-size: 24px;
 		position: relative;
 		top: 0;
@@ -225,6 +259,8 @@
 		color: white;
 		text-align: center;
 		border-radius: 0px 0px 16px 16px;
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
 	}
 
 	.images {
