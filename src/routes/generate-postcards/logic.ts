@@ -1,6 +1,6 @@
 import { supabase } from '$lib/supabase.ts'
 import sharp from 'sharp'
-import type { Postcard, PostcardRecipient } from './types.ts'
+import type { Postcard, PostcardRecipient } from './types.js'
 import { Buffer } from 'buffer'
 import { createSVGWindow } from 'svgdom'
 import { SVG, Svg, Box, Image, registerWindow, namespaces } from '@svgdotjs/svg.js'
