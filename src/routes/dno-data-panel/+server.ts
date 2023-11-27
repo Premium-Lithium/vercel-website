@@ -30,10 +30,12 @@ export async function POST({ request }) {
         if (projectId !== null) {
             projectFound = await getOpenSolarProjectDetails(projectId)
         }
-        if (option == 1) {
-            response = await generateDnoApplicationFrom(PLNumber, projectFound);
-        } else if (option == 2) {
+        if (option === 1) {
+            response = await generateDnoApplicationFrom(PLNumber, userId);
+        } else if (option === 2) {
             response = await createOpenSolarProjectFrom(PLNumber);
+        } else if (option === 3) {
+            response = await uploadDesignImage(PLNumber, projectFound)
         } else {
             return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber), userId)
         }
@@ -49,13 +51,37 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
     if (projectId) {
         if (projectFound) {
             if (dnoCreated) {
-                return json({ message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser(userId) })
+                return json({
+                    message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: {
+                        openSolarBtnDisable: true,
+                        dnoApplicationBtnDisable: true,
+                        getDesignImageBtnDisable: false
+                    }, currentSignatory: await crm.getCurrentUser(userId)
+                })
             }
-            return json({ message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: [true, false], currentSignatory: await crm.getCurrentUser(userId) })
+            return json({
+                message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: {
+                    openSolarBtnDisable: true,
+                    dnoApplicationBtnDisable: false,
+                    getDesignImageBtnDisable: false
+                }, currentSignatory: await crm.getCurrentUser(userId)
+            })
         }
-        return json({ message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: [true, true], currentSignatory: await crm.getCurrentUser(userId) })
+        return json({
+            message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: {
+                openSolarBtnDisable: true,
+                dnoApplicationBtnDisable: false,
+                getDesignImageBtnDisable: false,
+            }, currentSignatory: await crm.getCurrentUser(userId)
+        })
     }
-    return json({ message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: [false, true], currentSignatory: await crm.getCurrentUser(userId) })
+    return json({
+        message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: {
+            openSolarBtnDisable: false,
+            dnoApplicationBtnDisable: false,
+            getDesignImageBtnDisable: true
+        }, currentSignatory: await crm.getCurrentUser(userId)
+    })
 }
 
 async function getOpenSolarProject(PLNumber: string): Promise<string | null> {
@@ -131,7 +157,7 @@ function validateDnoDetails(phaseAndPower: Array<string>, customerMpan: string, 
     return missingDetails
 }
 
-async function generateDnoApplicationFrom(PLNumber: string, projectFound: ProjectData) {
+async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
     const customerName = await crm.getPersonNameFor(PLNumber);
     const customerAddressObject = await crm.getAddressFor(PLNumber);
     const customerEmail = (await crm.getPersonEmailFor(PLNumber))[0].value;
@@ -158,14 +184,6 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400, buttonDisable: [true, false] })
     }
 
-    const projectData = {
-        id: projectFound.projectId,
-        uuid: projectFound.uuid
-    }
-
-    const panelImagePath = '/tmp/panel_layout.jpeg'
-    const systemImageResponse = await downloadSystemImageFrom(projectData, panelImagePath)
-    const imageFileContent = fs.readFileSync(panelImagePath);
     const dnoName = await getNetworkOperatorFromPostCode(customerAddressObject.postcode)
 
     let dnoCompanyDetailsData = {
@@ -183,7 +201,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     }
 
     const date = new Date();
-    const pdUser = await crm.getCurrentUser();
+    const pdUser = await crm.getCurrentUser(userId);
 
     const fieldsToUpdate = {
         'dno_company.name': dnoCompanyDetailsData.name,
@@ -200,7 +218,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         'installer.telephone': '08006448899',
         'manufacturer.name': '',
         'energy_code': '',
-        'panel_layout': panelImagePath,
+        'panel_layout': '', // empty string for now in case we want to add it back in
 
         'manufacturer_existing': existingManufacturer,
         'manufacturerRef_existing': existingManufacturerRef,
@@ -254,7 +272,7 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
         },
         getProps: function (tagName) {
             if (tagName === 'panel_layout') {
-                return imageFileContent;
+                return //imageFileContent;
             } else if (tagName === 'schematic') {
                 return fs.readFileSync(schematicPathPng);
             }
@@ -288,7 +306,6 @@ async function generateDnoApplicationFrom(PLNumber: string, projectFound: Projec
     await sendNotificationMailFor(PLNumber)
 
     fs.unlinkSync(DocxFilePath);
-    fs.unlinkSync(panelImagePath);
     if (dnoName && dnoDetails) {
         console.log('G99 Application Form Generated With DNO Details')
         return json({ message: 'G99 Application Generated With DNO Details', statusCode: 200 })
@@ -355,13 +372,21 @@ function isPartOfSchematic(component: string | number) {
 }
 
 async function downloadSystemImageFrom(projectData, filePath) {
-    const projectId = projectData.id
+    const projectId = projectData.projectId
     const uuid = projectData.uuid
 
     const buff = await openSolar.getBufferImageFrom(projectId, uuid, [500, 500])
-
     fs.writeFileSync(filePath, buff)
     return json({ message: 'Panel Design Found and Downloaded', status: 200 })
+}
+
+async function uploadDesignImage(PLNumber: string, projectData: ProjectData) {
+    const panelImagePath = '/tmp/OpenSolarDesign.jpeg'
+    await downloadSystemImageFrom(projectData, panelImagePath)
+
+    await crm.attachFileFor(PLNumber, panelImagePath)
+
+    return json({ message: 'Design Image Generated and Attached', statusCode: 200 })
 }
 
 async function createOpenSolarProjectFrom(PLNumber: string) {

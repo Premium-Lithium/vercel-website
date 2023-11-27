@@ -2,10 +2,10 @@ import { json } from '@sveltejs/kit'
 
 export async function POST({ request }) {
 	if (!request.body) return json({ status: 400, message: 'No body provided' })
-	const { openSolarId } = await request.json()
+	const { openSolarId, openSolarOrgId } = await request.json()
 
 	let res = await fetch(
-		`https://api.opensolar.com/api/orgs/52668/projects/${openSolarId}/systems/details`,
+		`https://api.opensolar.com/api/orgs/${openSolarOrgId}/projects/${openSolarId}/systems/details`,
 		{
 			method: 'GET',
 			headers: {
