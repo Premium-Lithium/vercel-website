@@ -121,8 +121,12 @@
 	}
 </script>
 
-{#if isAuthenticated}
-	<MagicLink bind:isAuthenticated redirectUrl={'battery-proposals/audit'} />
+{#if !isAuthenticated}
+	<MagicLink
+		bind:isAuthenticated
+		redirectUrl={`battery-proposals/audit?startIndex=` + $page.url.searchParams.get('startIndex') ??
+			0}
+	/>
 {:else}
 	<div class="container">
 		{#key currentHouseToAudit}
