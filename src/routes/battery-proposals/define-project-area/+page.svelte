@@ -21,7 +21,9 @@
 		drawingManager,
 		spherical,
 		saveKmlModal,
-		kmlCollectionPrefix
+		kmlCollectionPrefix,
+		loadingDrawingManager,
+		loadingSpherical
 
 	const urlParams = $page.url.searchParams
 	left = urlParams.get('left') || ''
@@ -35,7 +37,8 @@
 
 	$: console.log(drawingManager)
 	$: if (loader) {
-		if (!drawingManager) {
+		if (!loadingDrawingManager && !drawingManager) {
+			loadingDrawingManager = true
 			loader.importLibrary('drawing').then(async (d) => {
 				drawingManager = new d.DrawingManager()
 				drawingManager.setOptions({
@@ -44,14 +47,13 @@
 						fillOpacity: 0.4,
 						fillColor: '#fff',
 						strokeColor: '#35bbed',
-						draggable: true
+						draggable: true,
+						clickable: true
 					},
-					drawingControlOptions: { drawingModes: [] }
+					drawingControlOptions: { drawingModes: [google.maps.drawing.OverlayType.RECTANGLE] }
 				})
 				drawingManager.setMap(map)
-				drawingManager.setDrawingMode('rectangle')
 				drawingManager.addListener('rectanglecomplete', (rect) => {
-					drawingManager.setDrawingMode(null)
 					let southWest = rect.bounds.getSouthWest()
 					let northEast = rect.bounds.getNorthEast()
 					left = southWest.lng()
@@ -67,12 +69,15 @@
 						top = northEast.lat()
 					})
 				})
+				loadingDrawingManager = false
 			})
 		}
-		if (!spherical) {
+		if (!loadingSpherical && !spherical) {
+			loadingSpherical = true
 			loader.importLibrary('geometry').then(async (g) => {
 				spherical = g.spherical
 			})
+			loadingSpherical = false
 		}
 	}
 	onMount(async () => {

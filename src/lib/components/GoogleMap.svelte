@@ -122,10 +122,6 @@
 		width: 100%;
 		height: 100%;
 	}
-
-	#map :global(button[title='Stop drawing']) {
-		display: none !important;
-	}
 	#map :global(button[title='Undo last edit']) {
 		display: none !important;
 	}
