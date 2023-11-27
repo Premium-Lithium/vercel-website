@@ -1,3 +1,7 @@
+# TODO: use web-based endpoint for setting up headless browser
+# https://stackoverflow.com/questions/55863044/execute-single-javascript-file-with-headless-chrome-from-the-command-line#56018628
+
+
 import requests
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
