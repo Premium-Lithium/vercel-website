@@ -113,7 +113,7 @@ async function buildPostcardFor(customerId: string, proposalType: string): Promi
 async function getFlyerFace(customerId: string, proposalType: string, face: string): Promise<Buffer | null> {
     const bucketName = "output-flyer-images"
 
-    const imagePath = `${proposalType}/${customerId}/${face}.png`
+    const imagePath = `${proposalType}/${customerId}/${face}`
     const { data, error } = await supabase.storage.from(bucketName).download(imagePath);
 
     if(error != null) {
