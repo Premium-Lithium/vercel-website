@@ -541,10 +541,7 @@ async function createDnoPdf(PLNumber: string) {
     if (!datasheet)
         return ({ message: "Error - Failed to find Datasheet on Database" })
     await crm.downloadPipedriveFileTo(fileId, dnoDocxPath)
-    const convert = await convertDocToPdf(dnoDocxPath, dnoPdfPath)
-    if (!convert) {
-        return json({ message: "Could not convert PDF", statusCode: 400 })
-    }
+    
 
     return ({ message: "DNO Application with Datasheets created", statusCode: 200 })
 }
@@ -572,16 +569,4 @@ async function getDatasheetPathFor(phase: string) {
         return path
     }
     return null
-}
-
-async function convertDocToPdf(docPath: string, pdfPath: string): Promise<boolean> {
-    pdfPath = './static/pdf.pdf'
-    docxConverter(docPath, pdfPath, (err, result) => {
-        if (err) {
-            console.log(err)
-        }
-        if (result)
-            return true
-    })
-    return false
 }
