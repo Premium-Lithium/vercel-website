@@ -1,83 +1,79 @@
 <script>
+	import { supabase } from '$lib/supabase'
+	import { page } from '$app/stores'
+	import AzimuthPitchDisplay from './AzimuthPitchDisplay.svelte'
+	import { onMount } from 'svelte'
+	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	let googleSolarResponse = undefined
 	let roofSection = undefined
 	let confident = false
 	let errorMessage = ''
 	let awaitingResponse = false
-	let result
+	let buildingLat, buildingLon, roofLat, roofLon, map, loader, drawingManager
+	let loadingDrawingManager = false
+	let loadingSpherical = false
+	let allAuditedProperties = undefined
 
-	$: if (result && !googleSolarResponse) {
-		googleSolarResponse = undefined
-		result.polygons.forEach(async (polygon, i) => {
-			if (i !== 0) return
-			const { lat, lon } = getCentroid(polygon)
-			let res = await fetch(`/battery-proposals/estimate-heading-of-panel`, {
-				method: 'POST',
-				body: JSON.stringify({
-					'coords': [{ 'lat': lat, 'lon': lon }]
+	const urlParams = $page.url.searchParams
+	buildingLat = urlParams.get('blat') || ''
+	buildingLon = urlParams.get('blon') || ''
+	roofLat = urlParams.get('rlat') || ''
+	roofLon = urlParams.get('rlon') || ''
+	let googleEarthLink = undefined
+
+	onMount(async () => {
+		let { data, error } = await supabase.from('existing-solar-properties').select('*')
+		allAuditedProperties = data.filter((x) => {
+			return x['audit_flags'].length == 1 && x['audit_flags'].includes(99)
+		})
+	})
+
+	$: if (loader) {
+		if (!loadingDrawingManager && !drawingManager) {
+			loadingDrawingManager = true
+			loader.importLibrary('drawing').then(async (d) => {
+				drawingManager = new d.DrawingManager()
+				drawingManager.setOptions({
+					rectangleOptions: {
+						fillOpacity: 0.4,
+						fillColor: '#fff',
+						strokeColor: '#35bbed',
+						clickable: true
+					},
+					drawingControlOptions: { drawingModes: [] }
 				})
+				drawingManager.setMap(map)
+				loadingDrawingManager = false
 			})
-			if (!res.ok) {
-			} else {
-				googleSolarResponse = await res.json()
-				console.log(googleSolarResponse)
-				if (
-					googleSolarResponse.boundingBoxesContainingPoint.includes(
-						googleSolarResponse.closestCenter
-					)
-				) {
-					confident = true
-					roofSection = googleSolarResponse.closestCenter
-				} else if (googleSolarResponse.boundingBoxesContainingPoint.length == 1) {
-					confident = true
-					roofSection = googleSolarResponse.boundingBoxesContainingPoint[0]
-				} else {
-					confident = false
-					roofSection = googleSolarResponse.closestCenter
-				}
-			}
-		})
+		}
 	}
-
-	function getCentroid(polygon) {
-		console.log(polygon)
-		let minLat, minLon, maxLat, maxLon
-		polygon.forEach((point) => {
-			if (!minLat || point.lat < minLat) {
-				minLat = point.lat
-			}
-			if (!maxLat || point.lat > maxLat) {
-				maxLat = point.lat
-			}
-			if (!minLon || point.lon < minLon) {
-				minLon = point.lon
-			}
-			if (!maxLon || point.lon > maxLon) {
-				maxLon = point.lon
-			}
-		})
-		console.log({ lat: (maxLat + minLat) / 2, lon: (maxLon + minLon) / 2 })
-		return { lat: (maxLat + minLat) / 2, lon: (maxLon + minLon) / 2 }
-	}
-
 	async function handleSubmit(event) {
 		awaitingResponse = true
 		errorMessage = ''
 		const formData = new FormData(event.target)
-		const lat = formData.get('lat')
-		const lon = formData.get('lon')
+		const rlat = formData.get('rlat')
+		const rlon = formData.get('rlon')
+		const blat = formData.get('blat')
+		const blon = formData.get('blon')
+		map.panTo(new google.maps.LatLng(rlat, rlon))
+
 		let res = await fetch(`/battery-proposals/estimate-heading-of-panel`, {
 			method: 'POST',
 			body: JSON.stringify({
-				'coords': [{ 'lat': lat, 'lon': lon }]
+				'roofCoords': { 'lat': rlat, 'lon': rlon },
+				'buildingCoords': { 'lat': blat, 'lon': blon }
 			})
 		})
 		if (!res.ok) {
 		} else {
 			googleSolarResponse = await res.json()
-			if (
-				googleSolarResponse.boundingBoxesContainingPoint.includes(googleSolarResponse.closestCenter)
-			) {
+			let bboxContainPoints = googleSolarResponse.boundingBoxesContainingPoint.map((bbox) => {
+				return (
+					bbox.center.latitude == googleSolarResponse.closestCenter.center.latitude &&
+					bbox.center.longitude == googleSolarResponse.closestCenter.center.longitude
+				)
+			})
+			if (bboxContainPoints.includes(true)) {
 				confident = true
 				roofSection = googleSolarResponse.closestCenter
 			} else if (googleSolarResponse.boundingBoxesContainingPoint.length == 1) {
@@ -86,105 +82,131 @@
 			} else {
 				confident = false
 				errorMessage = 'Cannot confidently find roof section'
-				roofSection = undefined
+				roofSection = googleSolarResponse.closestCenter
 			}
+			console.log(roofSection)
 		}
+		map.moveCamera({
+			center: new google.maps.LatLng(roofSection.center.latitude, roofSection.center.longitude),
+			zoom: 21
+		})
 	}
 
-	async function handleKMLUpload(event) {
-		const formData = new FormData(event.target)
-		let file = formData.get('kmlUpload')
-		await parseDocument(file)
-	}
-
-	async function parseDocument(file) {
-		let fileReader = new FileReader()
-		fileReader.onload = async (e) => {
-			result = await extractGoogleCoords(e.target.result)
-		}
-		fileReader.readAsText(file)
-	}
-
-	async function extractGoogleCoords(plainText) {
-		let parser = new DOMParser()
-		let xmlDoc = parser.parseFromString(plainText, 'text/xml')
-		let googlePolygons = []
-		let googleMarkers = []
-
-		if (xmlDoc.documentElement.nodeName == 'kml') {
-			for (const item of xmlDoc.getElementsByTagName('Placemark')) {
-				let placeMarkName = item.getElementsByTagName('name')[0].childNodes[0].nodeValue.trim()
-				let polygons = item.getElementsByTagName('Polygon')
-				let markers = item.getElementsByTagName('Point')
-
-				/** POLYGONS PARSE **/
-				for (const polygon of polygons) {
-					let coords = polygon.getElementsByTagName('coordinates')[0].childNodes[0].nodeValue.trim()
-					let points = coords.split(' ')
-
-					let googlePolygonsPaths = []
-					for (const point of points) {
-						let coord = point.split(',')
-						googlePolygonsPaths.push({ lat: +coord[1], lon: +coord[0] }) // +x converts x from string to a number
-					}
-					googlePolygons.push(googlePolygonsPaths)
-				}
-
-				/** MARKER PARSE **/
-				for (const marker of markers) {
-					var coords = marker.getElementsByTagName('coordinates')[0].childNodes[0].nodeValue.trim()
-					let coord = coords.split(',')
-					googleMarkers.push({ lat: +coord[1], lon: +coord[0] })
-				}
-			}
-		} else {
-			throw 'error while parsing'
-		}
-
-		return { markers: googleMarkers, polygons: googlePolygons }
+	async function getRandomSupabaseBuilding() {
+		const building = allAuditedProperties.sort(() => {
+			return Math.random() > 0.5 ? 1 : -1
+		})[0]
+		buildingLat = building.address.geometry.location.lat
+		buildingLon = building.address.geometry.location.lng
+		roofLat = building['solar_array_info'][0].location.latitude
+		roofLon = building['solar_array_info'][0].location.longitude
+		googleEarthLink = building['google_earth_url']
 	}
 </script>
 
 <div class="container">
+	<div class="header">
+		<button class="random-building-button" on:click={getRandomSupabaseBuilding}
+			>Get random building</button
+		>
+		{#if googleEarthLink}
+			<a href={googleEarthLink} target="_blank">Google Earth link</a>
+		{/if}
+	</div>
+	<p />
 	<form on:submit={handleSubmit}>
-		<label for="lat">Latitude:</label>
-		<input type="number" step="any" id="lat" name="lat" required />
+		<label for="blat">Building Latitude:</label>
+		<input type="number" step="any" id="blat" name="blat" bind:value={buildingLat} required />
 
-		<label for="lon">Longitude:</label>
-		<input type="number" step="any" id="lon" name="lon" required />
+		<label for="blon">Building Longitude:</label>
+		<input type="number" step="any" id="blon" name="blon" bind:value={buildingLon} required />
+
+		<label for="rlat">Roof Section Latitude:</label>
+		<input type="number" step="any" id="rlat" name="rlat" bind:value={roofLat} required />
+
+		<label for="rlon">Roof Section Longitude:</label>
+		<input type="number" step="any" id="rlon" name="rlon" bind:value={roofLon} required />
 
 		<button type="submit">Get roof details</button>
 	</form>
-	<form on:submit={handleKMLUpload}>
-		<label for="kmlUpload">Upload KML:</label>
-		<input type="file" id="kmlUpload" name="kmlUpload" accept=".kml" required />
-		<button type="submit">Get roof details</button>
-	</form>
-	<p>{errorMessage}</p>
+	<p style="color: red;">{errorMessage}</p>
 
 	{#if roofSection}
 		<p>Azimuth: {roofSection.azimuthDegrees}</p>
 		<p>Pitch: {roofSection.pitchDegrees}</p>
 		<p>Area: {roofSection.stats.areaMeters2}</p>
+		<!-- <div class="azimuth-pitch-display">
+			<AzimuthPitchDisplay
+				bind:azimuth={roofSection.azimuthDegrees}
+				bind:pitch={roofSection.pitchDegrees}
+			/>
+		</div> -->
 	{/if}
+	<GoogleMap bind:map bind:loader minZoom={10} initialZoom={13} />
 </div>
 
 <style>
 	.container {
-		position: absolute;
 		width: 100%;
 		height: 100%;
-		top: 0;
-		left: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
 
+	.container > a {
+		width: fit-content;
+	}
 	form {
+		max-width: 300px;
+		margin: 2rem auto;
+		padding: 1rem;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		background-color: #f9f9f9;
 		display: flex;
 		flex-direction: column;
-		width: 75%;
-		align-items: left;
+		gap: 12px;
+	}
+
+	label {
+		display: block;
+		color: #333;
+	}
+
+	input[type='number'] {
+		width: 100%;
+		border: 1px solid #ccc;
+		margin-bottom: 4px;
+		border-radius: 4px;
+		font-size: 24px;
+	}
+
+	button {
+		width: 100%;
+		padding: 0.5rem;
+		border: none;
+		border-radius: 4px;
+		background-color: #5cb85c;
+		color: white;
+		cursor: pointer;
+		font-size: 1rem;
+	}
+
+	button:hover {
+		background-color: #4cae4c;
+	}
+
+	.azimuth-pitch-display {
+		width: 100%;
+	}
+
+	.header {
+		margin: 12px;
+		width: 50%;
+		display: flex;
+		align-items: center;
+		flex-direction: column;
+		gap: 6px;
 	}
 </style>
