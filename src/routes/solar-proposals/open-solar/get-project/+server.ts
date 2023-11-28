@@ -1,3 +1,4 @@
+import { PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN } from '$env/static/public'
 import { json } from '@sveltejs/kit'
 
 export async function POST({ request }) {
@@ -9,14 +10,13 @@ export async function POST({ request }) {
 		{
 			method: 'GET',
 			headers: {
-				Authorization: 'Bearer s_IK65BN2IG56EVZ2GSH5NI5APGMKBCY5H',
+				Authorization: `Bearer ${PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN}`,
 				'Content-Type': 'application/json',
 				'Access-Control-Allow-Origin': '*',
 				'Access-Control-Allow-Methods': 'POST,PATCH,OPTIONS'
 			}
 		}
 	)
-	console.log(res)
 
 	if (!res.ok) return json({ status: 400, message: res.statusText })
 
