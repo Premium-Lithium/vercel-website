@@ -20,6 +20,9 @@ dependencies:
   '@microsoft/microsoft-graph-client':
     specifier: ^3.0.7
     version: 3.0.7(@azure/identity@3.4.1)
+  '@nora-soderlund/google-maps-solar-api':
+    specifier: ^1.1.1
+    version: 1.1.1
   '@pipedrive/app-extensions-sdk':
     specifier: ^0.9.0
     version: 0.9.0
@@ -1636,6 +1639,12 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
+
+  /@nora-soderlund/google-maps-solar-api@1.1.1:
+    resolution: {integrity: sha512-/TyuckK7B+3FEZQUnmQt6XK7b/8BrJA+NvYnBkxxF6unWI+hdezgcBi5N16/c4gSgQk3CMi+bCLQFMFe/OSo4w==}
+    dependencies:
+      geolib: 3.3.4
+    dev: false
 
   /@one-ini/wasm@0.1.1:
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
@@ -4919,6 +4928,10 @@ packages:
 
   /geojson-vt@3.2.1:
     resolution: {integrity: sha512-EvGQQi/zPrDA6zr6BnJD/YhwAkBP8nnJ9emh3EnHQKVMfg/MRVtPbMYdgVy/IaEmn4UfagD2a6fafPDL5hbtwg==}
+    dev: false
+
+  /geolib@3.3.4:
+    resolution: {integrity: sha512-EicrlLLL3S42gE9/wde+11uiaYAaeSVDwCUIv2uMIoRBfNJCn8EsSI+6nS3r4TCKDO6+RQNM9ayLq2at+oZQWQ==}
     dev: false
 
   /get-caller-file@1.0.3:

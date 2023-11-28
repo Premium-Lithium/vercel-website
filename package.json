@@ -43,6 +43,7 @@
 		"@googlemaps/js-api-loader": "^1.16.2",
 		"@mapbox/mapbox-gl-draw": "^1.4.3",
 		"@microsoft/microsoft-graph-client": "^3.0.7",
+		"@nora-soderlund/google-maps-solar-api": "^1.1.1",
 		"@pipedrive/app-extensions-sdk": "^0.9.0",
 		"@shopify/shopify-api": "^7.7.0",
 		"@supabase/auth-helpers-sveltekit": "^0.10.7",

@@ -11,8 +11,8 @@
 	let awaitingResponse = false
 	let buildingLat, buildingLon, roofLat, roofLon, map, loader, drawingManager
 	let loadingDrawingManager = false
-	let loadingSpherical = false
 	let allAuditedProperties = undefined
+	let mapDiv, bbox
 
 	const urlParams = $page.url.searchParams
 	buildingLat = urlParams.get('blat') || ''
@@ -48,6 +48,7 @@
 		}
 	}
 	async function handleSubmit(event) {
+		bbox?.setMap(null)
 		awaitingResponse = true
 		errorMessage = ''
 		const formData = new FormData(event.target)
@@ -55,7 +56,7 @@
 		const rlon = formData.get('rlon')
 		const blat = formData.get('blat')
 		const blon = formData.get('blon')
-		map.panTo(new google.maps.LatLng(rlat, rlon))
+		// map.panTo(new google.maps.LatLng(blat, blon))
 
 		let res = await fetch(`/battery-proposals/estimate-heading-of-panel`, {
 			method: 'POST',
@@ -84,12 +85,27 @@
 				errorMessage = 'Cannot confidently find roof section'
 				roofSection = googleSolarResponse.closestCenter
 			}
-			console.log(roofSection)
 		}
-		map.moveCamera({
-			center: new google.maps.LatLng(roofSection.center.latitude, roofSection.center.longitude),
-			zoom: 21
-		})
+
+		// bbox = new google.maps.Rectangle({
+		// 	strokeColor: '#35BBED',
+		// 	strokeOpacity: 1,
+		// 	strokeWeight: 2,
+		// 	fillColor: '#35BBED',
+		// 	fillOpacity: 0.5,
+		// 	clickable: false,
+		// 	map,
+		// 	bounds: {
+		// 		north: roofSection.boundingBox.ne.latitude,
+		// 		east: roofSection.boundingBox.ne.longitude,
+		// 		south: roofSection.boundingBox.sw.latitude,
+		// 		west: roofSection.boundingBox.sw.longitude
+		// 	}
+		// })
+		// map.moveCamera({
+		// 	center: new google.maps.LatLng(roofSection.center.latitude, roofSection.center.longitude),
+		// 	zoom: 21
+		// })
 	}
 
 	async function getRandomSupabaseBuilding() {
@@ -142,7 +158,9 @@
 			/>
 		</div> -->
 	{/if}
-	<GoogleMap bind:map bind:loader minZoom={10} initialZoom={13} />
+	<div class="map" bind:this={mapDiv}>
+		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={13} />
+	</div>
 </div>
 
 <style>
@@ -208,5 +226,10 @@
 		align-items: center;
 		flex-direction: column;
 		gap: 6px;
+	}
+
+	.map {
+		width: 100%;
+		height: 100%;
 	}
 </style>
