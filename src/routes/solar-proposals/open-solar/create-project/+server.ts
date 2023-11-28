@@ -1,7 +1,6 @@
 import { PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN } from '$env/static/public'
 import { json } from '@sveltejs/kit'
 
-// test
 export async function POST({ request }) {
 	if (!request.body) return json({ status: 400, message: 'No body provided' })
 	const { project, openSolarOrgId } = await request.json()
