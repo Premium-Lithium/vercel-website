@@ -3,6 +3,7 @@ import { supabase } from '$lib/supabase.ts'
 import validate from '$lib/validation-utils.js'
 import { generatePostcardFor } from './logic'
 
+// dummy change
 const schema = {
 	type: 'object',
 	required: ['customerId', 'proposalType'],
