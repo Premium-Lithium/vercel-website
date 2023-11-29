@@ -1,13 +1,9 @@
 <script>
 	import { PUBLIC_GOOGLE_API_KEY } from '$env/static/public'
 	import { onDestroy, onMount } from 'svelte'
-	import { Loader } from '@googlemaps/js-api-loader'
+
 	import Magnifier from './Magnifier.svelte'
-	export const loader = new Loader({
-		apiKey: PUBLIC_GOOGLE_API_KEY,
-		version: 'weekly',
-		libraries: ['places']
-	})
+	export let loader = null
 	export let cypressTag = ''
 	export let map
 	export let initialZoom
@@ -24,7 +20,13 @@
 		if (mapWidth * mapHeight) staticMapImage = getStaticImage()
 	}
 
-	onMount(() => {
+	onMount(async () => {
+		const Loader = await import('@googlemaps/js-api-loader')
+		loader = new Loader.Loader({
+			apiKey: PUBLIC_GOOGLE_API_KEY,
+			version: 'weekly',
+			libraries: ['places']
+		})
 		magnifierDisabled = true
 		loader
 			.importLibrary('core')
@@ -119,10 +121,6 @@
 	#map {
 		width: 100%;
 		height: 100%;
-	}
-
-	#map :global(button[title='Stop drawing']) {
-		display: none !important;
 	}
 	#map :global(button[title='Undo last edit']) {
 		display: none !important;

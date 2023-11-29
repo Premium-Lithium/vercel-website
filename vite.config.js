@@ -1,12 +1,13 @@
-import { sveltekit } from '@sveltejs/kit/vite';
+import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
 	plugins: [sveltekit()],
-    server: {
-        cors: false,
-    },
+	server: {
+		cors: false
+	},
 	optimizeDeps: {
 		include: ['lodash.get', 'lodash.isequal', 'lodash.clonedeep']
-	}
-});
+	},
+	assetsInclude: ['**/*.kml']
+})
