@@ -8,7 +8,7 @@
 	}
 
 	interface MarkerOptions {
-		latLng: LatLongObj,
+		latLng: LatLongObj
 		address: string
 	}
 
@@ -18,7 +18,17 @@
 	}
 
 	const initialCenter = { lat: 55, lng: -3 }
-	let map, loader
+	let map, loader, loadingMarkerManager: boolean, marker
+
+	$: if (loader) {
+		if (!loadingMarkerManager && !markerManager) {
+			loadingMarkerManager = true
+			loader.importLibrary('marker').then(async (m) => {
+				marker = new m.Marker()
+				
+			})
+		}
+	}
 
 	onMount(async () => {
 		await updateMapWithOptions({ option: 0 })
@@ -39,23 +49,19 @@
 
 	function testMarker() {
 		addMarker({
-			latLng: {lat: 53.9606746, lng: -1.1155305},
+			latLng: { lat: 53.9606746, lng: -1.1155305 },
 			address: '86 Poppleton Road, Holgate, York, YO26 4UP'
 		})
 	}
 
 	function addMarker(opts: MarkerOptions) {
-		let currMap = document.getElementById('map')
-		console.log(typeof(currMap))
 		let marker = new google.maps.Marker({
 			position: new google.maps.LatLng(opts.latLng.lat, opts.latLng.lng),
 			title: opts.address
 		})
-		if (currMap)
-			marker.setMap(currMap)
 	}
-
 </script>
+
 <!-- 
 TODO List
 Add handle to draggable control panel
@@ -95,5 +101,4 @@ Style draggable control panel
 		justify-content: center;
 		padding: 8px;
 	}
-
 </style>
