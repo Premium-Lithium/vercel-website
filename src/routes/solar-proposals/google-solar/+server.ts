@@ -10,18 +10,21 @@ export async function POST({ request }) {
 			`https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${lat}&location.longitude=${lon}&requiredQuality=${qualities[0]}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
 			{ method: 'GET' }
 		)
+		console.log(res)
 	} catch (e) {
 		try {
 			res = await fetch(
 				`https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${lat}&location.longitude=${lon}&requiredQuality=${qualities[1]}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
 				{ method: 'GET' }
 			)
+			console.log(res)
 		} catch (e) {
 			try {
 				res = await fetch(
 					`https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${lat}&location.longitude=${lon}&requiredQuality=${qualities[2]}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
 					{ method: 'GET' }
 				)
+				console.log(res)
 			} catch (e) {
 				return new Response(JSON.stringify(e), {
 					status: 400,
@@ -32,7 +35,6 @@ export async function POST({ request }) {
 			}
 		}
 	}
-
 	const data = await res.json()
 	return new Response(JSON.stringify(data), {
 		status: res.status,
