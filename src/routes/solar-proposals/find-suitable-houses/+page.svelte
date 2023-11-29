@@ -34,7 +34,7 @@
 					strokeColor: '#35bbed',
 					draggable: true
 				},
-				drawingControlOptions: { drawingModes: [google.maps.] }
+				drawingControlOptions: { drawingModes: [] }
 			})
 			drawingManager.setMap(map)
 			drawingManager.setDrawingMode('rectangle')
