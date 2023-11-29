@@ -8,7 +8,6 @@ export async function POST ({ request }) {
         .select('*')
         .eq('id', uuid)
     if (data) {
-        console.log(data[0])
         return data[0]
     }
     return error
