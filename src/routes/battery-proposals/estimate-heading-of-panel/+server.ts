@@ -10,7 +10,7 @@ export async function POST({ request }) {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ lat, lon })
+			body: JSON.stringify({ lat, lon, quality: 'MEDIUM' })
 		})
 		if (!res.ok) return json({ message: res.statusText }, { status: res.status })
 		let googleSolarData = await res.json()

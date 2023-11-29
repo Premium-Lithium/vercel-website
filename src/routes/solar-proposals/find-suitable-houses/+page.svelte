@@ -18,13 +18,12 @@
 	let southFacing = false
 	let minimumRoofSize = 16
 	let southFacingThreshold = 15
+	let loadingDrawingManager = false
 
 	let isAuthenticated = false
 
-	onMount(async () => {
-		const { data, error } = await supabase.auth.getSession()
-		if (data.session == null) isAuthenticated = false
-		else isAuthenticated = true
+	$: if (loader && !loadingDrawingManager && !drawingManager) {
+		loadingDrawingManager = true
 		loader.importLibrary('drawing').then(async (d) => {
 			drawingManager = new d.DrawingManager()
 			drawingManager.setOptions({
@@ -35,7 +34,7 @@
 					strokeColor: '#35bbed',
 					draggable: true
 				},
-				drawingControlOptions: { drawingModes: [] }
+				drawingControlOptions: { drawingModes: [google.maps.] }
 			})
 			drawingManager.setMap(map)
 			drawingManager.setDrawingMode('rectangle')
@@ -57,6 +56,13 @@
 				})
 			})
 		})
+		loadingDrawingManager = false
+	}
+	onMount(async () => {
+		const { data, error } = await supabase.auth.getSession()
+		if (data.session == null) isAuthenticated = false
+		else isAuthenticated = true
+
 		// let streetWays = data.elements.filter((x) => {
 		// 	return x.type == 'way' && x.tags?.highway == 'residential';
 		// });
@@ -242,7 +248,7 @@
 								headers: {
 									'Content-Type': 'application/json'
 								},
-								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
+								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon, quality: "MEDIUM" })
 							})
 							let data = await response.json()
 							resolve({ solarResult: data, house: x.house })
