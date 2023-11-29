@@ -21,11 +21,12 @@
 	let loadingDrawingManager = false
 
 	let isAuthenticated = false
+	let doGeocoding = false
+	let doGoogleSolar = false
+	let status = ''
 
 	$: if (loader) {
-		console.log(loader, loadingDrawingManager)
-
-		if(!loadingDrawingManager && !drawingManager) {
+		if (!loadingDrawingManager && !drawingManager) {
 			loadingDrawingManager = true
 
 			loader.importLibrary('drawing').then(async (d) => {
@@ -61,27 +62,16 @@
 				loadingDrawingManager = false
 			})
 		}
-
 	}
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
-
-
-		// let eastToWestStreets = getEastToWestStreets(streetNodes);
-		// console.log(eastToWestStreets);
-		// let buildingsOnEastToWestStreets = [];
-		// let eastToWestStreetNames = getStreetNames(eastToWestStreets);
-		// buildingWays.forEach((x) => {
-		// 	if (eastToWestStreetNames.includes(x.tags['addr:street']))
-		// 		buildingsOnEastToWestStreets.push(x);
-		// });
-		// console.log(getHouseNames(buildingsOnEastToWestStreets));
 	})
 
 	async function getStreets() {
 		awaitingResponse = true
+		status = 'Getting OSM data...'
 		errorMessage = ''
 		const formData = new FormData(event.target)
 		const left = formData.get('left')
@@ -107,17 +97,115 @@
 
 		console.log('total num of ways/nodes/relations')
 		console.log(data.elements.length)
-
-		let buildingWays = getHousesWithDetails(data.elements)
-		let buildingNodes = getNodesFromWays(buildingWays, data.elements)
-		let latLongOfHouses = buildingNodes.map((x) => {
-			return { house: x, latLon: getMeanLatLon(x.nodes) }
-		})
+		status = 'Finding streets...'
 		let streetWays = data.elements.filter((x) => {
-			return x.type == 'way' && x.tags?.highway == 'residential';
-		});
-		let streetNodes = getNodesFromWays(streetWays, data.elements);
-		
+			return x.type == 'way' && x.tags?.highway == 'residential'
+		})
+		let streetNodes = getNodesFromWays(streetWays, data.elements)
+		console.log(streetNodes)
+		let streetNames = getStreetNames(streetNodes)
+		console.log(streetNames)
+		if (doGeocoding) {
+			status = 'Performing Geocoding...'
+			let geocodesOfAddress = await findAddressesOnStreets(streetNames, streetNodes)
+			console.log(geocodesOfAddress)
+			let allParsedData = geocodesOfAddress.reduce((p, v, i, a) => {
+				return p.concat(parseResponseData(v.houses))
+			}, [])
+			downloadCSV(allParsedData, `Sevenoaks-houses.csv`)
+		}
+		awaitingResponse = false
+	}
+
+	async function findAddressesOnStreets(streetNames, streetNodes) {
+		let addresses = await Promise.all(
+			streetNames.map(async (streetName, i) => {
+				let houses = []
+				let limit = 1
+				let limitFound = false
+				let foundWithinBounds = true
+				let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
+					method: 'POST',
+					body: JSON.stringify({
+						lat: streetNodes[i].nodes[0].lat,
+						lon: streetNodes[i].nodes[0].lon
+					})
+				})
+				let addressComponents = (await res.json()).results[0]['address_components']
+				let addressArea = addressComponents
+					.filter((x) => {
+						return ['postal_town', 'administrative_area_level_2', 'country'].includes(x.types[0])
+					})
+					.map((x) => {
+						return x['long_name']
+					})
+					.join(', ')
+
+				while (!limitFound && limit <= 2 && foundWithinBounds) {
+					let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
+						method: 'POST',
+						body: JSON.stringify({ address: `${limit} ${streetName}, ${addressArea}` })
+					})
+					if (!res.ok) {
+						console.log(res.statusText)
+						break
+					}
+					res = await res.json()
+					if (!isLatLonInBounds(res.results[0].geometry.location, { left, top, right, bottom })) {
+						foundWithinBounds = false
+						break
+					}
+					let numberInResponse = res.results[0]['address_components'].filter((x) =>
+						x.types.includes('street_number')
+					)
+					if (numberInResponse.length > 0) {
+						houses.push(res.results[0])
+						limit++
+					} else {
+						limitFound = true
+					}
+				}
+				return { streetName, houses }
+			})
+		)
+		return addresses
+	}
+
+	function isLatLonInBounds(latLon, bounds) {
+		return (
+			latLon.lat > bounds.bottom &&
+			latLon.lat < bounds.top &&
+			latLon.lng > bounds.left &&
+			latLon.lng < bounds.right
+		)
+	}
+
+	function parseResponseData(houses) {
+		let response = houses.map((house) => {
+			const formattedAddress = house['formatted_address']
+			const address = house['address_components'].map((comp) => {
+				return comp['long_name']
+			})
+			const latitude = house.geometry.location.lat
+			const longitude = house.geometry.location.lng
+			return [address, formattedAddress, latitude, longitude]
+		})
+		return response
+	}
+
+	function downloadCSV(array, filename) {
+		const csvContent = array
+			.map((row) => row.map((field) => `"${field.toString().replace(/"/g, '""')}"`).join(','))
+			.join('\n')
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+		const link = document.createElement('a')
+		const url = URL.createObjectURL(blob)
+		link.setAttribute('href', url)
+		link.setAttribute('download', filename)
+		link.style.visibility = 'hidden'
+		document.body.appendChild(link)
+		link.click()
+		document.body.removeChild(link)
 	}
 
 	function getLeftmost(arr) {
@@ -175,8 +263,9 @@
 	function getStreetNames(streets) {
 		let streetNames = streets.map((x) => x.way.tags?.name)
 		let streetAltNames = streets.map((x) => x.way.tags['alt_name']).filter((x) => x)
-
-		return streetNames.concat(...streetAltNames)
+		return Array.from(new Set(streetNames.concat(...streetAltNames))).filter((x) => {
+			return x
+		})
 	}
 
 	function getMeanLatLon(nodes) {
@@ -276,7 +365,7 @@
 								headers: {
 									'Content-Type': 'application/json'
 								},
-								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon, quality: "MEDIUM" })
+								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon, quality: 'MEDIUM' })
 							})
 							let data = await response.json()
 							resolve({ solarResult: data, house: x.house })
@@ -333,52 +422,49 @@
 <!-- {#if isAuthenticated}
 	<MagicLink bind:isAuthenticated redirectUrl={'solar-proposals/find-suitable-houses'} />
 {:else} -->
-	<div class="container">
-		<form on:submit={getStreets}>
-			<label for="left">Left Longitude:</label>
-			<input type="number" step="any" id="left" name="left" bind:value={left} required />
+<div class="container">
+	<form on:submit={getStreets}>
+		<label for="left">Left Longitude:</label>
+		<input type="number" step="any" id="left" name="left" bind:value={left} required />
 
-			<label for="bottom">Bottom Latitude:</label>
-			<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
+		<label for="bottom">Bottom Latitude:</label>
+		<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
 
-			<label for="right">Right Longitude:</label>
-			<input type="number" step="any" id="right" name="right" bind:value={right} required />
+		<label for="right">Right Longitude:</label>
+		<input type="number" step="any" id="right" name="right" bind:value={right} required />
 
-			<label for="top">Top Latitude:</label>
-			<input type="number" step="any" id="top" name="top" bind:value={top} required />
-
+		<label for="top">Top Latitude:</label>
+		<input type="number" step="any" id="top" name="top" bind:value={top} required />
+		{#key status}
 			<button type="submit" disabled={awaitingResponse}>
-				{`${awaitingResponse ? 'Searching...' : 'Find Suitable Houses'}`}
+				{`${awaitingResponse ? status : 'Find Suitable Houses'}`}
 			</button>
-		</form>
-		{#if errorMessage != ''}
-			<p style="color: red">{errorMessage}</p>
-		{/if}
+		{/key}
+	</form>
+	{#if errorMessage != ''}
+		<p style="color: red">{errorMessage}</p>
+	{/if}
 
-		<div class="options">
-			<label for="minimumRoofSize">Minimum Roof Size (m²)</label>
+	<div class="options">
+		<label for="minimumRoofSize">Minimum Roof Size (m²)</label>
+		<input type="number" id="minimumRoofSize" name="minimumRoofSize" bind:value={minimumRoofSize} />
+		<label for="southFacing">South Facing</label>
+		<input type="checkbox" id="southFacing" name="southFacing" bind:checked={southFacing} />
+		{#if southFacing}
+			<label for="southFacingThreshold"
+				>South Facing Threshold <br /> (degrees from due south)</label
+			>
 			<input
 				type="number"
-				id="minimumRoofSize"
-				name="minimumRoofSize"
-				bind:value={minimumRoofSize}
+				id="southFacingThreshold"
+				name="southFacingThreshold"
+				bind:value={southFacingThreshold}
 			/>
-			<label for="southFacing">South Facing</label>
-			<input type="checkbox" id="southFacing" name="southFacing" bind:checked={southFacing} />
-			{#if southFacing}
-				<label for="southFacingThreshold"
-					>South Facing Threshold <br /> (degrees from due south)</label
-				>
-				<input
-					type="number"
-					id="southFacingThreshold"
-					name="southFacingThreshold"
-					bind:value={southFacingThreshold}
-				/>
-			{/if}
-		</div>
-		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
+		{/if}
 	</div>
+	<GoogleMap bind:map bind:loader minZoom={7} initialZoom={10} />
+</div>
+
 <!-- {/if} -->
 
 <style>
