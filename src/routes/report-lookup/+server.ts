@@ -8,7 +8,7 @@ export async function POST ({ request }) {
         .select('*')
         .eq('id', uuid)
     if (data) {
-        return data[0]
+        return new Response(JSON.stringify(data[0]))
     }
-    return error
+    return new Response(JSON.stringify(error))
 }
