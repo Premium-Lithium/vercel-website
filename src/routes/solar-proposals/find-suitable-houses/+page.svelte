@@ -296,7 +296,7 @@
 	}
 </script>
 
-{#if isAuthenticated}
+{#if !isAuthenticated}
 	<MagicLink bind:isAuthenticated redirectUrl={'solar-proposals/find-suitable-houses'} />
 {:else}
 	<div class="container">
