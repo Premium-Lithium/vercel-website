@@ -21,32 +21,44 @@ export async function POST({ request }) {
         let currAnalytics = data
         switch (req.analyticStage) {
             case 0:
-                currAnalytics.scannedQrCode = true
-                let { data, error } = await supabase
-                    .from('campaign_customers')
-                    .update({ analytics: currAnalytics })
-                    .eq('customer_id', req.uuid)
-                if (error)
-                    return new Response(JSON.stringify(error))
-                return new Response(JSON.stringify(data))
+                return new Response(JSON.stringify(await updateScannedQrCode(req.uuid, currAnalytics)))
             case 1:
-                currAnalytics.consented = true
-                let { data, error } = await supabase
-                    .from('campaign_customers')
-                    .update({ analytics: currAnalytics })
-                    .eq('customer_id', req.uuid)
-                if (error)
-                    return new Response(JSON.stringify(error))
-                return new Response(JSON.stringify(data))
+                return new Response(JSON.stringify(await consentedToAnalytics(req.uuid, currAnalytics)))
             case 2:
-                currAnalytics.bookedConsultation = true
-                let { data, error } = await supabase
-                    .from('campaign_customers')
-                    .update({ analytics: currAnalytics })
-                    .eq('customer_id', req.uuid)
-                if (error)
-                    return new Response(JSON.stringify(error))
-                return new Response(JSON.stringify(data))
+                return new Response(JSON.stringify(await bookedConsultationAnalytics(req.uuid, currAnalytics)))
         }
     }
+}
+
+async function updateScannedQrCode(uuid: string, currAnalytics) {
+    currAnalytics.scannedQrCode = true
+    let { data, error } = await supabase
+        .from('campaign_customers')
+        .update({ analytics: currAnalytics })
+        .eq('customer_id', uuid)
+    if (error)
+        return error
+    return data
+}
+
+async function consentedToAnalytics(uuid: string, currAnalytics) {
+    currAnalytics.consented = true
+    let { data, error } = await supabase
+        .from('campaign_customers')
+        .update({ analytics: currAnalytics })
+        .eq('customer_id', uuid)
+    if (error)
+        return error
+    return data
+}
+
+async function bookedConsultationAnalytics(uuid: string, currAnalytics) {
+    currAnalytics.bookedConsultation = true
+    let { data, error } = await supabase
+        .from('campaign_customers')
+        .update({ analytics: currAnalytics })
+        .eq('customer_id', uuid)
+    if (error)
+        return error
+    return data
 }
