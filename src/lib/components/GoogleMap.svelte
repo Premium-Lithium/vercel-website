@@ -8,6 +8,7 @@
 	export let map
 	export let initialZoom
 	export let minZoom
+	export let initialCenter
 
 	export let magnifierOutline = '#ffffff'
 	let CONTROL_POSITION
@@ -41,10 +42,12 @@
 						.importLibrary('maps')
 						.then(async ({ Map }) => {
 							const mapOptions = {
-								center: {
-									lat: 53.95922,
-									lng: -1.0761
-								},
+								center: initialCenter
+									? initialCenter
+									: {
+											lat: 53.95922,
+											lng: -1.0761
+									  },
 								zoom: initialZoom,
 								zoomControl: false,
 								zoomControlOptions: {
