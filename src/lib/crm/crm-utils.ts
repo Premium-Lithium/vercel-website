@@ -19,6 +19,18 @@ export class CRM {
 		const dealId = Number(dealFound.data.items[0].item.id)
 		return dealId
 	}
+
+	async getPLFromDealId(dealId: string) {
+		const deal = await this.pdDealsApi.getDeal(dealId)
+		const PLNumber = deal.data['3f2fc161661652ebbdd5c8a7924ae84a7bfdbb23']
+		return PLNumber
+	}
+
+	async getAllDealsWithFilter(filterId: string, paginationStart?: number) {
+		const dealsFoundWithFilter = await this.pdDealsApi.getDeals({filterId: filterId, limit: 500, start: paginationStart ? paginationStart : 0})
+		return dealsFoundWithFilter;
+	}
+
 	async setCustomField(PLNumber: string, fieldName: string, value: string) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 

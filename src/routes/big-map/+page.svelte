@@ -1,44 +1,22 @@
 <script lang="ts">
+	import type { Response, Request, MarkerOptions, Options } from "./MapTypes"
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { onMount } from 'svelte'
 	import { movable } from '@svelte-put/movable'
 
-	interface Options {
-		option: number
-	}
-
-	interface MarkerOptions {
-		latLng: LatLongObj
-		address: string
-		visible: boolean
-		marker: any | undefined
-	}
-
-	interface LatLongObj {
-		lat: number
-		lng: number
-	}
-
 	let mapMarkers: Array<MarkerOptions> = []
-
-	const initialCenter = { lat: 55, lng: -3 }
-	let map, loader, loadingMarkerManager: boolean
-
-	function updateMap() {
-		loader.importLibrary('marker').then(async (m) => {
-			for (let i in mapMarkers) {
-				if (mapMarkers[i].visible) {
-					mapMarkers[i].marker.setMap(map)
-				}
-			}
-		})
-	}
-		
+	let map: any, loader: any
 
 	onMount(async () => {
+		console.time('Start')
 		await updateMapWithOptions({ option: 0 })
+		console.timeEnd('Start')
 	})
 
+	/**
+	 * Sends request to server to get map marker data and updates the map
+	 * @param opts the option and any data required to send to the server to retrieve necessary data
+	 */
 	async function updateMapWithOptions(opts: Options) {
 		let mapRes = await fetch('/big-map', {
 			method: 'POST',
@@ -47,26 +25,63 @@
 		})
 		let mapProps = mapRes.json()
 		if (mapRes.ok) {
-			// Update map
+			// Do marker stuff
+			// Do map region stuff
 		}
 		// Error handling
 	}
 
-	function testMarker() {
-		let marker: MarkerOptions = {
-			latLng: { lat: 53.9606746, lng: -1.1155305 },
-			address: '86 Poppleton Road, Holgate, York, YO26 4UP',
-			visible: true,
-			marker: undefined
+	/**
+	 * Goes through the markers array and if the marker is meant to be visible, adds it to the map
+	 */
+	function updateMap() {
+		for (let i in mapMarkers) {
+			if (mapMarkers[i].visible) {
+				mapMarkers[i].marker.setMap(map)
+			}
 		}
-		mapMarkers.push(addMarker(marker))
+	}
+
+	// BASIC PROCESS FOR ADDING MARKERS
+	function testMarker() {
+		// Clear the map
+		mapMarkers.length = 0
+
+		// Get the map markers from some source
+		for (let i = 0; i < 10; i++) {
+			let marker: MarkerOptions = {
+				latLng: { lat: 53.9606746 + i / 10, lng: -1.1155305 - i / 10 },
+				address: '86 Poppleton Road, Holgate, York, YO26 4UP',
+				visible: true,
+				marker: undefined,
+				content: "Test marker"
+			}
+			// Add all markers to the map
+			mapMarkers.push(addMarker(marker))
+		}
+		// Update the map
 		updateMap()
 	}
 
+	/**
+	 * Creates a marker object for a given set of parameters
+	 * 	including location and pop up window
+	 * @param opts Marker parameters
+	 */
 	function addMarker(opts: MarkerOptions) {
 		let marker = new google.maps.Marker({
 			position: new google.maps.LatLng(opts.latLng.lat, opts.latLng.lng),
 			title: opts.address
+		})
+		let markerPopup = new google.maps.InfoWindow({
+			content: opts.content,
+			ariaLabel: opts.address
+		})
+		marker.addListener('click', () => {
+			markerPopup.open({
+				anchor: marker,
+				map
+			})
 		})
 		opts.marker = marker
 		return opts
@@ -93,9 +108,14 @@ Style draggable control panel
 		</div>
 	</div>
 	<div id="map">
-		<GoogleMap bind:map bind:loader minZoom={7} initialZoom={7} {initialCenter} />
+		<GoogleMap
+			bind:map
+			bind:loader
+			minZoom={7}
+			initialZoom={7}
+			initialCenter={{ lat: 55, lng: -3 }}
+		/>
 	</div>
-	
 </div>
 
 <style>
@@ -110,12 +130,13 @@ Style draggable control panel
 	}
 	.control-panel {
 		position: absolute;
-		width: 20%;
-		background-color: crimson;
 		display: flex;
 		flex-direction: row;
-		height: 24px;
-		justify-content: center;
+		width: 20%;
+		height: auto;
+		background-color: #b0b2b4;
+		border-radius:8px;
+		justify-content: left;
 		padding: 8px;
 		z-index: 1000;
 	}
