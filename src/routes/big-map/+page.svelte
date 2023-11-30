@@ -21,12 +21,19 @@
 	let map, loader, loadingMarkerManager: boolean, marker
 
 	$: if (loader) {
-		if (!loadingMarkerManager && !markerManager) {
+		if (!loadingMarkerManager && !marker) {
 			loadingMarkerManager = true
 			loader.importLibrary('marker').then(async (m) => {
 				marker = new m.Marker()
-				
+				console.log(marker)
+				marker.setOptions({
+					position: {lat: 55.43, lng: -2.56},
+					map,
+					title: 'Test'
+				})
+				marker.setMap(map)
 			})
+			loadingMarkerManager = false
 		}
 	}
 
@@ -67,9 +74,7 @@ TODO List
 Add handle to draggable control panel
 Style draggable control panel
 -->
-<div class="map">
 	<GoogleMap bind:map bind:loader minZoom={7} initialZoom={7} {initialCenter} />
-</div>
 
 <div class="control-panel" use:movable>
 	<button on:click={testMarker}>Add markers</button>
