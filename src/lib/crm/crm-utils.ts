@@ -7,6 +7,7 @@ export class CRM {
 	pdFilesApi;
 	pdNotesApi;
 	pdUsersApi;
+	
 
 	constructor() {
 		this.pdDealsApi = new pipedrive.DealsApi(pd);
@@ -59,6 +60,10 @@ export class CRM {
 		}
 		const dealRequest = await this.pdDealsApi.updateDeal(dealId, parsedRequest)
 		return dealRequest
+	}
+
+	async getAllDealsInPipelineWithFilter(pipeline: string, filter: string) {
+		const deals = 
 	}
 
 	async getDealDataFor(PLNumber: string) {

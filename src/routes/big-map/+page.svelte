@@ -1,13 +1,24 @@
 <script lang="ts">
-	import type { MapResponse, MapRequest, MarkerOptions, } from "./MapTypes"
+	import type { MapResponse, MapRequest, MarkerOptions } from './MapTypes'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
-	import Map from "$lib/components/Map.svelte"
+	import Map from '$lib/components/Map.svelte'
 
 	let mapMarkers: Array<MarkerOptions> = []
 	let filtersApplied: Array<string> = []
 	let map: any, loader: any
-	let filters: Array<string> = ['Test 1', 'Test 2', 'Test 3', 'Test 4']
+	let filters: Array<string> = [
+		'Prospect Email',
+		'Email Sent',
+		'Unable To Contact',
+		'1st Call Made',
+		'Expression of Interest',
+		'Awaiting Confirmation',
+		'Interested in other regions of UK',
+		'Confirmed partner - Yorkshire',
+		'Confirmed partner - M25',
+		'Partner paid'
+	]
 
 	/**
 	 * Sends request to server to get map marker data and updates the map
@@ -65,6 +76,12 @@
 		return opts
 	}
 
+	/**
+	 * adds a given filter to the array of filters applied, and updates the map
+	 * if the filter is already in the list, it removes it
+	 * @param filter string of filter to be added
+	 *
+	 */
 	function addFilter(filter: string) {
 		if (filtersApplied.includes(filter)) {
 			const index = filtersApplied.indexOf(filter)
@@ -83,19 +100,17 @@
 	}
 
 	function clearFilters() {
-		filtersApplied.length = 0;
+		filtersApplied.length = 0
 		let checkboxes = document.getElementsByName('filter-checkboxes')
 		for (let box in checkboxes) {
 			try {
 				checkboxes[box].checked = false
-			}
-			catch {
+			} catch {
 				break
 			}
 		}
 		updateMap()
 	}
-	
 </script>
 
 <!-- 
@@ -107,11 +122,11 @@ Style draggable control panel
 	<div class="control-panel" use:movable>
 		<button on:click={clearFilters}>Clear Filters</button>
 		<div class="filter-controls">
-			{#each filters as  filter }
-			<label>
-				<input name="filter-checkboxes" type="checkbox" on:click={() => addFilter(filter)}/>
-				{filter}</label
-			>
+			{#each filters as filter}
+				<label>
+					<input name="filter-checkboxes" type="checkbox" on:click={() => addFilter(filter)} />
+					{filter}</label
+				>
 			{/each}
 		</div>
 	</div>
@@ -139,11 +154,11 @@ Style draggable control panel
 	.control-panel {
 		position: absolute;
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 		width: 20%;
 		height: auto;
 		background-color: #b0b2b4;
-		border-radius:8px;
+		border-radius: 8px;
 		justify-content: left;
 		padding: 8px;
 		z-index: 1000;

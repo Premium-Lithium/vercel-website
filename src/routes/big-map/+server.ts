@@ -45,7 +45,7 @@ async function requestHandler(opts: MapRequest): Promise<MapResponse> {
 
 /**
  * Gets all deals with addresses - filter id = 384
- * @returns 
+ * @returns markers
  */
 async function getAllDealsWithAddress(): Promise<Array<MarkerOptions>> {
     let markers: Array<MarkerOptions> = []
@@ -78,6 +78,14 @@ async function getAllDealsWithAddress(): Promise<Array<MarkerOptions>> {
             finished = true
         }
     }
-    console.log("Finished Pagination, markers: ", markers.length)
     return markers
+}
+
+/**
+ * 
+ * @param pipeline the pipeline to be searched (for now just BDM)
+ * @returns Array of markers
+ */
+async function getAllDealsInPipeline(pipeline: string, filterId?: string): Promise<Array<MarkerOptions>> {
+    
 }
