@@ -370,7 +370,7 @@
 {#each modals as modal, i}
 	<Modal showModal={false} bind:dialog={modal}>
 		<div class="modal" slot="header">
-			<h3>{projects[i].address}</h3>
+			<h3>{projects[i].address.split(',')[0]}</h3>
 		</div>
 		{#if projects[i]}
 			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lon, 200, 19)} />
@@ -477,6 +477,7 @@
 	}
 	h3 {
 		margin: 32px 8px 8px 8px;
+		text-align: center;
 	}
 
 	.modal > h3 {
