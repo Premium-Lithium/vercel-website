@@ -19,6 +19,13 @@ export async function POST({ request }) {
         if (error)
             return new Response(JSON.stringify(error))
         let currAnalytics = data
+        if (currAnalytics === null) {
+            currAnalytics = {
+                scannedQrCode: false,
+                consented: false,
+                bookedConsultation: false,
+            }
+        }
         switch (req.analyticStage) {
             case 0:
                 return new Response(JSON.stringify(await updateScannedQrCode(req.uuid, currAnalytics)))
@@ -33,7 +40,7 @@ export async function POST({ request }) {
 async function updateScannedQrCode(uuid: string, currAnalytics) {
     currAnalytics.scannedQrCode = true
     let { data, error } = await supabase
-        .from('campaign_customers')
+        .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
         .eq('customer_id', uuid)
     if (error)
@@ -44,7 +51,7 @@ async function updateScannedQrCode(uuid: string, currAnalytics) {
 async function consentedToAnalytics(uuid: string, currAnalytics) {
     currAnalytics.consented = true
     let { data, error } = await supabase
-        .from('campaign_customers')
+        .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
         .eq('customer_id', uuid)
     if (error)
@@ -55,7 +62,7 @@ async function consentedToAnalytics(uuid: string, currAnalytics) {
 async function bookedConsultationAnalytics(uuid: string, currAnalytics) {
     currAnalytics.bookedConsultation = true
     let { data, error } = await supabase
-        .from('campaign_customers')
+        .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
         .eq('customer_id', uuid)
     if (error)
