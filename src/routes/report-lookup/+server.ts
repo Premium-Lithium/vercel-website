@@ -13,9 +13,9 @@ export async function POST({ request }) {
         return new Response(JSON.stringify(error))
     } else {
         let { data, error } = await supabase
-            .from('campaign_customers')
+            .from('existing-solar-properties')
             .select('analytics')
-            .eq('customer_id', req.uuid)
+            .eq('id', req.uuid)
         if (error)
             return new Response(JSON.stringify(error))
         let currAnalytics = data
@@ -43,7 +43,7 @@ async function updateScannedQrCode(uuid: string, currAnalytics) {
     let { data, error } = await supabase
         .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
-        .eq('customer_id', uuid)
+        .eq('id', uuid)
     if (error)
         return error
     return data
@@ -54,7 +54,7 @@ async function consentedToAnalytics(uuid: string, currAnalytics) {
     let { data, error } = await supabase
         .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
-        .eq('customer_id', uuid)
+        .eq('id', uuid)
     if (error)
         return error
     return data
@@ -65,7 +65,7 @@ async function bookedConsultationAnalytics(uuid: string, currAnalytics) {
     let { data, error } = await supabase
         .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
-        .eq('customer_id', uuid)
+        .eq('id', uuid)
     if (error)
         return error
     return data
