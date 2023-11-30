@@ -209,7 +209,7 @@
 	}
 
 	function getStaticImage(lat, lon, size, zoom) {
-		return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lon}&size=${size}x${size}&zoom=${zoom}&maptype=satellite&scale=2&key=${PUBLIC_GOOGLE_API_KEY}`
+		return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lon}&size=${size}x${size}&zoom=${zoom}&maptype=satellite&scale=2&key=${PUBLIC_GOOGLE_API_KEY}&markers=color:0x35bbed|${lat},${lon}`
 	}
 
 	async function completeProject(project, i) {
