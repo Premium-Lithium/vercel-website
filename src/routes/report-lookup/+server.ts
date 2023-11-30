@@ -19,6 +19,7 @@ export async function POST({ request }) {
         if (error)
             return new Response(JSON.stringify(error))
         let currAnalytics = data
+        console.log(data)
         if (currAnalytics === null) {
             currAnalytics = {
                 scannedQrCode: false,
