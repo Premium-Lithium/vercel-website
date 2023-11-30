@@ -18,49 +18,57 @@
 	let southFacing = false
 	let minimumRoofSize = 16
 	let southFacingThreshold = 15
+	let loadingDrawingManager = false
 
 	let isAuthenticated = false
 
-	onMount(async () => {
-		const { data, error } = await supabase.auth.getSession()
-		if (data.session == null) isAuthenticated = false
-		else isAuthenticated = true
-		loader.importLibrary('drawing').then(async (d) => {
-			drawingManager = new d.DrawingManager()
-			drawingManager.setOptions({
-				rectangleOptions: {
-					editable: true,
-					fillOpacity: 0.4,
-					fillColor: '#fff',
-					strokeColor: '#35bbed',
-					draggable: true
-				},
-				drawingControlOptions: { drawingModes: [] }
-			})
-			drawingManager.setMap(map)
-			drawingManager.setDrawingMode('rectangle')
-			drawingManager.addListener('rectanglecomplete', (rect) => {
-				drawingManager.setDrawingMode(null)
-				let southWest = rect.bounds.getSouthWest()
-				let northEast = rect.bounds.getNorthEast()
-				left = southWest.lng()
-				bottom = southWest.lat()
-				right = northEast.lng()
-				top = northEast.lat()
-				rect.addListener('bounds_changed', () => {
+	$: if (loader) {
+		console.log(loader, loadingDrawingManager)
+
+		if(!loadingDrawingManager && !drawingManager) {
+			loadingDrawingManager = true
+
+			loader.importLibrary('drawing').then(async (d) => {
+				drawingManager = new d.DrawingManager()
+				drawingManager.setOptions({
+					rectangleOptions: {
+						editable: true,
+						fillOpacity: 0.4,
+						fillColor: '#fff',
+						strokeColor: '#35bbed',
+						draggable: true
+					},
+					drawingControlOptions: { drawingModes: [google.maps.drawing.OverlayType.RECTANGLE] }
+				})
+				drawingManager.setMap(map)
+				drawingManager.addListener('rectanglecomplete', (rect) => {
+					drawingManager.setDrawingMode(null)
 					let southWest = rect.bounds.getSouthWest()
 					let northEast = rect.bounds.getNorthEast()
 					left = southWest.lng()
 					bottom = southWest.lat()
 					right = northEast.lng()
 					top = northEast.lat()
+					rect.addListener('bounds_changed', () => {
+						let southWest = rect.bounds.getSouthWest()
+						let northEast = rect.bounds.getNorthEast()
+						left = southWest.lng()
+						bottom = southWest.lat()
+						right = northEast.lng()
+						top = northEast.lat()
+					})
 				})
+				loadingDrawingManager = false
 			})
-		})
-		// let streetWays = data.elements.filter((x) => {
-		// 	return x.type == 'way' && x.tags?.highway == 'residential';
-		// });
-		// let streetNodes = getNodesFromWays(streetWays, data.elements);
+		}
+
+	}
+	onMount(async () => {
+		const { data, error } = await supabase.auth.getSession()
+		if (data.session == null) isAuthenticated = false
+		else isAuthenticated = true
+
+
 		// let eastToWestStreets = getEastToWestStreets(streetNodes);
 		// console.log(eastToWestStreets);
 		// let buildingsOnEastToWestStreets = [];
@@ -71,6 +79,46 @@
 		// });
 		// console.log(getHouseNames(buildingsOnEastToWestStreets));
 	})
+
+	async function getStreets() {
+		awaitingResponse = true
+		errorMessage = ''
+		const formData = new FormData(event.target)
+		const left = formData.get('left')
+		const bottom = formData.get('bottom')
+		const right = formData.get('right')
+		const top = formData.get('top')
+		let res = await fetch(`${$page.url.origin}/solar-proposals/find-suitable-houses`, {
+			method: 'POST',
+			body: JSON.stringify({
+				left: parseFloat(left.toString()),
+				bottom: parseFloat(bottom.toString()),
+				right: parseFloat(right.toString()),
+				top: parseFloat(top.toString())
+			}),
+			headers: { 'Content-Type': 'application/json' }
+		})
+		if (!res.ok) {
+			errorMessage = await res.text()
+			awaitingResponse = false
+			return
+		}
+		let data = await res.json()
+
+		console.log('total num of ways/nodes/relations')
+		console.log(data.elements.length)
+
+		let buildingWays = getHousesWithDetails(data.elements)
+		let buildingNodes = getNodesFromWays(buildingWays, data.elements)
+		let latLongOfHouses = buildingNodes.map((x) => {
+			return { house: x, latLon: getMeanLatLon(x.nodes) }
+		})
+		let streetWays = data.elements.filter((x) => {
+			return x.type == 'way' && x.tags?.highway == 'residential';
+		});
+		let streetNodes = getNodesFromWays(streetWays, data.elements);
+		
+	}
 
 	function getLeftmost(arr) {
 		return arr.reduce((p, c, i, a) => {
@@ -92,13 +140,6 @@
 
 	function getHouseNames(elements) {
 		return elements.map(async (x) => {
-			if (
-				x.house.way.tags['addr:housenumber'] &&
-				x.house.way.tags['addr:street'] &&
-				x.house.way.tags['addr:city'] &&
-				x.house.way.tags['addr:postcode']
-			)
-				return `${x.house.way.tags['addr:housenumber']} ${x.house.way.tags['addr:street']}, ${x.house.way.tags['addr:city']} ${x.house.way.tags['addr:postcode']}, UK`
 			return (await geocodeLatLngs([x]))[0].geocode.results[0]
 		})
 	}
@@ -172,13 +213,6 @@
 		let promises = []
 		let results = []
 		nodes.forEach(async (x) => {
-			if (
-				x.house.way.tags['addr:housenumber'] &&
-				x.house.way.tags['addr:postcode'] &&
-				x.house.way.tags['addr:street']
-			) {
-				return
-			}
 			let res = fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -242,7 +276,7 @@
 								headers: {
 									'Content-Type': 'application/json'
 								},
-								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
+								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon, quality: "MEDIUM" })
 							})
 							let data = await response.json()
 							resolve({ solarResult: data, house: x.house })
@@ -296,11 +330,11 @@
 	}
 </script>
 
-{#if isAuthenticated}
+<!-- {#if isAuthenticated}
 	<MagicLink bind:isAuthenticated redirectUrl={'solar-proposals/find-suitable-houses'} />
-{:else}
+{:else} -->
 	<div class="container">
-		<form on:submit={handleSubmit}>
+		<form on:submit={getStreets}>
 			<label for="left">Left Longitude:</label>
 			<input type="number" step="any" id="left" name="left" bind:value={left} required />
 
@@ -345,7 +379,7 @@
 		</div>
 		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
 	</div>
-{/if}
+<!-- {/if} -->
 
 <style>
 	.options {
