@@ -7,7 +7,7 @@
 	let awaitingResponse = false
 	let errorMessage = ''
 
-	let left, right, bottom, top, map, loader, drawingManager
+	let left, right, bottom, top, map, loader, drawingManager, submitButton
 
 	const urlParams = $page.url.searchParams
 	left = urlParams.get('left') || ''
@@ -24,6 +24,81 @@
 	let doGeocoding = false
 	let doGoogleSolar = false
 	let status = ''
+
+	let selectedFile
+	let googleMapsPolygon
+
+	function handleFileChange(event) {
+		selectedFile = event.target.files[0]
+		if (selectedFile) {
+			const reader = new FileReader()
+			reader.onload = (e) => {
+				const fileContents = e.target.result
+				drawPolygon(fileContents)
+				submitButton.click()
+			}
+			reader.readAsText(selectedFile)
+		}
+	}
+
+	function drawPolygon(kmlData) {
+		googleMapsPolygon?.setMap(null)
+		let coordinates = parseKMLToCoordinates(kmlData)
+
+		googleMapsPolygon = new google.maps.Polygon({
+			paths: coordinates,
+			strokeColor: '#FF0000',
+			strokeOpacity: 0.8,
+			strokeWeight: 2,
+			fillColor: '#FF0000',
+			fillOpacity: 0.35,
+			map
+		})
+		let southWest = getPolygonBounds(googleMapsPolygon).getSouthWest()
+		let northEast = getPolygonBounds(googleMapsPolygon).getNorthEast()
+		left = southWest.lng()
+		bottom = southWest.lat()
+		right = northEast.lng()
+		top = northEast.lat()
+		map.fitBounds(getPolygonBounds(googleMapsPolygon))
+	}
+
+	function parseKMLToCoordinates(kmlData) {
+		const parser = new DOMParser()
+		const xmlDoc = parser.parseFromString(kmlData, 'application/xml')
+
+		const coordinateElements = xmlDoc.getElementsByTagName('coordinates')
+
+		if (coordinateElements.length > 0) {
+			const coordinates = coordinateElements[0].textContent.trim().split(/\s+/)
+			return coordinates.map((coord) => {
+				const [lng, lat] = coord.split(',').map(Number)
+				return { lat, lng }
+			})
+		}
+
+		return []
+	}
+
+	function getPolygonBounds(polygon) {
+		let left = undefined
+		let bottom = undefined
+		let top = undefined
+		let right = undefined
+		polygon
+			.getPaths()
+			.getArray()[0]
+			.forEach((x) => {
+				if (!bottom || x.lat() < bottom) bottom = x.lat()
+				if (!top || x.lat() > top) top = x.lat()
+				if (!left || x.lng() < left) left = x.lng()
+				if (!right || x.lng() > right) right = x.lng()
+			})
+		return new google.maps.LatLngBounds(
+			new google.maps.LatLng(bottom, left),
+			new google.maps.LatLng(top, right)
+		)
+	}
 
 	$: if (loader) {
 		if (!loadingDrawingManager && !drawingManager) {
@@ -78,6 +153,7 @@
 		const bottom = formData.get('bottom')
 		const right = formData.get('right')
 		const top = formData.get('top')
+		console.log(left, bottom, top, right)
 		let res = await fetch(`${$page.url.origin}/solar-proposals/find-suitable-houses`, {
 			method: 'POST',
 			body: JSON.stringify({
@@ -436,10 +512,11 @@
 		<label for="top">Top Latitude:</label>
 		<input type="number" step="any" id="top" name="top" bind:value={top} required />
 		{#key status}
-			<button type="submit" disabled={awaitingResponse}>
+			<button type="submit" disabled={awaitingResponse} bind:this={submitButton}>
 				{`${awaitingResponse ? status : 'Find Suitable Houses'}`}
 			</button>
 		{/key}
+		<input type="file" accept=".kml" on:change={handleFileChange} />
 	</form>
 	{#if errorMessage != ''}
 		<p style="color: red">{errorMessage}</p>
@@ -506,6 +583,9 @@
 		border: 1px solid #ccc;
 		border-radius: 4px;
 		font-size: 24px;
+	}
+	input[type='file'] {
+		margin: 1rem auto 0 auto;
 	}
 
 	input[type='checkbox'] {
