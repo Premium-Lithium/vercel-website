@@ -1,40 +1,18 @@
-# todo: describe what each of the objects below actually are in code (json schema?)
-# resources:
-#   - name: lat-lon-pairs
-#   - name: property-addresses
+# location: []
 
-tasks:
-  get-location-data:
-    produces: [ "location" ]
+# 2d_roof_screenshot:
+#   - location
 
-  capture-2d-roof-image:
-    consumes: [ "location" ]
-    produces: "2d-roof-image"
+# 3d_property_screenshot:
+#   - location
 
-  capture-3d-property-image:
-    consumes: [ "latitude", "longitude" ]
-    produces: "3d-property-image"
+# total_solar_area:
+#   - 2d_roof_screenshot
 
-  extract-panel-outlines-from-2d-roof-image:
-    consumes: [ "2d-roof-image" ]
-    produces: "panel-outline"
+# potential_saving:
+#   - total_solar_area
+#   - location
 
-  # calculate-savings:
-  #   consumes: [ "panel-outline", "property-address" ]
-  #   produces: "solar-savings"
-
-  add-value-to-flyer:
-    consumes: [ "value", "flyer" ]
-    produces: "flyer"
-
-  send-flyer-to-property-owner:
-    consumes: [ "flyer", "property-address" ]
-
-# temp - remove this when complete
-campaigns:
-  - name: "Sevenoaks Solar Campaign 1"
-    tasks:
-      - get-location-data
-      - capture-2d-roof-image-for-labelling
-      - extract-panel-outlines-from-2d-roof-image
-      - calculate-savings
+# flyer_info:
+#   - potential_saving
+#   - 3d_property_screenshot
