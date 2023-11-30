@@ -1,32 +1,31 @@
 <script lang="ts">
-	import type { Response, Request, MarkerOptions, Options } from "./MapTypes"
+	import type { MapResponse, MapRequest, MarkerOptions, } from "./MapTypes"
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
-	import { onMount } from 'svelte'
 	import { movable } from '@svelte-put/movable'
+	import Map from "$lib/components/Map.svelte"
 
 	let mapMarkers: Array<MarkerOptions> = []
+	let filtersApplied: Array<string> = []
 	let map: any, loader: any
-
-	onMount(async () => {
-		console.time('Start')
-		await updateMapWithOptions({ option: 0 })
-		console.timeEnd('Start')
-	})
+	let filters: Array<string> = ['Test 1', 'Test 2', 'Test 3', 'Test 4']
 
 	/**
 	 * Sends request to server to get map marker data and updates the map
 	 * @param opts the option and any data required to send to the server to retrieve necessary data
 	 */
-	async function updateMapWithOptions(opts: Options) {
+	async function updateMapWithOptions(opts: MapRequest) {
 		let mapRes = await fetch('/big-map', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ opts })
 		})
-		let mapProps = mapRes.json()
+		let mapProps = await mapRes.json()
 		if (mapRes.ok) {
-			// Do marker stuff
-			// Do map region stuff
+			for (let prop in mapProps.body) {
+				let marker = addMarker(mapProps.body[prop])
+				mapMarkers.push(marker)
+			}
+			updateMap()
 		}
 		// Error handling
 	}
@@ -40,27 +39,6 @@
 				mapMarkers[i].marker.setMap(map)
 			}
 		}
-	}
-
-	// BASIC PROCESS FOR ADDING MARKERS
-	function testMarker() {
-		// Clear the map
-		mapMarkers.length = 0
-
-		// Get the map markers from some source
-		for (let i = 0; i < 10; i++) {
-			let marker: MarkerOptions = {
-				latLng: { lat: 53.9606746 + i / 10, lng: -1.1155305 - i / 10 },
-				address: '86 Poppleton Road, Holgate, York, YO26 4UP',
-				visible: true,
-				marker: undefined,
-				content: "Test marker"
-			}
-			// Add all markers to the map
-			mapMarkers.push(addMarker(marker))
-		}
-		// Update the map
-		updateMap()
 	}
 
 	/**
@@ -86,6 +64,38 @@
 		opts.marker = marker
 		return opts
 	}
+
+	function addFilter(filter: string) {
+		if (filtersApplied.includes(filter)) {
+			const index = filtersApplied.indexOf(filter)
+			filtersApplied.splice(index, 1)
+		} else {
+			filtersApplied.push(filter)
+		}
+		for (let f in filtersApplied) {
+			for (let m in mapMarkers) {
+				if (!(filtersApplied[f] in mapMarkers[m].filterOption)) {
+					mapMarkers[m].visible = false
+				}
+			}
+		}
+		updateMap()
+	}
+
+	function clearFilters() {
+		filtersApplied.length = 0;
+		let checkboxes = document.getElementsByName('filter-checkboxes')
+		for (let box in checkboxes) {
+			try {
+				checkboxes[box].checked = false
+			}
+			catch {
+				break
+			}
+		}
+		updateMap()
+	}
+	
 </script>
 
 <!-- 
@@ -95,16 +105,14 @@ Style draggable control panel
 -->
 <div class="map-container">
 	<div class="control-panel" use:movable>
-		<button on:click={testMarker}>Add markers</button>
+		<button on:click={clearFilters}>Clear Filters</button>
 		<div class="filter-controls">
+			{#each filters as  filter }
 			<label>
-				<input type="checkbox" />
-				Filter 1</label
+				<input name="filter-checkboxes" type="checkbox" on:click={() => addFilter(filter)}/>
+				{filter}</label
 			>
-			<label>
-				<input type="checkbox" />
-				Filter 2</label
-			>
+			{/each}
 		</div>
 	</div>
 	<div id="map">
