@@ -7,7 +7,7 @@
 	let awaitingResponse = false
 	let errorMessage = ''
 
-	let left, right, bottom, top, map, loader, drawingManager
+	let left, right, bottom, top, map, loader, drawingManager, submitButton
 
 	const urlParams = $page.url.searchParams
 	left = urlParams.get('left') || ''
@@ -18,59 +18,273 @@
 	let southFacing = false
 	let minimumRoofSize = 16
 	let southFacingThreshold = 15
+	let loadingDrawingManager = false
 
 	let isAuthenticated = false
+	let doGeocoding = false
+	let doGoogleSolar = false
+	let status = ''
 
-	onMount(async () => {
-		const { data, error } = await supabase.auth.getSession()
-		if (data.session == null) isAuthenticated = false
-		else isAuthenticated = true
-		loader.importLibrary('drawing').then(async (d) => {
-			drawingManager = new d.DrawingManager()
-			drawingManager.setOptions({
-				rectangleOptions: {
-					editable: true,
-					fillOpacity: 0.4,
-					fillColor: '#fff',
-					strokeColor: '#35bbed',
-					draggable: true
-				},
-				drawingControlOptions: { drawingModes: [] }
+	let selectedFile
+	let googleMapsPolygon
+
+	function handleFileChange(event) {
+		selectedFile = event.target.files[0]
+		if (selectedFile) {
+			const reader = new FileReader()
+			reader.onload = (e) => {
+				const fileContents = e.target.result
+				drawPolygon(fileContents)
+				submitButton.click()
+			}
+			reader.readAsText(selectedFile)
+		}
+	}
+
+	function drawPolygon(kmlData) {
+		googleMapsPolygon?.setMap(null)
+		let coordinates = parseKMLToCoordinates(kmlData)
+
+		googleMapsPolygon = new google.maps.Polygon({
+			paths: coordinates,
+			strokeOpacity: 0.8,
+			strokeWeight: 2,
+			fillOpacity: 0.4,
+			fillColor: '#fff',
+			strokeColor: '#35bbed',
+			map
+		})
+		let southWest = getPolygonBounds(googleMapsPolygon).getSouthWest()
+		let northEast = getPolygonBounds(googleMapsPolygon).getNorthEast()
+		left = southWest.lng()
+		bottom = southWest.lat()
+		right = northEast.lng()
+		top = northEast.lat()
+		map.fitBounds(getPolygonBounds(googleMapsPolygon))
+	}
+
+	function parseKMLToCoordinates(kmlData) {
+		const parser = new DOMParser()
+		const xmlDoc = parser.parseFromString(kmlData, 'application/xml')
+
+		const coordinateElements = xmlDoc.getElementsByTagName('coordinates')
+
+		if (coordinateElements.length > 0) {
+			const coordinates = coordinateElements[0].textContent.trim().split(/\s+/)
+			return coordinates.map((coord) => {
+				const [lng, lat] = coord.split(',').map(Number)
+				return { lat, lng }
 			})
-			drawingManager.setMap(map)
-			drawingManager.setDrawingMode('rectangle')
-			drawingManager.addListener('rectanglecomplete', (rect) => {
-				drawingManager.setDrawingMode(null)
-				let southWest = rect.bounds.getSouthWest()
-				let northEast = rect.bounds.getNorthEast()
-				left = southWest.lng()
-				bottom = southWest.lat()
-				right = northEast.lng()
-				top = northEast.lat()
-				rect.addListener('bounds_changed', () => {
+		}
+
+		return []
+	}
+
+	function getPolygonBounds(polygon) {
+		let left = undefined
+		let bottom = undefined
+		let top = undefined
+		let right = undefined
+		polygon
+			.getPaths()
+			.getArray()[0]
+			.forEach((x) => {
+				if (!bottom || x.lat() < bottom) bottom = x.lat()
+				if (!top || x.lat() > top) top = x.lat()
+				if (!left || x.lng() < left) left = x.lng()
+				if (!right || x.lng() > right) right = x.lng()
+			})
+		return new google.maps.LatLngBounds(
+			new google.maps.LatLng(bottom, left),
+			new google.maps.LatLng(top, right)
+		)
+	}
+
+	$: if (loader) {
+		if (!loadingDrawingManager && !drawingManager) {
+			loadingDrawingManager = true
+
+			loader.importLibrary('drawing').then(async (d) => {
+				drawingManager = new d.DrawingManager()
+				drawingManager.setOptions({
+					rectangleOptions: {
+						editable: true,
+						fillOpacity: 0.4,
+						fillColor: '#fff',
+						strokeColor: '#35bbed',
+						strokeOpacity: 0.8,
+						strokeWeight: 2,
+						draggable: true
+					},
+					drawingControlOptions: { drawingModes: [google.maps.drawing.OverlayType.RECTANGLE] }
+				})
+				drawingManager.setMap(map)
+				drawingManager.addListener('rectanglecomplete', (rect) => {
+					drawingManager.setDrawingMode(null)
 					let southWest = rect.bounds.getSouthWest()
 					let northEast = rect.bounds.getNorthEast()
 					left = southWest.lng()
 					bottom = southWest.lat()
 					right = northEast.lng()
 					top = northEast.lat()
+					rect.addListener('bounds_changed', () => {
+						let southWest = rect.bounds.getSouthWest()
+						let northEast = rect.bounds.getNorthEast()
+						left = southWest.lng()
+						bottom = southWest.lat()
+						right = northEast.lng()
+						top = northEast.lat()
+					})
 				})
+				loadingDrawingManager = false
 			})
-		})
-		// let streetWays = data.elements.filter((x) => {
-		// 	return x.type == 'way' && x.tags?.highway == 'residential';
-		// });
-		// let streetNodes = getNodesFromWays(streetWays, data.elements);
-		// let eastToWestStreets = getEastToWestStreets(streetNodes);
-		// console.log(eastToWestStreets);
-		// let buildingsOnEastToWestStreets = [];
-		// let eastToWestStreetNames = getStreetNames(eastToWestStreets);
-		// buildingWays.forEach((x) => {
-		// 	if (eastToWestStreetNames.includes(x.tags['addr:street']))
-		// 		buildingsOnEastToWestStreets.push(x);
-		// });
-		// console.log(getHouseNames(buildingsOnEastToWestStreets));
+		}
+	}
+	onMount(async () => {
+		const { data, error } = await supabase.auth.getSession()
+		if (data.session == null) isAuthenticated = false
+		else isAuthenticated = true
 	})
+
+	async function getStreets() {
+		awaitingResponse = true
+		status = 'Getting OSM data...'
+		errorMessage = ''
+		const formData = new FormData(event.target)
+		const left = formData.get('left')
+		const bottom = formData.get('bottom')
+		const right = formData.get('right')
+		const top = formData.get('top')
+		console.log(left, bottom, top, right)
+		let res = await fetch(`${$page.url.origin}/solar-proposals/find-suitable-houses`, {
+			method: 'POST',
+			body: JSON.stringify({
+				left: parseFloat(left.toString()),
+				bottom: parseFloat(bottom.toString()),
+				right: parseFloat(right.toString()),
+				top: parseFloat(top.toString())
+			}),
+			headers: { 'Content-Type': 'application/json' }
+		})
+		if (!res.ok) {
+			errorMessage = await res.text()
+			awaitingResponse = false
+			return
+		}
+		let data = await res.json()
+
+		console.log('total num of ways/nodes/relations')
+		console.log(data.elements.length)
+		status = 'Finding streets...'
+		let streetWays = data.elements.filter((x) => {
+			return x.type == 'way' && x.tags?.highway == 'residential'
+		})
+		let streetNodes = getNodesFromWays(streetWays, data.elements)
+		console.log(streetNodes)
+		let streetNames = getStreetNames(streetNodes)
+		console.log(streetNames)
+		if (doGeocoding) {
+			status = 'Performing Geocoding...'
+			let geocodesOfAddress = await findAddressesOnStreets(streetNames, streetNodes)
+			console.log(geocodesOfAddress)
+			let allParsedData = geocodesOfAddress.reduce((p, v, i, a) => {
+				return p.concat(parseResponseData(v.houses))
+			}, [])
+			downloadCSV(allParsedData, `Sevenoaks-houses.csv`)
+		}
+		awaitingResponse = false
+	}
+
+	async function findAddressesOnStreets(streetNames, streetNodes) {
+		let addresses = await Promise.all(
+			streetNames.map(async (streetName, i) => {
+				let houses = []
+				let limit = 1
+				let limitFound = false
+				let foundWithinBounds = true
+				let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
+					method: 'POST',
+					body: JSON.stringify({
+						lat: streetNodes[i].nodes[0].lat,
+						lon: streetNodes[i].nodes[0].lon
+					})
+				})
+				let addressComponents = (await res.json()).results[0]['address_components']
+				let addressArea = addressComponents
+					.filter((x) => {
+						return ['postal_town', 'administrative_area_level_2', 'country'].includes(x.types[0])
+					})
+					.map((x) => {
+						return x['long_name']
+					})
+					.join(', ')
+
+				while (!limitFound && limit <= 2 && foundWithinBounds) {
+					let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
+						method: 'POST',
+						body: JSON.stringify({ address: `${limit} ${streetName}, ${addressArea}` })
+					})
+					if (!res.ok) {
+						console.log(res.statusText)
+						break
+					}
+					res = await res.json()
+					if (!isLatLonInBounds(res.results[0].geometry.location, { left, top, right, bottom })) {
+						foundWithinBounds = false
+						break
+					}
+					let numberInResponse = res.results[0]['address_components'].filter((x) =>
+						x.types.includes('street_number')
+					)
+					if (numberInResponse.length > 0) {
+						houses.push(res.results[0])
+						limit++
+					} else {
+						limitFound = true
+					}
+				}
+				return { streetName, houses }
+			})
+		)
+		return addresses
+	}
+
+	function isLatLonInBounds(latLon, bounds) {
+		return (
+			latLon.lat > bounds.bottom &&
+			latLon.lat < bounds.top &&
+			latLon.lng > bounds.left &&
+			latLon.lng < bounds.right
+		)
+	}
+
+	function parseResponseData(houses) {
+		let response = houses.map((house) => {
+			const formattedAddress = house['formatted_address']
+			const address = house['address_components'].map((comp) => {
+				return comp['long_name']
+			})
+			const latitude = house.geometry.location.lat
+			const longitude = house.geometry.location.lng
+			return [address, formattedAddress, latitude, longitude]
+		})
+		return response
+	}
+
+	function downloadCSV(array, filename) {
+		const csvContent = array
+			.map((row) => row.map((field) => `"${field.toString().replace(/"/g, '""')}"`).join(','))
+			.join('\n')
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+		const link = document.createElement('a')
+		const url = URL.createObjectURL(blob)
+		link.setAttribute('href', url)
+		link.setAttribute('download', filename)
+		link.style.visibility = 'hidden'
+		document.body.appendChild(link)
+		link.click()
+		document.body.removeChild(link)
+	}
 
 	function getLeftmost(arr) {
 		return arr.reduce((p, c, i, a) => {
@@ -92,13 +306,6 @@
 
 	function getHouseNames(elements) {
 		return elements.map(async (x) => {
-			if (
-				x.house.way.tags['addr:housenumber'] &&
-				x.house.way.tags['addr:street'] &&
-				x.house.way.tags['addr:city'] &&
-				x.house.way.tags['addr:postcode']
-			)
-				return `${x.house.way.tags['addr:housenumber']} ${x.house.way.tags['addr:street']}, ${x.house.way.tags['addr:city']} ${x.house.way.tags['addr:postcode']}, UK`
 			return (await geocodeLatLngs([x]))[0].geocode.results[0]
 		})
 	}
@@ -134,8 +341,9 @@
 	function getStreetNames(streets) {
 		let streetNames = streets.map((x) => x.way.tags?.name)
 		let streetAltNames = streets.map((x) => x.way.tags['alt_name']).filter((x) => x)
-
-		return streetNames.concat(...streetAltNames)
+		return Array.from(new Set(streetNames.concat(...streetAltNames))).filter((x) => {
+			return x
+		})
 	}
 
 	function getMeanLatLon(nodes) {
@@ -172,13 +380,6 @@
 		let promises = []
 		let results = []
 		nodes.forEach(async (x) => {
-			if (
-				x.house.way.tags['addr:housenumber'] &&
-				x.house.way.tags['addr:postcode'] &&
-				x.house.way.tags['addr:street']
-			) {
-				return
-			}
 			let res = fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -242,7 +443,7 @@
 								headers: {
 									'Content-Type': 'application/json'
 								},
-								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon })
+								body: JSON.stringify({ lat: x.latLon.lat, lon: x.latLon.lon, quality: 'MEDIUM' })
 							})
 							let data = await response.json()
 							resolve({ solarResult: data, house: x.house })
@@ -296,56 +497,54 @@
 	}
 </script>
 
-{#if isAuthenticated}
+<!-- {#if isAuthenticated}
 	<MagicLink bind:isAuthenticated redirectUrl={'solar-proposals/find-suitable-houses'} />
-{:else}
-	<div class="container">
-		<form on:submit={handleSubmit}>
-			<label for="left">Left Longitude:</label>
-			<input type="number" step="any" id="left" name="left" bind:value={left} required />
+{:else} -->
+<div class="container">
+	<form on:submit={getStreets}>
+		<label for="left">Left Longitude:</label>
+		<input type="number" step="any" id="left" name="left" bind:value={left} required />
 
-			<label for="bottom">Bottom Latitude:</label>
-			<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
+		<label for="bottom">Bottom Latitude:</label>
+		<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
 
-			<label for="right">Right Longitude:</label>
-			<input type="number" step="any" id="right" name="right" bind:value={right} required />
+		<label for="right">Right Longitude:</label>
+		<input type="number" step="any" id="right" name="right" bind:value={right} required />
 
-			<label for="top">Top Latitude:</label>
-			<input type="number" step="any" id="top" name="top" bind:value={top} required />
-
-			<button type="submit" disabled={awaitingResponse}>
-				{`${awaitingResponse ? 'Searching...' : 'Find Suitable Houses'}`}
+		<label for="top">Top Latitude:</label>
+		<input type="number" step="any" id="top" name="top" bind:value={top} required />
+		{#key status}
+			<button type="submit" disabled={awaitingResponse} bind:this={submitButton}>
+				{`${awaitingResponse ? status : 'Find Suitable Houses'}`}
 			</button>
-		</form>
-		{#if errorMessage != ''}
-			<p style="color: red">{errorMessage}</p>
-		{/if}
+		{/key}
+		<input type="file" accept=".kml" on:change={handleFileChange} />
+	</form>
+	{#if errorMessage != ''}
+		<p style="color: red">{errorMessage}</p>
+	{/if}
 
-		<div class="options">
-			<label for="minimumRoofSize">Minimum Roof Size (m²)</label>
+	<div class="options">
+		<label for="minimumRoofSize">Minimum Roof Size (m²)</label>
+		<input type="number" id="minimumRoofSize" name="minimumRoofSize" bind:value={minimumRoofSize} />
+		<label for="southFacing">South Facing</label>
+		<input type="checkbox" id="southFacing" name="southFacing" bind:checked={southFacing} />
+		{#if southFacing}
+			<label for="southFacingThreshold"
+				>South Facing Threshold <br /> (degrees from due south)</label
+			>
 			<input
 				type="number"
-				id="minimumRoofSize"
-				name="minimumRoofSize"
-				bind:value={minimumRoofSize}
+				id="southFacingThreshold"
+				name="southFacingThreshold"
+				bind:value={southFacingThreshold}
 			/>
-			<label for="southFacing">South Facing</label>
-			<input type="checkbox" id="southFacing" name="southFacing" bind:checked={southFacing} />
-			{#if southFacing}
-				<label for="southFacingThreshold"
-					>South Facing Threshold <br /> (degrees from due south)</label
-				>
-				<input
-					type="number"
-					id="southFacingThreshold"
-					name="southFacingThreshold"
-					bind:value={southFacingThreshold}
-				/>
-			{/if}
-		</div>
-		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
+		{/if}
 	</div>
-{/if}
+	<GoogleMap bind:map bind:loader minZoom={7} initialZoom={10} />
+</div>
+
+<!-- {/if} -->
 
 <style>
 	.options {
@@ -386,6 +585,9 @@
 		border: 1px solid #ccc;
 		border-radius: 4px;
 		font-size: 24px;
+	}
+	input[type='file'] {
+		margin: 1rem auto 0 auto;
 	}
 
 	input[type='checkbox'] {
