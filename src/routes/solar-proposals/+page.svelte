@@ -473,6 +473,7 @@
 
 <style>
 	.bold {
+		font-weight: 600;
 	}
 	h3 {
 		margin: 32px 8px 8px 8px;
