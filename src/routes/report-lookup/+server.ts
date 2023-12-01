@@ -18,14 +18,14 @@ export async function POST({ request }) {
             .eq('id', req.uuid)
         if (error)
             return new Response(JSON.stringify(error))
-        let currAnalytics = data
-        console.log(data)
-        if (currAnalytics === null) {
-            currAnalytics = {
-                scannedQrCode: false,
-                consented: false,
-                bookedConsultation: false,
-            }
+        let currAnalytics;
+        if (data[0].analytics === null) {
+            currAnalytics = {}
+            currAnalytics.scannedQrCode = false;
+            currAnalytics.consented = false;
+            currAnalytics.bookedConsultation = false;
+        } else {
+            currAnalytics = data[0].analytics
         }
         switch (req.analyticStage) {
             case 0:
@@ -44,8 +44,10 @@ async function updateScannedQrCode(uuid: string, currAnalytics) {
         .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
         .eq('id', uuid)
-    if (error)
+    if (error) {
+        console.log(error)
         return error
+    }
     return data
 }
 
@@ -55,8 +57,10 @@ async function consentedToAnalytics(uuid: string, currAnalytics) {
         .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
         .eq('id', uuid)
-    if (error)
+    if (error) {
+        console.log(error)
         return error
+    }
     return data
 }
 
@@ -66,7 +70,9 @@ async function bookedConsultationAnalytics(uuid: string, currAnalytics) {
         .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
         .eq('id', uuid)
-    if (error)
+    if (error) {
+        console.log(error)
         return error
+    }
     return data
 }
