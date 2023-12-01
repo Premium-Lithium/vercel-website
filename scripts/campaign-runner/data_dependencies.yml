@@ -1,0 +1,18 @@
+location: []
+
+roofArialView:
+  - location
+
+propertyImage3d:
+  - location
+
+totalSolarAreaM2:
+  - roofArialView
+
+potentialSavingGBP:
+  - totalSolarAreaM2
+  - location
+
+solarFlyer:
+  - potentialSavingGBP
+  - propertyImage3d
