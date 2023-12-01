@@ -9,8 +9,8 @@ class Campaign:
     def __init__(self, name):
         definition = self._load_campaign_definition_for(name)
 
-        # if this succeeds, then extract the outputs that we want for this campaign
-        self.data = definition["campaign_specific_schema"]  # e.g "solarFlyer"
+        # todo: check if this succeeds
+        self._outputs = definition["campaign_specific_schema"]  # e.g "solarFlyer"
 
 
     def _load_campaign_definition_for(self, name):
@@ -71,10 +71,8 @@ class Campaign:
 
 
     def _get_required_inputs_from(self, dependency_graph):
-        outputs = self.data
-
         required_inputs = set()
-        queue = list(outputs)
+        queue = list(self._outputs)
 
         while queue:
             data = queue.pop()
@@ -96,11 +94,10 @@ class Campaign:
 
 
     def _find_missing_data(self, data_ordering):
-        # 1. Work out what data collection functions *are* implemented
         missing_data = []
 
-        for data in data_ordering:
-            if data not in self.data:
-                missing_data.append(data)
+        # for data in data_ordering:
+        #     if data not in self._outputs:
+        #         missing_data.append(data)
 
         return missing_data
