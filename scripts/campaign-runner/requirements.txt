@@ -1,2 +1,4 @@
 docopt
 pydantic
+supabase
+networkx
