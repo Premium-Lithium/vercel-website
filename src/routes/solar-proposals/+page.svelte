@@ -94,12 +94,12 @@
 
 		let projectStatus = 'Not started'
 		projectData['assigned_projects'].forEach((x) => {
-			if (x['customer_id'] === projectId) projectStatus = x.status
+			if (x['customerId'] === projectId) projectStatus = x.status
 		})
 		return {
-			id: houseData?.id,
+			id: houseData['customer_id'],
 			address: houseData?.address['formatted_address'],
-			lat_lon: houseData?.lat_lon,
+			lat_lon: houseData?.address.geometry.location,
 			status: projectStatus
 		}
 	}
@@ -151,6 +151,7 @@
 	async function createOpenSolarProject(project, comingFromOpen = false) {
 		if (awaitingResponse & !comingFromOpen) return
 		awaitingResponse = true
+		console.log(project)
 		let res = await fetch(`${$page.url.pathname}/open-solar/create-project`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -158,7 +159,7 @@
 				project: {
 					projectId: project.id,
 					address: project.address,
-					latLon: project.latLon,
+					latLon: { 'lat': project.latLon.lat, 'lon': project.latLon.lng },
 					uniqueIdentifier
 				},
 				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
@@ -167,7 +168,7 @@
 		let data = await res.json()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach((entry) => {
-			if (entry['customer_id'] == project.projectId) {
+			if (entry['customerId'] == project.projectId) {
 				entry.status = 'in_progress'
 				entry.openSolarId = data.id
 			}
@@ -183,7 +184,7 @@
 		awaitingResponse = true
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (entry['customer_id'] == project.projectId) {
+			if (entry['customerId'] == project.projectId) {
 				if (entry.openSolarId) {
 					let res = await fetch(`${$page.url.pathname}/open-solar/get-project`, {
 						method: 'POST',
@@ -221,7 +222,7 @@
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
-				entry['customer_id'] == project.projectId &&
+				entry['customerId'] == project.projectId &&
 				(entry.status == 'in_progress' || entry.status == 'completed')
 			) {
 				let existingFlags = entry.flags
@@ -341,7 +342,7 @@
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
-				(entry['customer_id'] == project.projectId && entry.status == 'in_progress') ||
+				(entry['customerId'] == project.projectId && entry.status == 'in_progress') ||
 				entry.status == 'completed'
 			) {
 				if (!entry.flags.includes(flag)) entry.flags = [...entry.flags, flag]
