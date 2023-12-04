@@ -7,6 +7,7 @@ export class CRM {
 	pdFilesApi;
 	pdNotesApi;
 	pdUsersApi;
+	pdOrgApi;
 	pdPipelinesApi;
 
 	constructor() {
@@ -14,6 +15,7 @@ export class CRM {
 		this.pdFilesApi = new pipedrive.FilesApi(pd);
 		this.pdNotesApi = new pipedrive.NotesApi(pd);
 		this.pdUsersApi = new pipedrive.UsersApi(pd);
+		this.pdOrgApi = new pipedrive.OrganizationsApi(pd);
 		this.pdPipelinesApi = new pipedrive.PipelinesApi(pd)
 	}
 	async getDealIdFromPL(PLNumber: string) {
@@ -30,6 +32,11 @@ export class CRM {
 
 	async getAllDealsWithFilter(filterId: string, paginationStart?: number) {
 		const dealsFoundWithFilter = await this.pdDealsApi.getDeals({filterId: filterId, limit: 500, start: paginationStart ? paginationStart : 0})
+		return dealsFoundWithFilter;
+	}
+
+	async getAllDealsFromPipelineWithFilter(pipelineID: string, filterId: string, paginationStart? : number) {
+		const dealsFoundWithFilter = await this.pdPipelinesApi.getPipelineDeals(pipelineID, {filterId: filterId, limit: 500, start: paginationStart ? paginationStart : 0})
 		return dealsFoundWithFilter;
 	}
 
@@ -324,6 +331,11 @@ export class CRM {
 	async getAllPipelines() {
 		const pipelines = await this.pdPipelinesApi.getPipelines();
 		return pipelines
+	}
+
+	async getOrganizationFor(orgID: string) {
+		const org = await this.pdOrgApi.getOrganization(orgID)
+		return org
 	}
 }
 

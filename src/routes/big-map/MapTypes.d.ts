@@ -4,10 +4,10 @@ export interface MapResponse {
     statusCode: number,
     body?: any  // Array of map markers, drawings or both
 }
-
 // To be expanded as necessary
 export interface MapRequest {
     option: number, 
+    body: undefined | any,
 }
 
 export interface PipeLineKey {
@@ -23,9 +23,21 @@ export interface MarkerOptions {
     marker: any | undefined
     content: string | undefined
     filterOption: Array<string>
+    pipelineId: string
+    stageId: string
 }
 
 export interface LatLongObj {
     lat: number
     lng: number
+}
+
+// Panel displaying options for each selected pipeline (for now, later on adding campaign etc.)
+export interface OptionPanel {
+    pipeline: PipeLineKey | undefined
+    stages: Array<string>
+    stagesVisible: Array<string>
+    filters: Array<string>
+    filtersApplied: Array<string>
+    markers: Array<MarkerOptions>
 }
