@@ -13,6 +13,10 @@
 	let supabaseAuth = undefined
 	let modals = []
 	const flagsVisibleToWorker = ['PANELS_ALREADY_INSTALLED', 'ROOF_TOO_COMPLICATED']
+	let campaign = undefined
+
+	const urlParams = $page.url.searchParams
+	campaign = urlParams.get('campaign-id') || ''
 
 	// PARAMETERS
 
@@ -43,7 +47,7 @@
 			workerData = await getWorkerData(uniqueIdentifier)
 		}
 		projectIds = workerData[0]['assigned_projects'].map((x) => {
-			return x.uuid
+			return x['customerId']
 		})
 
 		let projectData = await Promise.all(
@@ -78,9 +82,9 @@
 
 	async function getProjectData(projectId, workerId) {
 		let { data: houseData, error: houseError } = await supabase
-			.from('south_facing_houses')
+			.from('campaign_customers')
 			.select('*')
-			.eq('id', projectId)
+			.eq('customer_id', projectId)
 		let { data: projectData, error: projectError } = await supabase
 			.from('solar_turk_workers')
 			.select('*')
@@ -90,7 +94,7 @@
 
 		let projectStatus = 'Not started'
 		projectData['assigned_projects'].forEach((x) => {
-			if (x.uuid === projectId) projectStatus = x.status
+			if (x['customer_id'] === projectId) projectStatus = x.status
 		})
 		return {
 			id: houseData?.id,
@@ -109,12 +113,13 @@
 	}
 
 	async function createNewWorker(workerId, numOfProjects) {
-		let { data, error } = await supabase.rpc('get_random_south_facing_houses', {
-			num_rows: numOfProjects
+		let { data, error } = await supabase.rpc('get_random_campaign_customers', {
+			numrows: numOfProjects,
+			campaignid: '003-A'
 		})
 
 		if (error) {
-			console.error('Error fetching random south facing houses:', error)
+			console.error('Error fetching random campaign customers:', error)
 			return
 		}
 		let projectIds = data.map((x) => {
@@ -125,7 +130,12 @@
 			{
 				worker_id: workerId,
 				assigned_projects: data.map((x) => {
-					return { uuid: x.id, status: 'not_started', openSolarId: null, flags: [] }
+					return {
+						customerId: x['customer_id'],
+						status: 'not_started',
+						openSolarId: null,
+						flags: []
+					}
 				})
 			}
 		])
@@ -157,7 +167,7 @@
 		let data = await res.json()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach((entry) => {
-			if (entry.uuid == project.projectId) {
+			if (entry['customer_id'] == project.projectId) {
 				entry.status = 'in_progress'
 				entry.openSolarId = data.id
 			}
@@ -173,7 +183,7 @@
 		awaitingResponse = true
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (entry.uuid == project.projectId) {
+			if (entry['customer_id'] == project.projectId) {
 				if (entry.openSolarId) {
 					let res = await fetch(`${$page.url.pathname}/open-solar/get-project`, {
 						method: 'POST',
@@ -211,7 +221,7 @@
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
-				entry.uuid == project.projectId &&
+				entry['customer_id'] == project.projectId &&
 				(entry.status == 'in_progress' || entry.status == 'completed')
 			) {
 				let existingFlags = entry.flags
@@ -272,15 +282,15 @@
 
 	async function addOpenSolarLinkToAddress(openSolarId, houseId, workerId, numCompleted, flags) {
 		let { data, error: selectError } = await supabase
-			.from('south_facing_houses')
+			.from('campaign_customers')
 			.select('*')
-			.eq('id', houseId)
-		if (selectError) {
-			console.error('Error fetching from south facing houses:', selectError)
+			.eq('customer_id', houseId)
+		if (selectError || !data || data.length == 0 || !data[0]) {
+			console.error('Error fetching from campaign customers:', selectError)
 			return
 		}
 		data = data[0]
-		let openSolarProjects = data['open_solar_projects']
+		let openSolarProjects = data['campaign_specific_data']['open_solar_projects']
 		if (!openSolarProjects) {
 			openSolarProjects = [
 				{
@@ -303,9 +313,14 @@
 			]
 		}
 		let { error: updateHouseError } = await supabase
-			.from('south_facing_houses')
-			.update({ open_solar_projects: openSolarProjects })
-			.eq('id', houseId)
+			.from('campaign_customers')
+			.update({
+				campaign_specific_data: {
+					...data['campaign_specific_data'],
+					open_solar_projects: openSolarProjects
+				}
+			})
+			.eq('campaign_id', houseId)
 
 		if (updateHouseError) {
 			console.error('Error update to south facing houses:', updateHouseError)
@@ -326,7 +341,7 @@
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
-				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
+				(entry['customer_id'] == project.projectId && entry.status == 'in_progress') ||
 				entry.status == 'completed'
 			) {
 				if (!entry.flags.includes(flag)) entry.flags = [...entry.flags, flag]
