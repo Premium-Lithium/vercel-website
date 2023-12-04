@@ -1,4 +1,5 @@
 <script>
+	import { getRandomColor } from '$lib/utils'
 	import Modal from '$lib/components/Modal.svelte'
 	import { page } from '$app/stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
@@ -182,15 +183,6 @@
 		let northEast = bounds.getNorthEast()
 		let southWest = bounds.getSouthWest()
 		return `${southWest.lng()},${southWest.lat()},0 ${northEast.lng()},${southWest.lat()},0 ${northEast.lng()},${northEast.lat()},0 ${southWest.lng()},${northEast.lat()},0 ${southWest.lng()},${southWest.lat()},0 `
-	}
-
-	function getRandomColor() {
-		var letters = '0123456789ABCDEF'
-		var color = '#'
-		for (var i = 0; i < 6; i++) {
-			color += letters[Math.floor(Math.random() * 16)]
-		}
-		return color
 	}
 </script>
 
