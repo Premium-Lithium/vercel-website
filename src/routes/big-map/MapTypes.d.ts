@@ -10,6 +10,11 @@ export interface MapRequest {
     option: number, 
 }
 
+export interface PipeLineKey {
+    name: string,
+    id: number
+}
+
 // Location of marker, address of marker, visibility of marker on map, marker object itself, content of popup when clicked, array of filters that this marker will show up for
 export interface MarkerOptions {
     latLng: LatLongObj

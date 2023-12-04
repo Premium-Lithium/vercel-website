@@ -1,20 +1,7 @@
-import type { MapResponse, MapRequest, MarkerOptions, LatLongObj } from "./MapTypes"
+import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey } from "./MapTypes"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()
-const bdmPipelineStages = new Map([
-    [248, 'Prospect Email'],
-    [253, 'Email Sent'],
-    [249, 'Link Clicked'],
-    [255, 'Unable to Contact'],
-    [254, '1st Call Made'],
-    [250, 'Expression of Interest'],
-    [251, 'Awaiting Confirmation'],
-    [262, 'Interested in other regions of UK'],
-    [275, 'Confirmed partner - Yorkshire'],
-    [252, 'Confirmed partner - M25'],
-    [263, 'Partner Paid'],
-])
 
 /**
  * Parses body, sends to request handler, returns response from request handler
@@ -23,7 +10,7 @@ const bdmPipelineStages = new Map([
  */
 export async function POST({ request }) {
     const req = await request.json()
-    const res: MapResponse = await requestHandler(req.opts)
+    const res: MapResponse = await requestHandler(req)
 
     return new Response(JSON.stringify(res))
 }
@@ -37,10 +24,26 @@ async function requestHandler(opts: MapRequest): Promise<MapResponse> {
     switch (opts.option) {
         case 0:
             return ({ ok: true, message: '', statusCode: 200, body: undefined })
+        case -1: // Reserved for getting all pipelines
+            let pipelines = await getPipelines()
+            return ({ ok: true, message: '', statusCode: 200, body: pipelines})
+        case -2: // Reserved for getting filters for the selected pipelines
         default:
-            let markers = await getAllDealsWithAddress()
-            return ({ ok: true, message: 'Default', statusCode: 200, body: markers })
+            return ({ ok: true, message: 'Default', statusCode: 200, body: undefined })
     }
+}
+
+async function getPipelines(): Promise<Array<PipeLineKey>> {
+    const pipelines = await crm.getAllPipelines()
+    let pipelinesKeysArr = []
+    for (let pipeline in pipelines.data) {
+        let pipelineKey: PipeLineKey = {
+            name: pipelines.data[pipeline].name,
+            id: pipelines.data[pipeline].id
+        }
+        pipelinesKeysArr.push(pipelineKey)        
+    }
+    return pipelinesKeysArr
 }
 
 /**

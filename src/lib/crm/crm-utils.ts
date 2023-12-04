@@ -7,13 +7,14 @@ export class CRM {
 	pdFilesApi;
 	pdNotesApi;
 	pdUsersApi;
-	
+	pdPipelinesApi;
 
 	constructor() {
 		this.pdDealsApi = new pipedrive.DealsApi(pd);
 		this.pdFilesApi = new pipedrive.FilesApi(pd);
 		this.pdNotesApi = new pipedrive.NotesApi(pd);
 		this.pdUsersApi = new pipedrive.UsersApi(pd);
+		this.pdPipelinesApi = new pipedrive.PipelinesApi(pd)
 	}
 	async getDealIdFromPL(PLNumber: string) {
 		const dealFound = await this.pdDealsApi.searchDeals(PLNumber) //Returns array of deal found 
@@ -60,10 +61,6 @@ export class CRM {
 		}
 		const dealRequest = await this.pdDealsApi.updateDeal(dealId, parsedRequest)
 		return dealRequest
-	}
-
-	async getAllDealsInPipelineWithFilter(pipeline: string, filter: string) {
-		const deals = 
 	}
 
 	async getDealDataFor(PLNumber: string) {
@@ -322,6 +319,11 @@ export class CRM {
 
 		const newNote = await this.pdNotesApi.addNote(noteRequest);
 		return newNote
+	}
+
+	async getAllPipelines() {
+		const pipelines = await this.pdPipelinesApi.getPipelines();
+		return pipelines
 	}
 }
 
