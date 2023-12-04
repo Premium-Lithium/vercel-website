@@ -115,7 +115,7 @@
 	async function createNewWorker(workerId, numOfProjects) {
 		let { data, error } = await supabase.rpc('get_random_campaign_customers', {
 			numrows: numOfProjects,
-			campaignid: '003-A'
+			campaignid: campaign
 		})
 
 		if (error) {
@@ -320,7 +320,7 @@
 					open_solar_projects: openSolarProjects
 				}
 			})
-			.eq('campaign_id', houseId)
+			.eq('customer_id', houseId)
 
 		if (updateHouseError) {
 			console.error('Error update to south facing houses:', updateHouseError)
