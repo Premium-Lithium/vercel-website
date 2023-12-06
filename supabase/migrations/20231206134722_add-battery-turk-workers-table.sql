@@ -1,7 +1,7 @@
 create table "public"."battery_turk_workers" (
     "worker_id" uuid not null,
     "completed_regions" jsonb,
-    "assigned_region" jsonb
+    "assigned_region" jsonb[]
 );
 
 alter table "public"."campaign_master" alter column "area" set data type jsonb[] using "area"::jsonb[];
