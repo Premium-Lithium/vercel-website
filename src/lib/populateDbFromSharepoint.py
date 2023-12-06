@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from fastkml import kml, styles
 from pygeoif.geometry import Polygon
 from supabase import create_client, Client
+from getNumPropertiesInRegion import get_gdf_list, count_properties_in_region
 import ast
 
 EXTRACTION_ZONE = 'kmlFilesToProcess'
@@ -59,16 +60,17 @@ def process_kml_files_and_upload(campaign_id):
     url: str = "http://localhost:54321"
     key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
     supabase: Client = create_client(url, key)
-
+    gdf_list = get_gdf_list()
     for root, dirs, files in os.walk(EXTRACTION_ZONE):
         for file in files:
             if file.endswith('.kml'):
-                with open(os.path.join(root, file), 'rb') as f:  # Read as bytes
+                with open(os.path.join(root, file), 'rb') as f:
                     kml_content = f.read()
                     try:
-                        bbox = get_bounding_box(kml_content)  # Pass bytes to fastkml
+                        bbox = get_bounding_box(kml_content)
+                        numProps = count_properties_in_region(gdf_list, bbox)
                         if bbox:
-                            response = upload_bounding_box_to_supabase(supabase, bbox, campaign_id)
+                            response = upload_bounding_box_to_supabase(supabase, bbox, numProps, campaign_id)
                             print(f"Uploaded {file}: {response}")
                     except ValueError as e:
                         print(f"Error processing file {file}: {e}")
