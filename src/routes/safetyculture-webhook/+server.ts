@@ -72,7 +72,7 @@ async function updatePipedriveDealFrom(PLNumber: string, templateName: string) {
         const answerObject = await surveyDataSource.fetchAnswersFromFields(PLNumber, fieldNames, templateName)
 
         const request = {
-            'MPAN number': answerObject['MPAN'],
+            'MPAN': answerObject['MPAN'],
             'Roof Tile Type': answerObject['Roof Type '],
             'Pitch': answerObject['Roof Pitch '],
             'Azimuth': answerObject['Roof Orientation from South '],
