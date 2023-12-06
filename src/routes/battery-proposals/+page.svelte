@@ -3,20 +3,13 @@
 	import { page } from '$app/stores'
 	import Auth from '$lib/components/Auth.svelte'
 	import { supabase } from '$lib/supabase'
-	import type { Loader } from '@googlemaps/js-api-loader'
 	import type { UUID } from 'crypto'
 	import { onMount } from 'svelte'
-	import { generateUUID } from 'three/src/math/MathUtils'
 	import { default as template } from './Template.kml'
 	import type { RealtimeChannel } from '@supabase/supabase-js'
-	import Accordian from '$lib/components/Accordian.svelte'
 
 	let supabaseAuth: Object
 	let activeArea: Array<any> | undefined = undefined
-	let map: google.maps.Map, loader: Loader
-	let drawingManager
-	let loadingDrawingManager: boolean = false
-	let drawnRegions: boolean = false
 
 	let campaign: string = ''
 	const urlParams = $page.url.searchParams
