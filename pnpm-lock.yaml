@@ -158,6 +158,9 @@ dependencies:
   shopify-token:
     specifier: ^4.1.0
     version: 4.1.0
+  svelte-awesome-color-picker:
+    specifier: ^2.4.8
+    version: 2.4.8
   svelte-material-icons:
     specifier: ^3.0.5
     version: 3.0.5(svelte@4.2.7)
@@ -891,13 +894,13 @@ packages:
       core-js: 2.6.12
     dev: false
 
-  /@jimp/plugin-blur@0.16.13(@jimp/custom@0.6.8):
+  /@jimp/plugin-blur@0.16.13(@jimp/custom@0.16.13):
     resolution: {integrity: sha512-PvLrfa8vkej3qinlebyhLpksJgCF5aiysDMSVhOZqwH5nQLLtDE9WYbnsofGw4r0VVpyw3H/ANCIzYTyCtP9Cg==}
     peerDependencies:
       '@jimp/custom': '>=0.3.5'
     dependencies:
       '@babel/runtime': 7.23.4
-      '@jimp/custom': 0.6.8
+      '@jimp/custom': 0.16.13
       '@jimp/utils': 0.16.13
     dev: false
 
@@ -921,13 +924,13 @@ packages:
       '@jimp/utils': 0.16.13
     dev: false
 
-  /@jimp/plugin-color@0.16.13(@jimp/custom@0.6.8):
+  /@jimp/plugin-color@0.16.13(@jimp/custom@0.16.13):
     resolution: {integrity: sha512-xW+9BtEvoIkkH/Wde9ql4nAFbYLkVINhpgAE7VcBUsuuB34WUbcBl/taOuUYQrPEFQJ4jfXiAJZ2H/rvKjCVnQ==}
     peerDependencies:
       '@jimp/custom': '>=0.3.5'
     dependencies:
       '@babel/runtime': 7.23.4
-      '@jimp/custom': 0.6.8
+      '@jimp/custom': 0.16.13
       '@jimp/utils': 0.16.13
       tinycolor2: 1.6.0
     dev: false
@@ -1292,7 +1295,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.4
       '@jimp/custom': 0.16.13
-      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.6.8)
+      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/plugin-resize': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/utils': 0.16.13
     dev: false
@@ -1306,7 +1309,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.4
       '@jimp/custom': 0.16.13
-      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.6.8)
+      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/plugin-resize': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/utils': 0.16.13
     dev: false
@@ -1319,9 +1322,9 @@ packages:
       '@babel/runtime': 7.23.4
       '@jimp/custom': 0.16.13
       '@jimp/plugin-blit': 0.16.13(@jimp/custom@0.16.13)
-      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.6.8)
+      '@jimp/plugin-blur': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/plugin-circle': 0.16.13(@jimp/custom@0.16.13)
-      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.6.8)
+      '@jimp/plugin-color': 0.16.13(@jimp/custom@0.16.13)
       '@jimp/plugin-contain': 0.16.13(@jimp/custom@0.16.13)(@jimp/plugin-blit@0.16.13)(@jimp/plugin-resize@0.16.13)(@jimp/plugin-scale@0.16.13)
       '@jimp/plugin-cover': 0.16.13(@jimp/custom@0.16.13)(@jimp/plugin-crop@0.16.13)(@jimp/plugin-resize@0.16.13)(@jimp/plugin-scale@0.16.13)
       '@jimp/plugin-crop': 0.16.13(@jimp/custom@0.16.13)
@@ -3309,6 +3312,10 @@ packages:
     dependencies:
       color-convert: 2.0.1
       color-string: 1.9.1
+    dev: false
+
+  /colord@2.9.3:
+    resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
     dev: false
 
   /combined-stream@1.0.8:
@@ -8833,6 +8840,12 @@ packages:
   /supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+    dev: false
+
+  /svelte-awesome-color-picker@2.4.8:
+    resolution: {integrity: sha512-p6yzMMeo/IjqKMYb8oXa2vGbbRvtEDvi8LejGpY8AsZsjNwXSR0WKxQplaz67u1eqZFIRLPX0+IknQrhT5gI+g==}
+    dependencies:
+      colord: 2.9.3
     dev: false
 
   /svelte-check@3.6.2(postcss@8.4.31)(sass@1.69.5)(svelte@4.2.7):

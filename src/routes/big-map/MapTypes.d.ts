@@ -20,7 +20,7 @@ export interface MarkerOptions {
     latLng: LatLongObj
     address: string
     visible: boolean
-    marker: any | undefined
+    marker: google.maps.Marker
     content: string | undefined
     filterOption: Array<string>
     pipelineId: string
@@ -40,4 +40,6 @@ export interface OptionPanel {
     filters: Array<string>
     filtersApplied: Array<string>
     markers: Array<MarkerOptions>
+    colour: string
+    handle: HTMLElement
 }

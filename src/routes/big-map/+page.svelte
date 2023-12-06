@@ -2,14 +2,15 @@
 	import type { MapResponse, MapRequest, MarkerOptions, PipeLineKey, OptionPanel } from './MapTypes'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
+	import ColorPicker from 'svelte-awesome-color-picker'
 	import { onMount } from 'svelte'
 
 	let pipelines: Array<PipeLineKey> = [] // Array of all pipelines and IDs
 	let selectedPipelines: Array<number> = [] // Array of selected pipelines filtered by
 	let mapOptionPanels: Array<OptionPanel> = []
 	let map: any, loader: any
-
-	$: console.log(mapOptionPanels.length)
+	let handle: HTMLElement
+	let icon: string
 
 	onMount(async () => {
 		let res = await fetch('/big-map', {
@@ -21,11 +22,12 @@
 		})
 		let response = await res.json()
 		pipelines = response.body
+		const iconStream = fetch('/marker-base.svg')
+		icon = await (await iconStream).text()
 	})
 
-
 	/**
-	 * 
+	 *
 	 */
 	function updateMap() {
 		for (let panel in mapOptionPanels) {
@@ -52,6 +54,18 @@
 	}
 
 	/**
+	 * Creates a new icon with a given colour
+	 * @param panel group of markers to update
+	 */
+	async function changeIconColourFor(panel: OptionPanel) {
+		const newIconString = icon.replace('#888888', panel.colour)
+		const newIcon = new google.maps.Marker
+		for (let m in panel.markers) {
+			panel.markers[m].marker.setIcon()
+		}
+	}
+
+	/**
 	 * Creates a marker object for a given set of parameters
 	 * 	including location and pop up window
 	 * @param opts Marker parameters
@@ -59,7 +73,8 @@
 	function addMarker(opts: MarkerOptions) {
 		let marker = new google.maps.Marker({
 			position: new google.maps.LatLng(opts.latLng.lat, opts.latLng.lng),
-			title: opts.address
+			title: opts.address,
+			icon: '/marker-base.svg'
 		})
 		let markerPopup = new google.maps.InfoWindow({
 			content: opts.content,
@@ -92,7 +107,7 @@
 			panel.markers[m].visible = false
 		}
 		updateMap()
-		mapOptionPanels = mapOptionPanels.filter(item => item !== panel)
+		mapOptionPanels = mapOptionPanels.filter((item) => item !== panel)
 	}
 
 	/**
@@ -123,49 +138,56 @@
 		if (mapRes.ok) {
 			for (let p in selectedPipelines) {
 				let panel: OptionPanel = {
-						pipeline: pipelines.find(obj => obj.id === selectedPipelines[p]),
-						stages: [],
-						stagesVisible: [],
-						filters: [],
-						filtersApplied: [],
-						markers: []
-					}
+					pipeline: pipelines.find((obj) => obj.id === selectedPipelines[p]),
+					stages: [],
+					stagesVisible: [],
+					filters: [],
+					filtersApplied: [],
+					markers: [],
+					colour: '',
+					handle: document.createElement('div')
+				}
 				mapOptionPanels.push(panel)
 			}
-			console.log(mapOptionPanels)
 			for (let m in mapProps.body) {
-					let marker: MarkerOptions = {
-						latLng: mapProps.body[m].latLng,
-						address: mapProps.body[m].address,
-						visible: true,
-						marker: undefined,
-						content: mapProps.body[m].content,
-						filterOption: [],
-						pipelineId: mapProps.body[m].pipelineId,
-						stageId: ''
-					}
-					mapOptionPanels.find(obj => obj.pipeline === pipelines.find(obj => obj.id === parseInt(marker.pipelineId)))?.markers.push(addMarker(marker))
+				let marker: MarkerOptions = {
+					latLng: mapProps.body[m].latLng,
+					address: mapProps.body[m].address,
+					visible: true,
+					marker: undefined,
+					content: mapProps.body[m].content,
+					filterOption: [],
+					pipelineId: mapProps.body[m].pipelineId,
+					stageId: ''
 				}
+				mapOptionPanels
+					.find(
+						(obj) =>
+							obj.pipeline === pipelines.find((obj) => obj.id === parseInt(marker.pipelineId))
+					)
+					?.markers.push(addMarker(marker))
+			}
 			mapOptionPanels = [...mapOptionPanels] // Instantiate a 'new' array for reactivity
 			updateMap()
 		}
 	}
 
 	function clearPipelineCheckboxes() {
-		while (mapOptionPanels.length !== 0)
-			deletePanel(mapOptionPanels[0])
+		while (mapOptionPanels.length !== 0) deletePanel(mapOptionPanels[0])
 	}
 </script>
 
 <!-- 
 TODO List
-Add handle to draggable control panel
 Style draggable control panel
 -->
 <div class="map-container">
-	<div class="control-panel" use:movable>
+	<div class="control-panel" use:movable={{ handle }}>
 		<div class="filter-controls">
-			<h4>Pipelines</h4>
+			<div class="header-row">
+				<h4>Pipelines</h4>
+				<div class="handle" bind:this={handle}>.</div>
+			</div>
 			<div class="pipeline-checkboxes">
 				{#each pipelines as pipeline}
 					<label>
@@ -185,8 +207,11 @@ Style draggable control panel
 		</div>
 	</div>
 	{#each mapOptionPanels as panel}
-		<div class="option-panel" use:movable>
-			<h4>{panel.pipeline?.name}</h4>
+		<div class="option-panel" use:movable={{ handle:panel.handle }}>
+			<div class="header-row">
+				<h4>{panel.pipeline?.name}: {panel.markers.length} Markers</h4>
+				<div class="handle" bind:this={ panel.handle }>.</div>
+			</div>
 			<div class="filter-checkboxes">
 				{#each panel.filters as filter}
 					<label>
@@ -199,8 +224,16 @@ Style draggable control panel
 					>
 				{/each}
 			</div>
+			<div class="colour-picker">
+				<!-- Why does this have to complain :( -->
+				<ColorPicker bind:hex={panel.colour} />
+				<br />
+			</div>
 			<div class="clear-filter-checkboxes">
 				<button on:click={() => clearFilters(panel)}>Clear Filters</button>
+			</div>
+			<div class="set-marker-colour">
+				<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
 			</div>
 			<div class="delete-panel">
 				<button on:click={() => deletePanel(panel)}>Remove from Map</button>
@@ -236,11 +269,27 @@ Style draggable control panel
 		height: auto;
 		background-color: #b0b2b4;
 		border-radius: 8px;
-		border-width: 2px;
-		border-color: #000000;
+		border: 2px solid black;
 		justify-content: left;
 		padding: 8px;
 		z-index: 1000;
+	}
+
+	.header-row {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+	}
+
+	.handle {
+		background-color: #a157de;
+		display: flex;
+		justify-content: center;
+		vertical-align: middle;
+		border: 1px solid black;
+		border-radius: 8px;
+		height: 32px;
+		width: 32px;
 	}
 	.option-panel {
 		position: absolute;
@@ -249,8 +298,7 @@ Style draggable control panel
 		width: auto;
 		height: auto;
 		background-color: #b0b2b4;
-		border-color: #000000;
-		border-width: 2px;
+		border: 1px solid black;
 		border-radius: 8px;
 		justify-content: left;
 		padding: 8px;
