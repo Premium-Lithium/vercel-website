@@ -123,7 +123,7 @@
 	async function saveKml(region) {
 		let res = await fetch(template)
 		let kml = await res.text()
-		let uuid = `${uniqueIdentifier}-region-${numRegionsCompleted}`
+		let uuid = `${uniqueIdentifier.split('-')[0]}-region-${numRegionsCompleted}`
 		kml = kml
 			.replace(
 				'COORDINATE-LIST',
