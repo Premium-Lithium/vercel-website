@@ -161,6 +161,23 @@
 				}
 			})
 			.eq('worker_id', uniqueIdentifier)
+
+		const { data: masterSelectData, error: masterSelectError } = await supabase
+			.from('campaign_master')
+			.select('area')
+			.eq('campaign_id', campaign)
+
+		let masterDataToUpload = masterSelectData[0].area.map((x) => {
+			if (JSON.stringify(x.area) == JSON.stringify(campaignAreas[0].area)) {
+				x.status = 'allocated'
+			}
+			return x
+		})
+		const { data: masterUploadData, error: masterUploadError } = await supabase
+			.from('campaign_master')
+			.update({ 'area': masterDataToUpload })
+			.eq('campaign_id', campaign)
+		console.log('Master table updated', masterUploadData, masterUploadError)
 		activeArea = campaignAreas[0].area
 		await saveKml(activeArea)
 	}
