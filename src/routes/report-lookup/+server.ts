@@ -13,12 +13,20 @@ export async function POST({ request }) {
         return new Response(JSON.stringify(error))
     } else {
         let { data, error } = await supabase
-            .from('campaign_customers')
+            .from('existing-solar-properties')
             .select('analytics')
-            .eq('customer_id', req.uuid)
+            .eq('id', req.uuid)
         if (error)
             return new Response(JSON.stringify(error))
-        let currAnalytics = data
+        let currAnalytics;
+        if (data[0].analytics === null) {
+            currAnalytics = {}
+            currAnalytics.scannedQrCode = false;
+            currAnalytics.consented = false;
+            currAnalytics.bookedConsultation = false;
+        } else {
+            currAnalytics = data[0].analytics
+        }
         switch (req.analyticStage) {
             case 0:
                 return new Response(JSON.stringify(await updateScannedQrCode(req.uuid, currAnalytics)))
@@ -33,32 +41,38 @@ export async function POST({ request }) {
 async function updateScannedQrCode(uuid: string, currAnalytics) {
     currAnalytics.scannedQrCode = true
     let { data, error } = await supabase
-        .from('campaign_customers')
+        .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
-        .eq('customer_id', uuid)
-    if (error)
+        .eq('id', uuid)
+    if (error) {
+        console.log(error)
         return error
+    }
     return data
 }
 
 async function consentedToAnalytics(uuid: string, currAnalytics) {
     currAnalytics.consented = true
     let { data, error } = await supabase
-        .from('campaign_customers')
+        .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
-        .eq('customer_id', uuid)
-    if (error)
+        .eq('id', uuid)
+    if (error) {
+        console.log(error)
         return error
+    }
     return data
 }
 
 async function bookedConsultationAnalytics(uuid: string, currAnalytics) {
     currAnalytics.bookedConsultation = true
     let { data, error } = await supabase
-        .from('campaign_customers')
+        .from('existing-solar-properties')
         .update({ analytics: currAnalytics })
-        .eq('customer_id', uuid)
-    if (error)
+        .eq('id', uuid)
+    if (error) {
+        console.log(error)
         return error
+    }
     return data
 }
