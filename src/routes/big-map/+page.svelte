@@ -59,9 +59,9 @@
 	 */
 	async function changeIconColourFor(panel: OptionPanel) {
 		const newIconString = icon.replace('#888888', panel.colour)
-		const newIcon = new google.maps.Marker
+		const newIcon = new google.maps.Icon(newIconString)
 		for (let m in panel.markers) {
-			panel.markers[m].marker.setIcon()
+			panel.markers[m].marker.setIcon(newIcon)
 		}
 	}
 
