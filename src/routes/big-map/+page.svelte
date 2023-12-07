@@ -169,10 +169,18 @@
 		}
 	}
 
+	/**
+	 * Adds the chosen stage to the filter array for that panel
+	 * @param panel panel to operate on
+	 * @param stage stage to filter by for that panel
+	 */
 	function addStage(panel: OptionPanel, stage: string) {
 		panel.stagesVisible.push(stage)
 	}
 
+	/**
+	 * Goes through all panels and sets all their markers to invisible
+	 */
 	function makeAllMarkersInvisible() {
 		for (let panel in mapOptionPanels) {
 			for (let marker in mapOptionPanels[panel].markers) {
@@ -205,6 +213,10 @@
 		applyFilters()
 	}
 
+	/**
+	 * 
+	 * @param status
+	 */
 	function filterByStatus(status: string) {
 		if (statusFilters.includes(status)) {
 			statusFilters.splice(statusFilters.indexOf(status), 1)
@@ -240,6 +252,10 @@
 		updateMap()
 	}
 
+	/**
+	 * Clears the stage filtering for the panel
+	 * @param panel panel to operate on
+	 */
 	function clearStages(panel: OptionPanel) {
 		panel.stagesVisible.length = 0
 		updateMap()
@@ -262,14 +278,13 @@
 
 <!-- 
 TODO List
-Style draggable control panel
 Implement dropdown checkboxes: https://flowbite-svelte.com/docs/components/dropdown
-Get custom markers
+Get custom markers working
 -->
 <div class="map-container">
 	<div class="control-panel" use:movable={{ handle }}>
 		{#if loading}
-			<p>Loading wheel goes here</p>
+			<p>Loading</p>
 		{:else}
 			<div class="filter-controls">
 				<div class="header-row">
@@ -389,9 +404,9 @@ Get custom markers
 		flex-direction: column;
 		width: auto;
 		height: auto;
-		background-color: #b0b2b4;
+		background-color: #D0D1D2;
 		border-radius: 8px;
-		border: 2px solid black;
+		border: 2px solid #3A4339;
 		justify-content: left;
 		padding: 8px;
 		z-index: 1000;
@@ -404,11 +419,11 @@ Get custom markers
 	}
 
 	.handle {
-		background-color: #a157de;
+		background-color: #35BBED;
 		display: flex;
 		justify-content: center;
 		vertical-align: middle;
-		border: 1px solid black;
+		border: 1px solid #3A4339;
 		border-radius: 8px;
 		height: 32px;
 		width: 32px;
@@ -419,8 +434,8 @@ Get custom markers
 		flex-direction: column;
 		width: auto;
 		height: auto;
-		background-color: #b0b2b4;
-		border: 1px solid black;
+		background-color: #D0D1D2;
+		border: 1px solid #3A4339;
 		border-radius: 8px;
 		justify-content: left;
 		padding: 8px;
