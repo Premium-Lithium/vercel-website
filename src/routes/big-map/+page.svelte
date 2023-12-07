@@ -4,7 +4,6 @@
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
 	import { onMount } from 'svelte'
-	import { Slider } from '@bulatdashiev/svelte-slider'
 
 	let pipelines: Array<PipeLineKey> = [] // Array of all pipelines and IDs
 	let selectedPipelines: Array<number> = [] // Array of selected pipelines filtered by
@@ -286,7 +285,9 @@ Get custom markers
 			</div>
 			<div class="filters">
 				<div class="value-slider">
-
+					<label >
+						<input name="value-slider" type="range" min=0 max=
+					</label>
 				</div>
 				<!-- {#each panel.filters as filter}
 					<label>
