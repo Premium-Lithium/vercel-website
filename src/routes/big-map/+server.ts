@@ -101,13 +101,20 @@ async function findAddressFrom(deal): Promise<string | null> {
     // }
     return null
 }
-
 /**
- * Fills in and formats the content of the marker popup
- * @param marker marker to update
- * @returns updated marker
+ * Updates the content of a marker
+ * @param marker marker to operate on
+ * @param deal deal to pull data from
+ * @returns marker with content
  */
-function setContentOfMarker(marker: MarkerOptions): MarkerOptions {
+function setContentOfMarker(marker: MarkerOptions, deal: any): MarkerOptions {
+    const content = `
+    <h1>${deal.title}</h1>
+    <p>Address: ${marker.address}</p>
+    <p>Status: ${marker.filterOption.status}</p>
+    <p>Value: £${marker.filterOption.value}
+    `
+    marker.content = content
     return marker
 }
 
@@ -136,11 +143,12 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     address: address,
                     visible: true,
                     marker: undefined,
-                    content: deals.data[deal].title,
+                    content: '',
                     filterOption: { value: (deals.data[deal].value) ? deals.data[deal].value : 0, status: deals.data[deal].status },
                     pipelineId: pipeline,
                     stageId: deals.data[deal].stage_id,
                 }
+                marker = setContentOfMarker(marker, deals.data[deal])
                 markers.push(marker)
             }
         }
