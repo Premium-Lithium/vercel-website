@@ -12,6 +12,8 @@
 	let handle: HTMLElement
 	let icon: string
 	let loading: boolean = false
+	let value: number = 0
+	let statusFilters: Array<string> = []
 
 	onMount(async () => {
 		loading = true
@@ -30,6 +32,57 @@
 	})
 
 	/**
+	 * Gets deals from all pipelines in selectedPipelines, creates map marker objects, and puts them on the map
+	 */
+	 async function selectPipelines() {
+		clearMap()
+		clearPipelineCheckboxes()
+		let mapRes = await fetch('/big-map', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ option: 1, body: selectedPipelines })
+		})
+		let mapProps = await mapRes.json()
+		if (mapRes.ok) {
+			for (let p in selectedPipelines) {
+				let panel: OptionPanel = {
+					pipeline: pipelines.find((obj) => obj.id === selectedPipelines[p]),
+					stages: [],
+					stagesVisible: [],
+					filters: [],
+					filtersApplied: [],
+					markers: [],
+					colour: '',
+					handle: document.createElement('div')
+				}
+				// Loop over each stage in pipeline, add name to the list
+				panel.stages = panel.pipeline?.stages.map((obj) => obj.name)
+				mapOptionPanels.push(panel)
+			}
+			for (let m in mapProps.body) {
+				let marker: MarkerOptions = {
+					latLng: mapProps.body[m].latLng,
+					address: mapProps.body[m].address,
+					visible: true,
+					marker: undefined,
+					content: mapProps.body[m].content,
+					filterOption: mapProps.body[m].filterOption,
+					pipelineId: mapProps.body[m].pipelineId,
+					stageId: mapProps.body[m].stageId
+				}
+				mapOptionPanels
+					.find(
+						(obj) =>
+							obj.pipeline === pipelines.find((obj) => obj.id === parseInt(marker.pipelineId))
+					)
+					?.markers.push(addMarker(marker))
+			}
+			mapOptionPanels = [...mapOptionPanels] // Instantiate a 'new' array for reactivity
+			updateMap()
+		}
+	}
+
+	/**
 	 *	Go through each panels' markers and if they are meant to be visible, add them to the map, if not remove them
 	 */
 	function updateMap() {
@@ -45,6 +98,25 @@
 	}
 
 	/**
+	 * Deletes panels until all panels are gone
+	 */
+	 function clearPipelineCheckboxes() {
+		while (mapOptionPanels.length !== 0) deletePanel(mapOptionPanels[0])
+	}
+
+	/**
+	 * removes all markers for a panel on the map and deletes the panel
+	 * @param panel
+	 */
+	function deletePanel(panel: OptionPanel) {
+		for (let m in panel.markers) {
+			panel.markers[m].visible = false
+		}
+		updateMap()
+		mapOptionPanels = mapOptionPanels.filter((item) => item !== panel)
+	}
+
+	/**
 	 * Remove all markers from the map and empty all marker arrays
 	 */
 	function clearMap() {
@@ -57,18 +129,6 @@
 			mapOptionPanels[panel].markers.length = 0
 		}
 		updateMap()
-	}
-
-	/**
-	 * Creates a new icon with a given colour
-	 * @param panel group of markers to update
-	 */
-	async function changeIconColourFor(panel: OptionPanel) {
-		const newIconString = icon.replace('#888888', panel.colour)
-		const newIcon = new google.maps.Icon(newIconString)
-		for (let m in panel.markers) {
-			panel.markers[m].marker.setIcon(newIcon)
-		}
 	}
 
 	/**
@@ -96,14 +156,6 @@
 		return opts
 	}
 
-	function deletePanel(panel: OptionPanel) {
-		for (let m in panel.markers) {
-			panel.markers[m].visible = false
-		}
-		updateMap()
-		mapOptionPanels = mapOptionPanels.filter((item) => item !== panel)
-	}
-
 	/**
 	 * Adds the selected pipeline to the list of selected pipelines, removes it if already in list
 	 * @param pipeline object containing name and id
@@ -117,67 +169,48 @@
 		}
 	}
 
-	/**
-	 * Gets deals from all pipelines in selectedPipelines, creates map marker objects, and puts them on the map
-	 */
-	async function selectPipelines() {
-		clearMap()
-		clearPipelineCheckboxes()
-		let mapRes = await fetch('/big-map', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ option: 1, body: selectedPipelines })
-		})
-		let mapProps = await mapRes.json()
-		if (mapRes.ok) {
-			for (let p in selectedPipelines) {
-				let panel: OptionPanel = {
-					pipeline: pipelines.find((obj) => obj.id === selectedPipelines[p]),
-					stages: [],
-					stagesVisible: [],
-					filters: [],
-					filtersApplied: [],
-					markers: [],
-					colour: '',
-					handle: document.createElement('div')
-				}
-				// Loop over each stage in pipeline, add name to the list
-				panel.stages = panel.pipeline?.stages.map(obj => obj.name)
-				mapOptionPanels.push(panel)
-			}
-			for (let m in mapProps.body) {
-				let marker: MarkerOptions = {
-					latLng: mapProps.body[m].latLng,
-					address: mapProps.body[m].address,
-					visible: true,
-					marker: undefined,
-					content: mapProps.body[m].content,
-					filterOption: mapProps.body[m].filterOption,
-					pipelineId: mapProps.body[m].pipelineId,
-					stageId: mapProps.body[m].stageId
-				}
-				mapOptionPanels
-					.find(
-						(obj) =>
-							obj.pipeline === pipelines.find((obj) => obj.id === parseInt(marker.pipelineId))
-					)
-					?.markers.push(addMarker(marker))
-			}
-			mapOptionPanels = [...mapOptionPanels] // Instantiate a 'new' array for reactivity
-			updateMap()
-		}
-	}
-
 	function addStage(panel: OptionPanel, stage: string) {
 		panel.stagesVisible.push(stage)
 	}
 
-	function filterByValue(panel: OptionPanel, value: number) {
-
+	function makeAllMarkersInvisible() {
+		for (let panel in mapOptionPanels) {
+			for (let marker in mapOptionPanels[panel].markers) {
+				mapOptionPanels[panel].markers[marker].visible = false
+			}
+		}
+		updateMap()
 	}
 
-	function filterByStatus(panel: OptionPanel, status: string) {
+	function applyFilters() {
+		console.log(value, statusFilters)
+		makeAllMarkersInvisible()
+		for (let panel in mapOptionPanels) {
+			for (let marker in mapOptionPanels[panel].markers) {
+				if (
+					mapOptionPanels[panel].markers[marker].filterOption.value >= value &&
+					(statusFilters.includes(mapOptionPanels[panel].markers[marker].filterOption.status) ||
+						statusFilters.length === 0)
+				) {
+					mapOptionPanels[panel].markers[marker].visible = true
+				}
+			}
+		}
+		updateMap()
+	}
 
+	function clearFilters() {
+		value = 0
+		statusFilters.length = 0
+		applyFilters()
+	}
+
+	function filterByStatus(status: string) {
+		if (statusFilters.includes(status)) {
+			statusFilters.splice(statusFilters.indexOf(status), 1)
+		} else {
+			statusFilters.push(status)
+		}
 	}
 
 	/**
@@ -189,13 +222,19 @@
 			panel.markers[marker].visible = false
 		}
 		updateMap()
-		for (let stage in panel.stagesVisible) {
-			let pipeline = pipelines.find((obj) => obj.id === panel.pipeline?.id)
-			let stageId = pipeline?.stages.find((obj) => obj.name === panel.stagesVisible[stage])?.id
+		if (panel.stagesVisible.length === 0) {
 			for (let marker in panel.markers) {
-				if (stageId === panel.markers[marker].stageId.toString()) {
-					panel.markers[marker].visible = true
-				} 
+				panel.markers[marker].visible = true
+			}
+		} else {
+			for (let stage in panel.stagesVisible) {
+				let pipeline = pipelines.find((obj) => obj.id === panel.pipeline?.id)
+				let stageId = pipeline?.stages.find((obj) => obj.name === panel.stagesVisible[stage])?.id
+				for (let marker in panel.markers) {
+					if (stageId === panel.markers[marker].stageId.toString()) {
+						panel.markers[marker].visible = true
+					}
+				}
 			}
 		}
 		updateMap()
@@ -208,11 +247,17 @@
 	}
 
 	/**
-	 * Deletes panels until all panels are gone
+	 * Creates a new icon with a given colour
+	 * @param panel group of markers to update
 	 */
-	function clearPipelineCheckboxes() {
-		while (mapOptionPanels.length !== 0) deletePanel(mapOptionPanels[0])
+	 async function changeIconColourFor(panel: OptionPanel) {
+		const newIconString = icon.replace('#888888', panel.colour)
+		const newIcon = new google.maps.Icon(newIconString)
+		for (let m in panel.markers) {
+			panel.markers[m].marker.setIcon(newIcon)
+		}
 	}
+
 </script>
 
 <!-- 
@@ -246,6 +291,35 @@ Get custom markers
 				<div class="pipeline-checkbox-buttons">
 					<button on:click={selectPipelines}>Display Selected Pipelines</button>
 					<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
+				</div>
+				<div class="filters">
+					<div class="value-slider">
+						<label class="value-slider">
+							Only show deals with values above
+							<input name="value-slider" type="number" bind:value />
+						</label>
+					</div>
+					<div class="status-options">
+						<label class="value-slider">
+							Only show deals with status:
+							<label>
+								Won
+								<input name="won-status" type="checkbox" on:click={() => filterByStatus('won')} />
+							</label>
+							<label>
+								Open
+								<input name="won-status" type="checkbox" on:click={() => filterByStatus('open')} />
+							</label>
+							<label>
+								Lost
+								<input name="won-status" type="checkbox" on:click={() => filterByStatus('lost')} />
+							</label>
+						</label>
+					</div>
+					<div class="filter-buttons">
+						<button on:click={applyFilters}>Apply Filters</button>
+						<button on:click={clearFilters}>Clear Filters</button>
+					</div>
 				</div>
 			</div>
 		{/if}
@@ -282,23 +356,6 @@ Get custom markers
 				<div class="clear-stage-checkboxes">
 					<button on:click={() => clearStages(panel)}>Clear Stages</button>
 				</div>
-			</div>
-			<div class="filters">
-				<div class="value-slider">
-					<label >
-						<input name="value-slider" type="range" min=0 max=
-					</label>
-				</div>
-				<!-- {#each panel.filters as filter}
-					<label>
-						<input
-							name="filter-checkboxes-"
-							type="checkbox"
-							on:click={() => addFilter(panel, filter)}
-						/>
-						{filter}</label
-					>
-				{/each} -->
 			</div>
 			<div class="delete-panel">
 				<button on:click={() => deletePanel(panel)}>Remove from Map</button>
@@ -383,8 +440,12 @@ Get custom markers
 		display: flex;
 		flex-direction: row;
 	}
-	.filter-buttons {
+	.filters {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
+	}
+	.value-slider {
+		display: flex;
+		flex-direction: column;
 	}
 </style>

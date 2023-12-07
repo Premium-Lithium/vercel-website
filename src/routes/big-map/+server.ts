@@ -119,7 +119,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     visible: true,
                     marker: undefined,
                     content: deals.data[deal].title,
-                    filterOption: {value: deals.data[deal].value, status: deals.data[deal].status},
+                    filterOption: {value: (deals.data[deal].value) ? deals.data[deal].value : 0, status: deals.data[deal].status},
                     pipelineId: pipeline,
                     stageId: deals.data[deal].stage_id,
                 }
