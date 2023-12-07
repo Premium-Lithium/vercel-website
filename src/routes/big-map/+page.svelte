@@ -180,6 +180,7 @@
 <!-- 
 TODO List
 Style draggable control panel
+Implement dropdown checkboxes: https://flowbite-svelte.com/docs/components/dropdown
 -->
 <div class="map-container">
 	<div class="control-panel" use:movable={{ handle }}>
@@ -225,7 +226,6 @@ Style draggable control panel
 				{/each}
 			</div>
 			<div class="colour-picker">
-				<!-- Why does this have to complain :( -->
 				<ColorPicker bind:hex={panel.colour} />
 				<br />
 			</div>
