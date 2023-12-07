@@ -125,12 +125,12 @@ export class CRM {
 	}
 
 	async setMpanFor(PLNumber: string, value: string) {
-		const updateDealRequest = await this.setCustomField(PLNumber, 'MPAN number', value)
+		const updateDealRequest = await this.setCustomField(PLNumber, 'MPAN', value)
 		return updateDealRequest;
 	}
 
 	async getMpanFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'MPAN number')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'MPAN')
 		return fieldResponse
 	}
 
@@ -250,7 +250,7 @@ export class CRM {
 	}
 
 	async getNewInverterSizeFor(PLNumber: string) {
-		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kWp)')
+		const fieldResponse = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kW)')
 		return fieldResponse;
 	}
 
