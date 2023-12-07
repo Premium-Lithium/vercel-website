@@ -84,12 +84,12 @@ async function findAddressFrom(deal): Promise<string | null>  {
     if (deal['80ebeccb5c4130caa1da17c6304ab63858b912a1_formatted_address']) {
         return deal['80ebeccb5c4130caa1da17c6304ab63858b912a1_formatted_address']
     }
-    if (deal.orgId) {
-        const org = await crm.getOrganizationFor(deal.orgId)
-        if (org.data.addressFormattedAddress) {
-            return org.data.addressFormattedAddress
-        }
-    }
+    // if (deal.org_id) {
+    //     const org = await crm.getOrganizationFor(deal.org_id)
+    //     if (org.data.location_formatted_address) {
+    //         return org.data.location_formatted_address
+    //     }
+    // }
     return null
 }
 
@@ -111,6 +111,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
                     { method: 'GET' }
                 )
+                console.log(deals.data[deal])
                 let locRes = await res.json()
                 let marker: MarkerOptions = {
                     latLng: locRes.results[0].geometry.location,
@@ -118,7 +119,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     visible: true,
                     marker: undefined,
                     content: deals.data[deal].title,
-                    filterOption: [],
+                    filterOption: {value: deals.data[deal].value, status: deals.data[deal].status},
                     pipelineId: pipeline,
                     stageId: deals.data[deal].stage_id,
                 }

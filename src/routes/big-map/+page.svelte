@@ -4,6 +4,7 @@
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
 	import { onMount } from 'svelte'
+	import { Slider } from '@bulatdashiev/svelte-slider'
 
 	let pipelines: Array<PipeLineKey> = [] // Array of all pipelines and IDs
 	let selectedPipelines: Array<number> = [] // Array of selected pipelines filtered by
@@ -96,20 +97,6 @@
 		return opts
 	}
 
-	/**
-	 * adds a given filter to the array of filters applied, and updates the map
-	 * if the filter is already in the list, it removes it
-	 * @param filter string of filter to be added
-	 */
-	function addFilter(panel: OptionPanel, filter: string) {}
-
-	function applyFilters(panel: OptionPanel) {}
-
-	/**
-	 * Clears filters applied array, sets all checkboxes to true, and updates the map
-	 */
-	function clearFilters(panel: OptionPanel) {}
-
 	function deletePanel(panel: OptionPanel) {
 		for (let m in panel.markers) {
 			panel.markers[m].visible = false
@@ -166,9 +153,9 @@
 					visible: true,
 					marker: undefined,
 					content: mapProps.body[m].content,
-					filterOption: [],
+					filterOption: mapProps.body[m].filterOption,
 					pipelineId: mapProps.body[m].pipelineId,
-					stageId: ''
+					stageId: mapProps.body[m].stageId
 				}
 				mapOptionPanels
 					.find(
@@ -178,7 +165,6 @@
 					?.markers.push(addMarker(marker))
 			}
 			mapOptionPanels = [...mapOptionPanels] // Instantiate a 'new' array for reactivity
-			console.log(mapOptionPanels)
 			updateMap()
 		}
 	}
@@ -187,12 +173,38 @@
 		panel.stagesVisible.push(stage)
 	}
 
+	function filterByValue(panel: OptionPanel, value: number) {
+
+	}
+
+	function filterByStatus(panel: OptionPanel, status: string) {
+
+	}
+
+	/**
+	 * hides that panels markers from the map, adds only the wanted markers back to it
+	 * @param panel the current panel being operated on
+	 */
 	function applyStages(panel: OptionPanel) {
-		for (stage in panel.stages)
+		for (let marker in panel.markers) {
+			panel.markers[marker].visible = false
+		}
+		updateMap()
+		for (let stage in panel.stagesVisible) {
+			let pipeline = pipelines.find((obj) => obj.id === panel.pipeline?.id)
+			let stageId = pipeline?.stages.find((obj) => obj.name === panel.stagesVisible[stage])?.id
+			for (let marker in panel.markers) {
+				if (stageId === panel.markers[marker].stageId.toString()) {
+					panel.markers[marker].visible = true
+				} 
+			}
+		}
+		updateMap()
 	}
 
 	function clearStages(panel: OptionPanel) {
 		panel.stagesVisible.length = 0
+		updateMap()
 		// Set checkboxes to false
 	}
 
@@ -272,25 +284,20 @@ Get custom markers
 					<button on:click={() => clearStages(panel)}>Clear Stages</button>
 				</div>
 			</div>
-			<div class="filter-checkboxes">
-				{#each panel.filters as filter}
+			<div class="filters">
+				<div class="value-slider">
+
+				</div>
+				<!-- {#each panel.filters as filter}
 					<label>
 						<input
-							name="filter-checkboxes"
+							name="filter-checkboxes-"
 							type="checkbox"
 							on:click={() => addFilter(panel, filter)}
 						/>
 						{filter}</label
 					>
-				{/each}
-			</div>
-			<div class="filter-buttons">
-				<div class="add-checked-filters">
-					<button on:click={() => applyFilters(panel)}>Apply Filters</button>
-				</div>
-				<div class="clear-filter-checkboxes">
-					<button on:click={() => clearFilters(panel)}>Clear Filters</button>
-				</div>
+				{/each} -->
 			</div>
 			<div class="delete-panel">
 				<button on:click={() => deletePanel(panel)}>Remove from Map</button>
@@ -375,11 +382,6 @@ Get custom markers
 		display: flex;
 		flex-direction: row;
 	}
-	.filter-checkboxes {
-		display: flex;
-		flex-direction: column;
-	}
-
 	.filter-buttons {
 		display: flex;
 		flex-direction: row;

@@ -21,6 +21,11 @@ export interface PipeLineKey {
     stages: Array<StageFilter>
 }
 
+export interface DealFilter {
+    value: number
+    status: string
+}
+
 // Location of marker, address of marker, visibility of marker on map, marker object itself, content of popup when clicked, array of filters that this marker will show up for
 export interface MarkerOptions {
     latLng: LatLongObj
@@ -28,7 +33,7 @@ export interface MarkerOptions {
     visible: boolean
     marker: google.maps.Marker
     content: string | undefined
-    filterOption: Array<string>
+    filterOption: DealFilter
     pipelineId: string
     stageId: string
 }
