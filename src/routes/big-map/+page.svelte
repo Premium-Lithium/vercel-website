@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MapResponse, MapRequest, MarkerOptions, PipeLineKey, OptionPanel } from './MapTypes'
+	import type { MarkerOptions, PipeLineKey, OptionPanel } from './MapTypes'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -34,7 +34,7 @@
 	/**
 	 * Gets deals from all pipelines in selectedPipelines, creates map marker objects, and puts them on the map
 	 */
-	 async function selectPipelines() {
+	async function selectPipelines() {
 		clearMap()
 		clearPipelineCheckboxes()
 		let mapRes = await fetch('/big-map', {
@@ -100,7 +100,7 @@
 	/**
 	 * Deletes panels until all panels are gone
 	 */
-	 function clearPipelineCheckboxes() {
+	function clearPipelineCheckboxes() {
 		while (mapOptionPanels.length !== 0) deletePanel(mapOptionPanels[0])
 	}
 
@@ -214,7 +214,7 @@
 	}
 
 	/**
-	 * 
+	 *
 	 * @param status
 	 */
 	function filterByStatus(status: string) {
@@ -266,14 +266,13 @@
 	 * Creates a new icon with a given colour
 	 * @param panel group of markers to update
 	 */
-	 async function changeIconColourFor(panel: OptionPanel) {
+	async function changeIconColourFor(panel: OptionPanel) {
 		const newIconString = icon.replace('#888888', panel.colour)
 		const newIcon = new google.maps.Icon(newIconString)
 		for (let m in panel.markers) {
 			panel.markers[m].marker.setIcon(newIcon)
 		}
 	}
-
 </script>
 
 <!-- 
@@ -404,9 +403,9 @@ Get custom markers working
 		flex-direction: column;
 		width: auto;
 		height: auto;
-		background-color: #D0D1D2;
+		background-color: #d0d1d2;
 		border-radius: 8px;
-		border: 2px solid #3A4339;
+		border: 2px solid #3a4339;
 		justify-content: left;
 		padding: 8px;
 		z-index: 1000;
@@ -419,11 +418,11 @@ Get custom markers working
 	}
 
 	.handle {
-		background-color: #35BBED;
+		background-color: #35bbed;
 		display: flex;
 		justify-content: center;
 		vertical-align: middle;
-		border: 1px solid #3A4339;
+		border: 1px solid #3a4339;
 		border-radius: 8px;
 		height: 32px;
 		width: 32px;
@@ -434,8 +433,8 @@ Get custom markers working
 		flex-direction: column;
 		width: auto;
 		height: auto;
-		background-color: #D0D1D2;
-		border: 1px solid #3A4339;
+		background-color: #d0d1d2;
+		border: 1px solid #3a4339;
 		border-radius: 8px;
 		justify-content: left;
 		padding: 8px;

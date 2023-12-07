@@ -32,7 +32,7 @@ async function requestHandler(opts: MapRequest): Promise<MapResponse> {
                     markers.push(deals[marker])
                 }
             }
-            return ({ ok: true, message: 'Got deals for all pipelines', statusCode: 200, body: markers})
+            return ({ ok: true, message: 'Got deals for all pipelines', statusCode: 200, body: markers })
         case -1: // Reserved for getting selected pipelines
             let pipelines = await getPipelines()
             return ({ ok: true, message: '', statusCode: 200, body: pipelines })
@@ -42,6 +42,11 @@ async function requestHandler(opts: MapRequest): Promise<MapResponse> {
     }
 }
 
+/**
+ * Gets all stage names and IDs of a given pipeline for filtering
+ * @param pipelineId ID of the pipeline to retrieve stages for
+ * @returns array of stages with name and id
+ */
 async function getStagesForPipeLine(pipelineId: number): Promise<Array<StageFilter>> {
     let stages: Array<StageFilter> = []
     let stageIds = await crm.getStagesFor(pipelineId)
@@ -64,13 +69,17 @@ async function getPipelines(): Promise<Array<PipeLineKey>> {
     const pipelines = await crm.getAllPipelines()
     let pipelinesKeysArr = []
     for (let pipeline in pipelines.data) {
-        let pipelineKey: PipeLineKey = {
-            name: pipelines.data[pipeline].name,
-            id: pipelines.data[pipeline].id,
-            stages: await getStagesForPipeLine(pipelines.data[pipeline].id)
+        // try to get one deal - if not null don't add to pipelinesKeysArr
+        let dealsInPipelines = await crm.checkIfPipelineHasValidDeals(pipelines.data[pipeline].id)
+        if (dealsInPipelines) {
+            let pipelineKey: PipeLineKey = {
+                name: pipelines.data[pipeline].name,
+                id: pipelines.data[pipeline].id,
+                stages: await getStagesForPipeLine(pipelines.data[pipeline].id)
+            }
+            getStagesForPipeLine(pipelineKey.id)
+            pipelinesKeysArr.push(pipelineKey)
         }
-        getStagesForPipeLine(pipelineKey.id)
-        pipelinesKeysArr.push(pipelineKey)
     }
     return pipelinesKeysArr
 }
@@ -80,7 +89,7 @@ async function getPipelines(): Promise<Array<PipeLineKey>> {
  * @param deal individual deal to search address for
  * @returns address if found, null if not
  */
-async function findAddressFrom(deal): Promise<string | null>  {
+async function findAddressFrom(deal): Promise<string | null> {
     if (deal['80ebeccb5c4130caa1da17c6304ab63858b912a1_formatted_address']) {
         return deal['80ebeccb5c4130caa1da17c6304ab63858b912a1_formatted_address']
     }
@@ -91,6 +100,15 @@ async function findAddressFrom(deal): Promise<string | null>  {
     //     }
     // }
     return null
+}
+
+/**
+ * Fills in and formats the content of the marker popup
+ * @param marker marker to update
+ * @returns updated marker
+ */
+function setContentOfMarker(marker: MarkerOptions): MarkerOptions {
+    return marker
 }
 
 /**
@@ -119,7 +137,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     visible: true,
                     marker: undefined,
                     content: deals.data[deal].title,
-                    filterOption: {value: (deals.data[deal].value) ? deals.data[deal].value : 0, status: deals.data[deal].status},
+                    filterOption: { value: (deals.data[deal].value) ? deals.data[deal].value : 0, status: deals.data[deal].status },
                     pipelineId: pipeline,
                     stageId: deals.data[deal].stage_id,
                 }

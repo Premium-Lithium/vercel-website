@@ -6,13 +6,13 @@ export interface MapResponse {
 }
 // To be expanded as necessary
 export interface MapRequest {
-    option: number, 
+    option: number,
     body: undefined | any,
 }
 
 export interface StageFilter {
     id: string
-    name: string 
+    name: string
 }
 
 export interface PipeLineKey {

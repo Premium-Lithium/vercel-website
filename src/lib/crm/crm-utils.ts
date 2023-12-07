@@ -34,12 +34,12 @@ export class CRM {
 	}
 
 	async getAllDealsWithFilter(filterId: string, paginationStart?: number) {
-		const dealsFoundWithFilter = await this.pdDealsApi.getDeals({filterId: filterId, limit: 500, start: paginationStart ? paginationStart : 0})
+		const dealsFoundWithFilter = await this.pdDealsApi.getDeals({ filterId: filterId, limit: 500, start: paginationStart ? paginationStart : 0 })
 		return dealsFoundWithFilter;
 	}
 
-	async getAllDealsFromPipelineWithFilter(pipelineID: string, filterId: string, paginationStart? : number) {
-		const dealsFoundWithFilter = await this.pdPipelinesApi.getPipelineDeals(pipelineID, {filterId: filterId, limit: 500, start: paginationStart ? paginationStart : 0})
+	async getAllDealsFromPipelineWithFilter(pipelineID: string, filterId: string, paginationStart?: number) {
+		const dealsFoundWithFilter = await this.pdPipelinesApi.getPipelineDeals(pipelineID, { filterId: filterId, limit: 500, start: paginationStart ? paginationStart : 0 })
 		return dealsFoundWithFilter;
 	}
 
@@ -334,6 +334,14 @@ export class CRM {
 	async getAllPipelines() {
 		const pipelines = await this.pdPipelinesApi.getPipelines();
 		return pipelines
+	}
+
+	async checkIfPipelineHasValidDeals(pipelineId: string) {
+		const deal = await this.pdPipelinesApi.getPipelineDeals(pipelineId, { limit: 1, filterId: 384 })
+		if (deal.data) {
+			return true
+		}
+		return false
 	}
 
 	async getStagesFor(pipelineId: number) {
