@@ -103,6 +103,8 @@
 	 */
 	function addFilter(panel: OptionPanel, filter: string) {}
 
+	function applyFilters(panel: OptionPanel) {}
+
 	/**
 	 * Clears filters applied array, sets all checkboxes to true, and updates the map
 	 */
@@ -153,6 +155,8 @@
 					colour: '',
 					handle: document.createElement('div')
 				}
+				// Loop over each stage in pipeline, add name to the list
+				panel.stages = panel.pipeline?.stages.map(obj => obj.name)
 				mapOptionPanels.push(panel)
 			}
 			for (let m in mapProps.body) {
@@ -174,8 +178,22 @@
 					?.markers.push(addMarker(marker))
 			}
 			mapOptionPanels = [...mapOptionPanels] // Instantiate a 'new' array for reactivity
+			console.log(mapOptionPanels)
 			updateMap()
 		}
+	}
+
+	function addStage(panel: OptionPanel, stage: string) {
+		panel.stagesVisible.push(stage)
+	}
+
+	function applyStages(panel: OptionPanel) {
+		for (stage in panel.stages)
+	}
+
+	function clearStages(panel: OptionPanel) {
+		panel.stagesVisible.length = 0
+		// Set checkboxes to false
 	}
 
 	/**
@@ -197,35 +215,62 @@ Get custom markers
 		{#if loading}
 			<p>Loading wheel goes here</p>
 		{:else}
-		<div class="filter-controls">
-			<div class="header-row">
-				<h4>Pipelines</h4>
-				<div class="handle" bind:this={handle}>.</div>
+			<div class="filter-controls">
+				<div class="header-row">
+					<h4>Pipelines</h4>
+					<div class="handle" bind:this={handle}>.</div>
+				</div>
+				<div class="pipeline-checkboxes">
+					{#each pipelines as pipeline}
+						<label>
+							<input
+								name="pipeline-checkboxes"
+								type="checkbox"
+								on:click={() => addPipelineCheckbox(pipeline)}
+							/>
+							{pipeline.name}</label
+						>
+					{/each}
+				</div>
+				<div class="pipeline-checkbox-buttons">
+					<button on:click={selectPipelines}>Display Selected Pipelines</button>
+					<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
+				</div>
 			</div>
-			<div class="pipeline-checkboxes">
-				{#each pipelines as pipeline}
-					<label>
-						<input
-							name="pipeline-checkboxes"
-							type="checkbox"
-							on:click={() => addPipelineCheckbox(pipeline)}
-						/>
-						{pipeline.name}</label
-					>
-				{/each}
-			</div>
-			<div class="pipeline-checkbox-buttons">
-				<button on:click={selectPipelines}>Display Selected Pipelines</button>
-				<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
-			</div>
-		</div>
 		{/if}
 	</div>
 	{#each mapOptionPanels as panel}
-		<div class="option-panel" use:movable={{ handle:panel.handle }}>
+		<div class="option-panel" use:movable={{ handle: panel.handle }}>
 			<div class="header-row">
 				<h4>{panel.pipeline?.name}: {panel.markers.length} Markers</h4>
-				<div class="handle" bind:this={ panel.handle }>.</div>
+				<div class="handle" bind:this={panel.handle}>.</div>
+			</div>
+			<div class="colour-picker">
+				<ColorPicker bind:hex={panel.colour} />
+				<br />
+			</div>
+			<div class="set-marker-colour">
+				<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
+			</div>
+			<div class="stage-checkboxes">
+				{#each panel.stages as stage}
+					<label>
+						<input
+							name="stage-checkboxes"
+							type="checkbox"
+							on:click={() => addStage(panel, stage)}
+						/>
+						{stage}</label
+					>
+				{/each}
+			</div>
+			<div class="stage-buttons">
+				<div class="add-checked-stages">
+					<button on:click={() => applyStages(panel)}>Apply Stages</button>
+				</div>
+				<div class="clear-stage-checkboxes">
+					<button on:click={() => clearStages(panel)}>Clear Stages</button>
+				</div>
 			</div>
 			<div class="filter-checkboxes">
 				{#each panel.filters as filter}
@@ -239,17 +284,14 @@ Get custom markers
 					>
 				{/each}
 			</div>
-
-			<!-- <div class="colour-picker">
-				<ColorPicker bind:hex={panel.colour} />
-				<br />
-			</div> -->
-			<div class="clear-filter-checkboxes">
-				<button on:click={() => clearFilters(panel)}>Clear Filters</button>
+			<div class="filter-buttons">
+				<div class="add-checked-filters">
+					<button on:click={() => applyFilters(panel)}>Apply Filters</button>
+				</div>
+				<div class="clear-filter-checkboxes">
+					<button on:click={() => clearFilters(panel)}>Clear Filters</button>
+				</div>
 			</div>
-			<!-- <div class="set-marker-colour">
-				<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
-			</div> -->
 			<div class="delete-panel">
 				<button on:click={() => deletePanel(panel)}>Remove from Map</button>
 			</div>
@@ -322,5 +364,24 @@ Get custom markers
 	.pipeline-checkboxes {
 		display: flex;
 		flex-direction: column;
+	}
+
+	.stage-checkboxes {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.stage-buttons {
+		display: flex;
+		flex-direction: row;
+	}
+	.filter-checkboxes {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.filter-buttons {
+		display: flex;
+		flex-direction: row;
 	}
 </style>

@@ -120,7 +120,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     content: deals.data[deal].title,
                     filterOption: [],
                     pipelineId: pipeline,
-                    stageId: deals.data[deal].stageId,
+                    stageId: deals.data[deal].stage_id,
                 }
                 markers.push(marker)
             }
