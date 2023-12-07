@@ -136,7 +136,6 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
                     { method: 'GET' }
                 )
-                console.log(deals.data[deal])
                 let locRes = await res.json()
                 let marker: MarkerOptions = {
                     latLng: locRes.results[0].geometry.location,

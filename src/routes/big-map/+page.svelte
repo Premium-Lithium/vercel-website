@@ -287,7 +287,7 @@ Get custom markers working
 		{:else}
 			<div class="filter-controls">
 				<div class="header-row">
-					<h4>Pipelines</h4>
+					<h3>Pipelines</h3>
 					<div class="handle" bind:this={handle}>.</div>
 				</div>
 				<div class="pipeline-checkboxes">
@@ -306,6 +306,7 @@ Get custom markers working
 					<button on:click={selectPipelines}>Display Selected Pipelines</button>
 					<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
 				</div>
+				<h3>Filters</h3>
 				<div class="filters">
 					<div class="value-slider">
 						<label class="value-slider">
