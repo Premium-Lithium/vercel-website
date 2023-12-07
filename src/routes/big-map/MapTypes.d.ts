@@ -10,9 +10,15 @@ export interface MapRequest {
     body: undefined | any,
 }
 
+export interface StageFilter {
+    id: string
+    name: string 
+}
+
 export interface PipeLineKey {
     name: string,
     id: number
+    stages: Array<StageFilter>
 }
 
 // Location of marker, address of marker, visibility of marker on map, marker object itself, content of popup when clicked, array of filters that this marker will show up for

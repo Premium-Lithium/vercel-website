@@ -1,3 +1,4 @@
+import { stage } from '$lib/components/ProgressBar.svelte';
 import { pd, getField, getOptionIdFor, readCustomDealField } from '$lib/pipedrive-utils';
 import pipedrive from 'pipedrive';
 
@@ -9,6 +10,7 @@ export class CRM {
 	pdUsersApi;
 	pdOrgApi;
 	pdPipelinesApi;
+	pdStagesApi;
 
 	constructor() {
 		this.pdDealsApi = new pipedrive.DealsApi(pd);
@@ -16,7 +18,8 @@ export class CRM {
 		this.pdNotesApi = new pipedrive.NotesApi(pd);
 		this.pdUsersApi = new pipedrive.UsersApi(pd);
 		this.pdOrgApi = new pipedrive.OrganizationsApi(pd);
-		this.pdPipelinesApi = new pipedrive.PipelinesApi(pd)
+		this.pdPipelinesApi = new pipedrive.PipelinesApi(pd);
+		this.pdStagesApi = new pipedrive.StagesApi(pd);
 	}
 	async getDealIdFromPL(PLNumber: string) {
 		const dealFound = await this.pdDealsApi.searchDeals(PLNumber) //Returns array of deal found 
@@ -331,6 +334,17 @@ export class CRM {
 	async getAllPipelines() {
 		const pipelines = await this.pdPipelinesApi.getPipelines();
 		return pipelines
+	}
+
+	async getStagesFor(pipelineId: number) {
+		const pipelineStages = await this.pdPipelinesApi.getPipeline(pipelineId)
+		let stageIds = Object.keys(pipelineStages.data.deals_summary.per_stages)
+		return stageIds
+	}
+
+	async getStageNameFor(stageId: string) {
+		const stageData = await this.pdStagesApi.getStage(stageId)
+		return stageData.data.name
 	}
 
 	async getOrganizationFor(orgID: string) {

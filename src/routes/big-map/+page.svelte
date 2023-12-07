@@ -11,8 +11,10 @@
 	let map: any, loader: any
 	let handle: HTMLElement
 	let icon: string
+	let loading: boolean = false
 
 	onMount(async () => {
+		loading = true
 		let res = await fetch('/big-map', {
 			method: 'POST',
 			headers: {
@@ -24,10 +26,11 @@
 		pipelines = response.body
 		const iconStream = fetch('/marker-base.svg')
 		icon = await (await iconStream).text()
+		loading = false
 	})
 
 	/**
-	 *
+	 *	Go through each panels' markers and if they are meant to be visible, add them to the map, if not remove them
 	 */
 	function updateMap() {
 		for (let panel in mapOptionPanels) {
@@ -41,6 +44,9 @@
 		}
 	}
 
+	/**
+	 * Remove all markers from the map and empty all marker arrays
+	 */
 	function clearMap() {
 		for (let panel in mapOptionPanels) {
 			for (let marker in mapOptionPanels[panel].markers) {
@@ -172,6 +178,9 @@
 		}
 	}
 
+	/**
+	 * Deletes panels until all panels are gone
+	 */
 	function clearPipelineCheckboxes() {
 		while (mapOptionPanels.length !== 0) deletePanel(mapOptionPanels[0])
 	}
@@ -181,9 +190,13 @@
 TODO List
 Style draggable control panel
 Implement dropdown checkboxes: https://flowbite-svelte.com/docs/components/dropdown
+Get custom markers
 -->
 <div class="map-container">
 	<div class="control-panel" use:movable={{ handle }}>
+		{#if loading}
+			<p>Loading wheel goes here</p>
+		{:else}
 		<div class="filter-controls">
 			<div class="header-row">
 				<h4>Pipelines</h4>
@@ -206,6 +219,7 @@ Implement dropdown checkboxes: https://flowbite-svelte.com/docs/components/dropd
 				<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
 			</div>
 		</div>
+		{/if}
 	</div>
 	{#each mapOptionPanels as panel}
 		<div class="option-panel" use:movable={{ handle:panel.handle }}>
@@ -225,16 +239,17 @@ Implement dropdown checkboxes: https://flowbite-svelte.com/docs/components/dropd
 					>
 				{/each}
 			</div>
-			<div class="colour-picker">
+
+			<!-- <div class="colour-picker">
 				<ColorPicker bind:hex={panel.colour} />
 				<br />
-			</div>
+			</div> -->
 			<div class="clear-filter-checkboxes">
 				<button on:click={() => clearFilters(panel)}>Clear Filters</button>
 			</div>
-			<div class="set-marker-colour">
+			<!-- <div class="set-marker-colour">
 				<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
-			</div>
+			</div> -->
 			<div class="delete-panel">
 				<button on:click={() => deletePanel(panel)}>Remove from Map</button>
 			</div>

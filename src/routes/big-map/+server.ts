@@ -1,4 +1,4 @@
-import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey } from "./MapTypes"
+import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter } from "./MapTypes"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()
@@ -42,6 +42,20 @@ async function requestHandler(opts: MapRequest): Promise<MapResponse> {
     }
 }
 
+async function getStagesForPipeLine(pipelineId: number): Promise<Array<StageFilter>> {
+    let stages: Array<StageFilter> = []
+    let stageIds = await crm.getStagesFor(pipelineId)
+    for (let stage in stageIds) {
+        let stageName = await crm.getStageNameFor(stageIds[stage])
+        const stageFilter: StageFilter = {
+            id: stageIds[stage],
+            name: stageName
+        }
+        stages.push(stageFilter)
+    }
+    return stages
+}
+
 /**
  * Gets all deals with an address in pipedrive
  * @returns array of pipelines with name and ID
@@ -52,8 +66,10 @@ async function getPipelines(): Promise<Array<PipeLineKey>> {
     for (let pipeline in pipelines.data) {
         let pipelineKey: PipeLineKey = {
             name: pipelines.data[pipeline].name,
-            id: pipelines.data[pipeline].id
+            id: pipelines.data[pipeline].id,
+            stages: await getStagesForPipeLine(pipelines.data[pipeline].id)
         }
+        getStagesForPipeLine(pipelineKey.id)
         pipelinesKeysArr.push(pipelineKey)
     }
     return pipelinesKeysArr
