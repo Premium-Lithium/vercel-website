@@ -267,8 +267,8 @@ export class CRM {
 	// Single/three phase and solar generation are tied together, if you want to know one you also want to know the other, so returning them all as one object
 	async getPhaseAndPowerFor(PLNumber: string) {
 		const phaseType = await this.getCustomFieldDataFor(PLNumber, 'Single Phase or Three Phase')
-		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
-		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
+		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Inverter - Size (kW)')
+		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Inverter Size (kW)')
 		return [phaseType, existingSolarGen, newSolarGen]
 	}
 
