@@ -6,7 +6,7 @@
 	const dealId = $page.url.searchParams.get('selectedIds')
 	const userId = $page.url.searchParams.get('userId')
 
-	let sdk
+	let sdk: AppExtensionsSDK
 
 	let dealStatus: string = ''
 	let currentSignatory: string = ''
@@ -14,15 +14,18 @@
 	let buttonDisable = {
 		openSolarBtnDisable: true,
 		dnoApplicationBtnDisable: true,
-		getDesignImageBtnDisable: true
+		getDesignImageBtnDisable: true,
+		contractButtonDisable: true,
+		buildPDFContractDisable: true,
 	}
 	let loading = false
+	const hideSection = true
 	onMount(async () => {
 		sdk = await new AppExtensionsSDK().initialize()
-		await sdk.execute('resize', { height: 300 })
+		await sdk.execute('resize', { height: 480 })
 	})
 
-	onMount(() => {
+	onMount(async () => {
 		if (dealId) {
 			searchProjectDesign()
 		}
@@ -96,13 +99,17 @@
 			})
 			if (response.ok) {
 				const responseData = await response.json()
+				console.log(responseData)
 				alertMessage = responseData.message
-				if (responseData.statusCode === 200) location.reload()
+				buttonDisable = responseData.buttonDisable
+				console.log(responseData.projectLink)
+				if (responseData.projectLink)
+					window.open(responseData.projectLink).focus();
+				location.reload()
 				return response
 			}
 		} catch (error) {
 			console.log(error)
-			return error
 		}
 	}
 
@@ -122,13 +129,63 @@
 			if (response.ok) {
 				const responseData = await response.json()
 				alertMessage = responseData.message
+				buttonDisable = responseData.buttonDisable
 				return response
 			}
 		} catch (error) {
 			console.log(error)
+			buttonDisable.getDesignImageBtnDisable = false
 			return error
 		}
 	}
+
+	async function contractBuilder() {
+		try {
+			alertMessage = 'Building contract documents';
+			const res = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					userId: userId,
+					option: 4,
+				})
+			});
+			if (res.ok) {
+				const resData = await res.json();
+				alertMessage = resData.message;
+				return res;
+			}
+		} catch (error) {
+			console.log(error);
+			return error;
+		}
+	}
+
+	async function dnoPdfConverter() {
+		try {
+			alertMessage = 'Building PDF from DNO';
+			const res = await fetch('/dno-data-panel', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					dealId: dealId,
+					userId: userId,
+					option: 5,
+				})
+			});
+			if (res.ok) {
+				const resData = await res.json();
+				alertMessage = resData.message;
+				buttonDisable = resData.buttonDisable
+				return res;
+			}
+		} catch (error) {
+			console.log(error);
+			return error;
+		}
+	}
+
 </script>
 
 <div class="dno-panel">
@@ -142,13 +199,21 @@
 		<p>Deal Status: {dealStatus}</p>
 		<p>Current Signatory: {currentSignatory ? currentSignatory : 'Not Found'}</p>
 	</div>
-	<button disabled={buttonDisable.openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
+	<button disabled={loading || buttonDisable.openSolarBtnDisable} class="link-btn" on:click={generateOpenSolarProject}
 		>Start openSolar Project</button
 	>
-	<button disabled={buttonDisable.dnoApplicationBtnDisable} class="link-btn" on:click={handleGenerate}
-		>Generate DNO Application</button
+	<button disabled={loading || buttonDisable.dnoApplicationBtnDisable} class="link-btn" on:click={handleGenerate}
+		>{(buttonDisable.dnoApplicationBtnDisable) ? `DNO already exists for this project` : `Generate DNO Application`}</button
 	>
-	<button disabled={buttonDisable.getDesignImageBtnDisable} class="link-btn" on:click={getDesignImage}
+	{#if !hideSection}
+	<button disabled={loading || buttonDisable.contractButtonDisable} class="link-btn" on:click={contractBuilder}
+		>Build Contracts</button
+	>
+	<button disabled={loading || buttonDisable.buildPDFContractDisable} class="link-btn" on:click={dnoPdfConverter}
+		>Build Final DNO PDF</button
+	>
+	{/if}
+	<button disabled={loading || buttonDisable.getDesignImageBtnDisable} class="link-btn" on:click={getDesignImage}
 		>Get OpenSolar Design Image</button
 	>
 </div>

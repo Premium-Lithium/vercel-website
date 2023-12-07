@@ -65,12 +65,13 @@
 		"ajv": "^8.12.0",
 		"ajv-errors": "^3.0.0",
 		"ajv-formats": "^2.1.1",
+		"canvas": "^2.11.2",
 		"cheerio": "1.0.0-rc.12",
 		"convert-svg-to-png": "^0.6.4",
 		"dateformat": "^5.0.3",
-		"docxtemplater": "^3.42.2",
+		"docx": "^8.2.4",
+		"docxtemplater": "^3.42.0",
 		"docxtemplater-image-hyperlink-module-free": "^1.0.2",
-		"html-to-docx": "^1.8.0",
 		"isomorphic-fetch": "^3.0.0",
 		"jszip": "^3.10.1",
 		"juice": "^9.1.0",
@@ -100,7 +101,8 @@
 		"three.meshline": "^1.4.0",
 		"tiktoken": "^1.0.11",
 		"toastr": "^2.1.4",
-		"vercel": "^32.5.6",
+		"vercel": "^32.3.0",
+		"zlib": "^1.0.5",
 		"zod": "^3.22.4"
 	}
 }

@@ -7,7 +7,8 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater'
 import ImageModule from 'docxtemplater-image-hyperlink-module-free'
 import dateFormat from 'dateformat'
-import svg2img from 'svg2img'
+import { patchDocument, Table, TableCell, TableRow, PatchType, TextRun, VerticalAlign, TextDirection } from 'docx'
+import { convertFile } from 'convert-svg-to-png';
 
 const MAP_API_TOKEN =
     'pk.eyJ1IjoibGV3aXNib3dlcyIsImEiOiJjbGppa2MycW0wMWRnM3Fwam1veTBsYXd1In0.Xji31Ii0B9Y1Sibc-80Y7g';
@@ -16,10 +17,11 @@ const crm = new CRM()
 const openSolar = new openSolarAPI()
 
 interface ProjectData {
-    projectId: string,
+    projectId: string
     uuid: string
 }
-let projectFound: ProjectData | null = null;
+
+let projectFound: ProjectData | undefined = undefined;
 
 export async function POST({ request }) {
     let response
@@ -30,24 +32,33 @@ export async function POST({ request }) {
         if (projectId !== null) {
             projectFound = await getOpenSolarProjectDetails(projectId)
         }
-        if (option === 1) {
-            response = await generateDnoApplicationFrom(PLNumber, userId);
-        } else if (option === 2) {
-            response = await createOpenSolarProjectFrom(PLNumber);
-        } else if (option === 3) {
-            response = await uploadDesignImage(PLNumber, projectFound)
-        } else {
-            return initValidation(projectId, projectFound, await checkIfDNOCreatedFor(PLNumber), userId)
+        switch (option) {
+            case 1:
+                response = await generateDnoApplicationFrom(PLNumber, userId);
+                break;
+            case 2:
+                response = await createOpenSolarProjectFrom(PLNumber);
+                break;
+            case 3:
+                response = await uploadDesignImage(PLNumber, projectFound);
+                break;
+            case 4:
+                response = await buildContractFrom(PLNumber, projectFound, userId);
+                break;
+            case 5:
+                response = await createDnoPdf(PLNumber);
+                break;
+            default:
+                return initValidation(PLNumber, projectId, projectFound, await checkIfDNOCreatedFor(PLNumber), userId)
         }
-        const responseData = await response?.json();
-        return json(responseData);
+        return new Response(JSON.stringify(response))
     } catch (error) {
         console.log('Error:', error);
         return json({ message: 'DNO: Internal Server Error', statusCode: 500 });
     }
 }
 
-async function initValidation(projectId: string | null, projectFound: ProjectData | null, dnoCreated: boolean, userId: string) {
+async function initValidation(PLNumber: string, projectId: string | null, projectFound: ProjectData | null, dnoCreated: boolean, userId: string) {
     if (projectId) {
         if (projectFound) {
             if (dnoCreated) {
@@ -55,7 +66,9 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
                     message: "DNO Application Found", statusCode: 200, status: "Review G99 Document", buttonDisable: {
                         openSolarBtnDisable: true,
                         dnoApplicationBtnDisable: true,
-                        getDesignImageBtnDisable: false
+                        getDesignImageBtnDisable: false,
+                        contractButtonDisable: false,
+                        buildPDFContractDisable: (!(await crm.getNetworkOperatorFor(PLNumber) && dnoCreated)),
                     }, currentSignatory: await crm.getCurrentUser(userId)
                 })
             }
@@ -63,15 +76,19 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
                 message: "Design Found", statusCode: 200, status: "Create Documents", buttonDisable: {
                     openSolarBtnDisable: true,
                     dnoApplicationBtnDisable: false,
-                    getDesignImageBtnDisable: false
+                    getDesignImageBtnDisable: false,
+                    contractButtonDisable: false,
+                    buildPDFContractDisable: true,
                 }, currentSignatory: await crm.getCurrentUser(userId)
             })
         }
         return json({
-            message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project", buttonDisable: {
+            message: "Open Solar Project Found", statusCode: 200, status: "Design in Open Solar Project/Create Documents", buttonDisable: {
                 openSolarBtnDisable: true,
                 dnoApplicationBtnDisable: false,
                 getDesignImageBtnDisable: false,
+                contractButtonDisable: false,
+                buildPDFContractDisable: true,
             }, currentSignatory: await crm.getCurrentUser(userId)
         })
     }
@@ -79,7 +96,9 @@ async function initValidation(projectId: string | null, projectFound: ProjectDat
         message: "Open Solar Project Not Found", statusCode: 200, status: "Create Open Solar Project", buttonDisable: {
             openSolarBtnDisable: false,
             dnoApplicationBtnDisable: false,
-            getDesignImageBtnDisable: true
+            getDesignImageBtnDisable: true,
+            contractButtonDisable: false,
+            buildPDFContractDisable: true,
         }, currentSignatory: await crm.getCurrentUser(userId)
     })
 }
@@ -131,9 +150,9 @@ async function getDnoDetailsFrom(operatorName: string) {
         // Loads details from supabase
         const { data, error } = await supabase
             .from('network_operator')
-            .select('operator_details');
-        const desiredOperator = data?.find(operator => operator.operator_details.name === operatorName);
-        return desiredOperator?.operator_details || null;
+            .select('operator_details, code');
+        const desiredOperator = data?.find(operator => operator.operator_details.name.split(',')[0] === operatorName.split(',')[0]);
+        return desiredOperator || null;
     } catch (error) {
         console.error('Error fetching operator details:', error);
         return null;
@@ -165,11 +184,11 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
     const customerMpan = await crm.getMpanFor(PLNumber);
     const existingManufacturer = await crm.getExistingManufacturerFor(PLNumber)
     const existingManufacturerRef = await crm.getExistingManufacturerRefFor(PLNumber)
-    const existingStorageCapacity = await crm.getExistingStorageCapacityFor(PLNumber)
+    const existingStorageCapacity = parseInt(await crm.getExistingStorageCapacityFor(PLNumber))
     const newManufacturer = await crm.getNewManufacturerFor(PLNumber)
     const newManufacturerRef = await crm.getNewManufacturerRefFor(PLNumber)
-    const newInverterSize = await crm.getNewInverterSizeFor(PLNumber)
-    const newStorageCapacity = await crm.getNewStorageCapacityFor(PLNumber)
+    const newInverterSize = parseInt(await crm.getNewInverterSizeFor(PLNumber))
+    const newStorageCapacity = parseInt(await crm.getNewStorageCapacityFor(PLNumber))
     const phaseAndPower = await crm.getPhaseAndPowerFor(PLNumber)
 
     // This array doesn't get caught by the check later on so validating it here
@@ -178,7 +197,7 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
     if (!phaseAndPower[2])
         phaseAndPower[2] = ''
 
-    const missingDetails = validateDnoDetails(phaseAndPower, customerMpan, newManufacturerRef, newManufacturer, newInverterSize)
+    const missingDetails = validateDnoDetails(phaseAndPower, customerMpan, newManufacturerRef, newManufacturer, newInverterSize.toString())
 
     if (!!missingDetails.length) {
         return json({ message: `G99 Application Generation failed - missing entries for ${missingDetails.join(', ')}`, statusCode: 400, buttonDisable: [true, false] })
@@ -197,7 +216,8 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
     const dnoDetails = await getDnoDetailsFrom(dnoName);
     if (dnoName && dnoDetails) {
         // Populates the dnoDetails if we have data for it
-        dnoCompanyDetailsData = dnoDetails
+        dnoCompanyDetailsData = dnoDetails.operator_details
+        await crm.setNetworkOperatorCodeFor(PLNumber, dnoDetails.code)
     }
 
     const date = new Date();
@@ -228,8 +248,8 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
         'manufacturer_new': newManufacturer,
         'manufacturerRef_new': newManufacturerRef,
         'installationDate_new': 'ASAP',
-        'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? phaseAndPower[2] + 'kw' : '',
-        'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? phaseAndPower[2] + 'kw' : '',
+        'capacityThreePhase_new': (phaseAndPower[0] === 'Three Phase') ? newInverterSize + 'kw' : '',
+        'capacityPhaseOne_new': (phaseAndPower[0] === 'Single phase') ? newInverterSize + 'kw' : '',
         'storageCapacity_new': (newStorageCapacity) ? newStorageCapacity + 'kw' : '',
         'schematic': '/tmp/schematic.png',
         'date': `${dateFormat(date, 'dd/mm/yyyy')}`,
@@ -248,14 +268,9 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
     } else if (!schematic) {
         return json({ message: 'New Battery or Solar Panel Required on PipeDrive for Schematic' })
     }
-    let schematicPathSvg = '/tmp/schematic.svg'
-    let schematicPathPng = '/tmp/schematic.png'
 
-    fs.writeFileSync(schematicPathSvg, schematic);
-
-    svg2img(schematicPathSvg, function (error, outputBuffer) {
-        fs.writeFileSync(schematicPathPng, outputBuffer)
-    });
+    const schematicPathSvg = '/tmp/schematic.svg'
+    const schematicPathPng = await convertFile(schematicPathSvg)
 
     //https://www.npmjs.com/package/docxtemplater-image-hyperlink-module-free 
     const imageOpts = {
@@ -276,7 +291,7 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
             } else if (tagName === 'schematic') {
                 return fs.readFileSync(schematicPathPng);
             }
-            return null;
+            return { rotation: 90 };
         }
     };
 
@@ -331,27 +346,23 @@ async function getNetworkOperatorFromPostCode(postcode: string) {
 
 async function generateSchematicFor(PLNumber: string) {
     let existingSolarSize = 0;
-    const existingPanels = await crm.getCurrentlyHavePanelsFor(PLNumber)
-    if (existingPanels === 'Yes')
-        existingSolarSize = parseInt(await crm.getExistingSolarArrayGenerationFor(PLNumber))
     const existingInverterSize = await crm.getExistingInverterSizeFor(PLNumber); // number
     const newBatterySize = await crm.getNewBatterySizeFor(PLNumber) // string
     const newInverterSize = await crm.getNewInverterSizeFor(PLNumber) // string
     const newPanelGeneration = parseInt(await crm.getNewPanelGenerationFor(PLNumber))
     const epsForCustomer = await crm.getEPSRequiredFor(PLNumber) // string
+    const existingPanels = await crm.getCurrentlyHavePanelsFor(PLNumber)
+    if (existingPanels === 'Yes')
+        existingSolarSize = parseInt(await crm.getExistingSolarArrayGenerationFor(PLNumber))
 
     // Generates the title of the target schematic - can't use arrays as keys in a map as initially planned so just generating the schematic title string
     let targetSchematic = `${isPartOfSchematic(existingSolarSize)}EP-${isPartOfSchematic(newPanelGeneration)}NP-${isPartOfSchematic(newBatterySize)}B-${isPartOfSchematic(epsForCustomer)}CO.svg`
-
-    if (targetSchematic === "NEP-NNP-NB-NCO.svg") {
-        return // not applicable and missing details
-    }
+    if (targetSchematic === "NEP-NNP-NB-NCO.svg") return // not applicable and missing details
 
     const { data, error } = await supabase
         .storage
         .from('schematic_templates')
         .download(targetSchematic)
-
     if (error) {
         return null
     }
@@ -371,7 +382,7 @@ function isPartOfSchematic(component: string | number) {
     return (!!component) ? '' : 'N';
 }
 
-async function downloadSystemImageFrom(projectData, filePath) {
+async function downloadSystemImageFrom(projectData: ProjectData, filePath: string) {
     const projectId = projectData.projectId
     const uuid = projectData.uuid
 
@@ -407,9 +418,57 @@ async function createOpenSolarProjectFrom(PLNumber: string) {
         const createProjectRes = await openSolar.startProjectFrom(PLNumber, addressObjectRequest)
         crm.setOpenSolarProjectIdFor(PLNumber, createProjectRes.id);
         crm.attachNoteFor(PLNumber, `OpenSolar Project has been created for this deal. https://app.opensolar.com/#/projects/${createProjectRes.id}/design`)
-        return json({ message: 'Project succesfully created.', status: 200 })
+        return json({ message: 'Project succesfully created.', status: 200, projectLink: "https://app.opensolar.com/#/projects/" + createProjectRes.id + "/design" })
     } catch (error) {
         return json({ message: 'Error creating project.', status: 500 })
+    }
+}
+
+async function getContractTemplate() {
+    const { data, error } = await supabase
+        .storage
+        .from('contract_template')
+        .download('contract_template.docx')
+    if (error) {
+        return null
+    }
+    return data
+}
+
+/**
+ * Builds contract form using data from PipeDrive and OpenSolar
+ * @param PLNumber identifier for deal
+ * @param projectFound project on OpenSolar
+ * @returns success if document created properly, error if template not found, required data not found, document failed to upload
+ */
+async function buildContractFrom(PLNumber: string, projectFound: ProjectData | undefined, userId: string) {
+    const contractRes = await getContractTemplate()
+    if (contractRes === null)
+        return json({ message: "Could not retrieve contract template", statusCode: 404 })
+    const contractTemplate = await contractRes.arrayBuffer()
+    const path = `/tmp/contract_template.docx` // Actual location for production
+    fs.writeFileSync(path, Buffer.from(contractTemplate), { encoding: 'utf-8', flag: 'w' })
+
+    // Getting the contract contents from pipedrive
+    const contractData = await getContractDataFor(PLNumber, projectFound, userId)
+
+    // Patching reference: https://docx.js.org/#/usage/patcher?id=patches
+    patchDocument(fs.readFileSync(path), {
+        patches: {
+            test: {
+                type: PatchType.PARAGRAPH,
+                children: [new TextRun("Test")]
+            }
+        }
+    })
+    return json({ message: "Success Test", status: 200 })
+}
+
+async function getContractDataFor(PLNumber: string, projectFound: ProjectData | undefined, userId: string) {
+    return {
+        customerName: await crm.getPersonNameFor(PLNumber),
+        customerAddress: await crm.getAddressFor(PLNumber),
+        signatory: await crm.getCurrentUser(userId),
     }
 }
 
@@ -417,7 +476,7 @@ async function sendNotificationMailFor(PLNumber: string) {
     const emailData = {
         sender: 'dno@premiumlithium.com',
         recipients: ['dno@premiumlithium.com'],
-        subject: `TO DO: New G99 Form to Review Ref#${PLNumber}`,
+        subject: `TO DO: New G99 Form to Review Ref#${PLNumber} ${crm.getPersonNameFor(PLNumber)}`,
         mail_body: `Hi,
         
         There is a new form to review for the following deal:
@@ -451,9 +510,63 @@ async function sendNotificationMailFor(PLNumber: string) {
 async function checkIfDNOCreatedFor(PLNumber: string): Promise<boolean> {
     const files = await crm.getFilesFor(PLNumber)
     for (let file in files) {
-        if (files[file].name.includes('G99')) {
+        if (files[file].name.includes('G99_')) {
             return true
         }
     }
     return false
+}
+
+// Get DNO name from Pipedrive X
+// With name, get DNO details from supabase X
+// Get Single or Three Phase from pipedrive X
+// With Single/Three Phase, get datasheet from supabase and write to a PDF file X
+// Get DNO document from pipedrive and write to a docx file X
+// Create a zip of the relevant documents
+// Upload to PipeDrive
+// Send to relevant DNO email (use temporary email for now)
+// Fail on DNO details not found in database and conversion errors
+async function createDnoPdf(PLNumber: string) {
+    const dnoDocxPath = '/tmp/dno.docx'
+    const dnoPdfPath = '/tmp/dno.pdf'
+    const dealId = await crm.getDealIdFromPL(PLNumber)
+    const personName = await crm.getPersonNameFor(PLNumber)
+    const customerNetworkOperatorCode = await crm.getNetworkOperatorFor(PLNumber)
+    const customerPhase = (await crm.getPhaseAndPowerFor(PLNumber))[0]
+    const fileId = (await crm.getFileFor(dealId.toString(), 'G99_' + personName)).id
+    const customerDno = await getCustomerDnoFromCode(customerNetworkOperatorCode)
+    if (!customerDno)
+        return ({ message: "Error - Failed to find Network Operator on Database", statusCode: 400 })
+    const datasheet = await getDatasheetPathFor(customerPhase)
+    if (!datasheet)
+        return ({ message: "Error - Failed to find Datasheet on Database" })
+    await crm.downloadPipedriveFileTo(fileId, dnoDocxPath)
+    
+
+    return ({ message: "DNO Application with Datasheets created", statusCode: 200 })
+}
+
+async function getCustomerDnoFromCode(code: string) {
+    const { data, error } = await supabase
+        .from('network_operator')
+        .select('operator_details')
+        .eq('code', code)
+    if (!error)
+        return data
+    return null
+}
+
+// Returns the path, not the actual file 
+async function getDatasheetPathFor(phase: string) {
+    const { data, error } = await supabase
+        .storage
+        .from('inverter_datasheets')
+        .download((phase === "Three Phase") ? 'three_phase_inverter' : 'single_phase_inverter')
+    if (!error) {
+        const datasheet = await data.arrayBuffer()
+        const path = `/tmp/inverter_datasheet.pdf`
+        fs.writeFileSync(path, Buffer.from(datasheet), { encoding: 'utf-8', flag: 'w' })
+        return path
+    }
+    return null
 }

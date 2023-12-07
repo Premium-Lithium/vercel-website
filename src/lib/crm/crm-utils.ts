@@ -1,6 +1,6 @@
 import { pd, getField, getOptionIdFor, readCustomDealField } from '$lib/pipedrive-utils';
 import pipedrive from 'pipedrive';
-
+import fs from 'fs';
 
 export class CRM {
 	pdDealsApi;
@@ -101,7 +101,8 @@ export class CRM {
 			postcode: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_postal_code'],
 			country: dealData['80ebeccb5c4130caa1da17c6304ab63858b912a1_country']
 		}
-		return addressObject
+		return addressObject;
+
 	}
 
 	async getPLNumberFor(dealId: string) {
@@ -122,6 +123,21 @@ export class CRM {
 	async setOpenSolarProjectIdFor(PLNumber: string, value: string) {
 		const updateDealRequest = await this.setCustomField(PLNumber, 'OpenSolar Project ID', value)
 		return updateDealRequest
+	}
+
+	async getFileFor(dealId: string, fileName: string) {
+		const dealFiles = await this.pdDealsApi.getDealFiles(dealId)
+		const file = dealFiles.data.find((f) => f.name.includes(fileName));
+		if (file === undefined) {
+			console.log(`Could not find deal file with name '${fileName}'. Is this spelled correctly?`);
+			return null;
+		}
+		return file
+	}
+
+	async downloadPipedriveFileTo(fileId: string, path: string) {
+		const file = await this.pdFilesApi.downloadFile(fileId)
+		fs.writeFileSync(path, Buffer.from(file))
 	}
 
 	async setMpanFor(PLNumber: string, value: string) {
@@ -270,6 +286,16 @@ export class CRM {
 		const existingSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Existing Solar Array (kWp)')
 		const newSolarGen = await this.getCustomFieldDataFor(PLNumber, 'Solar Capacity (kWp)')
 		return [phaseType, existingSolarGen, newSolarGen]
+	}
+
+	async getNetworkOperatorFor(PLNumber: string) {
+		const fieldResponse = this.getCustomFieldDataFor(PLNumber, "Network Operator Code")
+		return fieldResponse
+	}
+
+	async setNetworkOperatorCodeFor(PLNumber: string, networkOperator: string) {
+		const updateDealRequest = this.setCustomField(PLNumber, "Network Operator Code", networkOperator)
+		return updateDealRequest
 	}
 
 	async getCurrentUser(userId: string) {

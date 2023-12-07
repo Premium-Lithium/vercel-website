@@ -1,5 +1,4 @@
 import { OPEN_SOLAR_ORG_ID, OPEN_SOLAR_TOKEN } from "$env/static/private";
-
 export class openSolarAPI {
     token;
     organisationId;
