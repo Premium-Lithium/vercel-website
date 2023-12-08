@@ -2,12 +2,11 @@ from pipedrive.client import Client
 from datetime import datetime
 from office365.sharepoint.client_context import ClientContext, UserCredential
 from openpyxl import Workbook
+import os
 
 PIPEDRIVE_API_TOKEN = "f3bf98ccd22e57bbc7f2693e52e32faf89b91e44"
 LOST_LEAD_FILTER_ID = "377"
 REPORTING_FILTER_ID = "277"
-LOST_LEAD_NAME = "LostLeadsBySource"
-REPORTING_NAME = "Reporting"
 LEAD_SOURCE_KEY = "9c6c616447ee45293d20ebb0db2d2f3f979bb86f"
 
 leadSourceDict = {
@@ -28,6 +27,34 @@ leadSourceDict = {
     "974": "Survey Booking",
     "1058": "Retail Store",
     None: None,
+}
+
+evChargerTypeDict = {
+    "810": "7kW Tethered",
+    "811": "7kW Untethered",
+    "812": "22kW Tethered",
+    "827": "22kW Untethered",
+    "1066": "No"
+}
+
+epsSwitchDict = {
+    "680": "Dual Socket",
+    "686": "Manual",
+    "809": "Auto",
+    "1094": "No"
+}
+
+paymentTypeDict = {
+    "986": "Residential - Express",
+    "987": "Residential - Payback",
+    "988": "Commercial - Express",
+    "989": "Commercial - Payback",
+    "990": "Commercial - Subscription"
+}
+
+singlePhaseOrThreePhaseDict = {
+    "1056": "Single Phase",
+    "1057": "Three Phase",
 }
 
 pd = Client(domain="https://premiumlithium.pipedrive.com/")
@@ -53,7 +80,7 @@ def getFilteredDeals(FILTERID):
     return dealData
 
 
-def createSpreadsheetFrom(deals, FILENAME):
+def createLostLeadsSpreadSheet(deals):
     print("Creating Spreadsheet")
     wb = Workbook()
     ws = wb.active
@@ -71,6 +98,8 @@ def createSpreadsheetFrom(deals, FILENAME):
             "Deal - Lost time",
             "Deal - Status",
             "Deal - Deal created",
+            "Deal - Quote Issued",
+            "Deal - Won Time",
         ]
     )
     for deal in deals:
@@ -91,11 +120,75 @@ def createSpreadsheetFrom(deals, FILENAME):
             row.append(deal["lost_time"])
             row.append(deal["status"])  # enum
             row.append(deal["add_time"])
+            row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
+            row.append(deal['won_time'])
             ws.append(row)
         except:
             pass
-    wb.save(FILENAME + str(datetime.now()) + ".xlsx")
-    return FILENAME + str(datetime.now()) + ".xlsx"
+    now = str(datetime.now()).replace('%', '').replace(':','-')
+    wb.save("LostLeadsBySource" + now + ".xlsx")
+    return "LostLeadsBySource" + now + ".xlsx"
+
+
+def createReportingSpreadSheet(deals):
+    print("Creating Spreadsheet")
+    wb = Workbook()
+    ws = wb.active
+    ws.append(
+        [
+            "Title",
+            "Status",
+            "Value",
+            "Won Time",
+            "Sales contact",
+            "Installation Date",
+            "Battery Model",
+            "Number of Panels",
+            "Battery size (kWh)",
+            "Quote Issued",
+            "EV Charger Type",
+            "EPS Switch",
+            "Lead Source",
+            "Payment Type",
+            "Deal Created",
+            "Contact Person",
+            "Stage",
+            "Deal Type",
+            "Single Phase or Three Phase",
+            "Site Survey Date",
+            "Inverter Size (kW)"
+        ]
+    )
+    for deal in deals:
+        try:
+            row = []
+            row.append(deal["title"])
+            row.append(deal["status"])
+            row.append(deal['won_time'])
+            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b'])
+            row.append(deal['f0ae912a9d78d9c102153390176de173cbd791eb'])
+            row.append(deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d'])
+            row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
+            row.append(deal['567489c8ee63a1e43f24caedcbd9ce1398c63317'])
+            row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
+            row.append(evChargerTypeDict[deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
+            row.append(epsSwitchDict[deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
+            row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
+            row.append(deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55'])
+            row.append(deal['add_time'])
+            row.append(deal['person_id']['name'])
+            row.append(deal['stage_id'])
+            row.append(paymentTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
+            row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
+            row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
+            row.append(deal['c71b79129a01daee3ed338e43f4b99b2356e4a13'])
+            ws.append(row)
+        except:
+            pass
+    now = str(datetime.now()).replace('%', '').replace(':','-')
+    wb.save("Reporting" + now + ".xlsx")
+    return "Reporting" + now + ".xlsx"
+
 
 
 def uploadToSharepoint(pathToFile):
@@ -120,15 +213,14 @@ def uploadToSharepoint(pathToFile):
 
 def main():
     FILTER_ID = LOST_LEAD_FILTER_ID
-    FILE_NAME = LOST_LEAD_NAME
     deals = getFilteredDeals(FILTER_ID)
-    pathToFile = createSpreadsheetFrom(deals, FILE_NAME)
+    pathToFile = createLostLeadsSpreadSheet(deals)
     uploadToSharepoint(pathToFile)
-    FILTER_ID = REPORTING_FILTER_ID
-    FILE_NAME = REPORTING_NAME
+    os.remove(pathToFile)
     deals = getFilteredDeals(FILTER_ID)
-    pathToFile = createSpreadsheetFrom(deals, FILE_NAME)
+    pathToFile = createReportingSpreadSheet(deals)
     uploadToSharepoint(pathToFile)
+    os.remove(pathToFile)
 
 # uploadToSharepoint(FILE_NAME + str(datetime.now().date()) + ".xlsx")
 main()
