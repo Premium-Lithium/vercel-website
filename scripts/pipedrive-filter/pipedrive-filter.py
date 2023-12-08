@@ -57,7 +57,7 @@ paymentTypeDict = {
 
 singlePhaseOrThreePhaseDict = {
     "1056": "Single Phase",
-    "1057": "Three Phase",,
+    "1057": "Three Phase",
     None: None
 }
 
