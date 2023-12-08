@@ -1,5 +1,6 @@
 import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter } from "./MapTypes"
 import { CRM } from "$lib/crm/crm-utils"
+import { exec } from "child_process"
 
 let crm = new CRM()
 
@@ -126,9 +127,14 @@ async function getLatLongFor(deal: any):Promise<LatLongObj | null> {
             `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
             { method: 'GET' }
         )
-        let locRes = (await res.json()).results[0].geometry.location
-        await crm.setLatLongFor(deal.id, locRes)
-        return locRes
+        try {
+            let locRes = (await res.json()).results[0].geometry.location
+            await crm.setLatLongFor(deal.id, locRes)
+            return locRes
+        }
+        catch {
+            return null
+        }
     }
     return null
 }
@@ -166,7 +172,6 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
             let latLng = await getLatLongFor(deals.data[deal])
             console.log(deals.data[deal].title, "Address: ", address, "LatLong: ", latLng)
             if (address && latLng) {
-                console.log(latLng)
                 let marker: MarkerOptions = {
                     latLng: latLng,
                     address: address,
