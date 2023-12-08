@@ -80,8 +80,8 @@
 			.eq('worker_id', uniqueIdentifier)
 
 		let regionToUpload = {
-			...selectData[0]['assigned_region'],
-			'time_finished': new Date(Date.now()).toISOString()
+			'time_finished': new Date(Date.now()).toISOString(),
+			...selectData[0]['assigned_region']
 		}
 		numRegionsCompleted = (selectData[0]['completed_regions']?.length ?? 0) + 1
 		const { data: uploadData, error: uploadError } = await supabase
