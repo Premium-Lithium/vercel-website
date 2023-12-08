@@ -88,7 +88,7 @@
 			.from('battery_turk_workers')
 			.update({
 				'assigned_region': null,
-				'completed_regions': [...selectData[0]['completed_regions'], regionToUpload]
+				'completed_regions': [...(selectData[0]['completed_regions'] ?? []), regionToUpload]
 			})
 			.eq('worker_id', uniqueIdentifier)
 
