@@ -14,28 +14,13 @@ def count_points_within_radius(gdf, lat, lon, radius_in_miles):
 
     return len(points_within_buffer)
 
-# props = {"SN7 7YQ": [51.656129674259866, -1.5754000692283365],
-# "TR16 5NR": [50.23724638361607, -5.197154106884273],
-# "NG12 5HB": [52.87903218915024, -1.0845728019807974],
-# "LA3 3EB": [54.01429206749631, -2.862367947710301],
-# "NG16 2GE": [53.007442832328586, -1.284280341674037],
-# "NR25 6EG": [52.90779765615002, 1.0992864245119653],
-# "SA62 5AA": [51.90830564504241, -5.072383507527523],
-# "ME14 2TQ": [51.28566798541035, 0.5334412519206945]}
-
-# for postcode, (latitude,longitude) in props.items():
-#     print(f"{postcode}:")
-#     for radius in [1,3,5]:
-#         # latitude = 52.24794740090099
-#         # longitude = 0.07882204782708145
-#         radius_in_miles = radius
-#         total_count = 0
-#         for gdf in gdf_total:
-#             count = count_points_within_radius(gdf, latitude, longitude, radius_in_miles)
-#             total_count += count
-#         print(f"Total number of points within {radius_in_miles} miles: {total_count}")
-#     print("\n=============================\n")
-
+def count_properties_in_radius(radius, lat, lon):
+    radius_in_miles = radius
+    total_count = 0
+    for gdf in gdf_total:
+        count = count_points_within_radius(gdf, lat, lon, radius_in_miles)
+        total_count += count
+    return total_count
 
 def count_properties_in_region(gdf_list, region_coords):
     region_polygon = Polygon(region_coords)
