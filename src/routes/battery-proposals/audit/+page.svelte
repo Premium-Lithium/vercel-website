@@ -1,24 +1,31 @@
-<script>
+<script lang="ts">
 	import { browser } from '$app/environment'
 	import { page } from '$app/stores'
 	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 
-	const batteryProposalsTableName = 'existing-solar-properties'
+	const batteryProposalsTableName = 'campaign_customers'
 
 	let allUnauditedHouses = []
 	let currentHouseToAudit = undefined
+	let auditCriteria = []
 	let currentHousePointer = 0
 	let loading = false
 	let currentHouseM2 = 0
 
 	currentHousePointer = +($page.url.searchParams.get('startIndex') ?? '0')
+	let campaign: string = ''
+	const urlParams = $page.url.searchParams
+	campaign = urlParams.get('campaignId') || ''
 
 	$: if (currentHouseToAudit)
-		currentHouseM2 = currentHouseToAudit['solar_array_info'].reduce((p, v, i, a) => {
-			return p + v['area_m2']
-		}, 0)
+		currentHouseM2 = currentHouseToAudit['campaign_specific_data']['solar_array_info'].reduce(
+			(p, v, i, a) => {
+				return p + v['area_m2']
+			},
+			0
+		)
 
 	$: currentHouseToAudit = currentHouseToAudit = allUnauditedHouses[currentHousePointer]
 
@@ -38,8 +45,11 @@
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
-		loading = false
+		auditCriteria = await loadAuditCriteria(campaign)
+		console.log(auditCriteria)
+
 		allUnauditedHouses = await loadAllUnauditedHousesFromSupabase(false)
+		loading = false
 
 		if (browser) {
 			document.addEventListener('keydown', (event) => {
@@ -107,7 +117,10 @@
 	}
 
 	async function loadAllUnauditedHousesFromSupabase(randomiseOrder = true) {
-		let { data, error } = await supabase.from(batteryProposalsTableName).select('*')
+		let { data, error } = await supabase
+			.from(batteryProposalsTableName)
+			.select('*')
+			.eq('campaign_id', campaign)
 
 		if (error) {
 			console.log(`Error fetching from ${batteryProposalsTableName}`)
@@ -133,112 +146,137 @@
 			}
 		}
 	}
+
+	async function loadAuditCriteria(campaignId: string) {
+		const { data: loadAuditData, error: loadAuditError } = await supabase
+			.from('campaign_master')
+			.select('audit_criteria')
+			.eq('campaign_id', campaignId)
+		if (loadAuditError) {
+			console.log(loadAuditError.message)
+			return
+		}
+		let auditCodes = loadAuditData[0]['audit_criteria']
+
+		let promises = auditCodes.map(async (x) => {
+			return supabase.from('campaign_audit_criteria').select('*').eq('id', x)
+		})
+
+		let results = (await Promise.all(promises)).map((x) => {
+			return x.data[0]
+		})
+		return results.filter((x) => {
+			return x['human_required']
+		})
+	}
 </script>
 
 {#if !isAuthenticated}
 	<MagicLink
 		bind:isAuthenticated
-		redirectUrl={`battery-proposals/audit?startIndex=` +
-			($page.url.searchParams.get('startIndex') ?? '0')}
+		redirectUrl={`battery-proposals/audit?startIndex=${currentHousePointer}&campaignId=${campaign}`}
 	/>
 {:else}
 	<div class="container">
-		{#key currentHouseToAudit}
-			<div class="header">
-				<h1>{currentHousePointer + 1} / {allUnauditedHouses.length}</h1>
+		{#if allUnauditedHouses.length == 0}
+			<div class="error-message">
+				<p>No houses to audit</p>
 			</div>
-			<div class="images">
-				<img
-					src={currentHouseToAudit ? currentHouseToAudit['screenshot_url'] : ''}
-					alt=""
-					class="image"
-				/>
-				<div class="house-details">
-					<p class="saving-text">
-						£{Math.round(
-							currentHouseToAudit ? currentHouseToAudit['potential_savings_with_battery_gbp'] : ''
-						)} saving
-					</p>
-					<p class="array-text">
-						{currentHouseToAudit ? currentHouseToAudit['solar_array_info'].length : ''} array{currentHouseToAudit
-							? currentHouseToAudit['solar_array_info'].length == 1
-								? ''
-								: 's'
-							: ''}
-					</p>
-					<p class="meter-squared">
-						{currentHouseToAudit ? Math.round(currentHouseM2) : ''}m² array size
-					</p>
+		{:else}
+			{#key currentHouseToAudit}
+				<div class="header">
+					<h1>{currentHousePointer + 1} / {allUnauditedHouses.length}</h1>
 				</div>
+				<div class="images">
+					<img
+						src={currentHouseToAudit ? currentHouseToAudit['screenshot_url'] : ''}
+						alt=""
+						class="image"
+					/>
+					<div class="house-details">
+						<p class="array-text">
+							{currentHouseToAudit ? currentHouseToAudit['solar_array_info'].length : ''} array{currentHouseToAudit
+								? currentHouseToAudit['solar_array_info'].length == 1
+									? ''
+									: 's'
+								: ''}
+						</p>
+						<p class="meter-squared">
+							{currentHouseToAudit ? Math.round(currentHouseM2) : ''}m² array size
+						</p>
+					</div>
+				</div>
+			{/key}
+			<div class="legend">
+				<ul class="audit-legend">
+					<li class="audit-legend-entry">Does the image show the roof and panels clearly?</li>
+					<li class="audit-legend-entry">Is the address likely to be correct?</li>
+					<li class="audit-legend-entry">
+						Does the area estimate / number of panels seem correct?
+					</li>
+					<li class="audit-legend-entry">Is it clear and sensible for us to send to customers?</li>
+					<li class="audit-legend-entry">Is the roof mostly shade free?</li>
+				</ul>
 			</div>
-		{/key}
-		<div class="legend">
-			<ul class="audit-legend">
-				<li class="audit-legend-entry">Does the image show the roof and panels clearly?</li>
-				<li class="audit-legend-entry">Is the address likely to be correct?</li>
-				<li class="audit-legend-entry">Does the area estimate / number of panels seem correct?</li>
-				<li class="audit-legend-entry">Is it clear and sensible for us to send to customers?</li>
-				<li class="audit-legend-entry">Is the roof mostly shade free?</li>
-			</ul>
-		</div>
 
-		<form action="" class="audit-options" bind:this={auditForm} on:submit={onSubmit}>
-			<div class="input-wrapper">
-				<label for="audit-option-1">1</label>
-				<input
-					type="checkbox"
-					name="audit-option-1"
-					id="audit-option-1"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption1}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-2">2</label>
-				<input
-					type="checkbox"
-					name="audit-option-2"
-					id="audit-option-2"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption2}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-3">3</label>
-				<input
-					type="checkbox"
-					name="audit-option-3"
-					id="audit-option-3"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption3}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-4">4</label>
-				<input
-					type="checkbox"
-					name="audit-option-4"
-					id="audit-option-4"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption4}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-5">5</label>
-				<input
-					type="checkbox"
-					name="audit-option-5"
-					id="audit-option-5"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption5}
-				/>
-			</div>
-		</form>
+			<form action="" class="audit-options" bind:this={auditForm} on:submit={onSubmit}>
+				<div class="input-wrapper">
+					<label for="audit-option-1">1</label>
+					<input
+						type="checkbox"
+						name="audit-option-1"
+						id="audit-option-1"
+						class="audit-option"
+						checked={true}
+						bind:this={auditOption1}
+					/>
+				</div>
+				<div class="input-wrapper">
+					<label for="audit-option-2">2</label>
+					<input
+						type="checkbox"
+						name="audit-option-2"
+						id="audit-option-2"
+						class="audit-option"
+						checked={true}
+						bind:this={auditOption2}
+					/>
+				</div>
+				<div class="input-wrapper">
+					<label for="audit-option-3">3</label>
+					<input
+						type="checkbox"
+						name="audit-option-3"
+						id="audit-option-3"
+						class="audit-option"
+						checked={true}
+						bind:this={auditOption3}
+					/>
+				</div>
+				<div class="input-wrapper">
+					<label for="audit-option-4">4</label>
+					<input
+						type="checkbox"
+						name="audit-option-4"
+						id="audit-option-4"
+						class="audit-option"
+						checked={true}
+						bind:this={auditOption4}
+					/>
+				</div>
+				<div class="input-wrapper">
+					<label for="audit-option-5">5</label>
+					<input
+						type="checkbox"
+						name="audit-option-5"
+						id="audit-option-5"
+						class="audit-option"
+						checked={true}
+						bind:this={auditOption5}
+					/>
+				</div>
+			</form>
+		{/if}
 
 		<input
 			type="button"
@@ -282,7 +320,7 @@
 		text-align: center;
 		border-radius: 0px 0px 16px 16px;
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-columns: 1fr 1fr;
 	}
 
 	.images {
@@ -368,5 +406,16 @@
 		color: white;
 		width: 100%;
 		text-align: center;
+	}
+
+	.house-details > p {
+		margin: 16px;
+	}
+
+	.error-message {
+		width: 100%;
+		text-align: center;
+		color: white;
+		font-size: 24px;
 	}
 </style>
