@@ -54,7 +54,7 @@
 			if (workerData[0]['assigned_region']) {
 				activeArea = workerData[0]['assigned_region'].area
 			}
-			numRegionsCompleted = workerData[0]['completed_regions'].length
+			numRegionsCompleted = workerData[0]['completed_regions']?.length ?? 0
 		}
 	}
 
@@ -83,7 +83,7 @@
 			...selectData[0]['assigned_region'],
 			'time_finished': new Date(Date.now()).toISOString()
 		}
-		numRegionsCompleted = selectData[0]['completed_regions'].length + 1
+		numRegionsCompleted = (selectData[0]['completed_regions']?.length ?? 0) + 1
 		const { data: uploadData, error: uploadError } = await supabase
 			.from('battery_turk_workers')
 			.update({
