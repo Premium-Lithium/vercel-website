@@ -4,8 +4,6 @@ drop index if exists "public"."campaign_customers_pkey";
 
 alter table "public"."campaign_customers" alter column "address" set not null;
 
-alter table "public"."existing-solar-properties" drop column "analytics";
-
 CREATE UNIQUE INDEX campaign_customers_pkey ON public.campaign_customers USING btree (campaign_id, address);
 
 alter table "public"."campaign_customers" add constraint "campaign_customers_pkey" PRIMARY KEY using index "campaign_customers_pkey";
