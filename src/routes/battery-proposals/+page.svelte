@@ -142,7 +142,7 @@
 		const url = URL.createObjectURL(blob)
 		const a = document.createElement('a')
 		a.href = url
-		a.download = `${uuid}.kml`
+		a.download = `${uniqueIdentifier.split('-')[0]}-${new Date(Date.now()).toISOString()}.kml`
 		document.body.appendChild(a)
 		a.click()
 
@@ -187,7 +187,9 @@
 		try {
 			const { data, error } = await supabase.storage
 				.from('worker-kml-upload')
-				.upload(`${campaign}/${uniqueIdentifier}/${file.name}`, file, { upsert: true })
+				.upload(`${campaign}/${uniqueIdentifier}/${new Date(Date.now()).toISOString()}`, file, {
+					upsert: true
+				})
 			successful = !error
 			console.log(error)
 		} catch (error) {
