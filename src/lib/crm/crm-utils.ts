@@ -73,6 +73,14 @@ export class CRM {
 		return dealRequest
 	}
 
+	async setLatLongFor(dealId: string, latLng: {lat: number, lng: number}) {
+		await this.pdDealsApi.updateDeal(dealId, {"730c28155f2aa8bef8cbc858811bb350a25a14d0": latLng.lat, "0fa7d4a340a160bfe5c5ff7b21e8e3948ec9068b": latLng.lng})
+	}
+
+	async setFormattedAddressFor(dealId: string, address: string) {
+		await this.pdDealsApi.updateDeal(dealId, {"6b9665ec09998cda1910dbb2fdc6c2d7d6c49b2e": address})
+	}
+
 	async getDealDataFor(PLNumber: string) {
 		const dealId = await this.getDealIdFromPL(PLNumber)
 		const dealRequest = await this.pdDealsApi.getDeal(dealId)
