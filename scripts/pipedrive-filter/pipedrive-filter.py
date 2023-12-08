@@ -220,12 +220,11 @@ def main():
     FILTER_ID = LOST_LEAD_FILTER_ID
     deals = getFilteredDeals(FILTER_ID)
     pathToFile = createLostLeadsSpreadSheet(deals)
-    # uploadToSharepoint(pathToFile)
+    uploadToSharepoint(pathToFile)
     os.remove(pathToFile)
     deals = getFilteredDeals(FILTER_ID)
     pathToFile = createReportingSpreadSheet(deals)
-    # uploadToSharepoint(pathToFile)
-    # os.remove(pathToFile)
+    uploadToSharepoint(pathToFile)
+    os.remove(pathToFile)
 
-# uploadToSharepoint(FILE_NAME + str(datetime.now().date()) + ".xlsx")
 main()
