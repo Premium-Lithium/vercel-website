@@ -92,8 +92,6 @@
 			})
 			.eq('worker_id', uniqueIdentifier)
 
-		console.log('Worker table updated', uploadData, uploadError)
-
 		const { data: masterSelectData, error: masterSelectError } = await supabase
 			.from('campaign_master')
 			.select('area')
@@ -109,7 +107,6 @@
 			.from('campaign_master')
 			.update({ 'area': masterDataToUpload })
 			.eq('campaign_id', campaign)
-		console.log('Master table updated', masterUploadData, masterUploadError)
 		activeArea = null
 		broadcastRoom.send({
 			type: 'broadcast',
@@ -177,7 +174,6 @@
 			.from('campaign_master')
 			.update({ 'area': masterDataToUpload })
 			.eq('campaign_id', campaign)
-		console.log('Master table updated', masterUploadData, masterUploadError)
 		activeArea = campaignAreas[0].area
 		await saveKml(activeArea)
 	}
