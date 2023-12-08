@@ -94,8 +94,8 @@ def createSpreadsheetFrom(deals, FILENAME):
             ws.append(row)
         except:
             pass
-    wb.save(FILENAME + str(datetime.now().date()) + ".xlsx")
-    return FILENAME + str(datetime.now().date()) + ".xlsx"
+    wb.save(FILENAME + str(datetime.now()) + ".xlsx")
+    return FILENAME + str(datetime.now()) + ".xlsx"
 
 
 def uploadToSharepoint(pathToFile):
