@@ -34,14 +34,16 @@ evChargerTypeDict = {
     "811": "7kW Untethered",
     "812": "22kW Tethered",
     "827": "22kW Untethered",
-    "1066": "No"
+    "1066": "No",
+    None: None
 }
 
 epsSwitchDict = {
     "680": "Dual Socket",
     "686": "Manual",
     "809": "Auto",
-    "1094": "No"
+    "1094": "No",
+    None: None
 }
 
 paymentTypeDict = {
@@ -49,12 +51,14 @@ paymentTypeDict = {
     "987": "Residential - Payback",
     "988": "Commercial - Express",
     "989": "Commercial - Payback",
-    "990": "Commercial - Subscription"
+    "990": "Commercial - Subscription",
+    None: None
 }
 
 singlePhaseOrThreePhaseDict = {
     "1056": "Single Phase",
-    "1057": "Three Phase",
+    "1057": "Three Phase",,
+    None: None
 }
 
 pd = Client(domain="https://premiumlithium.pipedrive.com/")
@@ -160,29 +164,32 @@ def createReportingSpreadSheet(deals):
         ]
     )
     for deal in deals:
-        row = []
-        row.append(deal["title"])
-        row.append(deal["status"])
-        row.append(deal['value'])
-        row.append(deal['won_time'])
-        row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b'])
-        row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
-        row.append(deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d'])
-        row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
-        row.append(deal['567489c8ee63a1e43f24caedcbd9ce1398c63317'])
-        row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
-        row.append(evChargerTypeDict[deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
-        row.append(epsSwitchDict[deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
-        row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
-        row.append(deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55'])
-        row.append(deal['add_time'])
-        row.append(deal['person_id']['name'])
-        row.append(deal['stage_id'])
-        row.append(paymentTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
-        row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
-        row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
-        row.append(deal['c71b79129a01daee3ed338e43f4b99b2356e4a13'])
-        ws.append(row)
+        try:
+            row = []
+            row.append(deal["title"])
+            row.append(deal["status"])
+            row.append(deal['value'])
+            row.append(deal['won_time'])
+            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b'])
+            row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
+            row.append(deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d'])
+            row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
+            row.append(deal['567489c8ee63a1e43f24caedcbd9ce1398c63317'])
+            row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
+            row.append(evChargerTypeDict[deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
+            row.append(epsSwitchDict[deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
+            row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
+            row.append(deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55'])
+            row.append(deal['add_time'])
+            row.append(deal['person_id']['name'])
+            row.append(deal['stage_id'])
+            row.append(paymentTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
+            row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
+            row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
+            row.append(deal['c71b79129a01daee3ed338e43f4b99b2356e4a13'])
+            ws.append(row)
+        except:
+            pass
     now = str(datetime.now()).replace('%', '').replace(':','-')
     wb.save("Reporting" + now + ".xlsx")
     return "Reporting" + now + ".xlsx"
