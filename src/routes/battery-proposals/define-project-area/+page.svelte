@@ -5,7 +5,7 @@
 	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
-	import { default as template } from './Template.kml'
+	import { default as template } from '../Template.kml'
 	import { generateUUID } from 'three/src/math/MathUtils'
 	import JSZip from 'jszip'
 	let awaitingResponse = false
