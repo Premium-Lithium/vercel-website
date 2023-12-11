@@ -1,36 +1,28 @@
 import networkx as nx
-from pathlib import Path
-import yaml
-import supabase
-
 import tasks
 from campaign_utils import getter_func_name
 from data_deps import data_dependencies
 
 from supabase import create_client, Client
 
-import matplotlib.pyplot as plt
-
-
-# todo: add production supabase url and key
-url: str = "http://localhost:54321" # url: str = os.environ.get("SUPABASE_URL")
-key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0" # key: str = os.environ.get("SUPABASE_KEY")
-
-supabase: Client = create_client(url, key)
-
 
 class Campaign:
     def __init__(self, name) -> None:
+        # todo: add production supabase url and key
+        url: str = "http://localhost:54321" # url: str = os.environ.get("SUPABASE_URL")
+        key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0" # key: str = os.environ.get("SUPABASE_KEY")
+
+        self._database: Client = create_client(url, key)
+
         # todo: check if this succeeds
         definition = self._load_campaign_definition_for(name)
 
-        self._name = name
-        self._output = definition["campaign_specific_schema"]
+        self._outputs = definition["output_names"]
         self._id = definition["campaign_id"]
 
 
     def _load_campaign_definition_for(self, name) -> dict[str, any]:
-        request = supabase.table('campaign_master').select("campaign_id, campaign_specific_schema").eq('campaign_name', name).execute()
+        request = self._database.table('campaign_master').select("campaign_id, output_names").eq('campaign_name', name).execute()
 
         campaign_def = request.data
         if not campaign_def:
@@ -73,14 +65,14 @@ class Campaign:
             raise ValueError("Data dependencies form a cycle, cannot determine execution order.")
 
 
-    def _fetch_data_in(self, data_ordering: list[str]) -> None:
-        campaign_data_table = supabase.table('campaign_customers')
+    def _retrieve_data_in(self, data_ordering: list[str]) -> None:
+        campaign_data_table = self._database.table('campaign_customers')
         campaign_items = campaign_data_table.select("*").eq('campaign_id', self._id).execute()
 
         campaign_data = campaign_items.data
 
         if not campaign_data:
-            raise ValueError(f"Could not fetch campaign items for campaign '{self._name}'")
+            raise ValueError(f"Could not fetch campaign data")
 
         for customer in campaign_data:
             customer_data = customer
