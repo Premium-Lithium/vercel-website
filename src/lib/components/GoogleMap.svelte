@@ -3,7 +3,7 @@
 	import { onDestroy, onMount } from 'svelte'
 
 	import Magnifier from './Magnifier.svelte'
-	export let loader = null
+	export let loader = undefined
 	export let cypressTag = ''
 	export let map
 	export let initialZoom

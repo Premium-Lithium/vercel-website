@@ -1,6 +1,9 @@
 <script>
 	import { page } from '$app/stores'
-	import { PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID } from '$env/static/public'
+	import {
+		PUBLIC_GOOGLE_API_KEY,
+		PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+	} from '$env/static/public'
 	import Auth from '$lib/components/Auth.svelte'
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
@@ -216,6 +219,10 @@
 		modals[i].showModal()
 	}
 
+	function getStaticImage(lat, lon, size, zoom) {
+		return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lon}&size=${size}x${size}&zoom=${zoom}&maptype=satellite&scale=2&key=${PUBLIC_GOOGLE_API_KEY}&markers=color:0x35bbed|${lat},${lon}`
+	}
+
 	async function completeProject(project, i) {
 		let awaitingResponse = true
 		modals[i].close()
@@ -362,28 +369,53 @@
 		await completeProject(project, i)
 		modals[i].close()
 	}
+
+	async function notResidentialClicked(project, i) {
+		await addFlagToProject(project, 'PROPERTY_NOT_RESIDENTIAL')
+		await completeProject(project, i)
+		modals[i].close()
+	}
+
+	async function notSuitableForSolarClicked(project, i) {
+		await addFlagToProject(project, 'NOT_SUITABLE_FOR_SOLAR')
+		await completeProject(project, i)
+		modals[i].close()
+	}
 </script>
 
 {#each modals as modal, i}
 	<Modal showModal={false} bind:dialog={modal}>
 		<div class="modal" slot="header">
-			<h3>{projects[i].address}</h3>
+			<h3>{projects[i].address.split(',')[0]}</h3>
 		</div>
+		{#if projects[i]}
+			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lon, 200, 19)} />
+		{/if}
 		<div class="button-container">
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
 			>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => panelsAlreadyInstalledClicked(projects[i], i)}
+				>Panels are already installed</button
+			>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => roofTooComplicatedClicked(projects[i], i)}
+				>Roof is too complicated</button
+			>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => notResidentialClicked(projects[i], i)}
+				>Not a residential property</button
+			>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => notSuitableForSolarClicked(projects[i], i)}
+				>Not suitable for solar</button
+			>
 			{#if projects[i].status.toLowerCase() != 'not started'}
-				<button
-					class="warning-button"
-					on:click|stopPropagation={() => panelsAlreadyInstalledClicked(projects[i], i)}
-					>Panels are already installed</button
-				>
-				<button
-					class="warning-button"
-					on:click|stopPropagation={() => roofTooComplicatedClicked(projects[i], i)}
-					>Roof is too complicated</button
-				>
 				<button
 					class="modal-button"
 					on:click|stopPropagation={() => completeProject(projects[i], i)}
@@ -415,9 +447,11 @@
 					{#each projects as project, i}
 						{#if project.status.toLowerCase() != 'completed'}
 							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
-								<div class="project-item">
+								<div class="project-item" class:bold={project.status == 'In progress'}>
 									<div class="address">{project.address.split(',')[0]}</div>
-									<div class="status">{project.status}</div>
+									<div class="status">
+										{project.status}
+									</div>
 								</div>
 							</li>
 						{/if}
@@ -438,7 +472,9 @@
 							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
 								<div class="project-item">
 									<div class="address">{project.address.split(',')[0]}</div>
-									<div class="status">{project.status}</div>
+									<div class={'status'}>
+										{project.status}
+									</div>
 								</div>
 							</li>
 						{/if}
@@ -452,8 +488,12 @@
 </div>
 
 <style>
+	.bold {
+		font-weight: 600;
+	}
 	h3 {
 		margin: 32px 8px 8px 8px;
+		text-align: center;
 	}
 
 	.modal > h3 {
@@ -569,9 +609,8 @@
 		background-color: #eaeaea;
 		border-radius: 8px;
 		color: black;
-		margin-right: 10px;
 		cursor: pointer;
-		transition: background-color 0.3s ease;
+		transition: background-color 0.15s ease;
 	}
 
 	.modal-button {
