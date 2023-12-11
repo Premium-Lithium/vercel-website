@@ -29,6 +29,29 @@
 			version: 'weekly',
 			libraries: ['places']
 		})
+		const mapOptions = {
+			center: initialCenter
+				? initialCenter
+				: {
+						lat: 53.95922,
+						lng: -1.0761
+				  },
+			zoom: initialZoom,
+			zoomControl: false,
+			zoomControlOptions: {
+				position: CONTROL_POSITION
+			},
+			minZoom,
+			disableDefaultUI: true,
+			tilt: 0,
+			// mapTypeId: mapId: 'hybrid',
+			disableDoubleClickZoom: true,
+			mapId: mapId ? mapId : '6f6816d6bb1eeac4',
+			draggableCursor: 'pointer'
+		}
+		if (!(mapId)) {
+			mapOptions['mapTypeId'] = 'hybrid'
+		}
 		magnifierDisabled = true
 		loader
 			.importLibrary('core')
@@ -42,26 +65,6 @@
 					loader
 						.importLibrary('maps')
 						.then(async ({ Map }) => {
-							const mapOptions = {
-								center: initialCenter
-									? initialCenter
-									: {
-											lat: 53.95922,
-											lng: -1.0761
-									  },
-								zoom: initialZoom,
-								zoomControl: false,
-								zoomControlOptions: {
-									position: CONTROL_POSITION
-								},
-								minZoom,
-								disableDefaultUI: true,
-								tilt: 0,
-								mapTypeId: 'hybrid',
-								disableDoubleClickZoom: true,
-								mapId: mapId ? mapId : '6f6816d6bb1eeac4',
-								draggableCursor: 'pointer',
-							}
 							map = new Map(document.getElementById('map'), mapOptions)
 						})
 						.catch((e) => {
