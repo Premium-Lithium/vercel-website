@@ -279,11 +279,8 @@
 	// TODO
 	function renderKmlFile() {
 		console.log("KML")
-		let kmlLayer = new google.maps.KmlLayer({
-			url: 'http://localhost:3000/solarHeatmap-80.kml',
-			suppressInfoWindows: true,
-			preserveViewport: false,
-		})
+		let kmlLayer = new google.maps.KmlLayer()
+		kmlLayer.setUrl('https://premiumlithium-my.sharepoint.com/:u:/p/peter_gillingham/EWK0sLA_ZsRJpKPbRSftZGYBwmwMKDkD1EYWIRnles_cdQ?e=uhDKvi')
 		kmlLayer.setMap(map)
 		console.log(kmlLayer)
 	}
