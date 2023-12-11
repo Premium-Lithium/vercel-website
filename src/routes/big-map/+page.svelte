@@ -29,6 +29,7 @@
 		const iconStream = fetch('/marker-base.svg')
 		icon = await (await iconStream).text()
 		loading = false
+		renderKmlFile()
 	})
 
 	/**
@@ -273,6 +274,18 @@
 		for (let m in panel.markers) {
 			panel.markers[m].marker.setIcon(svgMarker)
 		}
+	}
+
+	// TODO
+	function renderKmlFile() {
+		console.log("KML")
+		let kmlLayer = new google.maps.KmlLayer({
+			url: 'http://localhost:3000/solarHeatmap-80.kml',
+			suppressInfoWindows: true,
+			preserveViewport: false,
+		})
+		kmlLayer.setMap(map)
+		console.log(kmlLayer)
 	}
 </script>
 
