@@ -1,5 +1,5 @@
-def get_location():
-    print("Getting location...")
+def get_location(address):
+    print(f"Getting location from address {address}")
     return 50.0, -1.0
 
 

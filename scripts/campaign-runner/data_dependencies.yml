@@ -1,4 +1,7 @@
-location: []
+address: []
+
+location:
+  - address
 
 roofArialView:
   - location
