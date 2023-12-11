@@ -20,7 +20,7 @@ supabase: Client = create_client(url, key)
 
 
 class Campaign:
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         # todo: check if this succeeds
         definition = self._load_campaign_definition_for(name)
 
@@ -29,7 +29,7 @@ class Campaign:
         self._id = definition["campaign_id"]
 
 
-    def _load_campaign_definition_for(self, name):
+    def _load_campaign_definition_for(self, name) -> dict[str, any]:
         request = supabase.table('campaign_master').select("campaign_id, campaign_specific_schema").eq('campaign_name', name).execute()
 
         campaign_def = request.data
@@ -42,16 +42,10 @@ class Campaign:
         return campaign_def[0]
 
 
-    def run(self):
-        data_ordering = self._calc_data_fetch_order_to_calc_outputs()
-        self._fetch_data_in(data_ordering)
-
-
-    def _calc_data_fetch_order_to_calc_outputs(self):
+    def run(self) -> None: # todo: could this return a bool to indicate success?
         dependency_graph = self._create_data_dependency_graph()
-        ordered_required_inputs = self._calc_fetch_order_for(dependency_graph)
-
-        return ordered_required_inputs
+        data_ordering = self._calc_data_retrieval_order(dependency_graph)
+        self._retrieve_data_in(data_ordering)
 
 
     def _create_data_dependency_graph(self) -> nx.DiGraph:
@@ -72,14 +66,14 @@ class Campaign:
         return dependency_graph
 
 
-    def _calc_fetch_order_for(self, dependency_graph):
+    def _calc_data_retrieval_order(self, dependency_graph) -> list[str]:
         try:
             return list(nx.topological_sort(dependency_graph))
         except nx.NetworkXUnfeasible:
             raise ValueError("Data dependencies form a cycle, cannot determine execution order.")
 
 
-    def _fetch_data_in(self, data_ordering: list[str]):
+    def _fetch_data_in(self, data_ordering: list[str]) -> None:
         campaign_data_table = supabase.table('campaign_customers')
         campaign_items = campaign_data_table.select("*").eq('campaign_id', self._id).execute()
 
@@ -98,7 +92,7 @@ class Campaign:
                 if not dependency_names:
                     continue
 
-                args = self._extract_data_from(customer_data, dependency_names)
+                args = self._extract_task_args_from(customer_data, dependency_names)
                 task = getattr(tasks, getter_func_name(data_name))
                 data = task(**args)
 
@@ -107,7 +101,7 @@ class Campaign:
             data, count = campaign_data_table.update(customer_data).eq('customer_id', customer['customer_id']).execute()
 
 
-    def _extract_data_from(self, customer_data: dict[str, any], data: list[str]) -> dict[str, any]:
+    def _extract_task_args_from(self, customer_data: dict[str, any], data: list[str]) -> dict[str, any]:
         args = {}
 
         for data_name in data:
