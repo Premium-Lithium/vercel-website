@@ -67,6 +67,13 @@ singlePhaseOrThreePhaseDict = {
     None: None
 }
 
+batteryTypeDict = {
+    "825": "Pod",
+    "826": "Plant",
+    "833": "Panel",
+    None: None
+}
+
 pd = Client(domain="https://premiumlithium.pipedrive.com/")
 pd.set_api_token(PIPEDRIVE_API_TOKEN)
 
@@ -181,14 +188,14 @@ def createReportingSpreadSheet(deals):
             row.append(deal['won_time'])
             row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
             row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
-            row.append(deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d'])
+            row.append(batteryTypeDict[deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d']])
             row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
             row.append(deal['567489c8ee63a1e43f24caedcbd9ce1398c63317'])
             row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
             row.append(evChargerTypeDict[deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
             row.append(epsSwitchDict[deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
             row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
-            row.append(deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55'])
+            row.append(paymentTypeDict[deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55']])
             row.append(deal['add_time'])
             row.append(deal['person_id']['name'])
             row.append(deal['stage_id'])
