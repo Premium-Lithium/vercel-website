@@ -9,6 +9,7 @@
 	export let initialZoom
 	export let minZoom
 	export let initialCenter
+	export let mapId
 
 	export let magnifierOutline = '#ffffff'
 	let CONTROL_POSITION
@@ -58,8 +59,8 @@
 								tilt: 0,
 								mapTypeId: 'hybrid',
 								disableDoubleClickZoom: true,
-								mapId: '6f6816d6bb1eeac4',
-								draggableCursor: 'pointer'
+								mapId: mapId ? mapId : '6f6816d6bb1eeac4',
+								draggableCursor: 'pointer',
 							}
 							map = new Map(document.getElementById('map'), mapOptions)
 						})

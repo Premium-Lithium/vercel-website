@@ -390,6 +390,7 @@ Get custom markers working
 			minZoom={7}
 			initialZoom={7}
 			initialCenter={{ lat: 55, lng: -3 }}
+			mapId={"b304734e07437047"}
 		/>
 	</div>
 </div>
