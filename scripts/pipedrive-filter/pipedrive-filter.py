@@ -129,9 +129,8 @@ def createLostLeadsSpreadSheet(deals):
             ws.append(row)
         except:
             pass
-    now = str(datetime.now()).replace('%', '').replace(':','-')
-    wb.save("LostLeadsBySource" + now + ".xlsx")
-    return "LostLeadsBySource" + now + ".xlsx"
+    wb.save("LostLeadsBySource.xlsx")
+    return "LostLeadsBySource.xlsx"
 
 
 def createReportingSpreadSheet(deals):
@@ -190,9 +189,8 @@ def createReportingSpreadSheet(deals):
             ws.append(row)
         except:
             pass
-    now = str(datetime.now()).replace('%', '').replace(':','-')
-    wb.save("Reporting" + now + ".xlsx")
-    return "Reporting" + now + ".xlsx"
+    wb.save("Reporting.xlsx")
+    return "Reporting.xlsx"
 
 
 
