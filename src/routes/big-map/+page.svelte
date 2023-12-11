@@ -267,12 +267,18 @@
 	 * @param panel group of markers to update
 	 */
 	async function changeIconColourFor(panel: OptionPanel) {
-		const newIconString = icon.replace('#888888', panel.colour)
-		const newIcon = new google.maps.Icon(newIconString)
+		const newIconString = icon.replace('#C9FC50', panel.colour)
 		for (let m in panel.markers) {
-			panel.markers[m].marker.setIcon(newIcon)
+			panel.markers[m].marker.setIcon(newIconString)
 		}
 	}
+
+	async function createNewIconWith(colour: string) {
+		const svgMarker = {
+			fillColor: colour,
+		}
+	}
+
 </script>
 
 <!-- 

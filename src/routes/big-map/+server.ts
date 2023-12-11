@@ -1,6 +1,5 @@
-import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter } from "./MapTypes"
+import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter, OptionPanel } from "./MapTypes"
 import { CRM } from "$lib/crm/crm-utils"
-import { exec } from "child_process"
 
 let crm = new CRM()
 
@@ -170,7 +169,6 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
         for (let deal in deals.data) {
             let address = await findAddressFrom(deals.data[deal])
             let latLng = await getLatLongFor(deals.data[deal])
-            console.log(deals.data[deal].title, "Address: ", address, "LatLong: ", latLng)
             if (address && latLng) {
                 let marker: MarkerOptions = {
                     latLng: latLng,
