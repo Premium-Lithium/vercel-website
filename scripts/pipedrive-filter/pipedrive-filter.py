@@ -55,6 +55,12 @@ paymentTypeDict = {
     None: None
 }
 
+dealTypeDict = {
+    "1020": "Battery Only",
+    "1021": "Battery & Solar",
+    None: None
+}
+
 singlePhaseOrThreePhaseDict = {
     "1056": "Single Phase",
     "1057": "Three Phase",
@@ -104,6 +110,8 @@ def createLostLeadsSpreadSheet(deals):
             "Deal - Deal created",
             "Deal - Quote Issued",
             "Deal - Won Time",
+            "Deal - Sales Contact",
+            "Deal - Stage"
         ]
     )
     for deal in deals:
@@ -126,6 +134,8 @@ def createLostLeadsSpreadSheet(deals):
             row.append(deal["add_time"])
             row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
             row.append(deal['won_time'])
+            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
+            row.append(deal['stage_id'])
             ws.append(row)
         except:
             pass
@@ -163,13 +173,13 @@ def createReportingSpreadSheet(deals):
         ]
     )
     for deal in deals:
+        row = []
         try:
-            row = []
             row.append(deal["title"])
             row.append(deal["status"])
             row.append(deal['value'])
             row.append(deal['won_time'])
-            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b'])
+            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
             row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
             row.append(deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d'])
             row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
@@ -182,7 +192,7 @@ def createReportingSpreadSheet(deals):
             row.append(deal['add_time'])
             row.append(deal['person_id']['name'])
             row.append(deal['stage_id'])
-            row.append(paymentTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
+            row.append(dealTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
             row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
             row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
             row.append(deal['c71b79129a01daee3ed338e43f4b99b2356e4a13'])
@@ -215,12 +225,11 @@ def uploadToSharepoint(pathToFile):
 
 
 def main():
-    FILTER_ID = LOST_LEAD_FILTER_ID
-    deals = getFilteredDeals(FILTER_ID)
+    deals = getFilteredDeals(LOST_LEAD_FILTER_ID)
     pathToFile = createLostLeadsSpreadSheet(deals)
     uploadToSharepoint(pathToFile)
     os.remove(pathToFile)
-    deals = getFilteredDeals(FILTER_ID)
+    deals = getFilteredDeals(REPORTING_FILTER_ID)
     pathToFile = createReportingSpreadSheet(deals)
     uploadToSharepoint(pathToFile)
     os.remove(pathToFile)
