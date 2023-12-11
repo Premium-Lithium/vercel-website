@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { installationStores } from './../../../lib/MapStores.js'
 	import { browser } from '$app/environment'
 	import { page } from '$app/stores'
 	import MagicLink from '$lib/components/MagicLink.svelte'
@@ -30,23 +31,21 @@
 	$: currentHouseToAudit = currentHouseToAudit = allUnauditedHouses[currentHousePointer]
 
 	let isAuthenticated = false
-	let auditOption1, auditOption2, auditOption3, auditOption4, auditOption5, nextButton, auditForm
-	$: auditOptions = [
-		{ name: 'CLEAR_IMAGE', value: auditOption1 },
-		{ name: 'ADDRESS_CORRECT', value: auditOption2 },
-		{ name: 'CORRECT_PANEL_ESTIMATE', value: auditOption3 },
-		{ name: 'CLEAR_AND_SENSIBLE', value: auditOption4 },
-		{ name: 'SHADE_FREE', value: auditOption5 }
-	].map((x, i) => {
-		if (x.value) return { name: x.name, value: x.value.checked, index: i }
+	let nextButton, auditForm
+	let loadedAuditOptions = []
+	let auditCheckboxes = []
+	$: auditOptions = loadedAuditOptions.map((x, i) => {
+		return { name: x.name, value: x.value, index: i, description: x.description }
 	})
 
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
-		auditCriteria = await loadAuditCriteria(campaign)
-		console.log(auditCriteria)
+		loadedAuditOptions = await loadAuditCriteria(campaign)
+		loadedAuditOptions = loadedAuditOptions.map((x) => {
+			return { ...x, 'value': true }
+		})
 
 		allUnauditedHouses = await loadAllUnauditedHousesFromSupabase(false)
 		loading = false
@@ -59,19 +58,19 @@
 						nextButton.click()
 						break
 					case 'Digit1':
-						auditOption1.checked = !auditOption1.checked
+						auditCheckboxes[0].checked = !auditCheckboxes[0].checked
 						break
 					case 'Digit2':
-						auditOption2.checked = !auditOption2.checked
+						auditCheckboxes[1].checked = !auditCheckboxes[1].checked
 						break
 					case 'Digit3':
-						auditOption3.checked = !auditOption3.checked
+						auditCheckboxes[2].checked = !auditCheckboxes[2].checked
 						break
 					case 'Digit4':
-						auditOption4.checked = !auditOption4.checked
+						auditCheckboxes[3].checked = !auditCheckboxes[3].checked
 						break
 					case 'Digit5':
-						auditOption5.checked = !auditOption5.checked
+						auditCheckboxes[4].checked = !auditCheckboxes[4].checked
 						break
 				}
 			})
@@ -86,7 +85,7 @@
 			let existingFlags = currentHouseToAudit['audit_flags']
 			let newFlags = [...(existingFlags ?? [])]
 			auditOptions.forEach((x) => {
-				if (!x.value && !newFlags.includes(20 + x.index)) newFlags.push(20 + x.index)
+				if (!x.value && !newFlags.includes(x.index)) newFlags.push(x.index)
 			})
 			const { data, error } = await supabase
 				.from(batteryProposalsTableName)
@@ -109,11 +108,7 @@
 			}
 		}
 		currentHousePointer += 1
-		auditOption1.checked = true
-		auditOption2.checked = true
-		auditOption3.checked = true
-		auditOption4.checked = true
-		auditOption5.checked = true
+		auditCheckboxes.forEach((x) => (x.checked = true))
 	}
 
 	async function loadAllUnauditedHousesFromSupabase(randomiseOrder = true) {
@@ -156,6 +151,8 @@
 			console.log(loadAuditError.message)
 			return
 		}
+		console.log(loadAuditData)
+
 		let auditCodes = loadAuditData[0]['audit_criteria']
 
 		let promises = auditCodes.map(async (x) => {
@@ -165,9 +162,15 @@
 		let results = (await Promise.all(promises)).map((x) => {
 			return x.data[0]
 		})
-		return results.filter((x) => {
+
+		results = results.filter((x) => {
 			return x['human_required']
 		})
+
+		auditCheckboxes = results.map((x) => {
+			null
+		})
+		return results
 	}
 </script>
 
@@ -178,7 +181,7 @@
 	/>
 {:else}
 	<div class="container">
-		{#if allUnauditedHouses.length == 0}
+		{#if allUnauditedHouses.length != 0}
 			<div class="error-message">
 				<p>No houses to audit</p>
 			</div>
@@ -209,84 +212,39 @@
 			{/key}
 			<div class="legend">
 				<ul class="audit-legend">
-					<li class="audit-legend-entry">Does the image show the roof and panels clearly?</li>
-					<li class="audit-legend-entry">Is the address likely to be correct?</li>
-					<li class="audit-legend-entry">
-						Does the area estimate / number of panels seem correct?
-					</li>
-					<li class="audit-legend-entry">Is it clear and sensible for us to send to customers?</li>
-					<li class="audit-legend-entry">Is the roof mostly shade free?</li>
+					{#each auditOptions as audit}
+						<li class="audit-legend-entry">{audit.description}</li>
+					{/each}
 				</ul>
 			</div>
 
 			<form action="" class="audit-options" bind:this={auditForm} on:submit={onSubmit}>
-				<div class="input-wrapper">
-					<label for="audit-option-1">1</label>
-					<input
-						type="checkbox"
-						name="audit-option-1"
-						id="audit-option-1"
-						class="audit-option"
-						checked={true}
-						bind:this={auditOption1}
-					/>
-				</div>
-				<div class="input-wrapper">
-					<label for="audit-option-2">2</label>
-					<input
-						type="checkbox"
-						name="audit-option-2"
-						id="audit-option-2"
-						class="audit-option"
-						checked={true}
-						bind:this={auditOption2}
-					/>
-				</div>
-				<div class="input-wrapper">
-					<label for="audit-option-3">3</label>
-					<input
-						type="checkbox"
-						name="audit-option-3"
-						id="audit-option-3"
-						class="audit-option"
-						checked={true}
-						bind:this={auditOption3}
-					/>
-				</div>
-				<div class="input-wrapper">
-					<label for="audit-option-4">4</label>
-					<input
-						type="checkbox"
-						name="audit-option-4"
-						id="audit-option-4"
-						class="audit-option"
-						checked={true}
-						bind:this={auditOption4}
-					/>
-				</div>
-				<div class="input-wrapper">
-					<label for="audit-option-5">5</label>
-					<input
-						type="checkbox"
-						name="audit-option-5"
-						id="audit-option-5"
-						class="audit-option"
-						checked={true}
-						bind:this={auditOption5}
-					/>
-				</div>
+				{#each auditOptions as audit, i}
+					<div class="input-wrapper">
+						<label for={`audit-option-${i}`}>{i + 1}</label>
+						<input
+							type="checkbox"
+							name={`audit-option-${i}`}
+							id={`audit-option-${i}`}
+							class="audit-option"
+							checked={true}
+							on:click={() => (audit.value = !audit.value)}
+							bind:this={auditCheckboxes[i]}
+						/>
+					</div>
+				{/each}
 			</form>
-		{/if}
 
-		<input
-			type="button"
-			value="Next"
-			class="next-button"
-			bind:this={nextButton}
-			on:click={() => {
-				auditForm.requestSubmit()
-			}}
-		/>
+			<input
+				type="button"
+				value="Next"
+				class="next-button"
+				bind:this={nextButton}
+				on:click={() => {
+					auditForm.requestSubmit()
+				}}
+			/>
+		{/if}
 	</div>
 {/if}
 
