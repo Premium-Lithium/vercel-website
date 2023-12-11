@@ -1,0 +1,4 @@
+pipedrive-python-lib
+datetime
+Office365-REST-Python-Client
+openpyxl

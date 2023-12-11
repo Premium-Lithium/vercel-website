@@ -303,7 +303,6 @@ async function generateDnoApplicationFrom(PLNumber: string, userId: string) {
 
     fs.writeFileSync(DocxFilePath, buff)
     const addFileRequest = await crm.attachFileFor(PLNumber, DocxFilePath)
-    await sendNotificationMailFor(PLNumber)
 
     fs.unlinkSync(DocxFilePath);
     if (dnoName && dnoDetails) {
