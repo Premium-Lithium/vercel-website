@@ -11,10 +11,8 @@
 	let supabaseAuth: Object
 	let activeArea: Array<any> | undefined = undefined
 
-	let campaign: string = ''
-	const urlParams = $page.url.searchParams
-	campaign = urlParams.get('campaign-id') || ''
-	let campaignAreas: Array<any>
+	let activeCampaigns: Array<string> = []
+	let campaignAreas: Array<any> = []
 	let uniqueIdentifier: UUID
 	let loadedWorkerDetails: boolean = false
 	let broadcastRoom: RealtimeChannel
@@ -23,16 +21,16 @@
 	let uploadedFile: File
 	let uploadedFilesFromFileInput: FileList
 
+	$: console.log(campaignAreas)
 	onMount(async () => {
-		campaignAreas = await loadCampaignAreas(campaign)
+		await loadCampaignAreas()
 	})
-
 	$: if (supabaseAuth) {
 		uniqueIdentifier = supabaseAuth.user.id
 		broadcastRoom = supabase.channel('room1')
 		broadcastRoom
 			.on('broadcast', { event: 'claim_project' }, async (payload) => {
-				campaignAreas = await loadCampaignAreas(campaign)
+				await loadCampaignAreas()
 			})
 			.subscribe()
 		loadWorkerDetails().then(() => {
@@ -58,16 +56,37 @@
 		}
 	}
 
-	async function loadCampaignAreas(campaignId: string) {
+	async function loadCampaignArea(campaignId: string) {
 		const { data: campaignData, error: campaignGetError } = await supabase
 			.from('campaign_master')
 			.select('*')
 			.eq('campaign_id', campaignId)
+		if (!campaignData[0]) return
 		return campaignData[0].area
 			.filter((x) => {
 				return x.status == 'unprocessed'
 			})
 			.sort((a, b) => b.estNumProperties - a.estNumProperties)
+	}
+
+	async function loadCampaignAreas() {
+		const { data: getActiveCampaignData, error: getActiveCampaignError } = await supabase
+			.from('campaign_master')
+			.select('*')
+		activeCampaigns = getActiveCampaignData
+			?.map((x) => {
+				if (x['campaign_name'].includes('existing-solar')) return x.campaign_id
+			})
+			.filter((x) => {
+				return x
+			})
+
+		let promises: Array<Promise<Array<any>>> = []
+		activeCampaigns.forEach((x) => {
+			promises.push(loadCampaignArea(x))
+		})
+		campaignAreas = await Promise.all(promises)
+		return campaignAreas
 	}
 
 	async function completeRegion() {
@@ -229,7 +248,7 @@
 
 {#if browser}
 	{#if !supabaseAuth}
-		<Auth redirectUrl={`battery-proposals/?campaign-id=${campaign}`} bind:supabaseAuth />
+		<Auth redirectUrl={`battery-proposals`} bind:supabaseAuth />
 	{:else if !loadedWorkerDetails}
 		<p>Loading...</p>
 	{:else}
