@@ -16,10 +16,7 @@
 	let supabaseAuth = undefined
 	let modals = []
 	const flagsVisibleToWorker = ['PANELS_ALREADY_INSTALLED', 'ROOF_TOO_COMPLICATED']
-	let campaign = undefined
-
-	const urlParams = $page.url.searchParams
-	campaign = urlParams.get('campaign-id') || ''
+	let activeCampaigns = []
 
 	// PARAMETERS
 
@@ -128,7 +125,6 @@
 		let projectIds = data.map((x) => {
 			return x.id
 		})
-		console.log(supabaseAuth)
 
 		let response = await supabase.from('solar_turk_workers').insert([
 			{
