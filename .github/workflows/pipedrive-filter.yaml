@@ -21,7 +21,7 @@ jobs:
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
         with:
-          path: "/scripts/pipedrive-filter/requirements.txt"
+          path: .github/workflows/scripts/pipedrive-filter/requirements.txt
 
       - name: Execute Python script # Run the app.py
-        run: "/scripts/pipedrive-filter/pipedrive-filter.py"
+        run: python .github/workflows/scripts/pipedrive-filter/pipedrive-filter.py
