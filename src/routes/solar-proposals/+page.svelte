@@ -393,7 +393,7 @@
 			<h3>{projects[i].address.split(',')[0]}</h3>
 		</div>
 		{#if projects[i]}
-			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lon, 200, 19)} />
+			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lng, 200, 19)} />
 		{/if}
 		<div class="button-container">
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
