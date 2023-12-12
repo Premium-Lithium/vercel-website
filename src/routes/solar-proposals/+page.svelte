@@ -8,6 +8,7 @@
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
+	import { updateStatus } from '$lib/campaignTools'
 
 	let uniqueIdentifier = undefined
 	let projects = []
@@ -66,7 +67,13 @@
 			modals = modals.length > projects.length ? [...modals] : [...modals, null]
 			projects = [
 				...projects,
-				{ projectId: x.id, address: x.address, latLon: x.lat_lon, status: statusToString(x.status) }
+				{
+					projectId: x.id,
+					address: x.address,
+					latLon: x.lat_lon,
+					status: statusToString(x.status),
+					campaignId: x['campaign_id']
+				}
 			]
 		})
 	}
@@ -106,6 +113,7 @@
 			id: houseData['customer_id'],
 			address: houseData?.address['formatted_address'],
 			lat_lon: houseData?.address.geometry.location,
+			campaign_id: houseData['campaign_id'],
 			status: projectStatus
 		}
 	}
@@ -228,7 +236,7 @@
 	}
 
 	async function completeProject(project, i) {
-		let awaitingResponse = true
+		awaitingResponse = true
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
@@ -242,12 +250,21 @@
 				flags.forEach(async (flag) => {
 					await addFlagToProject(project, flag)
 				})
+				let newFlags = [
+					...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
+				] // merge flag arrays, removing duplicates
 				await addOpenSolarLinkToAddress(
 					entry.openSolarId,
 					project.projectId,
 					uniqueIdentifier,
 					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
-					[...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])] // merge flag arrays, removing duplicates
+					newFlags
+				)
+				await updateStatus(
+					project.campaignId,
+					project.projectId,
+					'DESIGN-COMPLETED',
+					'An OpenSolar design has been completed'
 				)
 			}
 		})
