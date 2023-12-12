@@ -40,6 +40,12 @@
 	})
 
 	async function populateProjectList() {
+		const { data: getActiveCampaignData, error: getActiveCampaignError } = await supabase
+			.from('campaign_master')
+			.select('*')
+		activeCampaigns = getActiveCampaignData?.map((x) => {
+			if (x['campaign_name'].includes('new-solar')) return x.campaign_id
+		})
 		let workerData = await getWorkerData(uniqueIdentifier)
 		let projectIds = []
 		if (workerData.length == 0) {
@@ -113,9 +119,9 @@
 	}
 
 	async function createNewWorker(workerId, numOfProjects) {
-		let { data, error } = await supabase.rpc('get_random_campaign_customers', {
+		let { data, error } = await supabase.rpc('get_campaign_customers', {
 			numrows: numOfProjects,
-			campaignid: campaign
+			campaignids: activeCampaigns
 		})
 
 		if (error) {
