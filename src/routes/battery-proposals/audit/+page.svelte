@@ -192,14 +192,18 @@
 				</div>
 				<div class="images">
 					<img
-						src={currentHouseToAudit ? currentHouseToAudit['screenshot_url'] : ''}
+						src={currentHouseToAudit
+							? currentHouseToAudit['campaign_specific_data']['screenshot_url']
+							: ''}
 						alt=""
 						class="image"
 					/>
 					<div class="house-details">
 						<p class="array-text">
-							{currentHouseToAudit ? currentHouseToAudit['solar_array_info'].length : ''} array{currentHouseToAudit
-								? currentHouseToAudit['solar_array_info'].length == 1
+							{currentHouseToAudit
+								? currentHouseToAudit['campaign_specific_data']['solar_array_info'].length
+								: ''} array{currentHouseToAudit
+								? currentHouseToAudit['campaign_specific_data']['solar_array_info'].length == 1
 									? ''
 									: 's'
 								: ''}
