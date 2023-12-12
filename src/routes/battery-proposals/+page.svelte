@@ -132,6 +132,7 @@
 			.update({ 'area': masterDataToUpload })
 			.eq('campaign_id', selectData[0]['campaign_id'])
 		activeArea = null
+		activeCampaign = null
 		broadcastRoom.send({
 			type: 'broadcast',
 			event: 'claim_project',
