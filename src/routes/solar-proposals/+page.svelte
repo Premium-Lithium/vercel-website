@@ -128,6 +128,7 @@
 		let projectIds = data.map((x) => {
 			return x.id
 		})
+		console.log(supabaseAuth)
 
 		let response = await supabase.from('solar_turk_workers').insert([
 			{
@@ -139,7 +140,8 @@
 						openSolarId: null,
 						flags: []
 					}
-				})
+				}),
+				worker_email: supabaseAuth.user.email
 			}
 		])
 

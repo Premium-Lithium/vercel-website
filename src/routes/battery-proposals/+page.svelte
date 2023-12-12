@@ -49,7 +49,7 @@
 		if (workerData.length == 0) {
 			const { data: insertWorkerData, error: insertWorkerError } = await supabase
 				.from('battery_turk_workers')
-				.insert({ 'worker_id': uniqueIdentifier })
+				.insert({ 'worker_id': uniqueIdentifier, 'worker_email': supabaseAuth.user.email })
 		} else {
 			if (workerData[0]['assigned_region']) {
 				activeArea = workerData[0]['assigned_region'].area
