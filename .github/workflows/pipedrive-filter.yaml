@@ -1,8 +1,9 @@
 name: Python Script Workflow
 
 on:
+  workflow_dispatch:
   schedule:
-  - cron: "* 6,18 *  * *"
+    - cron: "* 6,18 *  * *"
 
 jobs:
   build:
@@ -20,7 +21,7 @@ jobs:
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
         with:
-          path: "src/scripts/pipedrive-filter/requirements.txt"
+          path: "/scripts/pipedrive-filter/requirements.txt"
 
-      - name: Execute Python script # Run the app.py
-        run: "src/scripts/pipedrive-filter/pipedrive-filter.py"
+      - name: Execute Python script # Run the .py file
+        run: "/scripts/pipedrive-filter/pipedrive-filter.py"
