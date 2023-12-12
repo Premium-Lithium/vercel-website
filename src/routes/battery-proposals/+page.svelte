@@ -10,11 +10,10 @@
 
 	let supabaseAuth: Object
 	let activeArea: Array<any> | undefined = undefined
+	let activeCampaign: string | undefined = undefined
 
-	let campaign: string = ''
-	const urlParams = $page.url.searchParams
-	campaign = urlParams.get('campaign-id') || ''
-	let campaignAreas: Array<any>
+	let activeCampaigns: Array<string> = []
+	let campaignAreas: Array<any> = []
 	let uniqueIdentifier: UUID
 	let loadedWorkerDetails: boolean = false
 	let broadcastRoom: RealtimeChannel
@@ -23,16 +22,16 @@
 	let uploadedFile: File
 	let uploadedFilesFromFileInput: FileList
 
+	$: console.log(campaignAreas)
 	onMount(async () => {
-		campaignAreas = await loadCampaignAreas(campaign)
+		campaignAreas = await loadCampaignAreas()
 	})
-
 	$: if (supabaseAuth) {
 		uniqueIdentifier = supabaseAuth.user.id
 		broadcastRoom = supabase.channel('room1')
 		broadcastRoom
 			.on('broadcast', { event: 'claim_project' }, async (payload) => {
-				campaignAreas = await loadCampaignAreas(campaign)
+				campaignAreas = await loadCampaignAreas()
 			})
 			.subscribe()
 		loadWorkerDetails().then(() => {
@@ -49,35 +48,60 @@
 		if (workerData.length == 0) {
 			const { data: insertWorkerData, error: insertWorkerError } = await supabase
 				.from('battery_turk_workers')
-				.insert({ 'worker_id': uniqueIdentifier })
+				.insert({ 'worker_id': uniqueIdentifier, 'worker_email': supabaseAuth.user.email })
 		} else {
 			if (workerData[0]['assigned_region']) {
 				activeArea = workerData[0]['assigned_region'].area
+				activeCampaign = workerData[0]['assigned_region']['campaign_id']
 			}
 			numRegionsCompleted = workerData[0]['completed_regions']?.length ?? 0
 		}
 	}
 
-	async function loadCampaignAreas(campaignId: string) {
+	async function loadCampaignArea(campaignId: string) {
 		const { data: campaignData, error: campaignGetError } = await supabase
 			.from('campaign_master')
 			.select('*')
 			.eq('campaign_id', campaignId)
+		if (!campaignData[0]) return
 		return campaignData[0].area
 			.filter((x) => {
 				return x.status == 'unprocessed'
 			})
 			.sort((a, b) => b.estNumProperties - a.estNumProperties)
+			.map((x) => {
+				return { campaignId, 'area': x }
+			})
+	}
+
+	async function loadCampaignAreas() {
+		const { data: getActiveCampaignData, error: getActiveCampaignError } = await supabase
+			.from('campaign_master')
+			.select('*')
+		activeCampaigns = getActiveCampaignData
+			?.map((x) => {
+				if (x['campaign_name'].includes('existing-solar')) return x.campaign_id
+			})
+			.filter((x) => {
+				return x
+			})
+
+		let promises: Array<Promise<Array<any>>> = []
+		activeCampaigns.forEach((x) => {
+			promises.push(loadCampaignArea(x))
+		})
+		return (await Promise.all(promises))[0]
 	}
 
 	async function completeRegion() {
-		if (uploadedFile) {
-			if (!(await uploadFile(uploadedFile))) return
-		}
 		let { data: selectData, error: selectError } = await supabase
 			.from('battery_turk_workers')
 			.select('*')
 			.eq('worker_id', uniqueIdentifier)
+
+		if (uploadedFile) {
+			if (!(await uploadFile(uploadedFile, activeCampaign))) return
+		}
 
 		let regionToUpload = {
 			'time_finished': new Date(Date.now()).toISOString(),
@@ -95,7 +119,7 @@
 		const { data: masterSelectData, error: masterSelectError } = await supabase
 			.from('campaign_master')
 			.select('area')
-			.eq('campaign_id', campaign)
+			.eq('campaign_id', activeCampaign)
 
 		let masterDataToUpload = masterSelectData[0].area.map((x) => {
 			if (JSON.stringify(x.area) == JSON.stringify(selectData[0]['assigned_region'].area)) {
@@ -106,8 +130,9 @@
 		const { data: masterUploadData, error: masterUploadError } = await supabase
 			.from('campaign_master')
 			.update({ 'area': masterDataToUpload })
-			.eq('campaign_id', campaign)
+			.eq('campaign_id', selectData[0]['campaign_id'])
 		activeArea = null
+		activeCampaign = null
 		broadcastRoom.send({
 			type: 'broadcast',
 			event: 'claim_project',
@@ -117,10 +142,11 @@
 		uploadedFilesFromFileInput = undefined
 	}
 
-	async function saveKml(region) {
+	async function saveKml(region, campaign) {
 		let res = await fetch(template)
 		let kml = await res.text()
 		let uuid = `${uniqueIdentifier.split('-')[0]}-region-${numRegionsCompleted}`
+		console.log(region, campaign)
 		kml = kml
 			.replace(
 				'COORDINATE-LIST',
@@ -148,13 +174,14 @@
 	}
 
 	async function allocateNewRegion() {
-		campaignAreas = await loadCampaignAreas(campaign)
+		campaignAreas = await loadCampaignAreas()
 		const { data: insertData, error: insertError } = await supabase
 			.from('battery_turk_workers')
 			.update({
 				'assigned_region': {
-					area: campaignAreas[0].area,
-					'time_started': new Date(Date.now()).toISOString()
+					area: campaignAreas[0].area.area,
+					'time_started': new Date(Date.now()).toISOString(),
+					'campaign_id': campaignAreas[0].campaignId
 				}
 			})
 			.eq('worker_id', uniqueIdentifier)
@@ -162,10 +189,10 @@
 		const { data: masterSelectData, error: masterSelectError } = await supabase
 			.from('campaign_master')
 			.select('area')
-			.eq('campaign_id', campaign)
+			.eq('campaign_id', campaignAreas[0].campaignId)
 
 		let masterDataToUpload = masterSelectData[0].area.map((x) => {
-			if (JSON.stringify(x.area) == JSON.stringify(campaignAreas[0].area)) {
+			if (JSON.stringify(x.area) == JSON.stringify(campaignAreas[0].area.area)) {
 				x.status = 'allocated'
 			}
 			return x
@@ -173,12 +200,13 @@
 		const { data: masterUploadData, error: masterUploadError } = await supabase
 			.from('campaign_master')
 			.update({ 'area': masterDataToUpload })
-			.eq('campaign_id', campaign)
+			.eq('campaign_id', campaignAreas[0].campaignId)
 		activeArea = campaignAreas[0].area
-		await saveKml(activeArea)
+		activeCampaign = campaignAreas[0].campaignId
+		await saveKml(campaignAreas[0].area.area, campaignAreas[0].campaignId)
 	}
 
-	async function uploadFile(file) {
+	async function uploadFile(file, campaign) {
 		let successful = false
 		try {
 			const { data, error } = await supabase.storage
@@ -229,7 +257,7 @@
 
 {#if browser}
 	{#if !supabaseAuth}
-		<Auth redirectUrl={`battery-proposals/?campaign-id=${campaign}`} bind:supabaseAuth />
+		<Auth redirectUrl={`battery-proposals`} bind:supabaseAuth />
 	{:else if !loadedWorkerDetails}
 		<p>Loading...</p>
 	{:else}
@@ -239,7 +267,7 @@
 					<button
 						class="download-button"
 						on:click={() => {
-							saveKml(activeArea)
+							saveKml(activeArea, activeCampaign)
 						}}>Download KML</button
 					>
 					<button

@@ -8,6 +8,7 @@
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
+	import { updateStatus } from '$lib/campaignTools'
 
 	let uniqueIdentifier = undefined
 	let projects = []
@@ -16,10 +17,7 @@
 	let supabaseAuth = undefined
 	let modals = []
 	const flagsVisibleToWorker = ['PANELS_ALREADY_INSTALLED', 'ROOF_TOO_COMPLICATED']
-	let campaign = undefined
-
-	const urlParams = $page.url.searchParams
-	campaign = urlParams.get('campaign-id') || ''
+	let activeCampaigns = []
 
 	// PARAMETERS
 
@@ -43,6 +41,12 @@
 	})
 
 	async function populateProjectList() {
+		const { data: getActiveCampaignData, error: getActiveCampaignError } = await supabase
+			.from('campaign_master')
+			.select('*')
+		activeCampaigns = getActiveCampaignData?.map((x) => {
+			if (x['campaign_name'].includes('new-solar')) return x.campaign_id
+		})
 		let workerData = await getWorkerData(uniqueIdentifier)
 		let projectIds = []
 		if (workerData.length == 0) {
@@ -63,7 +67,13 @@
 			modals = modals.length > projects.length ? [...modals] : [...modals, null]
 			projects = [
 				...projects,
-				{ projectId: x.id, address: x.address, latLon: x.lat_lon, status: statusToString(x.status) }
+				{
+					projectId: x.id,
+					address: x.address,
+					latLon: x.lat_lon,
+					status: statusToString(x.status),
+					campaignId: x['campaign_id']
+				}
 			]
 		})
 	}
@@ -103,6 +113,7 @@
 			id: houseData['customer_id'],
 			address: houseData?.address['formatted_address'],
 			lat_lon: houseData?.address.geometry.location,
+			campaign_id: houseData['campaign_id'],
 			status: projectStatus
 		}
 	}
@@ -116,9 +127,9 @@
 	}
 
 	async function createNewWorker(workerId, numOfProjects) {
-		let { data, error } = await supabase.rpc('get_random_campaign_customers', {
+		let { data, error } = await supabase.rpc('get_campaign_customers', {
 			numrows: numOfProjects,
-			campaignid: campaign
+			campaignids: activeCampaigns
 		})
 
 		if (error) {
@@ -139,7 +150,8 @@
 						openSolarId: null,
 						flags: []
 					}
-				})
+				}),
+				worker_email: supabaseAuth.user.email
 			}
 		])
 
@@ -224,7 +236,7 @@
 	}
 
 	async function completeProject(project, i) {
-		let awaitingResponse = true
+		awaitingResponse = true
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
@@ -238,12 +250,21 @@
 				flags.forEach(async (flag) => {
 					await addFlagToProject(project, flag)
 				})
+				let newFlags = [
+					...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
+				] // merge flag arrays, removing duplicates
 				await addOpenSolarLinkToAddress(
 					entry.openSolarId,
 					project.projectId,
 					uniqueIdentifier,
 					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
-					[...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])] // merge flag arrays, removing duplicates
+					newFlags
+				)
+				await updateStatus(
+					project.campaignId,
+					project.projectId,
+					'DESIGN-COMPLETED',
+					'An OpenSolar design has been completed'
 				)
 			}
 		})
@@ -389,7 +410,7 @@
 			<h3>{projects[i].address.split(',')[0]}</h3>
 		</div>
 		{#if projects[i]}
-			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lon, 200, 19)} />
+			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lng, 200, 19)} />
 		{/if}
 		<div class="button-container">
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
