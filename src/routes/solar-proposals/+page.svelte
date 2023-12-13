@@ -16,6 +16,7 @@
 	let isAuthenticated = false
 	let supabaseAuth = undefined
 	let modals = []
+	let menuModal
 	const flagsVisibleToWorker = ['PANELS_ALREADY_INSTALLED', 'ROOF_TOO_COMPLICATED']
 	let activeCampaigns = []
 
@@ -126,19 +127,64 @@
 		return `${split[0][0].toUpperCase()}${split[0].slice(1)}${split[1] ? ` ${split[1]}` : ''}`
 	}
 
+	async function assignNProjects(workerId, numOfProjects) {
+		const { data: getProjectsData, error: getProjectsError } = await supabase
+			.from('solar_turk_workers')
+			.select('assigned_projects')
+			.eq('worker_id', workerId)
+		let assignedProjects = getProjectsData[0]['assigned_projects'].map((x) => {
+			return x.customerId
+		})
+
+		let { data, error } = await supabase.rpc('get_campaign_customers', {
+			numrows: numOfProjects,
+			campaignids: activeCampaigns,
+			assignedprojectids: assignedProjects
+		})
+
+		console.log(data)
+
+		if (error) {
+			console.error('Error fetching random campaign customers:', error)
+			return
+		}
+
+		let response = await supabase
+			.from('solar_turk_workers')
+			.update({
+				assigned_projects: [
+					...data.map((x) => {
+						return {
+							customerId: x['customer_id'],
+							status: 'not_started',
+							openSolarId: null,
+							flags: []
+						}
+					}),
+					...getProjectsData[0]['assigned_projects']
+				]
+			})
+			.eq('worker_id', workerId)
+
+		let newData = response.data
+		let newError = response.error
+
+		if (newError) {
+			console.error('Error allocating new projects:', newError)
+		}
+	}
+
 	async function createNewWorker(workerId, numOfProjects) {
 		let { data, error } = await supabase.rpc('get_campaign_customers', {
 			numrows: numOfProjects,
-			campaignids: activeCampaigns
+			campaignids: activeCampaigns,
+			assignedprojectids: []
 		})
 
 		if (error) {
 			console.error('Error fetching random campaign customers:', error)
 			return
 		}
-		let projectIds = data.map((x) => {
-			return x.id
-		})
 
 		let response = await supabase.from('solar_turk_workers').insert([
 			{
@@ -448,9 +494,42 @@
 		</div>
 	</Modal>
 {/each}
+<Modal showModal={false} bind:dialog={menuModal}>
+	<div class="modal" slot="header"><h3>Menu</h3></div>
+	<div class="inner-modal">
+		<div class="button-container">
+			<button
+				class="modal-button"
+				on:click={async () => {
+					await assignNProjects(uniqueIdentifier, 25)
+					await populateProjectList()
+					menuModal.close()
+				}}
+			>
+				Get new projects
+			</button>
+			<button
+				class="modal-button"
+				on:click={async () => {
+					await supabase.auth.signOut()
+					supabaseAuth = undefined
+					isAuthenticated = false
+					menuModal.close()
+				}}
+			>
+				Log out
+			</button>
+		</div>
+	</div>
+</Modal>
 
 <div class="container">
 	{#if isAuthenticated}
+		<div class="hamburger" on:click={menuModal.showModal()}>
+			<div class="ham" />
+			<div class="ham" />
+			<div class="ham" />
+		</div>
 		{#if awaitingResponse}
 			<div class="spinner" />
 			<div class="loading-indicator">Loading...</div>
@@ -509,6 +588,32 @@
 </div>
 
 <style>
+	.hamburger {
+		width: 40px;
+		height: 30px;
+		margin: 26px 24px 24px 24px;
+		position: absolute;
+		display: grid;
+		grid-template-rows: 1fr 1fr 1fr;
+	}
+
+	.hamburger:hover > .ham {
+		background: #424242;
+	}
+
+	.ham {
+		width: 100%;
+		height: 50%;
+		top: 25%;
+		position: relative;
+		background: black;
+		border-radius: 25px;
+	}
+
+	.inner-modal {
+		width: 40vw;
+	}
+
 	.bold {
 		font-weight: 600;
 	}
