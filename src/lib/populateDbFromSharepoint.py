@@ -85,5 +85,5 @@ def process_kml_files_and_upload(campaign_id):
 
 ctx = loginToSharepoint()
 campaign_id = getFilesFromSharepoint(ctx)
-process_kml_files_and_upload('004-A')
+process_kml_files_and_upload(campaign_id)
 shutil.rmtree('kmlFilesToProcess')
