@@ -323,7 +323,7 @@
 		let addresses = await Promise.all(
 			streetNames.map(async (streetName, i) => {
 				await new Promise((resolve) => {
-					setTimeout(resolve, 10 * i)
+					setTimeout(resolve, 50 * i)
 				})
 				let houses = []
 				let strikes = 0
@@ -349,7 +349,7 @@
 
 				while (!limitFound && limit <= hardLimit && strikes < 3) {
 					await new Promise((resolve) => {
-						setTimeout(resolve, 10)
+						setTimeout(resolve, 50)
 					})
 					let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 						method: 'POST',
