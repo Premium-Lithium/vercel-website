@@ -4,6 +4,7 @@
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
 	import { onMount } from 'svelte'
+	import { DateInput } from 'date-picker-svelte'
 
 	let pipelines: Array<PipeLineKey> = [] // Array of all pipelines and IDs
 	let selectedPipelines: Array<number> = [] // Array of selected pipelines filtered by
@@ -18,6 +19,13 @@
 	let feedbackOptions: Array<string> = []
 	let feedbackMessage: string
 	let feedbackSubmitted: boolean = false
+	let wonDate: Date = new Date(1420977600000)
+	let installDate: Date = new Date(1420977600000)
+	let quoteDate: Date = new Date(1420977600000)
+	let checkWonTime: boolean = false
+	let checkInstalledTime: boolean = false
+	let checkQuoteTime: boolean = false
+	let showNullMarkers: boolean = false
 
 	onMount(async () => {
 		loading = true
@@ -57,7 +65,7 @@
 					filters: [],
 					filtersApplied: [],
 					markers: [],
-					colour: '',
+					colour: '#C9FC50',
 					handle: document.createElement('div')
 				}
 				// Loop over each stage in pipeline, add name to the list
@@ -73,7 +81,8 @@
 					content: mapProps.body[m].content,
 					filterOption: mapProps.body[m].filterOption,
 					pipelineId: mapProps.body[m].pipelineId,
-					stageId: mapProps.body[m].stageId
+					stageId: mapProps.body[m].stageId,
+					deal: mapProps.body[m].deal
 				}
 				mapOptionPanels
 					.find(
@@ -195,11 +204,46 @@
 		updateMap()
 	}
 
+	/**
+	 * checks against each date filter (separately as some of the filters may not be chosen)
+	 * @param marker
+	 */
+	function checkDateFilterFor(marker: MarkerOptions): boolean {
+		let showMarker = true
+		if (marker.deal) {
+			if (checkWonTime) {
+				if (marker.deal.won_time) {
+					showMarker = new Date(marker.deal.won_time) > wonDate ? true : false
+				} else {
+					showMarker = showNullMarkers
+				}
+			}
+			if (checkQuoteTime) {
+				if (marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) {
+					showMarker = (new Date(marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) > installDate) ? true : false
+				} else {
+					showMarker = showNullMarkers
+				}
+			}
+			if (checkInstalledTime && marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) {
+				if (marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) {
+					new Date(marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) > quoteDate ? true : false
+				} else {
+					showMarker = showNullMarkers
+				}
+			}
+		} else {
+			showMarker = showNullMarkers
+		}
+		return showMarker
+	}
+
 	function applyFilters() {
 		makeAllMarkersInvisible()
 		for (let panel in mapOptionPanels) {
 			for (let marker in mapOptionPanels[panel].markers) {
 				if (
+					checkDateFilterFor(mapOptionPanels[panel].markers[marker]) &&
 					mapOptionPanels[panel].markers[marker].filterOption.value >= value &&
 					(statusFilters.includes(mapOptionPanels[panel].markers[marker].filterOption.status) ||
 						statusFilters.length === 0)
@@ -281,27 +325,27 @@
 
 	// TODO - change to heatmap layer
 	function renderKmlFile() {
-		console.log("KML")
 		let kmlLayer = new google.maps.KmlLayer()
-		kmlLayer.setUrl('https://premiumlithium-my.sharepoint.com/:u:/p/peter_gillingham/EWK0sLA_ZsRJpKPbRSftZGYBwmwMKDkD1EYWIRnles_cdQ?e=uhDKvi')
+		kmlLayer.setUrl(
+			'https://premiumlithium-my.sharepoint.com/:u:/p/peter_gillingham/EWK0sLA_ZsRJpKPbRSftZGYBwmwMKDkD1EYWIRnles_cdQ?e=uhDKvi'
+		)
 		kmlLayer.setMap(map)
-		console.log(kmlLayer)
 	}
 
 	// Create email content from button and message
 	// Clear input fields
-	// Send email request 
+	// Send email request
 	async function sendFeedbackEmail() {
 		const message = formEmailContent()
 		await fetch('/send-mail', {
-			method: "POST",
+			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				sender: "peter.gillingham@premiumlithium.com",
-				recipients: ["peter.gillingham@premiumlithium.com"],
-				subject: "Big Map Feedback",
+				sender: 'peter.gillingham@premiumlithium.com',
+				recipients: ['peter.gillingham@premiumlithium.com'],
+				subject: 'Big Map Feedback',
 				mail_body: message,
-				content_type: "TEXT"
+				content_type: 'HTML'
 			})
 		})
 		feedbackSubmitted = true
@@ -324,7 +368,6 @@
 			feedbackOptions.push(option)
 		}
 	}
-
 </script>
 
 <!-- 
@@ -371,19 +414,44 @@ Navigation
 						<label class="value-slider">
 							Only show deals with status:
 							<label>
-								Won
 								<input name="won-status" type="checkbox" on:click={() => filterByStatus('won')} />
+								Won
 							</label>
 							<label>
-								Open
 								<input name="won-status" type="checkbox" on:click={() => filterByStatus('open')} />
+								Open
 							</label>
 							<label>
-								Lost
 								<input name="won-status" type="checkbox" on:click={() => filterByStatus('lost')} />
+								Lost
 							</label>
 						</label>
+						<label>
+							Only show deals won after:
+							<div class="time-filter">
+								<input type="checkbox" bind:checked={checkWonTime} />
+								<DateInput timePrecision={'minute'} bind:value={wonDate} />
+							</div>
+						</label>
+						<label>
+							Only show deals installed after:
+							<div class="time-filter">
+								<input type="checkbox" bind:checked={checkInstalledTime} />
+								<DateInput timePrecision={'minute'} bind:value={installDate} />
+							</div>
+						</label>
+						<label>
+							Only show deals quoted after:
+							<div class="time-filter">
+								<input type="checkbox" bind:checked={checkQuoteTime} />
+								<DateInput timePrecision={'minute'} bind:value={quoteDate} />
+							</div>
+						</label>
 					</div>
+					<label>
+						<input type="checkbox" bind:checked={showNullMarkers} />
+						Show markers with no filter data
+					</label>
 					<div class="filter-buttons">
 						<button on:click={applyFilters}>Apply Filters</button>
 						<button on:click={clearFilters}>Clear Filters</button>
@@ -449,7 +517,7 @@ Navigation
 				>
 				<label>
 					<input
-						id=feature-checkbox
+						id="feature-checkbox"
 						name="feedback-checkboxes"
 						type="checkbox"
 						on:click={() => addFeedbackOptions('Feature')}
@@ -460,7 +528,7 @@ Navigation
 					name="feedback-form"
 					class="feedback-form"
 					bind:value={feedbackMessage}
-					></textarea>
+				/>
 				<div class="clear-stage-checkboxes">
 					<button on:click={sendFeedbackEmail}>Submit Feedback</button>
 				</div>
@@ -561,5 +629,10 @@ Navigation
 	.feedback-form {
 		width: 96%;
 		height: 80px;
+	}
+
+	.time-filter {
+		display: flex;
+		flex-direction: row;
 	}
 </style>

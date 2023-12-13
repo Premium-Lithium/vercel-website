@@ -1,4 +1,4 @@
-import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter, OptionPanel } from "./MapTypes"
+import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter } from "./MapTypes"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()
@@ -89,7 +89,7 @@ async function getPipelines(): Promise<Array<PipeLineKey>> {
  * @param deal individual deal to search address for
  * @returns address if found, null if not
  */
-async function findAddressFrom(deal:any): Promise<string | null> {
+async function findAddressFrom(deal: any): Promise<string | null> {
     if (deal['6b9665ec09998cda1910dbb2fdc6c2d7d6c49b2e']) {
         return deal['6b9665ec09998cda1910dbb2fdc6c2d7d6c49b2e']
     }
@@ -115,9 +115,9 @@ async function findAddressFrom(deal:any): Promise<string | null> {
  * @param deal deal to operate on
  * @returns lat long object if address found, null if not
  */
-async function getLatLongFor(deal: any):Promise<LatLongObj | null> {
+async function getLatLongFor(deal: any): Promise<LatLongObj | null> {
     if (deal['730c28155f2aa8bef8cbc858811bb350a25a14d0'] && deal['0fa7d4a340a160bfe5c5ff7b21e8e3948ec9068b']) {
-        let locRes = { lat: deal['730c28155f2aa8bef8cbc858811bb350a25a14d0'], lng: deal['0fa7d4a340a160bfe5c5ff7b21e8e3948ec9068b']}
+        let locRes = { lat: deal['730c28155f2aa8bef8cbc858811bb350a25a14d0'], lng: deal['0fa7d4a340a160bfe5c5ff7b21e8e3948ec9068b'] }
         return locRes
     }
     let address = await findAddressFrom(deal)
@@ -179,6 +179,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     filterOption: { value: (deals.data[deal].value) ? deals.data[deal].value : 0, status: deals.data[deal].status },
                     pipelineId: pipeline,
                     stageId: deals.data[deal].stage_id,
+                    deal: deals.data[deal]
                 }
                 marker = setContentOfMarker(marker, deals.data[deal])
                 markers.push(marker)

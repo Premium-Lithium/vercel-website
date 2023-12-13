@@ -92,6 +92,9 @@ dependencies:
   convert-svg-to-png:
     specifier: ^0.6.4
     version: 0.6.4
+  date-picker-svelte:
+    specifier: ^2.10.1
+    version: 2.10.1(svelte@4.2.7)
   dateformat:
     specifier: ^5.0.3
     version: 5.0.3
@@ -3608,6 +3611,14 @@ packages:
       whatwg-url: 7.1.0
     dev: false
     optional: true
+
+  /date-picker-svelte@2.10.1(svelte@4.2.7):
+    resolution: {integrity: sha512-z4cJ33hngSCPlxc1ERVOgRBJHQXwghJMNtQBT0Q2d3Z9IHGmoIYpViS5s9oRbivs4+TDHkIBmqd/8Ldu9xEYhw==}
+    peerDependencies:
+      svelte: ^3.24.0 || ^4.0.0
+    dependencies:
+      svelte: 4.2.7
+    dev: false
 
   /dateformat@5.0.3:
     resolution: {integrity: sha512-Kvr6HmPXUMerlLcLF+Pwq3K7apHpYmGDVqrxcDasBg86UcKeTSNWbEzU8bwdXnxnR44FtMhJAxI4Bov6Y/KUfA==}

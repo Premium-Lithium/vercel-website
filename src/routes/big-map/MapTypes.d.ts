@@ -36,6 +36,7 @@ export interface MarkerOptions {
     filterOption: DealFilter
     pipelineId: string
     stageId: string
+    deal: any
 }
 
 export interface LatLongObj {
