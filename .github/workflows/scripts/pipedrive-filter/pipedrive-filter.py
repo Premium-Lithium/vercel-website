@@ -26,6 +26,9 @@ leadSourceDict = {
     "965": "Prism",
     "974": "Survey Booking",
     "1058": "Retail Store",
+    "1081": "Right Move",
+    "1082": "Post Card",
+    "1084": "Flyer",
     None: None,
 }
 
@@ -101,7 +104,7 @@ def getFilteredDeals(FILTERID):
 
 
 def createLostLeadsSpreadSheet(deals):
-    print("Creating Spreadsheet")
+    print("Creating Lost Lead Spreadsheet")
     wb = Workbook()
     ws = wb.active
     ws.append(
@@ -129,7 +132,7 @@ def createLostLeadsSpreadSheet(deals):
         row.append(deal["title"])
         row.append(deal["value"])
         if deal["org_id"] == None:
-            row.append(None)
+            row.append('')
         else:
             row.append(deal["org_id"]["name"])
         row.append(deal["person_id"]["name"])
@@ -143,7 +146,10 @@ def createLostLeadsSpreadSheet(deals):
         row.append(deal["add_time"])
         row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
         row.append(deal['won_time'])
-        row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
+        if deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b'] != None:
+            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
+        else:
+            row.append('')
         row.append(deal['stage_id'])
         ws.append(row)
     wb.save("LostLeadsBySource.xlsx")
@@ -151,7 +157,7 @@ def createLostLeadsSpreadSheet(deals):
 
 
 def createReportingSpreadSheet(deals):
-    print("Creating Spreadsheet")
+    print("Creating Reporting Spreadsheet")
     wb = Workbook()
     ws = wb.active
     ws.append(
