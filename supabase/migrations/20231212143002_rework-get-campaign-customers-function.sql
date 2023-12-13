@@ -2,19 +2,20 @@ drop function if exists "public"."get_random_campaign_customers"(numrows integer
 
 set check_function_bodies = off;
 
-CREATE OR REPLACE FUNCTION public.get_campaign_customers(campaignids text[], numrows integer)
- RETURNS SETOF campaign_customers
- LANGUAGE plpgsql
-AS $function$
+create or replace function public.get_campaign_customers (
+  campaignids text[],
+  numrows integer,
+  assignedprojectids uuid[]
+) returns setof campaign_customers as $$
 BEGIN
     RETURN QUERY
-        SELECT *
-        FROM campaign_customers
-        WHERE campaign_id = ANY(campaignids)
-        ORDER BY random()
-        LIMIT numrows;
+    SELECT *
+    FROM campaign_customers
+    WHERE campaign_id = ANY(campaignids)
+    AND customer_id NOT IN (SELECT unnest(assignedprojectids))
+    ORDER BY random()
+    LIMIT numrows;
 END;
-$function$
-;
+$$ language plpgsql;
 
 
