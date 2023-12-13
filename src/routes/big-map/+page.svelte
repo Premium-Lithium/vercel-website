@@ -10,8 +10,9 @@
 	let mapOptionPanels: Array<OptionPanel> = []
 	let map: any, loader: any
 	let handle: HTMLElement
-	let icon: string
+	let helpHandle: HTMLElement
 	let loading: boolean = false
+	let icon: string
 	let value: number = 0
 	let statusFilters: Array<string> = []
 
@@ -388,6 +389,14 @@ Get custom markers working
 			</div>
 		</div>
 	{/each}
+	<div class=control-panel use:movable={{ handle: helpHandle }}>
+		<div class="filter-controls">
+			<div class="header-row">
+				<h3>Feedback</h3>
+				<div class="handle" bind:this={helpHandle}>.</div>
+			</div>
+		</div>
+	</div>
 	<div id="map">
 		<GoogleMap
 			bind:map
