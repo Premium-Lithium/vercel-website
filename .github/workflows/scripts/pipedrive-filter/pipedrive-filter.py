@@ -71,6 +71,9 @@ batteryTypeDict = {
     "825": "Pod",
     "826": "Plant",
     "833": "Panel",
+    "1071": "Givenergy All in one",
+    "1072": "Sunsynk ",
+    "1073": "Givenergy",
     None: None
 }
 
@@ -122,30 +125,27 @@ def createLostLeadsSpreadSheet(deals):
         ]
     )
     for deal in deals:
-        try:
-            row = []
-            row.append(deal["title"])
-            row.append(deal["value"])
-            if deal["org_id"] == None:
-                row.append(None)
-            else:
-                row.append(deal["org_id"]["name"])
-            row.append(deal["person_id"]["name"])
-            row.append(deal["expected_close_date"])
-            row.append(deal["next_activity_date"])
-            row.append(deal["user_id"]["name"])
-            row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
-            row.append(deal["lost_reason"])
-            row.append(deal["lost_time"])
-            row.append(deal["status"])  # enum
-            row.append(deal["add_time"])
-            row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
-            row.append(deal['won_time'])
-            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
-            row.append(deal['stage_id'])
-            ws.append(row)
-        except:
-            pass
+        row = []
+        row.append(deal["title"])
+        row.append(deal["value"])
+        if deal["org_id"] == None:
+            row.append(None)
+        else:
+            row.append(deal["org_id"]["name"])
+        row.append(deal["person_id"]["name"])
+        row.append(deal["expected_close_date"])
+        row.append(deal["next_activity_date"])
+        row.append(deal["user_id"]["name"])
+        row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
+        row.append(deal["lost_reason"])
+        row.append(deal["lost_time"])
+        row.append(deal["status"])  # enum
+        row.append(deal["add_time"])
+        row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
+        row.append(deal['won_time'])
+        row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
+        row.append(deal['stage_id'])
+        ws.append(row)
     wb.save("LostLeadsBySource.xlsx")
     return "LostLeadsBySource.xlsx"
 
@@ -181,31 +181,28 @@ def createReportingSpreadSheet(deals):
     )
     for deal in deals:
         row = []
-        try:
-            row.append(deal["title"])
-            row.append(deal["status"])
-            row.append(deal['value'])
-            row.append(deal['won_time'])
-            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
-            row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
-            row.append(batteryTypeDict[deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d']])
-            row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
-            row.append(deal['567489c8ee63a1e43f24caedcbd9ce1398c63317'])
-            row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
-            row.append(evChargerTypeDict[deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
-            row.append(epsSwitchDict[deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
-            row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
-            row.append(paymentTypeDict[deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55']])
-            row.append(deal['add_time'])
-            row.append(deal['person_id']['name'])
-            row.append(deal['stage_id'])
-            row.append(dealTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
-            row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
-            row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
-            row.append(deal['c71b79129a01daee3ed338e43f4b99b2356e4a13'])
-            ws.append(row)
-        except:
-            pass
+        row.append(deal["title"])
+        row.append(deal["status"])
+        row.append(deal['value'])
+        row.append(deal['won_time'])
+        row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
+        row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
+        row.append(batteryTypeDict[deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d']])
+        row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
+        row.append(deal['567489c8ee63a1e43f24caedcbd9ce1398c63317'])
+        row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
+        row.append(evChargerTypeDict[deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
+        row.append(epsSwitchDict[deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
+        row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
+        row.append(paymentTypeDict[deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55']])
+        row.append(deal['add_time'])
+        row.append(deal['person_id']['name'])
+        row.append(deal['stage_id'])
+        row.append(dealTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
+        row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
+        row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
+        row.append(deal['c71b79129a01daee3ed338e43f4b99b2356e4a13'])
+        ws.append(row)
     wb.save("Reporting.xlsx")
     return "Reporting.xlsx"
 
