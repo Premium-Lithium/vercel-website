@@ -195,7 +195,7 @@
 		</button>
 	</form>
 </Modal>
-{#if isAuthenticated}
+{#if !isAuthenticated}
 	<MagicLink bind:isAuthenticated redirectUrl={'/battery-proposals/define-project-area'} />
 {:else}
 	<div class="container">
