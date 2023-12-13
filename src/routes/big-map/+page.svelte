@@ -15,6 +15,9 @@
 	let icon: string
 	let value: number = 0
 	let statusFilters: Array<string> = []
+	let feedbackOptions: Array<string> = []
+	let feedbackMessage: string
+	let feedbackSubmitted: boolean = false
 
 	onMount(async () => {
 		loading = true
@@ -193,7 +196,6 @@
 	}
 
 	function applyFilters() {
-		console.log(value, statusFilters)
 		makeAllMarkersInvisible()
 		for (let panel in mapOptionPanels) {
 			for (let marker in mapOptionPanels[panel].markers) {
@@ -277,7 +279,7 @@
 		}
 	}
 
-	// TODO
+	// TODO - change to heatmap layer
 	function renderKmlFile() {
 		console.log("KML")
 		let kmlLayer = new google.maps.KmlLayer()
@@ -285,12 +287,51 @@
 		kmlLayer.setMap(map)
 		console.log(kmlLayer)
 	}
+
+	// Create email content from button and message
+	// Clear input fields
+	// Send email request 
+	async function sendFeedbackEmail() {
+		const message = formEmailContent()
+		await fetch('/send-mail', {
+			method: "POST",
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				sender: "peter.gillingham@premiumlithium.com",
+				recipients: ["peter.gillingham@premiumlithium.com"],
+				subject: "Big Map Feedback",
+				mail_body: message,
+				content_type: "TEXT"
+			})
+		})
+		feedbackSubmitted = true
+	}
+
+	function formEmailContent(): string {
+		let message: string = ''
+		for (let i in feedbackOptions) {
+			message += feedbackOptions[i] + ', '
+		}
+		message += '\n'
+		message += feedbackMessage
+		return message
+	}
+
+	function addFeedbackOptions(option: string) {
+		if (feedbackOptions.includes(option)) {
+			feedbackOptions.splice(feedbackOptions.indexOf(option), 1)
+		} else {
+			feedbackOptions.push(option)
+		}
+	}
+
 </script>
 
 <!-- 
 TODO List
 Implement dropdown checkboxes: https://flowbite-svelte.com/docs/components/dropdown
-Get custom markers working
+Navigation
+
 -->
 <div class="map-container">
 	<div class="control-panel" use:movable={{ handle }}>
@@ -389,13 +430,45 @@ Get custom markers working
 			</div>
 		</div>
 	{/each}
-	<div class=control-panel use:movable={{ handle: helpHandle }}>
+	<div class="control-panel" use:movable={{ handle: helpHandle }}>
 		<div class="filter-controls">
 			<div class="header-row">
 				<h3>Feedback</h3>
 				<div class="handle" bind:this={helpHandle}>.</div>
 			</div>
+			<p>Provide your feedback with the fields below</p>
+			<div class="stage-checkboxes">
+				<h5>Tick all that apply:</h5>
+				<label>
+					<input
+						id="bug-checkbox"
+						name="feedback-checkboxes"
+						type="checkbox"
+						on:click={() => addFeedbackOptions('Bug')}
+					/>Bug</label
+				>
+				<label>
+					<input
+						id=feature-checkbox
+						name="feedback-checkboxes"
+						type="checkbox"
+						on:click={() => addFeedbackOptions('Feature')}
+					/>Feature</label
+				>
+				<textarea
+					id="feedback-textarea"
+					name="feedback-form"
+					class="feedback-form"
+					bind:value={feedbackMessage}
+					></textarea>
+				<div class="clear-stage-checkboxes">
+					<button on:click={sendFeedbackEmail}>Submit Feedback</button>
+				</div>
+			</div>
 		</div>
+		{#if feedbackSubmitted}
+			<p>Thanks!</p>
+		{/if}
 	</div>
 	<div id="map">
 		<GoogleMap
@@ -483,5 +556,10 @@ Get custom markers working
 	.value-slider {
 		display: flex;
 		flex-direction: column;
+	}
+
+	.feedback-form {
+		width: 96%;
+		height: 80px;
 	}
 </style>
