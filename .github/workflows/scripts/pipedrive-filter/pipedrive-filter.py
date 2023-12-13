@@ -83,27 +83,32 @@ batteryTypeDict = {
 pd = Client(domain="https://premiumlithium.pipedrive.com/")
 pd.set_api_token(PIPEDRIVE_API_TOKEN)
 
-
 # Gets deals by filter Lost Deals by Lead Source LOOK INTO PAGINATION https://github.com/GearPlug/pipedrive-python/blob/master/pipedrive/deals.py
 def getFilteredDeals(FILTERID):
     print("Getting Deals")
     moreDealsToCome = True
     start = 0
     dealData = []
+    relatedData = {}
     while moreDealsToCome:
         response = pd.deals.get_all_deals_with_filter(
             FILTERID, params={"start": start}
         )
+        for obj in response['related_objects']['stage']:
+            try:
+                relatedData[str(obj)] = response['related_objects']['stage'][obj]
+            except:
+                pass # Not important if it broke - it means there were no 
         for deal in response["data"]:
             dealData.append(deal)
         if response["additional_data"]["pagination"]["more_items_in_collection"]:
             start = response["additional_data"]["pagination"]["next_start"]
         else:
             moreDealsToCome = False
-    return dealData
+    return dealData, relatedData
 
 
-def createLostLeadsSpreadSheet(deals):
+def createLostLeadsSpreadSheet(deals, relatedObjects):
     print("Creating Lost Lead Spreadsheet")
     wb = Workbook()
     ws = wb.active
@@ -150,13 +155,13 @@ def createLostLeadsSpreadSheet(deals):
             row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
         else:
             row.append('')
-        row.append(deal['stage_id'])
+        row.append(relatedObjects[str(deal['stage_id'])]['name'])
         ws.append(row)
     wb.save("LostLeadsBySource.xlsx")
     return "LostLeadsBySource.xlsx"
 
 
-def createReportingSpreadSheet(deals):
+def createReportingSpreadSheet(deals, relatedObjects):
     print("Creating Reporting Spreadsheet")
     wb = Workbook()
     ws = wb.active
@@ -203,7 +208,7 @@ def createReportingSpreadSheet(deals):
         row.append(paymentTypeDict[deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55']])
         row.append(deal['add_time'])
         row.append(deal['person_id']['name'])
-        row.append(deal['stage_id'])
+        row.append(relatedObjects[str(deal['stage_id'])]['name'])
         row.append(dealTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
         row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
         row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
@@ -235,12 +240,12 @@ def uploadToSharepoint(pathToFile):
 
 
 def main():
-    deals = getFilteredDeals(LOST_LEAD_FILTER_ID)
-    pathToFile = createLostLeadsSpreadSheet(deals)
+    deals, relatedObjects = getFilteredDeals(LOST_LEAD_FILTER_ID)
+    pathToFile = createLostLeadsSpreadSheet(deals, relatedObjects)
     uploadToSharepoint(pathToFile)
     os.remove(pathToFile)
-    deals = getFilteredDeals(REPORTING_FILTER_ID)
-    pathToFile = createReportingSpreadSheet(deals)
+    deals, relatedObjects = getFilteredDeals(REPORTING_FILTER_ID)
+    pathToFile = createReportingSpreadSheet(deals, relatedObjects)
     uploadToSharepoint(pathToFile)
     os.remove(pathToFile)
 
