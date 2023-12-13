@@ -267,7 +267,7 @@
 									console.error('Error with fetch for house:', house, error)
 									resolve(null)
 								}
-							}, promises.length * 201)
+							}, promises.length * 250)
 						)
 					)
 				})
@@ -322,6 +322,9 @@
 	async function findAddressesOnStreets(streetNames, streetNodes) {
 		let addresses = await Promise.all(
 			streetNames.map(async (streetName, i) => {
+				await new Promise((resolve) => {
+					setTimeout(resolve, 10 * i)
+				})
 				let houses = []
 				let strikes = 0
 				let limit = 1
@@ -345,6 +348,9 @@
 					.join(', ')
 
 				while (!limitFound && limit <= hardLimit && strikes < 3) {
+					await new Promise((resolve) => {
+						setTimeout(resolve, 10)
+					})
 					let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 						method: 'POST',
 						body: JSON.stringify({ address: `${limit} ${streetName}, ${addressArea}` })
@@ -579,7 +585,7 @@
 							console.error('Error with fetch for house:', x.house, error)
 							resolve(null)
 						}
-					}, i * 201)
+					}, i * 250)
 				)
 		)
 		let googleSolarResults = []
