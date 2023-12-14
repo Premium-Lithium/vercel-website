@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MarkerOptions, PipeLineKey, OptionPanel } from './MapTypes'
+	import type { MarkerOptions, PipeLineKey, OptionPanel, LatLongObj } from './MapTypes'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -26,9 +26,11 @@
 	let checkInstalledTime: boolean = false
 	let checkQuoteTime: boolean = false
 	let showNullMarkers: boolean = false
+	let heatmap: google.maps.visualization.HeatmapLayer
 
 	onMount(async () => {
 		loading = true
+		generateHeatmap()
 		let res = await fetch('/big-map', {
 			method: 'POST',
 			headers: {
@@ -41,7 +43,6 @@
 		const iconStream = fetch('/marker-base.svg')
 		icon = await (await iconStream).text()
 		loading = false
-		renderKmlFile()
 	})
 
 	/**
@@ -220,14 +221,19 @@
 			}
 			if (checkQuoteTime) {
 				if (marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) {
-					showMarker = (new Date(marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) > installDate) ? true : false
+					showMarker =
+						new Date(marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) > installDate
+							? true
+							: false
 				} else {
 					showMarker = showNullMarkers
 				}
 			}
 			if (checkInstalledTime && marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) {
 				if (marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) {
-					new Date(marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) > quoteDate ? true : false
+					new Date(marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) > quoteDate
+						? true
+						: false
 				} else {
 					showMarker = showNullMarkers
 				}
@@ -323,18 +329,6 @@
 		}
 	}
 
-	// TODO - change to heatmap layer
-	function renderKmlFile() {
-		let kmlLayer = new google.maps.KmlLayer()
-		kmlLayer.setUrl(
-			'https://premiumlithium-my.sharepoint.com/:u:/p/peter_gillingham/EWK0sLA_ZsRJpKPbRSftZGYBwmwMKDkD1EYWIRnles_cdQ?e=uhDKvi'
-		)
-		kmlLayer.setMap(map)
-	}
-
-	// Create email content from button and message
-	// Clear input fields
-	// Send email request
 	async function sendFeedbackEmail() {
 		const message = formEmailContent()
 		await fetch('/send-mail', {
@@ -367,6 +361,29 @@
 		} else {
 			feedbackOptions.push(option)
 		}
+	}
+
+	async function toggleHeatmap() {
+		if (heatmap.getMap() === map) {
+			heatmap.setMap(null)
+		} else {
+			heatmap.setMap(map)
+		}
+	}
+
+	async function generateHeatmap() {
+		let heatmapData: Array<google.maps.LatLng> = []
+		const heatRes = await fetch('./heatmapCoords.csv')
+		const data = await heatRes.text()
+		const lines = data.split('\n')
+		for (let line = 2; line < lines.length; line++) {
+			let row = lines[line].split(',')
+			if (!isNaN(parseFloat(row[0])) && !isNaN(parseFloat(row[1])))
+				heatmapData.push(new google.maps.LatLng(parseFloat(row[0]), parseFloat(row[1])))
+		}
+		heatmap = new google.maps.visualization.HeatmapLayer({
+			data: heatmapData
+		})
 	}
 </script>
 
@@ -455,6 +472,13 @@ Navigation
 					<div class="filter-buttons">
 						<button on:click={applyFilters}>Apply Filters</button>
 						<button on:click={clearFilters}>Clear Filters</button>
+					</div>
+				</div>
+				<div class="heatmap">
+					<h3>Solar Install Heatmap</h3>
+					<p>Residential solar installs across the UK</p>
+					<div class="heatmap-button">
+						<button on:click={toggleHeatmap}>Toggle Heatmap</button>
 					</div>
 				</div>
 			</div>

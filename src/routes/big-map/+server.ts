@@ -33,6 +33,9 @@ async function requestHandler(opts: MapRequest): Promise<MapResponse> {
                 }
             }
             return ({ ok: true, message: 'Got deals for all pipelines', statusCode: 200, body: markers })
+        // case 2:
+        //     let heatmapData = generateHeatmap()
+        //     return ({ ok: true, message: 'Generated heatmap', statusCode: 200, body: heatmapData })
         case -1: // Reserved for getting selected pipelines
             let pipelines = await getPipelines()
             return ({ ok: true, message: '', statusCode: 200, body: pipelines })

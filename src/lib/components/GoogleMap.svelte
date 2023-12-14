@@ -27,7 +27,7 @@
 		loader = new Loader.Loader({
 			apiKey: PUBLIC_GOOGLE_API_KEY,
 			version: 'weekly',
-			libraries: ['places']
+			libraries: ['places', 'visualization']
 		})
 		const mapOptions = {
 			center: initialCenter
