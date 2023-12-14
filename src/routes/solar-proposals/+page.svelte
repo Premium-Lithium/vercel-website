@@ -622,7 +622,7 @@
 	}
 
 	.inner-modal {
-		width: 40vw;
+		min-width: 25vw;
 	}
 
 	.bold {
