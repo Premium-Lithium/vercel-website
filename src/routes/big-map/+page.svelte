@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MarkerOptions, PipeLineKey, OptionPanel, LatLongObj } from './MapTypes'
+	import type { MarkerOptions, PipeLineKey, OptionPanel } from './MapTypes'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -267,10 +267,6 @@
 		applyFilters()
 	}
 
-	/**
-	 *
-	 * @param status
-	 */
 	function filterByStatus(status: string) {
 		if (statusFilters.includes(status)) {
 			statusFilters.splice(statusFilters.indexOf(status), 1)
@@ -284,10 +280,7 @@
 	 * @param panel the current panel being operated on
 	 */
 	function applyStages(panel: OptionPanel) {
-		for (let marker in panel.markers) {
-			panel.markers[marker].visible = false
-		}
-		updateMap()
+		makeAllMarkersInvisible()
 		if (panel.stagesVisible.length === 0) {
 			for (let marker in panel.markers) {
 				panel.markers[marker].visible = true
@@ -387,12 +380,6 @@
 	}
 </script>
 
-<!-- 
-TODO List
-Implement dropdown checkboxes: https://flowbite-svelte.com/docs/components/dropdown
-Navigation
-
--->
 <div class="map-container">
 	<div class="control-panel" use:movable={{ handle }}>
 		{#if loading}
