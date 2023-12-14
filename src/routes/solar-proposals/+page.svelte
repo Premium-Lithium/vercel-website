@@ -448,6 +448,12 @@
 		await completeProject(project, i)
 		modals[i].close()
 	}
+
+	async function pinNotOnRoofClicked(project, i) {
+		await addFlagToProject(project, 'ADDRESS_UNCLEAR')
+		await completeProject(project, i)
+		modals[i].close()
+	}
 </script>
 
 {#each modals as modal, i}
@@ -461,6 +467,11 @@
 		<div class="button-container">
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
+			>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => pinNotOnRoofClicked(projects[i], i)}
+				>Pin isn't on roof / address unclear</button
 			>
 			<button
 				class="warning-button"
@@ -611,7 +622,7 @@
 	}
 
 	.inner-modal {
-		width: 40vw;
+		min-width: 25vw;
 	}
 
 	.bold {
@@ -736,6 +747,7 @@
 		border-radius: 8px;
 		color: black;
 		cursor: pointer;
+		min-width: 60%;
 		transition: background-color 0.15s ease;
 	}
 
