@@ -364,6 +364,24 @@
 		}
 	}
 
+	async function generateLeedsHeatmap() {
+		let heatmapData: Array<google.maps.LatLng> = []
+		const heatRes = await fetch('./latlongleeds.csv')
+		const data = await heatRes.text()
+		const lines = data.split('\n')
+		for (let line = 2; line < lines.length; line++) {
+			let row = lines[line].replace(/[()]/g, ''); 
+			row = row.replace(/["']/g, ''); 
+			let latLng = row.split(',')
+			if (!isNaN(parseFloat(latLng[0])) && !isNaN(parseFloat(latLng[1]))) {
+				heatmapData.push(new google.maps.LatLng(parseFloat(latLng[1]), parseFloat(latLng[0])))
+			}
+		}
+		heatmap = new google.maps.visualization.HeatmapLayer({
+			data: heatmapData,
+		})
+	}
+
 	async function generateHeatmap() {
 		let heatmapData: Array<google.maps.LatLng> = []
 		const heatRes = await fetch('./heatmapCoords.csv')
