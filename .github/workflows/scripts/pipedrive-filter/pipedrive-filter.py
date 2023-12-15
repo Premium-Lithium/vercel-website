@@ -1,5 +1,4 @@
 from pipedrive.client import Client
-from datetime import datetime
 from office365.sharepoint.client_context import ClientContext, UserCredential
 from openpyxl import Workbook
 import os
@@ -8,6 +7,8 @@ PIPEDRIVE_API_TOKEN = "f3bf98ccd22e57bbc7f2693e52e32faf89b91e44"
 LOST_LEAD_FILTER_ID = "377"
 REPORTING_FILTER_ID = "277"
 LEAD_SOURCE_KEY = "9c6c616447ee45293d20ebb0db2d2f3f979bb86f"
+
+TESTING = False
 
 leadSourceDict = {
     "968": "Battery Competition",
@@ -89,47 +90,54 @@ def getFilteredDeals(FILTERID):
     moreDealsToCome = True
     start = 0
     dealData = []
-    relatedData = {}
+    stages = {}
+    pipelines = {}
     while moreDealsToCome:
         response = pd.deals.get_all_deals_with_filter(
             FILTERID, params={"start": start}
         )
         for obj in response['related_objects']['stage']:
             try:
-                relatedData[str(obj)] = response['related_objects']['stage'][obj]
+                stages[str(obj)] = response['related_objects']['stage'][obj]
             except:
-                pass # Not important if it broke - it means there were no 
+                pass # Not important if it broke - it means there wasn't anything useful in it
+        for obj in response['related_objects']['pipeline']:
+            try:
+                pipelines[str(obj)] = response['related_objects']['pipeline'][obj]
+            except:
+                pass # Not important if it broke - it means there wasn't anything useful in it
         for deal in response["data"]:
             dealData.append(deal)
         if response["additional_data"]["pagination"]["more_items_in_collection"]:
             start = response["additional_data"]["pagination"]["next_start"]
         else:
             moreDealsToCome = False
-    return dealData, relatedData
+    return dealData, stages, pipelines
 
 
-def createLostLeadsSpreadSheet(deals, relatedObjects):
+def createLostLeadsSpreadSheet(deals, stages, pipelines):
     print("Creating Lost Lead Spreadsheet")
     wb = Workbook()
     ws = wb.active
     ws.append(
         [
-            "Deal - Title",
-            "Deal - Value",
-            "Deal - Organization",
-            "Deal - Contact person",
-            "Deal - Expected close date",
-            "Deal - Next activity date",
-            "Deal - Owner",
-            "Deal - Lead Source",
-            "Deal - Lost reason",
-            "Deal - Lost time",
-            "Deal - Status",
-            "Deal - Deal created",
-            "Deal - Quote Issued",
-            "Deal - Won Time",
-            "Deal - Sales Contact",
-            "Deal - Stage"
+            "Title",
+            "Value",
+            "Organization",
+            "Contact person",
+            "Expected close date",
+            "Next activity date",
+            "Owner",
+            "Lead Source",
+            "Lost reason",
+            "Lost time",
+            "Status",
+            "Deal created",
+            "Pipeline"
+            "Quote Issued",
+            "Won Time",
+            "Sales Contact",
+            "Stage"
         ]
     )
     for deal in deals:
@@ -149,19 +157,21 @@ def createLostLeadsSpreadSheet(deals, relatedObjects):
         row.append(deal["lost_time"])
         row.append(deal["status"])  # enum
         row.append(deal["add_time"])
+        # pipeline
+        row.append(pipelines[str(deal['pipeline_id'])]['name'])
         row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
         row.append(deal['won_time'])
         if deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b'] != None:
             row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
         else:
             row.append('')
-        row.append(relatedObjects[str(deal['stage_id'])]['name'])
+        row.append(stages[str(deal['stage_id'])]['name'])
         ws.append(row)
     wb.save("LostLeadsBySource.xlsx")
     return "LostLeadsBySource.xlsx"
 
 
-def createReportingSpreadSheet(deals, relatedObjects):
+def createReportingSpreadSheet(deals, stages, pipelines):
     print("Creating Reporting Spreadsheet")
     wb = Workbook()
     ws = wb.active
@@ -196,7 +206,10 @@ def createReportingSpreadSheet(deals, relatedObjects):
         row.append(deal["status"])
         row.append(deal['value'])
         row.append(deal['won_time'])
-        row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
+        try:
+            row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
+        except:
+            row.append('')
         row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
         row.append(batteryTypeDict[deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d']])
         row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
@@ -208,7 +221,7 @@ def createReportingSpreadSheet(deals, relatedObjects):
         row.append(paymentTypeDict[deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55']])
         row.append(deal['add_time'])
         row.append(deal['person_id']['name'])
-        row.append(relatedObjects[str(deal['stage_id'])]['name'])
+        row.append(stages[str(deal['stage_id'])]['name'])
         row.append(dealTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
         row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
         row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
@@ -240,13 +253,19 @@ def uploadToSharepoint(pathToFile):
 
 
 def main():
-    deals, relatedObjects = getFilteredDeals(LOST_LEAD_FILTER_ID)
-    pathToFile = createLostLeadsSpreadSheet(deals, relatedObjects)
-    uploadToSharepoint(pathToFile)
-    os.remove(pathToFile)
-    deals, relatedObjects = getFilteredDeals(REPORTING_FILTER_ID)
-    pathToFile = createReportingSpreadSheet(deals, relatedObjects)
-    uploadToSharepoint(pathToFile)
-    os.remove(pathToFile)
+    if TESTING:
+        deals, stages, pipelines = getFilteredDeals(LOST_LEAD_FILTER_ID)
+        pathToFile = createLostLeadsSpreadSheet(deals, stages, pipelines)
+        deals, stages, pipelines = getFilteredDeals(REPORTING_FILTER_ID)
+        pathToFile = createReportingSpreadSheet(deals, stages, pipelines)
+    else:
+        deals, stages, pipelines = getFilteredDeals(LOST_LEAD_FILTER_ID)
+        pathToFile = createLostLeadsSpreadSheet(deals, stages, pipelines)
+        uploadToSharepoint(pathToFile)
+        os.remove(pathToFile)
+        deals, stages, pipelines = getFilteredDeals(REPORTING_FILTER_ID)
+        pathToFile = createReportingSpreadSheet(deals, stages, pipelines)
+        uploadToSharepoint(pathToFile)
+        os.remove(pathToFile)
 
 main()
