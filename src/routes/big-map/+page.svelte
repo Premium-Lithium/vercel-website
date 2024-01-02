@@ -390,29 +390,30 @@
 		{:else}
 			<div class="filter-controls">
 				<div class="header-row">
-					<div class="header-tab">
-						{#if !hidePipelineOptions}
-							<button
-								class="dropdown-button"
-								on:click={() => (hidePipelineOptions = !hidePipelineOptions)}
-							>
-								<svg width="18" height="19" class="dropdown-icon">
-									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-								</svg>
-							</button>
-						{:else}
-							<button
-								class="dropdown-button"
-								on:click={() => (hidePipelineOptions = !hidePipelineOptions)}
-							>
-								<svg width="18" height="19" class="dropdown-icon-rotated">
-									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-								</svg>
-							</button>
-						{/if}
-						<h3>Pipelines</h3>
-					</div>
+					<h2>Map Options</h2>
 					<div class="handle" bind:this={handle}>.</div>
+				</div>
+				<div class="header-tab">
+					{#if !hidePipelineOptions}
+						<button
+							class="dropdown-button"
+							on:click={() => (hidePipelineOptions = !hidePipelineOptions)}
+						>
+							<svg width="18" height="19" class="dropdown-icon">
+								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+							</svg>
+						</button>
+					{:else}
+						<button
+							class="dropdown-button"
+							on:click={() => (hidePipelineOptions = !hidePipelineOptions)}
+						>
+							<svg width="18" height="19" class="dropdown-icon-rotated">
+								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+							</svg>
+						</button>
+					{/if}
+					<h3>Pipelines</h3>
 				</div>
 				{#if hidePipelineOptions}
 					<div class="pipeline-checkboxes">
