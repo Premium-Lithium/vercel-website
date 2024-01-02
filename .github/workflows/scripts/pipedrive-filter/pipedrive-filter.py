@@ -8,7 +8,7 @@ LOST_LEAD_FILTER_ID = "377"
 REPORTING_FILTER_ID = "277"
 LEAD_SOURCE_KEY = "9c6c616447ee45293d20ebb0db2d2f3f979bb86f"
 
-TESTING = True
+TESTING = False
 
 # Lead Source, EVChargerType, EPSSwitch, PaymentType, DealType, SinglePhaseOrThreePhase, NewBatteryModel
 dealFieldsDict = {12654: {}, 12631: {}, 12575: {}, 12681: {}, 12698: {}, 12712: {}, 12650: {}}
