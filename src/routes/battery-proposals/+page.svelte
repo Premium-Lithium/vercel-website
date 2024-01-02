@@ -21,8 +21,9 @@
 	let kmlFileInput
 	let uploadedFile: File
 	let uploadedFilesFromFileInput: FileList
+	let result
+	let dateFinished
 
-	$: console.log(campaignAreas)
 	onMount(async () => {
 		campaignAreas = await loadCampaignAreas()
 	})
@@ -98,15 +99,19 @@
 			.from('battery_turk_workers')
 			.select('*')
 			.eq('worker_id', uniqueIdentifier)
-
+		let fileName = ''
 		if (uploadedFile) {
-			if (!(await uploadFile(uploadedFile, activeCampaign))) return
+			fileName = await uploadFile(uploadedFile, activeCampaign)
+			if (!fileName) return
 		}
 
 		let regionToUpload = {
-			'time_finished': new Date(Date.now()).toISOString(),
+			'time_finished': dateFinished,
+			'num_polygons': result.polygons.length - 1,
 			...selectData[0]['assigned_region']
 		}
+
+		console.log(regionToUpload)
 		numRegionsCompleted = (selectData[0]['completed_regions']?.length ?? 0) + 1
 		const { data: uploadData, error: uploadError } = await supabase
 			.from('battery_turk_workers')
@@ -207,11 +212,13 @@
 	}
 
 	async function uploadFile(file, campaign) {
+		console.log(file)
 		let successful = false
+		dateFinished = new Date(Date.now()).toISOString()
 		try {
 			const { data, error } = await supabase.storage
 				.from('worker-kml-upload')
-				.upload(`${campaign}/${uniqueIdentifier}/${new Date(Date.now()).toISOString()}`, file, {
+				.upload(`${campaign}/${uniqueIdentifier}/${dateFinished}`, file, {
 					upsert: true
 				})
 			successful = !error
@@ -219,7 +226,7 @@
 		} catch (error) {
 			console.error('Error uploading file:', error.message)
 		}
-		return successful
+		return `${campaign}/${uniqueIdentifier}/${dateFinished}`
 	}
 
 	function handleDragOver(event) {
@@ -243,6 +250,7 @@
 		if (files.length > 0 && files[0].name.endsWith('.kml')) {
 			kmlFileInput.files = files
 			uploadedFile = files[0]
+			await parseDocument(uploadedFile)
 		}
 	}
 
@@ -252,6 +260,53 @@
 		if (files.length > 0 && files[0].name.endsWith('.kml')) {
 			uploadedFile = files[0]
 		}
+	}
+
+	async function parseDocument(file) {
+		let fileReader = new FileReader()
+		fileReader.onload = async (e) => {
+			result = await extractGoogleCoords(e.target.result)
+		}
+		fileReader.readAsText(file)
+	}
+
+	async function extractGoogleCoords(plainText) {
+		let parser = new DOMParser()
+		let xmlDoc = parser.parseFromString(plainText, 'text/xml')
+		let googlePolygons = []
+		let googleMarkers = []
+
+		if (xmlDoc.documentElement.nodeName == 'kml') {
+			for (const item of xmlDoc.getElementsByTagName('Placemark')) {
+				let placeMarkName = item.getElementsByTagName('name')[0].childNodes[0].nodeValue.trim()
+				let polygons = item.getElementsByTagName('Polygon')
+				let markers = item.getElementsByTagName('Point')
+
+				/** POLYGONS PARSE **/
+				for (const polygon of polygons) {
+					let coords = polygon.getElementsByTagName('coordinates')[0].childNodes[0].nodeValue.trim()
+					let points = coords.split(' ')
+
+					let googlePolygonsPaths = []
+					for (const point of points) {
+						let coord = point.split(',')
+						googlePolygonsPaths.push({ lat: +coord[1], lon: +coord[0] }) // +x converts x from string to a number
+					}
+					googlePolygons.push(googlePolygonsPaths)
+				}
+
+				/** MARKER PARSE **/
+				for (const marker of markers) {
+					var coords = marker.getElementsByTagName('coordinates')[0].childNodes[0].nodeValue.trim()
+					let coord = coords.split(',')
+					googleMarkers.push({ lat: +coord[1], lon: +coord[0] })
+				}
+			}
+		} else {
+			throw 'error while parsing'
+		}
+
+		return { markers: googleMarkers, polygons: googlePolygons }
 	}
 </script>
 
