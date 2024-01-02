@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { installationStores } from './../../../lib/MapStores.js'
 	import { browser } from '$app/environment'
 	import { page } from '$app/stores'
 	import MagicLink from '$lib/components/MagicLink.svelte'
@@ -20,15 +19,24 @@
 	const urlParams = $page.url.searchParams
 	campaign = urlParams.get('campaignId') || ''
 
-	$: if (currentHouseToAudit)
-		currentHouseM2 = currentHouseToAudit['campaign_specific_data']['solar_array_info'].reduce(
-			(p, v, i, a) => {
-				return p + v['area_m2']
-			},
-			0
-		)
+	$: if (currentHouseToAudit) {
+		console.log(currentHouseToAudit)
+		try {
+			currentHouseM2 = currentHouseToAudit['campaign_specific_data']['solar_array_info'].reduce(
+				(p, v, i, a) => {
+					return p + v['area_m2']
+				},
+				0
+			)
+		} catch (e) {
+			currentHouseM2 =
+				currentHouseToAudit['campaign_specific_data']['roof_details']['wholeRoofStats'][
+					'areaMeters2'
+				]
+		}
+	}
 
-	$: currentHouseToAudit = currentHouseToAudit = allUnauditedHouses[currentHousePointer]
+	$: currentHouseToAudit = allUnauditedHouses[currentHousePointer]
 
 	let isAuthenticated = false
 	let nextButton, auditForm
