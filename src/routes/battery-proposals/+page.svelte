@@ -23,12 +23,16 @@
 	let uploadedFilesFromFileInput: FileList
 	let result
 	let dateFinished
+	let isInternal = false
 
 	onMount(async () => {
 		campaignAreas = await loadCampaignAreas()
 	})
 	$: if (supabaseAuth) {
 		uniqueIdentifier = supabaseAuth.user.id
+		if (supabaseAuth.user.email.endsWith('premiumlithium.com')) {
+			isInternal = true
+		}
 		broadcastRoom = supabase.channel('room1')
 		broadcastRoom
 			.on('broadcast', { event: 'claim_project' }, async (payload) => {
@@ -94,6 +98,46 @@
 		return (await Promise.all(promises))[0]
 	}
 
+	async function allocateNewRegion() {
+		campaignAreas = await loadCampaignAreas()
+		if (!isInternal) {
+			const { data: insertData, error: insertError } = await supabase
+				.from('battery_turk_workers')
+				.update({
+					'assigned_region': {
+						area: campaignAreas[0].area.area,
+						'time_started': new Date(Date.now()).toISOString(),
+						'campaign_id': campaignAreas[0].campaignId
+					}
+				})
+				.eq('worker_id', uniqueIdentifier)
+
+			const { data: masterSelectData, error: masterSelectError } = await supabase
+				.from('campaign_master')
+				.select('area')
+				.eq('campaign_id', campaignAreas[0].campaignId)
+
+			let masterDataToUpload = masterSelectData[0].area.map((x) => {
+				if (JSON.stringify(x.area) == JSON.stringify(campaignAreas[0].area.area)) {
+					x.status = 'allocated'
+				}
+				return x
+			})
+			const { data: masterUploadData, error: masterUploadError } = await supabase
+				.from('campaign_master')
+				.update({ 'area': masterDataToUpload })
+				.eq('campaign_id', campaignAreas[0].campaignId)
+		}
+		broadcastRoom.send({
+			type: 'broadcast',
+			event: 'claim_project',
+			payload: { message: 'claimed this project' }
+		})
+		activeArea = campaignAreas[0].area
+		activeCampaign = campaignAreas[0].campaignId
+		await saveKml(campaignAreas[0].area.area, campaignAreas[0].campaignId)
+	}
+
 	async function completeRegion() {
 		let { data: selectData, error: selectError } = await supabase
 			.from('battery_turk_workers')
@@ -121,21 +165,24 @@
 			})
 			.eq('worker_id', uniqueIdentifier)
 
-		const { data: masterSelectData, error: masterSelectError } = await supabase
-			.from('campaign_master')
-			.select('area')
-			.eq('campaign_id', activeCampaign)
+		if (!isInternal) {
+			const { data: masterSelectData, error: masterSelectError } = await supabase
+				.from('campaign_master')
+				.select('area')
+				.eq('campaign_id', activeCampaign)
 
-		let masterDataToUpload = masterSelectData[0].area.map((x) => {
-			if (JSON.stringify(x.area) == JSON.stringify(selectData[0]['assigned_region'].area)) {
-				x.status = 'processed'
-			}
-			return x
-		})
-		const { data: masterUploadData, error: masterUploadError } = await supabase
-			.from('campaign_master')
-			.update({ 'area': masterDataToUpload })
-			.eq('campaign_id', selectData[0]['campaign_id'])
+			let masterDataToUpload = masterSelectData[0].area.map((x) => {
+				if (JSON.stringify(x.area) == JSON.stringify(selectData[0]['assigned_region'].area)) {
+					x.status = 'processed'
+				}
+				return x
+			})
+			const { data: masterUploadData, error: masterUploadError } = await supabase
+				.from('campaign_master')
+				.update({ 'area': masterDataToUpload })
+				.eq('campaign_id', selectData[0]['campaign_id'])
+		}
+
 		activeArea = null
 		activeCampaign = null
 		broadcastRoom.send({
@@ -176,39 +223,6 @@
 
 		document.body.removeChild(a)
 		URL.revokeObjectURL(url)
-	}
-
-	async function allocateNewRegion() {
-		campaignAreas = await loadCampaignAreas()
-		const { data: insertData, error: insertError } = await supabase
-			.from('battery_turk_workers')
-			.update({
-				'assigned_region': {
-					area: campaignAreas[0].area.area,
-					'time_started': new Date(Date.now()).toISOString(),
-					'campaign_id': campaignAreas[0].campaignId
-				}
-			})
-			.eq('worker_id', uniqueIdentifier)
-
-		const { data: masterSelectData, error: masterSelectError } = await supabase
-			.from('campaign_master')
-			.select('area')
-			.eq('campaign_id', campaignAreas[0].campaignId)
-
-		let masterDataToUpload = masterSelectData[0].area.map((x) => {
-			if (JSON.stringify(x.area) == JSON.stringify(campaignAreas[0].area.area)) {
-				x.status = 'allocated'
-			}
-			return x
-		})
-		const { data: masterUploadData, error: masterUploadError } = await supabase
-			.from('campaign_master')
-			.update({ 'area': masterDataToUpload })
-			.eq('campaign_id', campaignAreas[0].campaignId)
-		activeArea = campaignAreas[0].area
-		activeCampaign = campaignAreas[0].campaignId
-		await saveKml(campaignAreas[0].area.area, campaignAreas[0].campaignId)
 	}
 
 	async function uploadFile(file, campaign) {
