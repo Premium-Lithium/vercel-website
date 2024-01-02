@@ -1,3 +1,5 @@
+import type { BooleanKeyframeTrack } from "three"
+
 export interface MapResponse {
     ok: boolean,
     message: string,
@@ -47,6 +49,7 @@ export interface LatLongObj {
 // Panel displaying options for each selected pipeline (for now, later on adding campaign etc.)
 export interface OptionPanel {
     pipeline: PipeLineKey | undefined
+    hideStageOptions: boolean
     stages: Array<string>
     stagesVisible: Array<string>
     filters: Array<string>

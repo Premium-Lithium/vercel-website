@@ -27,6 +27,8 @@
 	let checkQuoteTime: boolean = false
 	let showNullMarkers: boolean = false
 	let heatmap: google.maps.visualization.HeatmapLayer
+	let hidePipelineOptions: boolean = false
+	let hideFilterOptions: boolean = false
 
 	onMount(async () => {
 		loading = true
@@ -67,7 +69,8 @@
 					filtersApplied: [],
 					markers: [],
 					colour: '#C9FC50',
-					handle: document.createElement('div')
+					handle: document.createElement('div'),
+					hideStageOptions: false
 				}
 				// Loop over each stage in pipeline, add name to the list
 				panel.stages = panel.pipeline?.stages.map((obj) => obj.name)
@@ -309,7 +312,7 @@
 		// Set checkboxes to false
 	}
 
-	async function changeIconColourFor(panel: OptionPanel) {
+	function changeIconColourFor(panel: OptionPanel) {
 		const svgMarker = {
 			path: 'M 15.00,14.00 C 15.00,14.00 14.54,17.32 14.54,17.32 14.23,19.63 13.42,21.86 12.17,23.84 12.17,23.84 12.17,23.84 12.17,23.84 11.00,25.69 10.22,27.76 9.86,29.91 9.86,29.91 9.54,31.83 9.54,31.83M 4.00,14.00 C 4.00,14.00 4.36,17.35 4.36,17.35 4.61,19.69 5.42,21.92 6.73,23.87 6.73,23.87 6.73,23.87 6.73,23.87 7.96,25.70 8.75,27.77 9.06,29.95 9.06,29.95 9.32,31.88 9.32,31.88M 17.50,8.50 C 17.50,12.92 13.92,16.50 9.50,16.50 5.08,16.50 1.50,12.92 1.50,8.50 1.50,4.08 5.08,0.50 9.50,0.50 13.92,0.50 17.50,4.08 17.50,8.50 Z',
 			scale: 1,
@@ -364,24 +367,6 @@
 		}
 	}
 
-	async function generateLeedsHeatmap() {
-		let heatmapData: Array<google.maps.LatLng> = []
-		const heatRes = await fetch('./latlongleeds.csv')
-		const data = await heatRes.text()
-		const lines = data.split('\n')
-		for (let line = 2; line < lines.length; line++) {
-			let row = lines[line].replace(/[()]/g, ''); 
-			row = row.replace(/["']/g, ''); 
-			let latLng = row.split(',')
-			if (!isNaN(parseFloat(latLng[0])) && !isNaN(parseFloat(latLng[1]))) {
-				heatmapData.push(new google.maps.LatLng(parseFloat(latLng[1]), parseFloat(latLng[0])))
-			}
-		}
-		heatmap = new google.maps.visualization.HeatmapLayer({
-			data: heatmapData,
-		})
-	}
-
 	async function generateHeatmap() {
 		let heatmapData: Array<google.maps.LatLng> = []
 		const heatRes = await fetch('./heatmapCoords.csv')
@@ -405,79 +390,133 @@
 		{:else}
 			<div class="filter-controls">
 				<div class="header-row">
-					<h3>Pipelines</h3>
+					<div class="header-tab">
+						{#if !hidePipelineOptions}
+							<button
+								class="dropdown-button"
+								on:click={() => (hidePipelineOptions = !hidePipelineOptions)}
+							>
+								<svg width="18" height="19" class="dropdown-icon">
+									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+								</svg>
+							</button>
+						{:else}
+							<button
+								class="dropdown-button"
+								on:click={() => (hidePipelineOptions = !hidePipelineOptions)}
+							>
+								<svg width="18" height="19" class="dropdown-icon-rotated">
+									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+								</svg>
+							</button>
+						{/if}
+						<h3>Pipelines</h3>
+					</div>
 					<div class="handle" bind:this={handle}>.</div>
 				</div>
-				<div class="pipeline-checkboxes">
-					{#each pipelines as pipeline}
-						<label>
-							<input
-								name="pipeline-checkboxes"
-								type="checkbox"
-								on:click={() => addPipelineCheckbox(pipeline)}
-							/>
-							{pipeline.name}</label
+				{#if hidePipelineOptions}
+					<div class="pipeline-checkboxes">
+						{#each pipelines as pipeline}
+							<label>
+								<input
+									name="pipeline-checkboxes"
+									type="checkbox"
+									on:click={() => addPipelineCheckbox(pipeline)}
+								/>
+								{pipeline.name}</label
+							>
+						{/each}
+					</div>
+					<div class="pipeline-checkbox-buttons">
+						<button on:click={selectPipelines}>Display Selected Pipelines</button>
+						<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
+					</div>
+				{/if}
+				<div class="header-tab">
+					{#if !hideFilterOptions}
+						<button
+							class="dropdown-button"
+							on:click={() => (hideFilterOptions = !hideFilterOptions)}
 						>
-					{/each}
+							<svg width="18" height="19" class="dropdown-icon">
+								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+							</svg>
+						</button>
+					{:else}
+						<button
+							class="dropdown-button"
+							on:click={() => (hideFilterOptions = !hideFilterOptions)}
+						>
+							<svg width="18" height="19" class="dropdown-icon-rotated">
+								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+							</svg>
+						</button>
+					{/if}
+					<h3>Filters</h3>
 				</div>
-				<div class="pipeline-checkbox-buttons">
-					<button on:click={selectPipelines}>Display Selected Pipelines</button>
-					<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
-				</div>
-				<h3>Filters</h3>
 				<div class="filters">
-					<div class="value-slider">
-						<label class="value-slider">
-							Only show deals with values above
-							<input name="value-slider" type="number" bind:value />
-						</label>
-					</div>
-					<div class="status-options">
-						<label class="value-slider">
-							Only show deals with status:
-							<label>
-								<input name="won-status" type="checkbox" on:click={() => filterByStatus('won')} />
-								Won
+					{#if hideFilterOptions}
+						<div class="value-slider">
+							<label class="value-slider">
+								Only show deals with values above
+								<input name="value-slider" type="number" bind:value />
+							</label>
+						</div>
+						<div class="status-options">
+							<label class="value-slider">
+								Only show deals with status:
+								<label>
+									<input name="won-status" type="checkbox" on:click={() => filterByStatus('won')} />
+									Won
+								</label>
+								<label>
+									<input
+										name="won-status"
+										type="checkbox"
+										on:click={() => filterByStatus('open')}
+									/>
+									Open
+								</label>
+								<label>
+									<input
+										name="won-status"
+										type="checkbox"
+										on:click={() => filterByStatus('lost')}
+									/>
+									Lost
+								</label>
 							</label>
 							<label>
-								<input name="won-status" type="checkbox" on:click={() => filterByStatus('open')} />
-								Open
+								Only show deals won after:
+								<div class="time-filter">
+									<input type="checkbox" bind:checked={checkWonTime} />
+									<DateInput timePrecision={'minute'} bind:value={wonDate} />
+								</div>
 							</label>
 							<label>
-								<input name="won-status" type="checkbox" on:click={() => filterByStatus('lost')} />
-								Lost
+								Only show deals installed after:
+								<div class="time-filter">
+									<input type="checkbox" bind:checked={checkInstalledTime} />
+									<DateInput timePrecision={'minute'} bind:value={installDate} />
+								</div>
 							</label>
-						</label>
+							<label>
+								Only show deals quoted after:
+								<div class="time-filter">
+									<input type="checkbox" bind:checked={checkQuoteTime} />
+									<DateInput timePrecision={'minute'} bind:value={quoteDate} />
+								</div>
+							</label>
+						</div>
 						<label>
-							Only show deals won after:
-							<div class="time-filter">
-								<input type="checkbox" bind:checked={checkWonTime} />
-								<DateInput timePrecision={'minute'} bind:value={wonDate} />
-							</div>
+							<input type="checkbox" bind:checked={showNullMarkers} />
+							Show markers with no filter data
 						</label>
-						<label>
-							Only show deals installed after:
-							<div class="time-filter">
-								<input type="checkbox" bind:checked={checkInstalledTime} />
-								<DateInput timePrecision={'minute'} bind:value={installDate} />
-							</div>
-						</label>
-						<label>
-							Only show deals quoted after:
-							<div class="time-filter">
-								<input type="checkbox" bind:checked={checkQuoteTime} />
-								<DateInput timePrecision={'minute'} bind:value={quoteDate} />
-							</div>
-						</label>
-					</div>
-					<label>
-						<input type="checkbox" bind:checked={showNullMarkers} />
-						Show markers with no filter data
-					</label>
-					<div class="filter-buttons">
-						<button on:click={applyFilters}>Apply Filters</button>
-						<button on:click={clearFilters}>Clear Filters</button>
-					</div>
+						<div class="filter-buttons">
+							<button on:click={applyFilters}>Apply Filters</button>
+							<button on:click={clearFilters}>Clear Filters</button>
+						</div>
+					{/if}
 				</div>
 				<div class="heatmap">
 					<h3>Solar Install Heatmap</h3>
@@ -503,27 +542,51 @@
 				<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
 			</div>
 			<div class="stage-checkboxes">
-				{#each panel.stages as stage}
-					<label>
-						<input
-							name="stage-checkboxes"
-							type="checkbox"
-							on:click={() => addStage(panel, stage)}
-						/>
-						{stage}</label
-					>
-				{/each}
-			</div>
-			<div class="stage-buttons">
-				<div class="add-checked-stages">
-					<button on:click={() => applyStages(panel)}>Apply Stages</button>
+				<div class="header-tab">
+					{#if !panel.hideStageOptions}
+						<button
+							class="dropdown-button"
+							on:click={() => (panel.hideStageOptions = !panel.hideStageOptions)}
+						>
+							<svg width="18" height="19" class="dropdown-icon">
+								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+							</svg>
+						</button>
+					{:else}
+						<button
+							class="dropdown-button"
+							on:click={() => (panel.hideStageOptions = !panel.hideStageOptions)}
+						>
+							<svg width="18" height="19" class="dropdown-icon-rotated">
+								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+							</svg>
+						</button>
+					{/if}
+					<h4>Stages</h4>
 				</div>
-				<div class="clear-stage-checkboxes">
-					<button on:click={() => clearStages(panel)}>Clear Stages</button>
-				</div>
-			</div>
-			<div class="delete-panel">
-				<button on:click={() => deletePanel(panel)}>Remove from Map</button>
+				{#if panel.hideStageOptions}
+					{#each panel.stages as stage}
+						<label>
+							<input
+								name="stage-checkboxes"
+								type="checkbox"
+								on:click={() => addStage(panel, stage)}
+							/>
+							{stage}</label
+						>
+					{/each}
+					<div class="stage-buttons">
+						<div class="add-checked-stages">
+							<button on:click={() => applyStages(panel)}>Apply Stages</button>
+						</div>
+						<div class="clear-stage-checkboxes">
+							<button on:click={() => clearStages(panel)}>Clear Stages</button>
+						</div>
+					</div>
+					<div class="delete-panel">
+						<button on:click={() => deletePanel(panel)}>Remove from Map</button>
+					</div>
+				{/if}
 			</div>
 		</div>
 	{/each}
@@ -663,5 +726,26 @@
 	.time-filter {
 		display: flex;
 		flex-direction: row;
+	}
+
+	.header-tab {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.dropdown-button {
+		background-color: #d0d1d2;
+		border: none;
+	}
+
+	.dropdown-icon {
+		position: relative;
+		transform: scale(0.8);
+		top: 2px;
+	}
+	.dropdown-icon-rotated {
+		position: relative;
+		top: 2px;
+		transform: scale(0.8) rotate(90deg);
 	}
 </style>
