@@ -384,7 +384,7 @@
 </script>
 
 <div class="map-container">
-	<div class="control-panel" use:movable={{ handle }}>
+	<div class="control-panel" id="control-panel" use:movable={{ handle }}>
 		{#if loading}
 			<p>Loading</p>
 		{:else}
@@ -590,7 +590,7 @@
 			</div>
 		</div>
 	{/each}
-	<div class="control-panel" use:movable={{ handle: helpHandle }}>
+	<div class="option-panel" use:movable={{ handle: helpHandle }}>
 		<div class="filter-controls">
 			<div class="header-row">
 				<h3>Feedback</h3>
@@ -643,6 +643,11 @@
 </div>
 
 <style>
+
+	button, input {
+		cursor: pointer;
+	}
+
 	.map-container {
 		position: relative;
 		width: 100%;
@@ -663,7 +668,7 @@
 		border: 2px solid #3a4339;
 		justify-content: left;
 		padding: 8px;
-		z-index: 1000;
+		z-index: 3;
 	}
 
 	.header-row {
@@ -693,7 +698,7 @@
 		border-radius: 8px;
 		justify-content: left;
 		padding: 8px;
-		z-index: 1000;
+		z-index: 2;
 	}
 	.pipeline-checkboxes {
 		display: flex;
