@@ -8,78 +8,10 @@ LOST_LEAD_FILTER_ID = "377"
 REPORTING_FILTER_ID = "277"
 LEAD_SOURCE_KEY = "9c6c616447ee45293d20ebb0db2d2f3f979bb86f"
 
-TESTING = False
+TESTING = True
 
-leadSourceDict = {
-    "968": "Battery Competition",
-    "969": "Battery Finder",
-    "971": "Consultation Booking",
-    "970": "Chatbot",
-    "966": "Contact Us Webform",
-    "909": "Customer Referral",
-    "991": "DDS",
-    "972": "Email",
-    "1007": "Energiser - Callback",
-    "1016": "Energiser - Consultation",
-    "1055": "Energiser - Survey",
-    "834": "Leads.io",
-    "973": "Phone Call",
-    "965": "Prism",
-    "974": "Survey Booking",
-    "1058": "Retail Store",
-    "1081": "Right Move",
-    "1082": "Post Card",
-    "1084": "Flyer",
-    None: None,
-}
-
-evChargerTypeDict = {
-    "810": "7kW Tethered",
-    "811": "7kW Untethered",
-    "812": "22kW Tethered",
-    "827": "22kW Untethered",
-    "1066": "No",
-    None: None
-}
-
-epsSwitchDict = {
-    "680": "Dual Socket",
-    "686": "Manual",
-    "809": "Auto",
-    "1094": "No",
-    None: None
-}
-
-paymentTypeDict = {
-    "986": "Residential - Express",
-    "987": "Residential - Payback",
-    "988": "Commercial - Express",
-    "989": "Commercial - Payback",
-    "990": "Commercial - Subscription",
-    None: None
-}
-
-dealTypeDict = {
-    "1020": "Battery Only",
-    "1021": "Battery & Solar",
-    None: None
-}
-
-singlePhaseOrThreePhaseDict = {
-    "1056": "Single Phase",
-    "1057": "Three Phase",
-    None: None
-}
-
-batteryTypeDict = {
-    "825": "Pod",
-    "826": "Plant",
-    "833": "Panel",
-    "1071": "Givenergy All in one",
-    "1072": "Sunsynk ",
-    "1073": "Givenergy",
-    None: None
-}
+# Lead Source, EVChargerType, EPSSwitch, PaymentType, DealType, SinglePhaseOrThreePhase, NewBatteryModel
+dealFieldsDict = {12654: {}, 12631: {}, 12575: {}, 12681: {}, 12698: {}, 12712: {}, 12650: {}}
 
 pd = Client(domain="https://premiumlithium.pipedrive.com/")
 pd.set_api_token(PIPEDRIVE_API_TOKEN)
@@ -152,7 +84,7 @@ def createLostLeadsSpreadSheet(deals, stages, pipelines):
         row.append(deal["expected_close_date"])
         row.append(deal["next_activity_date"])
         row.append(deal["user_id"]["name"])
-        row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
+        row.append(dealFieldsDict[12654][(deal[LEAD_SOURCE_KEY])])
         row.append(deal["lost_reason"])
         row.append(deal["lost_time"])
         row.append(deal["status"])  # enum
@@ -210,19 +142,19 @@ def createReportingSpreadSheet(deals, stages, pipelines):
         except:
             row.append('')
         row.append(deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520'])
-        row.append(batteryTypeDict[deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d']])
+        row.append(dealFieldsDict[12650][deal['05e84b1dee500f1541defcfbcccc87cab1f2dc0d']])
         row.append(deal['255ed939a712945ddb3ffc7db54bdcd152132e1d'])
         row.append(deal['567489c8ee63a1e43f24caedcbd9ce1398c63317'])
         row.append(deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e'])
-        row.append(evChargerTypeDict[deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
-        row.append(epsSwitchDict[deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
-        row.append(leadSourceDict[deal[LEAD_SOURCE_KEY]])
-        row.append(paymentTypeDict[deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55']])
+        row.append(dealFieldsDict[12631][deal['645f9a8b6d8376f2f8cfd6519a6f72229f9ea761']])
+        row.append(dealFieldsDict[12575][deal['42dc4717c0f0523d6fad9881d07be252906a6c1d']])
+        row.append(dealFieldsDict[12654][(deal[LEAD_SOURCE_KEY])])
+        row.append(dealFieldsDict[12681][deal['8b2cdc8efef23bb571c9ee3d720b0113c1fd9d55']])
         row.append(deal['add_time'])
         row.append(deal['person_id']['name'])
         row.append(stages[str(deal['stage_id'])]['name'])
-        row.append(dealTypeDict[deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
-        row.append(singlePhaseOrThreePhaseDict[deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
+        row.append(dealFieldsDict[12698][deal['89249d62cbbfd657d1696b426836e9ae92cd6474']])
+        row.append(dealFieldsDict[12712][deal['e82e044a6f7231a43d3f570785b2fc033823df65']])
         row.append(deal['e32b261b04609d33ecbc6282fba121c6284f9d53'])
         row.append(deal['c71b79129a01daee3ed338e43f4b99b2356e4a13'])
         ws.append(row)
@@ -250,8 +182,17 @@ def uploadToSharepoint(pathToFile):
             with open(pathToFile, "rb") as f:
                 folder.files.upload(f).execute_query()
 
-
+def createPipedriveDictionaries():
+    dealFields = pd.deals.get_deal_fields()['data']
+    for field in dealFields:
+        if field['id'] in dealFieldsDict:
+            id = field['id']
+            for opt in field['options']:
+                dealFieldsDict[id].update({str(opt['id']): opt['label']})
+            dealFieldsDict[id].update({None: None})
+    
 def main():
+    createPipedriveDictionaries()
     if TESTING:
         deals, stages, pipelines = getFilteredDeals(LOST_LEAD_FILTER_ID)
         pathToFile = createLostLeadsSpreadSheet(deals, stages, pipelines)
