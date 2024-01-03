@@ -39,6 +39,8 @@ export interface MarkerOptions {
     pipelineId: string
     stageId: string
     deal: any
+    colour: string
+    labelID: string
 }
 
 export interface LatLongObj {
@@ -57,4 +59,10 @@ export interface OptionPanel {
     markers: Array<MarkerOptions>
     colour: string
     handle: HTMLElement
+}
+
+export interface LabelInfo {
+    name: string
+    id: string
+    color: string
 }

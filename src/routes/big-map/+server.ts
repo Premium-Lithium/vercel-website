@@ -1,7 +1,8 @@
-import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter } from "./MapTypes"
+import type { MapResponse, MapRequest, MarkerOptions, LatLongObj, PipeLineKey, StageFilter, LabelInfo } from "./MapTypes"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()
+let labelInfo: Array<LabelInfo> = []
 
 /**
  * Parses body, sends to request handler, returns response from request handler
@@ -39,10 +40,29 @@ async function requestHandler(opts: MapRequest): Promise<MapResponse> {
         case -1: // Reserved for getting selected pipelines
             let pipelines = await getPipelines()
             return ({ ok: true, message: '', statusCode: 200, body: pipelines })
-        case -2: // Reserved for getting filters for the selected pipelines
+        case -2: // Getting labels
+            let labels = await getLabels()
+            return ({ ok: true, message: '', statusCode: 200, body: labels })
         default:
             return ({ ok: true, message: 'Default', statusCode: 200, body: undefined })
     }
+}
+
+async function getLabels(): Promise<Array<LabelInfo>> {
+    let labels: Array<LabelInfo> = []
+    let labelFieldID = "12463"
+
+    let dealFields = await crm.getDealFieldOptionsFor(labelFieldID)
+    for (let option in dealFields.options) {
+        let label: LabelInfo = {
+            name: dealFields.options[option].label,
+            id: dealFields.options[option].id.toString(),
+            color: dealFields.options[option].color
+        }
+        labels.push(label)
+    }
+    labelInfo = labels
+    return labels
 }
 
 /**
@@ -148,11 +168,19 @@ async function getLatLongFor(deal: any): Promise<LatLongObj | null> {
  * @returns marker with content
  */
 function setContentOfMarker(marker: MarkerOptions, deal: any): MarkerOptions {
+    let labelString
+    try {
+        labelString = (labelInfo.find((el) => el.id === deal.label)?.name)
+    }
+    catch {
+        labelString = "No Label attached to deal"
+    }
     const content = `
     <h1>${deal.title}</h1>
     <p>Address: ${marker.address}</p>
     <p>Status: ${marker.filterOption.status}</p>
     <p>Value: £${marker.filterOption.value}
+    <p>Labels: ${labelString}
     `
     marker.content = content
     return marker
@@ -182,7 +210,9 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     filterOption: { value: (deals.data[deal].value) ? deals.data[deal].value : 0, status: deals.data[deal].status },
                     pipelineId: pipeline,
                     stageId: deals.data[deal].stage_id,
-                    deal: deals.data[deal]
+                    deal: deals.data[deal],
+                    colour: "#c9fc50",
+                    labelID: deals.data[deal].label
                 }
                 marker = setContentOfMarker(marker, deals.data[deal])
                 markers.push(marker)

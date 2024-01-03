@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MarkerOptions, PipeLineKey, OptionPanel } from './MapTypes'
+	import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './MapTypes'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -15,6 +15,7 @@
 	let loading: boolean = false
 	let icon: string
 	let value: number = 0
+	let labels: Array<LabelInfo> = []
 	let statusFilters: Array<string> = []
 	let feedbackOptions: Array<string> = []
 	let feedbackMessage: string
@@ -29,19 +30,43 @@
 	let heatmap: google.maps.visualization.HeatmapLayer
 	let hidePipelineOptions: boolean = false
 	let hideFilterOptions: boolean = false
+	let labelFilter: Array<string> = [] // Array of label IDs, not names
+	let applyLabelColourToMarker: boolean = false
+	let hideLabelOptions: boolean = false
+
+	const colourMap = new Map([
+		['yellow', '#E1F378'],
+		['brown', '#302411'],
+		['purple', '#222F60'],
+		['orange', '#F9BF3B'],
+		['blue', '#35BBED'],
+		['red', '#F0302E'],
+		['pink', '#F6A19A'],
+		['green', '#C9FC50'],
+		['dark-gray', '#464748']
+	])
 
 	onMount(async () => {
 		loading = true
 		generateHeatmap()
-		let res = await fetch('/big-map', {
+		let pipelinesRes = await fetch('/big-map', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application-json'
 			},
 			body: JSON.stringify({ option: -1 })
 		})
-		let response = await res.json()
-		pipelines = response.body
+		let pipelinesResponse = await pipelinesRes.json()
+		pipelines = pipelinesResponse.body
+		let labelsRes = await fetch('/big-map', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application-json'
+			},
+			body: JSON.stringify({ option: -2 })
+		})
+		let labelsResponse = await labelsRes.json()
+		labels = labelsResponse.body
 		const iconStream = fetch('/marker-base.svg')
 		icon = await (await iconStream).text()
 		loading = false
@@ -52,7 +77,7 @@
 	 */
 	async function selectPipelines() {
 		clearMap()
-		clearPipelineCheckboxes()
+		// clearPipelineCheckboxes()
 		let mapRes = await fetch('/big-map', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -86,7 +111,9 @@
 					filterOption: mapProps.body[m].filterOption,
 					pipelineId: mapProps.body[m].pipelineId,
 					stageId: mapProps.body[m].stageId,
-					deal: mapProps.body[m].deal
+					deal: mapProps.body[m].deal,
+					colour: mapProps.body[m].colour,
+					labelID: mapProps.body[m].labelID
 				}
 				mapOptionPanels
 					.find(
@@ -120,6 +147,10 @@
 	 */
 	function clearPipelineCheckboxes() {
 		while (mapOptionPanels.length !== 0) deletePanel(mapOptionPanels[0])
+		let checkboxes = document.getElementsByName("pipeline-checkbox")
+		for (let box of checkboxes) {
+			box.checked = false
+		}
 	}
 
 	/**
@@ -267,6 +298,13 @@
 	function clearFilters() {
 		value = 0
 		statusFilters.length = 0
+		let checkboxes = document.getElementsByName("filter-checkbox")
+		for (let box of checkboxes) {
+			box.checked = false
+		}
+		wonDate = new Date(1420977600000)
+		installDate = new Date(1420977600000)
+		quoteDate = new Date(1420977600000)
 		applyFilters()
 	}
 
@@ -302,6 +340,48 @@
 		updateMap()
 	}
 
+	function updateLabelFilter(label: LabelInfo) {
+		if (labelFilter.includes(label.id)) {
+			labelFilter.splice(labelFilter.indexOf(label.id), 1)
+		} else {
+			labelFilter.push(label.id)
+		}
+	}
+
+	function clearLabelFilters() {
+		labelFilter.length = 0
+		let checkboxes = document.getElementsByName("label-checkbox")
+		for (let box of checkboxes) {
+			box.checked = false
+		}
+		filterByLabel()
+	}
+
+	function filterByLabel() {
+		makeAllMarkersInvisible()
+		for (let panel in mapOptionPanels) {
+			for (let marker in mapOptionPanels[panel].markers) {
+				let label = labels.find((el) => el.id === mapOptionPanels[panel].markers[marker].labelID)
+				if (label !== undefined) {
+					if (labelFilter.length === 0) {
+						mapOptionPanels[panel].markers[marker].visible = true
+					} else {
+						if (labelFilter.includes(label.id)) {
+							mapOptionPanels[panel].markers[marker].visible = true
+						}
+					}
+					if (applyLabelColourToMarker) {
+						mapOptionPanels[panel].colour = colourMap.get(label.color) // temporary for now, until each marker has its own colour picker
+						mapOptionPanels[panel].markers[marker].colour = colourMap.get(label.color) // These errors are never an issue - it won't get here if label is undefined
+					}
+					console.log(mapOptionPanels[panel].markers[marker].colour)
+				}
+			}
+			changeIconColourFor(mapOptionPanels[panel])
+		}
+		updateMap()
+	}
+
 	/**
 	 * Clears the stage filtering for the panel
 	 * @param panel panel to operate on
@@ -309,19 +389,23 @@
 	function clearStages(panel: OptionPanel) {
 		panel.stagesVisible.length = 0
 		updateMap()
-		// Set checkboxes to false
+		let checkboxes = document.getElementsByName("stage-checkbox")
+		for (let box of checkboxes) {
+			box.checked = false
+		}
 	}
 
 	function changeIconColourFor(panel: OptionPanel) {
-		const svgMarker = {
-			path: 'M 15.00,14.00 C 15.00,14.00 14.54,17.32 14.54,17.32 14.23,19.63 13.42,21.86 12.17,23.84 12.17,23.84 12.17,23.84 12.17,23.84 11.00,25.69 10.22,27.76 9.86,29.91 9.86,29.91 9.54,31.83 9.54,31.83M 4.00,14.00 C 4.00,14.00 4.36,17.35 4.36,17.35 4.61,19.69 5.42,21.92 6.73,23.87 6.73,23.87 6.73,23.87 6.73,23.87 7.96,25.70 8.75,27.77 9.06,29.95 9.06,29.95 9.32,31.88 9.32,31.88M 17.50,8.50 C 17.50,12.92 13.92,16.50 9.50,16.50 5.08,16.50 1.50,12.92 1.50,8.50 1.50,4.08 5.08,0.50 9.50,0.50 13.92,0.50 17.50,4.08 17.50,8.50 Z',
-			scale: 1,
-			fillColor: panel.colour,
-			fillOpacity: 1,
-			anchor: new google.maps.Point(9, 33)
-		}
-		for (let m in panel.markers) {
-			panel.markers[m].marker.setIcon(svgMarker)
+		for (let marker in panel.markers) {
+			panel.markers[marker].colour = panel.colour // Temporary for now, until each stage has its own colour picker
+			const svgMarker = {
+				path: 'M 15.00,14.00 C 15.00,14.00 14.54,17.32 14.54,17.32 14.23,19.63 13.42,21.86 12.17,23.84 12.17,23.84 12.17,23.84 12.17,23.84 11.00,25.69 10.22,27.76 9.86,29.91 9.86,29.91 9.54,31.83 9.54,31.83M 4.00,14.00 C 4.00,14.00 4.36,17.35 4.36,17.35 4.61,19.69 5.42,21.92 6.73,23.87 6.73,23.87 6.73,23.87 6.73,23.87 7.96,25.70 8.75,27.77 9.06,29.95 9.06,29.95 9.32,31.88 9.32,31.88M 17.50,8.50 C 17.50,12.92 13.92,16.50 9.50,16.50 5.08,16.50 1.50,12.92 1.50,8.50 1.50,4.08 5.08,0.50 9.50,0.50 13.92,0.50 17.50,4.08 17.50,8.50 Z',
+				scale: 1,
+				fillColor: panel.markers[marker].colour,
+				fillOpacity: 1,
+				anchor: new google.maps.Point(9, 33)
+			}
+			panel.markers[marker].marker.setIcon(svgMarker)
 		}
 	}
 
@@ -420,7 +504,7 @@
 						{#each pipelines as pipeline}
 							<label>
 								<input
-									name="pipeline-checkboxes"
+									name="pipeline-checkbox"
 									type="checkbox"
 									on:click={() => addPipelineCheckbox(pipeline)}
 								/>
@@ -460,19 +544,19 @@
 						<div class="value-slider">
 							<label class="value-slider">
 								Only show deals with values above
-								<input name="value-slider" type="number" bind:value />
+								<input name="value-slider" type="number" class="filter-value" bind:value />
 							</label>
 						</div>
 						<div class="status-options">
 							<label class="value-slider">
 								Only show deals with status:
 								<label>
-									<input name="won-status" type="checkbox" on:click={() => filterByStatus('won')} />
+									<input name="filter-checkbox" type="checkbox" on:click={() => filterByStatus('won')} />
 									Won
 								</label>
 								<label>
 									<input
-										name="won-status"
+										name="filter-checkbox"
 										type="checkbox"
 										on:click={() => filterByStatus('open')}
 									/>
@@ -480,7 +564,7 @@
 								</label>
 								<label>
 									<input
-										name="won-status"
+										name="filter-checkbox"
 										type="checkbox"
 										on:click={() => filterByStatus('lost')}
 									/>
@@ -490,32 +574,81 @@
 							<label>
 								Only show deals won after:
 								<div class="time-filter">
-									<input type="checkbox" bind:checked={checkWonTime} />
+									<input name="filter-checkbox" type="checkbox" bind:checked={checkWonTime} />
 									<DateInput timePrecision={'minute'} bind:value={wonDate} />
 								</div>
 							</label>
 							<label>
 								Only show deals installed after:
 								<div class="time-filter">
-									<input type="checkbox" bind:checked={checkInstalledTime} />
+									<input name="filter-checkbox" type="checkbox" bind:checked={checkInstalledTime} />
 									<DateInput timePrecision={'minute'} bind:value={installDate} />
 								</div>
 							</label>
 							<label>
 								Only show deals quoted after:
 								<div class="time-filter">
-									<input type="checkbox" bind:checked={checkQuoteTime} />
+									<input name="filter-checkbox" type="checkbox" bind:checked={checkQuoteTime} />
 									<DateInput timePrecision={'minute'} bind:value={quoteDate} />
 								</div>
 							</label>
 						</div>
 						<label>
-							<input type="checkbox" bind:checked={showNullMarkers} />
+							<input type="checkbox" name="filter-checkbox" bind:checked={showNullMarkers} />
 							Show markers with no filter data
 						</label>
 						<div class="filter-buttons">
 							<button on:click={applyFilters}>Apply Filters</button>
 							<button on:click={clearFilters}>Clear Filters</button>
+						</div>
+					{/if}
+				</div>
+				<div class="labels">
+					<div class="header-tab">
+						{#if !hideLabelOptions}
+							<button
+								class="dropdown-button"
+								on:click={() => (hideLabelOptions = !hideLabelOptions)}
+							>
+								<svg width="18" height="19" class="dropdown-icon">
+									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+								</svg>
+							</button>
+						{:else}
+							<button
+								class="dropdown-button"
+								on:click={() => (hideLabelOptions = !hideLabelOptions)}
+							>
+								<svg width="18" height="19" class="dropdown-icon-rotated">
+									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+								</svg>
+							</button>
+						{/if}
+						<h3>Labels</h3>
+					</div>
+					{#if hideLabelOptions}
+						<div class="label-options">
+							<div class="label-checkboxes">
+								{#each labels as pdLabel}
+									<div class="label-options">
+										<label>
+											<input type="checkbox" name="label-checkbox" on:click={() => updateLabelFilter(pdLabel)} />
+											{pdLabel.name}
+										</label>
+									</div>
+								{/each}
+							</div>
+							<p />
+							<div class="label-controls">
+								<div>
+									<input type="checkbox" name="label-checkbox" bind:checked={applyLabelColourToMarker} />
+									Apply Label Colour to Marker
+								</div>
+								<div class="label-select-button">
+									<button on:click={filterByLabel}> Apply Labels </button>
+									<button on:click={clearLabelFilters}> Clear Labels </button>
+								</div>
+							</div>
 						</div>
 					{/if}
 				</div>
@@ -569,7 +702,7 @@
 					{#each panel.stages as stage}
 						<label>
 							<input
-								name="stage-checkboxes"
+								name="stage-checkbox"
 								type="checkbox"
 								on:click={() => addStage(panel, stage)}
 							/>
@@ -644,8 +777,8 @@
 </div>
 
 <style>
-
-	button, input {
+	button,
+	input {
 		cursor: pointer;
 	}
 
@@ -753,5 +886,20 @@
 		position: relative;
 		top: 2px;
 		transform: scale(0.8) rotate(90deg);
+	}
+
+	.label-controls {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.label-select-button {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.label-options {
+		display: flex;
+		flex-direction: column;
 	}
 </style>
