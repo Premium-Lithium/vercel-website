@@ -53,23 +53,23 @@ def createLostLeadsSpreadSheet(deals, stages, pipelines):
     ws = wb.active
     ws.append(
         [
-            "Title",
-            "Value",
-            "Organization",
-            "Contact person",
-            "Expected close date",
-            "Next activity date",
-            "Owner",
-            "Lead Source",
-            "Lost reason",
-            "Lost time",
-            "Status",
-            "Deal created",
-            "Pipeline"
-            "Quote Issued",
-            "Won Time",
-            "Sales Contact",
-            "Stage"
+            "Deal - Title",
+            "Deal - Value",
+            "Deal - Organization",
+            "Deal - Contact person",
+            "Deal - Expected close date",
+            "Deal - Next activity date",
+            "Deal - Owner",
+            "Deal - Lead Source",
+            "Deal - Lost reason",
+            "Deal - Lost time",
+            "Deal - Status",
+            "Deal - Deal created",
+            "Deal - Pipeline"
+            "Deal - Quote Issued",
+            "Deal - Won Time",
+            "Deal - Sales Contact",
+            "Deal - Stage"
         ]
     )
     for deal in deals:
