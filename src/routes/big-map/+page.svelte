@@ -49,21 +49,19 @@
 	onMount(async () => {
 		loading = true
 		generateHeatmap()
-		let pipelinesRes = await fetch('/big-map', {
-			method: 'POST',
+		let pipelinesRes = await fetch('/big-map/pipelines', {
+			method: 'GET',
 			headers: {
 				'Content-Type': 'application-json'
 			},
-			body: JSON.stringify({ option: -1 })
 		})
 		let pipelinesResponse = await pipelinesRes.json()
 		pipelines = pipelinesResponse.body
-		let labelsRes = await fetch('/big-map', {
-			method: 'POST',
+		let labelsRes = await fetch('/big-map/labels', {
+			method: 'GET',
 			headers: {
 				'Content-Type': 'application-json'
 			},
-			body: JSON.stringify({ option: -2 })
 		})
 		let labelsResponse = await labelsRes.json()
 		labels = labelsResponse.body
@@ -77,11 +75,10 @@
 	 */
 	async function selectPipelines() {
 		clearMap()
-		// clearPipelineCheckboxes()
-		let mapRes = await fetch('/big-map', {
+		let mapRes = await fetch('/big-map/deals', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ option: 1, body: selectedPipelines })
+			body: JSON.stringify({ body: selectedPipelines })
 		})
 		let mapProps = await mapRes.json()
 		if (mapRes.ok) {
