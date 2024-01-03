@@ -1,6 +1,6 @@
 create table "public"."battery_turk_workers" (
     "worker_id" uuid not null,
-    "completed_regions" jsonb,
+    "completed_regions" jsonb[],
     "assigned_region" jsonb
 );
 

@@ -36,7 +36,7 @@ create table "public"."campaign_master" (
 
 CREATE UNIQUE INDEX campaign_audit_criteria_pkey ON public.campaign_audit_criteria USING btree (id);
 
-CREATE UNIQUE INDEX campaign_customers_pkey ON public.campaign_customers USING btree (campaign_id);
+CREATE UNIQUE INDEX campaign_customers_pkey ON public.campaign_customers USING btree (campaign_id, address_formatted);
 
 CREATE UNIQUE INDEX master_campaign_pkey ON public.campaign_master USING btree (campaign_id);
 

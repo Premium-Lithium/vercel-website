@@ -1,0 +1,27 @@
+name: Python Script Workflow
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "* 10,17 *  * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository content
+        uses: actions/checkout@v2 # Checkout the repository content to github runner.
+
+      - name: Setup Python Version
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 # Install the python version needed
+
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v2
+        with:
+          path: .github/workflows/scripts/pipedrive-filter/requirements.txt
+
+      - name: Execute Python script # Run the app.py
+        run: python .github/workflows/scripts/pipedrive-filter/pipedrive-filter.py

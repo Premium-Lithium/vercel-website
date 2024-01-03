@@ -1,4 +1,5 @@
 <script>
+	import { getRandomColor } from '$lib/utils'
 	import { page } from '$app/stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import MagicLink from '$lib/components/MagicLink.svelte'
@@ -7,7 +8,16 @@
 	let awaitingResponse = false
 	let errorMessage = ''
 
-	let left, right, bottom, top, map, loader, drawingManager, submitButton
+	let left,
+		right,
+		bottom,
+		top,
+		map,
+		loader,
+		drawingManager,
+		spherical,
+		submitButton,
+		selectedCampaignId
 
 	const urlParams = $page.url.searchParams
 	left = urlParams.get('left') || ''
@@ -19,14 +29,24 @@
 	let minimumRoofSize = 16
 	let southFacingThreshold = 15
 	let loadingDrawingManager = false
+	let loadingSpherical = false
+	let polygons = []
 
 	let isAuthenticated = false
-	let doGeocoding = false
-	let doGoogleSolar = false
+	let doGeocoding = true
+	let doGoogleSolar = true
+	let downloadAsCsv = false
 	let status = ''
 
 	let selectedFile
 	let googleMapsPolygon
+
+	let possibleCampaigns = []
+
+	onMount(async () => {
+		const { data, error } = await supabase.from('campaign_master').select('*')
+		possibleCampaigns = data
+	})
 
 	function handleFileChange(event) {
 		selectedFile = event.target.files[0]
@@ -66,9 +86,7 @@
 	function parseKMLToCoordinates(kmlData) {
 		const parser = new DOMParser()
 		const xmlDoc = parser.parseFromString(kmlData, 'application/xml')
-
 		const coordinateElements = xmlDoc.getElementsByTagName('coordinates')
-
 		if (coordinateElements.length > 0) {
 			const coordinates = coordinateElements[0].textContent.trim().split(/\s+/)
 			return coordinates.map((coord) => {
@@ -76,7 +94,6 @@
 				return { lat, lng }
 			})
 		}
-
 		return []
 	}
 
@@ -139,6 +156,13 @@
 				loadingDrawingManager = false
 			})
 		}
+		if (!loadingSpherical && !spherical) {
+			loadingSpherical = true
+			loader.importLibrary('geometry').then(async (g) => {
+				spherical = g.spherical
+			})
+			loadingSpherical = false
+		}
 	}
 	onMount(async () => {
 		const { data, error } = await supabase.auth.getSession()
@@ -150,58 +174,162 @@
 		awaitingResponse = true
 		status = 'Getting OSM data...'
 		errorMessage = ''
+		let allElements = []
+		let promises = []
 		const formData = new FormData(event.target)
-		const left = formData.get('left')
-		const bottom = formData.get('bottom')
-		const right = formData.get('right')
-		const top = formData.get('top')
-		console.log(left, bottom, top, right)
-		let res = await fetch(`${$page.url.origin}/solar-proposals/find-suitable-houses`, {
-			method: 'POST',
-			body: JSON.stringify({
-				left: parseFloat(left.toString()),
-				bottom: parseFloat(bottom.toString()),
-				right: parseFloat(right.toString()),
-				top: parseFloat(top.toString())
-			}),
-			headers: { 'Content-Type': 'application/json' }
-		})
-		if (!res.ok) {
-			errorMessage = await res.text()
-			awaitingResponse = false
-			return
-		}
-		let data = await res.json()
+		let left = formData.get('left')
+		let bottom = formData.get('bottom')
+		let right = formData.get('right')
+		let top = formData.get('top')
 
+		let grid = breakDownIntoGrid(left, bottom, top, right, 250000)
+
+		grid.forEach((x, i, a) => {
+			x.forEach((xy, j) => {
+				left = xy.getSouthWest().lng()
+				bottom = xy.getSouthWest().lat()
+				right = xy.getNorthEast().lng()
+				top = xy.getNorthEast().lat()
+				promises.push(
+					fetch(`${$page.url.origin}/solar-proposals/find-suitable-houses`, {
+						method: 'POST',
+						body: JSON.stringify({
+							left: parseFloat(left.toString()),
+							bottom: parseFloat(bottom.toString()),
+							right: parseFloat(right.toString()),
+							top: parseFloat(top.toString())
+						}),
+						headers: { 'Content-Type': 'application/json' }
+					})
+						.then((res) => (res.ok ? res.json() : Promise.reject(res.statusText)))
+						.catch((error) => {
+							console.error('Fetch error:', error)
+							return []
+						})
+				)
+			})
+		})
+
+		await Promise.all(promises).then((responses) => {
+			allElements = responses.reduce((p, v) => {
+				return p.concat(v.elements || [])
+			}, [])
+		})
 		console.log('total num of ways/nodes/relations')
-		console.log(data.elements.length)
+		console.log(allElements.length)
 		status = 'Finding streets...'
-		let streetWays = data.elements.filter((x) => {
+		let streetWays = allElements.filter((x) => {
 			return x.type == 'way' && x.tags?.highway == 'residential'
 		})
-		let streetNodes = getNodesFromWays(streetWays, data.elements)
+		let streetNodes = getNodesFromWays(streetWays, allElements)
 		console.log(streetNodes)
 		let streetNames = getStreetNames(streetNodes)
 		console.log(streetNames)
+		let streetsWithHouses = []
+
 		if (doGeocoding) {
 			status = 'Performing Geocoding...'
 			let geocodesOfAddress = await findAddressesOnStreets(streetNames, streetNodes)
-			console.log(geocodesOfAddress)
 			let allParsedData = geocodesOfAddress.reduce((p, v, i, a) => {
 				return p.concat(parseResponseData(v.houses))
 			}, [])
-			downloadCSV(allParsedData, `Sevenoaks-houses.csv`)
+			if (downloadAsCsv) downloadCSV(allParsedData, `York-houses.csv`)
+			streetsWithHouses = geocodesOfAddress
 		}
+		let googleSolarResults = []
+		let suitableHouses = streetsWithHouses.reduce((p, v, i, a) => {
+			return Array.from(new Set(p.concat(v.houses)))
+		}, [])
+
+		if (doGoogleSolar) {
+			let promises = []
+
+			streetsWithHouses.forEach((street) => {
+				console.log(street)
+				street.houses.forEach((house) => {
+					const lat = house.geometry.location.lat
+					const lon = house.geometry.location.lng
+
+					promises.push(
+						new Promise((resolve) =>
+							setTimeout(async () => {
+								try {
+									let response = await fetch(`${$page.url.origin}/solar-proposals/google-solar`, {
+										method: 'POST',
+										headers: {
+											'Content-Type': 'application/json'
+										},
+										body: JSON.stringify({ lat, lon, quality: 'MEDIUM' })
+									})
+									let data = await response.json()
+									resolve({ solarResult: data, house: house })
+								} catch (error) {
+									console.error('Error with fetch for house:', house, error)
+									resolve(null)
+								}
+							}, promises.length * 250)
+						)
+					)
+				})
+			})
+
+			try {
+				googleSolarResults = await Promise.all(promises)
+				googleSolarResults = googleSolarResults.filter((x) => x)
+			} catch (error) {
+				console.error('An error occurred with the batch of promises', error)
+			}
+
+			console.log(googleSolarResults)
+
+			suitableHouses = []
+
+			let housesWithASouthernRoof = googleSolarResults.filter((x) => {
+				if (x.solarResult.error) return false
+				return getSoutherlyRoofSections(x.solarResult.solarPotential.roofSegmentStats).length
+			})
+
+			suitableHouses = housesWithASouthernRoof.filter((x) => {
+				return doesRoofHaveEnoughSpaceFor6Panels(
+					getSoutherlyRoofSections(x.solarResult.solarPotential.roofSegmentStats)
+				)
+			})
+		}
+
+		console.log('Suitable houses:')
+		console.log(suitableHouses)
+
+		suitableHouses.forEach(async (x) => {
+			let { buildingStats, roofSegmentStats, wholeRoofStats, maxArrayAreaMeters2 } =
+				x.solarResult.solarPotential
+			let { data, error } = await supabase.from('campaign_customers').upsert({
+				campaign_id: selectedCampaignId,
+				campaign_specific_data: {
+					'roof_details': { buildingStats, maxArrayAreaMeters2, roofSegmentStats, wholeRoofStats }
+				},
+				address: x.house,
+				address_formatted: x.house['formatted_address'],
+				current_status: {
+					name: 'PRE-DESIGN',
+					description: 'Not yet had an OpenSolar Design created',
+					date_started: new Date(Date.now()).toISOString()
+				}
+			})
+		})
 		awaitingResponse = false
 	}
 
 	async function findAddressesOnStreets(streetNames, streetNodes) {
 		let addresses = await Promise.all(
 			streetNames.map(async (streetName, i) => {
+				await new Promise((resolve) => {
+					setTimeout(resolve, 50 * i)
+				})
 				let houses = []
+				let strikes = 0
 				let limit = 1
+				let hardLimit = 50
 				let limitFound = false
-				let foundWithinBounds = true
 				let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 					method: 'POST',
 					body: JSON.stringify({
@@ -219,7 +347,10 @@
 					})
 					.join(', ')
 
-				while (!limitFound && limit <= 2 && foundWithinBounds) {
+				while (!limitFound && limit <= hardLimit && strikes < 3) {
+					await new Promise((resolve) => {
+						setTimeout(resolve, 50)
+					})
 					let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 						method: 'POST',
 						body: JSON.stringify({ address: `${limit} ${streetName}, ${addressArea}` })
@@ -230,8 +361,13 @@
 					}
 					res = await res.json()
 					if (!isLatLonInBounds(res.results[0].geometry.location, { left, top, right, bottom })) {
-						foundWithinBounds = false
-						break
+						strikes += 1
+						continue
+					}
+
+					if (res.results[0].geometry['location_type'] == 'RANGE_INTERPOLATED') {
+						strikes += 1
+						continue
 					}
 					let numberInResponse = res.results[0]['address_components'].filter((x) =>
 						x.types.includes('street_number')
@@ -261,9 +397,7 @@
 	function parseResponseData(houses) {
 		let response = houses.map((house) => {
 			const formattedAddress = house['formatted_address']
-			const address = house['address_components'].map((comp) => {
-				return comp['long_name']
-			})
+			const address = JSON.stringify(house['address_components'])
 			const latitude = house.geometry.location.lat
 			const longitude = house.geometry.location.lng
 			return [address, formattedAddress, latitude, longitude]
@@ -451,7 +585,7 @@
 							console.error('Error with fetch for house:', x.house, error)
 							resolve(null)
 						}
-					}, i * 201)
+					}, i * 250)
 				)
 		)
 		let googleSolarResults = []
@@ -494,6 +628,52 @@
 		})
 
 		awaitingResponse = false
+	}
+
+	function breakDownIntoGrid(lft, btm, top, rgt, targetArea) {
+		polygons.forEach((p) => p.setMap(null))
+		let gridTop = { lat: +top, lng: 0 }
+		let gridBottom = { lat: +btm, lng: 0 }
+		let gridLeft = { lat: 0, lng: +lft }
+		let gridRight = { lat: 0, lng: +rgt }
+
+		let currentRows = Math.floor(
+			spherical.computeDistanceBetween({ lat: +btm, lng: +lft }, { lat: +top, lng: +lft }) /
+				Math.sqrt(targetArea)
+		)
+		let currentCols = Math.floor(
+			spherical.computeDistanceBetween({ lat: +btm, lng: +lft }, { lat: +btm, lng: +rgt }) /
+				Math.sqrt(targetArea)
+		)
+
+		let grid = []
+		for (let row = 0; row < currentRows; row++) {
+			grid.push(new Array(currentCols))
+			for (let col = 0; col < currentCols; col++) {
+				const top = spherical.interpolate(gridTop, gridBottom, row / currentRows)
+				const bottom = spherical.interpolate(gridTop, gridBottom, (row + 1) / currentRows)
+				const left = spherical.interpolate(gridLeft, gridRight, col / currentCols)
+				const right = spherical.interpolate(gridLeft, gridRight, (col + 1) / currentCols)
+				grid[row][col] = new google.maps.LatLngBounds(
+					new google.maps.LatLng(bottom.lat(), left.lng()),
+					new google.maps.LatLng(top.lat(), right.lng())
+				)
+
+				const color = getRandomColor()
+				const polygon = new google.maps.Rectangle({
+					strokeColor: color,
+					strokeOpacity: 1,
+					strokeWeight: 2,
+					fillColor: color,
+					fillOpacity: 0.5,
+					clickable: false,
+					map,
+					bounds: grid[row][col]
+				})
+				polygons = [...polygons, polygon]
+			}
+		}
+		return grid
 	}
 </script>
 
@@ -540,6 +720,16 @@
 				bind:value={southFacingThreshold}
 			/>
 		{/if}
+		<label for="doGoogleSolar">Google Solar Lookup</label>
+		<input type="checkbox" id="doGoogleSolar" name="doGoogleSolar" bind:checked={doGoogleSolar} />
+		{#if doGoogleSolar}
+			<label for="campaignId">Campaign: </label>
+			<select name="campaignId" id="campaignId" bind:value={selectedCampaignId}>
+				{#each possibleCampaigns as campaign}
+					<option value={campaign['campaign_id']}>{campaign['campaign_name']}</option>
+				{/each}
+			</select>
+		{/if}
 	</div>
 	<GoogleMap bind:map bind:loader minZoom={7} initialZoom={10} />
 </div>
@@ -554,7 +744,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: left;
-		margin: 0px 10vw 0px 10vw;
+		margin: 0px 10vw 10px 10vw;
 	}
 	.container {
 		width: 100%;

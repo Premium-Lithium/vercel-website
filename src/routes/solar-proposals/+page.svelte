@@ -8,6 +8,7 @@
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
+	import { updateStatus } from '$lib/campaignTools'
 
 	let uniqueIdentifier = undefined
 	let projects = []
@@ -15,7 +16,9 @@
 	let isAuthenticated = false
 	let supabaseAuth = undefined
 	let modals = []
+	let menuModal
 	const flagsVisibleToWorker = ['PANELS_ALREADY_INSTALLED', 'ROOF_TOO_COMPLICATED']
+	let activeCampaigns = []
 
 	// PARAMETERS
 
@@ -39,6 +42,12 @@
 	})
 
 	async function populateProjectList() {
+		const { data: getActiveCampaignData, error: getActiveCampaignError } = await supabase
+			.from('campaign_master')
+			.select('*')
+		activeCampaigns = getActiveCampaignData?.map((x) => {
+			if (x['campaign_name'].includes('new-solar')) return x.campaign_id
+		})
 		let workerData = await getWorkerData(uniqueIdentifier)
 		let projectIds = []
 		if (workerData.length == 0) {
@@ -46,7 +55,7 @@
 			workerData = await getWorkerData(uniqueIdentifier)
 		}
 		projectIds = workerData[0]['assigned_projects'].map((x) => {
-			return x.uuid
+			return x['customerId']
 		})
 
 		let projectData = await Promise.all(
@@ -59,7 +68,13 @@
 			modals = modals.length > projects.length ? [...modals] : [...modals, null]
 			projects = [
 				...projects,
-				{ projectId: x.id, address: x.address, latLon: x.lat_lon, status: statusToString(x.status) }
+				{
+					projectId: x.id,
+					address: x.address,
+					latLon: x.lat_lon,
+					status: statusToString(x.status),
+					campaignId: x['campaign_id']
+				}
 			]
 		})
 	}
@@ -81,9 +96,9 @@
 
 	async function getProjectData(projectId, workerId) {
 		let { data: houseData, error: houseError } = await supabase
-			.from('south_facing_houses')
+			.from('campaign_customers')
 			.select('*')
-			.eq('id', projectId)
+			.eq('customer_id', projectId)
 		let { data: projectData, error: projectError } = await supabase
 			.from('solar_turk_workers')
 			.select('*')
@@ -93,12 +108,13 @@
 
 		let projectStatus = 'Not started'
 		projectData['assigned_projects'].forEach((x) => {
-			if (x.uuid === projectId) projectStatus = x.status
+			if (x['customerId'] === projectId) projectStatus = x.status
 		})
 		return {
-			id: houseData?.id,
+			id: houseData['customer_id'],
 			address: houseData?.address['formatted_address'],
-			lat_lon: houseData?.lat_lon,
+			lat_lon: houseData?.address.geometry.location,
+			campaign_id: houseData['campaign_id'],
 			status: projectStatus
 		}
 	}
@@ -111,25 +127,77 @@
 		return `${split[0][0].toUpperCase()}${split[0].slice(1)}${split[1] ? ` ${split[1]}` : ''}`
 	}
 
+	async function assignNProjects(workerId, numOfProjects) {
+		const { data: getProjectsData, error: getProjectsError } = await supabase
+			.from('solar_turk_workers')
+			.select('assigned_projects')
+			.eq('worker_id', workerId)
+		let assignedProjects = getProjectsData[0]['assigned_projects'].map((x) => {
+			return x.customerId
+		})
+
+		let { data, error } = await supabase.rpc('get_campaign_customers', {
+			numrows: numOfProjects,
+			campaignids: activeCampaigns,
+			assignedprojectids: assignedProjects
+		})
+
+		console.log(data)
+
+		if (error) {
+			console.error('Error fetching random campaign customers:', error)
+			return
+		}
+
+		let response = await supabase
+			.from('solar_turk_workers')
+			.update({
+				assigned_projects: [
+					...data.map((x) => {
+						return {
+							customerId: x['customer_id'],
+							status: 'not_started',
+							openSolarId: null,
+							flags: []
+						}
+					}),
+					...getProjectsData[0]['assigned_projects']
+				]
+			})
+			.eq('worker_id', workerId)
+
+		let newData = response.data
+		let newError = response.error
+
+		if (newError) {
+			console.error('Error allocating new projects:', newError)
+		}
+	}
+
 	async function createNewWorker(workerId, numOfProjects) {
-		let { data, error } = await supabase.rpc('get_random_south_facing_houses', {
-			num_rows: numOfProjects
+		let { data, error } = await supabase.rpc('get_campaign_customers', {
+			numrows: numOfProjects,
+			campaignids: activeCampaigns,
+			assignedprojectids: []
 		})
 
 		if (error) {
-			console.error('Error fetching random south facing houses:', error)
+			console.error('Error fetching random campaign customers:', error)
 			return
 		}
-		let projectIds = data.map((x) => {
-			return x.id
-		})
 
 		let response = await supabase.from('solar_turk_workers').insert([
 			{
 				worker_id: workerId,
 				assigned_projects: data.map((x) => {
-					return { uuid: x.id, status: 'not_started', openSolarId: null, flags: [] }
-				})
+					return {
+						customerId: x['customer_id'],
+						status: 'not_started',
+						openSolarId: null,
+						flags: []
+					}
+				}),
+				worker_email: supabaseAuth.user.email
 			}
 		])
 
@@ -144,6 +212,7 @@
 	async function createOpenSolarProject(project, comingFromOpen = false) {
 		if (awaitingResponse & !comingFromOpen) return
 		awaitingResponse = true
+		console.log(project)
 		let res = await fetch(`${$page.url.pathname}/open-solar/create-project`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -151,7 +220,7 @@
 				project: {
 					projectId: project.id,
 					address: project.address,
-					latLon: project.latLon,
+					latLon: { 'lat': project.latLon.lat, 'lon': project.latLon.lng },
 					uniqueIdentifier
 				},
 				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
@@ -160,7 +229,7 @@
 		let data = await res.json()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach((entry) => {
-			if (entry.uuid == project.projectId) {
+			if (entry['customerId'] == project.projectId) {
 				entry.status = 'in_progress'
 				entry.openSolarId = data.id
 			}
@@ -176,7 +245,7 @@
 		awaitingResponse = true
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (entry.uuid == project.projectId) {
+			if (entry['customerId'] == project.projectId) {
 				if (entry.openSolarId) {
 					let res = await fetch(`${$page.url.pathname}/open-solar/get-project`, {
 						method: 'POST',
@@ -213,12 +282,12 @@
 	}
 
 	async function completeProject(project, i) {
-		let awaitingResponse = true
+		awaitingResponse = true
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
-				entry.uuid == project.projectId &&
+				entry['customerId'] == project.projectId &&
 				(entry.status == 'in_progress' || entry.status == 'completed')
 			) {
 				let existingFlags = entry.flags
@@ -227,12 +296,21 @@
 				flags.forEach(async (flag) => {
 					await addFlagToProject(project, flag)
 				})
+				let newFlags = [
+					...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
+				] // merge flag arrays, removing duplicates
 				await addOpenSolarLinkToAddress(
 					entry.openSolarId,
 					project.projectId,
 					uniqueIdentifier,
 					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
-					[...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])] // merge flag arrays, removing duplicates
+					newFlags
+				)
+				await updateStatus(
+					project.campaignId,
+					project.projectId,
+					'DESIGN-COMPLETED',
+					'An OpenSolar design has been completed'
 				)
 			}
 		})
@@ -279,15 +357,15 @@
 
 	async function addOpenSolarLinkToAddress(openSolarId, houseId, workerId, numCompleted, flags) {
 		let { data, error: selectError } = await supabase
-			.from('south_facing_houses')
+			.from('campaign_customers')
 			.select('*')
-			.eq('id', houseId)
-		if (selectError) {
-			console.error('Error fetching from south facing houses:', selectError)
+			.eq('customer_id', houseId)
+		if (selectError || !data || data.length == 0 || !data[0]) {
+			console.error('Error fetching from campaign customers:', selectError)
 			return
 		}
 		data = data[0]
-		let openSolarProjects = data['open_solar_projects']
+		let openSolarProjects = data['campaign_specific_data']['open_solar_projects']
 		if (!openSolarProjects) {
 			openSolarProjects = [
 				{
@@ -310,9 +388,14 @@
 			]
 		}
 		let { error: updateHouseError } = await supabase
-			.from('south_facing_houses')
-			.update({ open_solar_projects: openSolarProjects })
-			.eq('id', houseId)
+			.from('campaign_customers')
+			.update({
+				campaign_specific_data: {
+					...data['campaign_specific_data'],
+					open_solar_projects: openSolarProjects
+				}
+			})
+			.eq('customer_id', houseId)
 
 		if (updateHouseError) {
 			console.error('Error update to south facing houses:', updateHouseError)
@@ -333,7 +416,7 @@
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (
-				(entry.uuid == project.projectId && entry.status == 'in_progress') ||
+				(entry['customerId'] == project.projectId && entry.status == 'in_progress') ||
 				entry.status == 'completed'
 			) {
 				if (!entry.flags.includes(flag)) entry.flags = [...entry.flags, flag]
@@ -365,6 +448,12 @@
 		await completeProject(project, i)
 		modals[i].close()
 	}
+
+	async function pinNotOnRoofClicked(project, i) {
+		await addFlagToProject(project, 'ADDRESS_UNCLEAR')
+		await completeProject(project, i)
+		modals[i].close()
+	}
 </script>
 
 {#each modals as modal, i}
@@ -373,11 +462,16 @@
 			<h3>{projects[i].address.split(',')[0]}</h3>
 		</div>
 		{#if projects[i]}
-			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lon, 200, 19)} />
+			<img src={getStaticImage(projects[i].latLon.lat, projects[i].latLon.lng, 200, 19)} />
 		{/if}
 		<div class="button-container">
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
+			>
+			<button
+				class="warning-button"
+				on:click|stopPropagation={() => pinNotOnRoofClicked(projects[i], i)}
+				>Pin isn't on roof / address unclear</button
 			>
 			<button
 				class="warning-button"
@@ -411,9 +505,42 @@
 		</div>
 	</Modal>
 {/each}
+<Modal showModal={false} bind:dialog={menuModal}>
+	<div class="modal" slot="header"><h3>Menu</h3></div>
+	<div class="inner-modal">
+		<div class="button-container">
+			<button
+				class="modal-button"
+				on:click={async () => {
+					await assignNProjects(uniqueIdentifier, 25)
+					await populateProjectList()
+					menuModal.close()
+				}}
+			>
+				Get new projects
+			</button>
+			<button
+				class="modal-button"
+				on:click={async () => {
+					await supabase.auth.signOut()
+					supabaseAuth = undefined
+					isAuthenticated = false
+					menuModal.close()
+				}}
+			>
+				Log out
+			</button>
+		</div>
+	</div>
+</Modal>
 
 <div class="container">
 	{#if isAuthenticated}
+		<div class="hamburger" on:click={menuModal.showModal()}>
+			<div class="ham" />
+			<div class="ham" />
+			<div class="ham" />
+		</div>
 		{#if awaitingResponse}
 			<div class="spinner" />
 			<div class="loading-indicator">Loading...</div>
@@ -472,6 +599,32 @@
 </div>
 
 <style>
+	.hamburger {
+		width: 40px;
+		height: 30px;
+		margin: 26px 24px 24px 24px;
+		position: absolute;
+		display: grid;
+		grid-template-rows: 1fr 1fr 1fr;
+	}
+
+	.hamburger:hover > .ham {
+		background: #424242;
+	}
+
+	.ham {
+		width: 100%;
+		height: 50%;
+		top: 25%;
+		position: relative;
+		background: black;
+		border-radius: 25px;
+	}
+
+	.inner-modal {
+		min-width: 25vw;
+	}
+
 	.bold {
 		font-weight: 600;
 	}
@@ -594,6 +747,7 @@
 		border-radius: 8px;
 		color: black;
 		cursor: pointer;
+		min-width: 60%;
 		transition: background-color 0.15s ease;
 	}
 
