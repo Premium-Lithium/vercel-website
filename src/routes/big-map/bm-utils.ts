@@ -37,7 +37,6 @@ export async function generateHeatmap() {
     heatmap.set(new google.maps.visualization.HeatmapLayer({
         data: heatmapData
     }))
-    console.log(get(heatmap))
 }
 
 export async function getSelectedPipelineData(selectedPipelines: Array<number>) {
@@ -96,7 +95,6 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
      * @param opts Marker parameters
      */
 function addMarker(opts: MarkerOptions) {
-    const map = get(map)
     let marker = new google.maps.Marker({
         position: new google.maps.LatLng(opts.latLng.lat, opts.latLng.lng),
         title: opts.address,
@@ -109,7 +107,6 @@ function addMarker(opts: MarkerOptions) {
     marker.addListener('click', () => {
         markerPopup.open({
             anchor: marker,
-            map: map // might not be necessary? check after the rest of it works
         })
     })
     opts.marker = marker
@@ -120,7 +117,7 @@ function addMarker(opts: MarkerOptions) {
  */
 export function updateMap() {
     let currentPanels = get(mapOptionPanels)
-    for (let panel in mapOptionPanels) {
+    for (let panel in currentPanels) {
         for (let marker in currentPanels[panel].markers) {
             if (currentPanels[panel].markers[marker].visible) {
                 currentPanels[panel].markers[marker].marker.setMap(get(map))

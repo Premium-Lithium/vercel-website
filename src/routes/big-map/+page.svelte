@@ -6,7 +6,6 @@
 		checkQuoteTime,
 		checkWonTime,
 		feedbackMessage,
-		feedbackOptions,
 		feedbackSubmitted,
 		heatmap,
 		hideFilterOptions,
@@ -29,7 +28,26 @@
 	import ColorPicker from 'svelte-awesome-color-picker'
 	import { onMount } from 'svelte'
 	import { DateInput } from 'date-picker-svelte'
-	import { generateHeatmap, getLabels, getPipelines, getSelectedPipelineData, updateMap, deletePanel, makeAllMarkersInvisible, clearMap, checkDateFilterFor, applyFilters, clearFilterData, setFiltersToDefaultValues, applyFiltersToPanel, addPipelineCheckbox, filterByLabel, filterByStatus, sendFeedbackEmail, updateLabelFilter, changeIconColourFor, addFeedbackOptions } from './bm-utils'
+	import {
+		generateHeatmap,
+		getLabels,
+		getPipelines,
+		getSelectedPipelineData,
+		updateMap,
+		deletePanel,
+		makeAllMarkersInvisible,
+		clearMap,
+		applyFilters,
+		setFiltersToDefaultValues,
+		applyFiltersToPanel,
+		addPipelineCheckbox,
+		filterByLabel,
+		filterByStatus,
+		sendFeedbackEmail,
+		updateLabelFilter,
+		changeIconColourFor,
+		addFeedbackOptions
+	} from './bm-utils'
 
 	let loader: any
 	let handle: HTMLElement
@@ -64,13 +82,21 @@
 		}
 	}
 
+	/**
+	 * Adds the chosen stage to the filter array for that panel
+	 * @param panel panel to operate on
+	 * @param stage stage to filter by for that panel
+	 */
+	function addStage(panel: OptionPanel, stage: string) {
+		panel.stagesVisible.push(stage)
+	}
+
 	function clearFilters() {
 		setFiltersToDefaultValues()
 		let checkboxes = document.getElementsByName('filter-checkbox')
 		for (let box of checkboxes) {
 			box.checked = false
 		}
-		
 	}
 
 	function clearLabelFilters() {
@@ -86,7 +112,7 @@
 	 * Clears the stage filtering for the panel
 	 * @param panel panel to operate on
 	 */
-	 function clearStages(panel: OptionPanel) {
+	function clearStages(panel: OptionPanel) {
 		panel.stagesVisible.length = 0
 		updateMap()
 		let checkboxes = document.getElementsByName('stage-checkbox')
@@ -112,7 +138,6 @@
 			$heatmap.setMap($map)
 		}
 	}
-
 </script>
 
 <div class="map-container">
