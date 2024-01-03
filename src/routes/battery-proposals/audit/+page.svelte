@@ -35,7 +35,7 @@
 				]
 		}
 	}
-
+	$: console.log(allUnauditedHouses)
 	$: currentHouseToAudit = allUnauditedHouses[currentHousePointer]
 
 	let isAuthenticated = false
@@ -189,7 +189,7 @@
 	/>
 {:else}
 	<div class="container">
-		{#if allUnauditedHouses.length != 0}
+		{#if allUnauditedHouses.length == 0}
 			<div class="error-message">
 				<p>No houses to audit</p>
 			</div>
