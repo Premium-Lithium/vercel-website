@@ -1,4 +1,4 @@
-import { writable, type Writable } from "svelte/store"
+import { writable, type Writable, readable, type Readable } from "svelte/store"
 
 export interface MapResponse {
     ok: boolean,
@@ -67,35 +67,32 @@ export interface LabelInfo {
     color: string
 }
 
-export let pipelines: Array<PipeLineKey> = [] // Array of all pipelines and IDs
-export let selectedPipelines: Array<number> = [] // Array of selected pipelines filtered by
-export let mapOptionPanels: Array<OptionPanel> = []
-export let map: any, loader: any
-export let handle: HTMLElement
-export let helpHandle: HTMLElement
-export let loading: boolean = false
-export let icon: string
-export let value: number = 0
-export let labels: Array<LabelInfo> = []
-export let statusFilters: Array<string> = []
-export let feedbackOptions: Array<string> = []
-export let feedbackMessage: string
-export let feedbackSubmitted: boolean = false
-export let wonDate: Date = new Date(1420977600000)
-export let installDate: Date = new Date(1420977600000)
-export let quoteDate: Date = new Date(1420977600000)
-export let checkWonTime: boolean = false
-export let checkInstalledTime: boolean = false
-export let checkQuoteTime: boolean = false
-export let showNullMarkers: boolean = false
-export let heatmap: google.maps.visualization.HeatmapLayer
-export let hidePipelineOptions: boolean = false
-export let hideFilterOptions: boolean = false
-export let labelFilter: Array<string> = [] // Array of label IDs, not names
-export let applyLabelColourToMarker: boolean = false
-export let hideLabelOptions: boolean = false
+export let map: Writable<any> = writable()
+export let pipelines: Writable<Array<PipeLineKey>> = writable([]) // Array of all pipelines and IDs
+export let selectedPipelines: Writable<Array<number>> = writable([]) // Array of selected pipelines filtered by
+export let mapOptionPanels: Writable<Array<OptionPanel>> = writable([])
+export let loading: Writable<boolean> = writable(false)
+export let value: Writable<number> = writable(0)
+export let labels: Writable<Array<LabelInfo>> = writable([])
+export let statusFilters: Writable<Array<string>> = writable([])
+export let feedbackOptions: Writable<Array<string>> = writable([])
+export let feedbackMessage: Writable<string> = writable()
+export let feedbackSubmitted: Writable<boolean> = writable(false)
+export let wonDate: Writable<Date> = writable(new Date(1420977600000))
+export let installDate: Writable<Date> = writable(new Date(1420977600000))
+export let quoteDate: Writable<Date> = writable(new Date(1420977600000))
+export let checkWonTime: Writable<boolean> = writable(false)
+export let checkInstalledTime: Writable<boolean> = writable(false)
+export let checkQuoteTime: Writable<boolean> = writable(false)
+export let showNullMarkers: Writable<boolean> = writable(false)
+export let heatmap: Writable<google.maps.visualization.HeatmapLayer>
+export let hidePipelineOptions: Writable<boolean> = writable(false)
+export let hideFilterOptions: Writable<boolean> = writable(false)
+export let labelFilter: Writable<Array<string>> = writable([]) // Array of label IDs, not names
+export let applyLabelColourToMarker: Writable<boolean> = writable(false)
+export let hideLabelOptions: Writable<boolean> = writable(false)
 
-const colourMap = new Map([
+export const colourMap: Readable<Map<string, string>> = readable(new Map([
     ['yellow', '#E1F378'],
     ['brown', '#302411'],
     ['purple', '#222F60'],
@@ -105,4 +102,4 @@ const colourMap = new Map([
     ['pink', '#F6A19A'],
     ['green', '#C9FC50'],
     ['dark-gray', '#464748']
-])
+]));
