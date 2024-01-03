@@ -103,3 +103,5 @@ export const colourMap: Readable<Map<string, string>> = readable(new Map([
     ['green', '#C9FC50'],
     ['dark-gray', '#464748']
 ]));
+
+export const enableFeedback: Writable<boolean> = writable(false)

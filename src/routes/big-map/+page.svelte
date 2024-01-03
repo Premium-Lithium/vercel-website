@@ -21,7 +21,8 @@
 		selectedPipelines,
 		showNullMarkers,
 		value,
-		wonDate
+		wonDate,
+		enableFeedback
 	} from './bm-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
@@ -309,32 +310,28 @@
 					</div>
 					{#if $hideLabelOptions}
 						<div class="checkbox-stack">
-							<div class="label-checkboxes">
-								{#each $labels as pdLabel}
-									<label>
-										<input
-											type="checkbox"
-											name="label-checkbox"
-											on:click={() => updateLabelFilter(pdLabel)}
-										/>
-										{pdLabel.name}
-									</label>
-								{/each}
-							</div>
-							<p />
-							<div class="checkbox-stack">
-								<div>
+							{#each $labels as pdLabel}
+								<label>
 									<input
 										type="checkbox"
 										name="label-checkbox"
-										bind:checked={$applyLabelColourToMarker}
+										on:click={() => updateLabelFilter(pdLabel)}
 									/>
-									Apply Label Colour to Marker
-								</div>
-								<div class="labelled-checkbox">
-									<button on:click={filterByLabel}> Apply Labels </button>
-									<button on:click={clearLabelFilters}> Clear Labels </button>
-								</div>
+									{pdLabel.name}
+								</label>
+							{/each}
+							<p />
+							<div>
+								<input
+									type="checkbox"
+									name="label-checkbox"
+									bind:checked={$applyLabelColourToMarker}
+								/>
+								Apply Label Colour to Marker
+							</div>
+							<div class="labelled-checkbox">
+								<button on:click={filterByLabel}> Apply Labels </button>
+								<button on:click={clearLabelFilters}> Clear Labels </button>
 							</div>
 						</div>
 					{/if}
@@ -411,46 +408,48 @@
 			</div>
 		</div>
 	{/each}
-	<div class="option-panel" use:movable={{ handle: helpHandle }}>
-		<div class="filter-controls">
-			<div class="header-row">
-				<h3>Feedback</h3>
-				<div class="handle" bind:this={helpHandle}>.</div>
-			</div>
-			<p>Provide your feedback with the fields below</p>
-			<div class="checkbox-stack">
-				<h5>Tick all that apply:</h5>
-				<label>
-					<input
-						id="bug-checkbox"
-						name="feedback-checkboxes"
-						type="checkbox"
-						on:click={() => addFeedbackOptions('Bug')}
-					/>Bug</label
-				>
-				<label>
-					<input
-						id="feature-checkbox"
-						name="feedback-checkboxes"
-						type="checkbox"
-						on:click={() => addFeedbackOptions('Feature')}
-					/>Feature</label
-				>
-				<textarea
-					id="feedback-textarea"
-					name="feedback-form"
-					class="feedback-form"
-					bind:value={$feedbackMessage}
-				/>
-				<div class="clear-stage-checkboxes">
-					<button on:click={sendFeedbackEmail}>Submit Feedback</button>
+	{#if $enableFeedback}
+		<div class="option-panel" use:movable={{ handle: helpHandle }}>
+			<div class="filter-controls">
+				<div class="header-row">
+					<h3>Feedback</h3>
+					<div class="handle" bind:this={helpHandle}>.</div>
+				</div>
+				<p>Provide your feedback with the fields below</p>
+				<div class="checkbox-stack">
+					<h5>Tick all that apply:</h5>
+					<label>
+						<input
+							id="bug-checkbox"
+							name="feedback-checkboxes"
+							type="checkbox"
+							on:click={() => addFeedbackOptions('Bug')}
+						/>Bug</label
+					>
+					<label>
+						<input
+							id="feature-checkbox"
+							name="feedback-checkboxes"
+							type="checkbox"
+							on:click={() => addFeedbackOptions('Feature')}
+						/>Feature</label
+					>
+					<textarea
+						id="feedback-textarea"
+						name="feedback-form"
+						class="feedback-form"
+						bind:value={$feedbackMessage}
+					/>
+					<div class="clear-stage-checkboxes">
+						<button on:click={sendFeedbackEmail}>Submit Feedback</button>
+					</div>
 				</div>
 			</div>
+			{#if feedbackSubmitted}
+				<p>Thanks!</p>
+			{/if}
 		</div>
-		{#if feedbackSubmitted}
-			<p>Thanks!</p>
-		{/if}
-	</div>
+	{/if}
 	<div id="map">
 		<GoogleMap
 			bind:map={$map}
@@ -557,5 +556,4 @@
 		top: 2px;
 		transform: scale(0.8) rotate(90deg);
 	}
-
 </style>
