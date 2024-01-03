@@ -1,4 +1,4 @@
-import type { PipeLineKey, StageFilter } from "../MapTypes"
+import type { PipeLineKey, StageFilter } from "../bm-stores"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()

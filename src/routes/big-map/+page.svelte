@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './MapTypes'
+	import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'

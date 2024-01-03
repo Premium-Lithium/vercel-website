@@ -1,4 +1,4 @@
-import type { LabelInfo } from "../MapTypes"
+import type { LabelInfo } from "../bm-stores"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()
