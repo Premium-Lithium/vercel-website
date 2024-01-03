@@ -90,10 +90,10 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
 }
 
 /**
-     * Creates a marker object for a given set of parameters
-     * 	including location and pop up window
-     * @param opts Marker parameters
-     */
+ * Creates a marker object for a given set of parameters
+ * 	including location and pop up window
+ * @param opts Marker parameters
+ */
 function addMarker(opts: MarkerOptions) {
     let marker = new google.maps.Marker({
         position: new google.maps.LatLng(opts.latLng.lat, opts.latLng.lng),
@@ -112,6 +112,7 @@ function addMarker(opts: MarkerOptions) {
     opts.marker = marker
     return opts
 }
+
 /**
  *	Go through each panels' markers and if they are meant to be visible, add them to the map, if not remove them
  */
@@ -177,9 +178,9 @@ export function makeAllMarkersInvisible() {
 }
 
 /**
-     * checks against each date filter (separately as some of the filters may not be chosen)
-     * @param marker
-     */
+ * checks against each date filter (separately as some of the filters may not be chosen)
+ * @param marker
+ */
 export function checkDateFilterFor(marker: MarkerOptions): boolean {
     let showMarker = true
     let nullMarkers = get(showNullMarkers)
