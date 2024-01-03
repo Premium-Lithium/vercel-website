@@ -29,7 +29,6 @@
 	import { onMount } from 'svelte'
 	import { DateInput } from 'date-picker-svelte'
 	import {
-		generateHeatmap,
 		getLabels,
 		getPipelines,
 		getSelectedPipelineData,
@@ -47,7 +46,8 @@
 		updateLabelFilter,
 		changeIconColourFor,
 		addFeedbackOptions
-	} from './bm-utils'
+	} from './bm-pipedrive-utils'
+	import { generateHeatmap } from './bm-heatmap-utils'
 
 	let loader: any
 	let handle: HTMLElement
@@ -173,7 +173,7 @@
 					<h3>Pipelines</h3>
 				</div>
 				{#if $hidePipelineOptions}
-					<div class="pipeline-checkboxes">
+					<div class="checkbox-stack">
 						{#each $pipelines as pipeline}
 							<label>
 								<input
@@ -212,16 +212,16 @@
 					{/if}
 					<h3>Filters</h3>
 				</div>
-				<div class="filters">
+				<div class="checkbox-stack">
 					{#if $hideFilterOptions}
-						<div class="value-slider">
-							<label class="value-slider">
+						<div class="checkbox-stack">
+							<label class="checkbox-stack">
 								Only show deals with values above
 								<input name="value-slider" type="number" class="filter-value" bind:value={$value} />
 							</label>
 						</div>
 						<div class="status-options">
-							<label class="value-slider">
+							<label class="checkbox-stack">
 								Only show deals with status:
 								<label>
 									<input
@@ -250,14 +250,14 @@
 							</label>
 							<label>
 								Only show deals won after:
-								<div class="time-filter">
+								<div class="labelled-checkbox">
 									<input name="filter-checkbox" type="checkbox" bind:checked={$checkWonTime} />
 									<DateInput timePrecision={'minute'} bind:value={$wonDate} />
 								</div>
 							</label>
 							<label>
 								Only show deals installed after:
-								<div class="time-filter">
+								<div class="labelled-checkbox">
 									<input
 										name="filter-checkbox"
 										type="checkbox"
@@ -268,7 +268,7 @@
 							</label>
 							<label>
 								Only show deals quoted after:
-								<div class="time-filter">
+								<div class="labelled-checkbox">
 									<input name="filter-checkbox" type="checkbox" bind:checked={$checkQuoteTime} />
 									<DateInput timePrecision={'minute'} bind:value={$quoteDate} />
 								</div>
@@ -308,23 +308,21 @@
 						<h3>Labels</h3>
 					</div>
 					{#if $hideLabelOptions}
-						<div class="label-options">
+						<div class="checkbox-stack">
 							<div class="label-checkboxes">
 								{#each $labels as pdLabel}
-									<div class="label-options">
-										<label>
-											<input
-												type="checkbox"
-												name="label-checkbox"
-												on:click={() => updateLabelFilter(pdLabel)}
-											/>
-											{pdLabel.name}
-										</label>
-									</div>
+									<label>
+										<input
+											type="checkbox"
+											name="label-checkbox"
+											on:click={() => updateLabelFilter(pdLabel)}
+										/>
+										{pdLabel.name}
+									</label>
 								{/each}
 							</div>
 							<p />
-							<div class="label-controls">
+							<div class="checkbox-stack">
 								<div>
 									<input
 										type="checkbox"
@@ -333,7 +331,7 @@
 									/>
 									Apply Label Colour to Marker
 								</div>
-								<div class="label-select-button">
+								<div class="labelled-checkbox">
 									<button on:click={filterByLabel}> Apply Labels </button>
 									<button on:click={clearLabelFilters}> Clear Labels </button>
 								</div>
@@ -364,7 +362,7 @@
 			<div class="set-marker-colour">
 				<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
 			</div>
-			<div class="stage-checkboxes">
+			<div class="checkbox-stack">
 				<div class="header-tab">
 					{#if !panel.hideStageOptions}
 						<button
@@ -398,7 +396,7 @@
 							{stage}</label
 						>
 					{/each}
-					<div class="stage-buttons">
+					<div class="labelled-checkbox">
 						<div class="add-checked-stages">
 							<button on:click={() => applyStages(panel)}>Apply Stages</button>
 						</div>
@@ -420,7 +418,7 @@
 				<div class="handle" bind:this={helpHandle}>.</div>
 			</div>
 			<p>Provide your feedback with the fields below</p>
-			<div class="stage-checkboxes">
+			<div class="checkbox-stack">
 				<h5>Tick all that apply:</h5>
 				<label>
 					<input
@@ -523,25 +521,13 @@
 		padding: 8px;
 		z-index: 2;
 	}
-	.pipeline-checkboxes {
-		display: flex;
-		flex-direction: column;
-	}
 
-	.stage-checkboxes {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.stage-buttons {
+	.labelled-checkbox {
 		display: flex;
 		flex-direction: row;
 	}
-	.filters {
-		display: flex;
-		flex-direction: column;
-	}
-	.value-slider {
+
+	.checkbox-stack {
 		display: flex;
 		flex-direction: column;
 	}
@@ -549,11 +535,6 @@
 	.feedback-form {
 		width: 96%;
 		height: 80px;
-	}
-
-	.time-filter {
-		display: flex;
-		flex-direction: row;
 	}
 
 	.header-tab {
@@ -577,18 +558,4 @@
 		transform: scale(0.8) rotate(90deg);
 	}
 
-	.label-controls {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.label-select-button {
-		display: flex;
-		flex-direction: row;
-	}
-
-	.label-options {
-		display: flex;
-		flex-direction: column;
-	}
 </style>
