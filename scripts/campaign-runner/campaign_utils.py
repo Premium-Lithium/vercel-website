@@ -30,8 +30,3 @@ for name, required_params in data_dependencies.items():
             raise ValueError(f"Could not find function named `{required_task_name}`")
 
         validate_arguments(required_task_name, required_params)
-
-    # existing_args = list(signature(existing_tasks[required_task_name]).parameters.keys())
-
-    # if not all(param in existing_args for param in required_params):
-    #     raise ValueError(f"Function {required_task_name} has incorrect arguments:\nExpected: {required_params}\nFound: {existing_args}")
