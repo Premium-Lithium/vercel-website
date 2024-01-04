@@ -53,6 +53,7 @@ def main():
     solar_panels = []
     with open(args.filename, newline='') as f:
         reader = csv.reader(f, dialect="unix")
+        print("Parsing csv...")
         for row in reader:
             if row[0] == 'panel_lon_lat': continue
             latitude = float(row[0].split(', ')[1].rstrip(')'))
@@ -61,7 +62,12 @@ def main():
             solar_panels.append(SolarPanel(latitude, longitude,area))
 
     buildings_dict = {}
+    print("Getting postcodes/addresses...")
+
+    i = 0
     for panel in solar_panels:
+        print(f"{i} / {len(solar_panels)}", end="\r")
+        i+=1
         postcode = get_postcode_of(panel.location)
         if not postcode:
             continue
@@ -77,8 +83,11 @@ def main():
 
     for x in items_to_remove:
         buildings_dict.pop(x)
-
+    print("Combining duplicates...")
+    i = 0
     for array in duplicate_arrays:
+        print(f"{i} / {len(duplicate_arrays)}", end="\r")
+        i+=1
         address = get_address_of(array.location)
         formatted_addr = address["formatted_address"]
 
@@ -87,8 +96,14 @@ def main():
         buildings_dict[formatted_addr].arrays.append(array)
 
     print(f"Created {len(buildings_dict)} buildings")
-    for b in buildings_dict:
-        create_new_database_record_for(buildings_dict[b],campaign_id)
+    if args.database:
+        print("Uploading to database...")
+        i=0
+        for b in buildings_dict:
+            print(f"{i} / {len(buildings_dict)}", end="\r")
+            i+=1
+            create_new_database_record_for(buildings_dict[b],campaign_id)
+    print("Completed!")
 
 def catch_auto_audit_errors_on(building) -> AutoAuditError:
     errors = []
@@ -114,8 +129,6 @@ def create_new_database_record_for(building: Building, campaign_id):
         "audit_flags": catch_auto_audit_errors_on(building),
         "address": building.address
     }
-    print(database_entry)
-    print()
     supabase.table('campaign_customers').insert(database_entry).execute()
 
 if __name__ == '__main__':
