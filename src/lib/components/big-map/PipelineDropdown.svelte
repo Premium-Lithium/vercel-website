@@ -70,12 +70,14 @@
 <div class="dropdown">
 	<DropdownHeader header={'Pipeline'} bind:droppedDown={shown} />
 	{#if shown}
-		{#each pipelines as pipeline, index}
-			<LabelledCheckbox label={pipeline.name} on:change={() => handleCheckboxChange(index)} />
-		{/each}
-		<div class="controls">
-			<MenuButton title="Select Pipelines" on:click={handleSelectPipelines} />
-			<MenuButton title="Clear Selection" on:click={handleClearPipelines} />
+		<div class="menu">
+			{#each pipelines as pipeline, index}
+				<LabelledCheckbox label={pipeline.name} on:change={() => handleCheckboxChange(index)} />
+			{/each}
+			<div class="controls">
+				<MenuButton title="Select Pipelines" on:click={handleSelectPipelines} />
+				<MenuButton title="Clear Selection" on:click={handleClearPipelines} />
+			</div>
 		</div>
 	{/if}
 </div>
@@ -90,5 +92,8 @@
 		display: flex;
 		flex-direction: row;
 	}
-	
+
+	.menu {
+		padding-left: 24px;
+	}
 </style>

@@ -41,6 +41,7 @@
 <div class="dropdown">
 	<DropdownHeader header={'Filters'} bind:droppedDown={shown} />
 	{#if shown}
+	<div class="menu">
 		<div class="checkbox-options">
 			<p>Only show deals that are:</p>
 			{#each checkboxOptions as checkbox}
@@ -73,6 +74,7 @@
 			<MenuButton title="Apply Filters" on:click={applyFilters} />
 			<MenuButton title="Clear Filters" on:click={clearFilters} />
 		</div>
+	</div>
 	{/if}
 </div>
 
@@ -85,5 +87,9 @@
 	.controls {
 		display: flex;
 		flex-direction: row;
+	}
+
+	.menu {
+		padding-left: 24px;
 	}
 </style>

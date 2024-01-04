@@ -20,6 +20,7 @@
 	import { generateHeatmap } from './bm-heatmap-utils'
 	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
 	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
+	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
 
 	let loader: any
 	let loading: boolean = false
@@ -79,6 +80,7 @@
 				</div>
 				<PipedriveSection/>
 				<HeatmapSection />
+				<CampaignSection />
 			</div>
 		{/if}
 	</div>
