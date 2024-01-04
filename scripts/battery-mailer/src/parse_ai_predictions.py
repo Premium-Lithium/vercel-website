@@ -6,6 +6,7 @@ from enum import Enum
 from supabase import create_client, Client
 import datetime
 from concurrent.futures import ThreadPoolExecutor
+import json
 class SolarPanel:
     def __init__(self, lat, lon, area):
         self.lat = lat
@@ -48,6 +49,25 @@ def get_postcode_of(location: Location):
         return None
     return response['result'][0]['postcode']
 
+def bulk_get_postcode_of(locations: [Location]):
+    if len(locations) > 100:
+        print("Please provide 1-100 locations")
+        return None
+    query = {"geolocations": [{"longitude": x.longitude, "latitude": x.latitude} for x in locations]}
+    response = requests.post(f'https://api.postcodes.io/postcodes',json=query)
+    response = response.json()
+    if response['result'] == None:
+        return None
+    return [{'query': x['query'], 'postcode': x['result'][0]['postcode']} for x in response['result'] if x['result'] != None]
+
+def parallel_get_postcode(panels):
+    postcodes = bulk_get_postcode_of([panel.location for panel in panels])
+    return (postcodes,panels)
+
+def parallel_get_address(panel):
+    address = get_address_of(panel.location)
+    return (address,panel)
+
 def main():
     if not args.filename.endswith('.csv'):
         print('TypeError: File must be a .csv')
@@ -73,19 +93,15 @@ def main():
     buildings_dict = {}
     print("Getting postcodes/addresses...")
 
-    i = 0
-    def parallel_get_postcode(panel):
-        postcode = get_postcode_of(panel.location)
-        return (postcode, panel)
-
-    def parallel_get_address(panel):
-        address = get_address_of(panel.location)
-        return (address,panel)
-
+    chunk_size = 100
+    solar_chunks = [solar_panels[i:i+chunk_size] for i in range(0,len(solar_panels), chunk_size)]
     with ThreadPoolExecutor() as executor:
-        results = list(executor.map(parallel_get_postcode, solar_panels))
+        results = list(executor.map(parallel_get_postcode, solar_chunks))
+    flattened = [item for sublist in results for item in sublist]
+    postcodes = [item['postcode'] for sublist in flattened for item in sublist if type(item) == dict]
+    panels = [item for sublist in flattened for item in sublist if type(item) != dict]
 
-    for postcode, panel in results:
+    for panel,postcode in zip(panels,postcodes):
         if not postcode:
             continue
         if postcode not in buildings_dict:
