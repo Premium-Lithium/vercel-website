@@ -7,6 +7,11 @@ from supabase import create_client, Client
 import datetime
 from concurrent.futures import ThreadPoolExecutor
 import json
+import threading
+import time
+
+last_api_call_time = time.time()
+lock = threading.Lock()
 class SolarPanel:
     def __init__(self, lat, lon, area):
         self.lat = lat
@@ -32,6 +37,15 @@ class Building:
         return sum([array.area for array in self.arrays])
 
 def get_address_of(location: Location):
+    global last_api_call_time
+
+    with lock:
+        elapsed = time.time() - last_api_call_time
+        wait_time = max(0.02 - elapsed, 0)  # 0.02 seconds for 50 calls per second
+        time.sleep(wait_time)
+
+        last_api_call_time = time.time()
+
     response = requests.post('http://localhost:3000/solar-proposals/geocoding', json={
         "lat": location.latitude, "lon": location.longitude
     })
@@ -40,7 +54,6 @@ def get_address_of(location: Location):
         return None
 
     return response['results'][0]
-
 
 def get_postcode_of(location: Location):
     response = requests.get(f'https://api.postcodes.io/postcodes?lon={location.longitude}&lat={location.latitude}')
@@ -62,7 +75,7 @@ def bulk_get_postcode_of(locations: [Location]):
 
 def parallel_get_postcode(panels):
     postcodes = bulk_get_postcode_of([panel.location for panel in panels])
-    return (postcodes,panels)
+    return list(zip(postcodes,panels))
 
 def parallel_get_address(panel):
     address = get_address_of(panel.location)
@@ -97,10 +110,11 @@ def main():
     solar_chunks = [solar_panels[i:i+chunk_size] for i in range(0,len(solar_panels), chunk_size)]
     with ThreadPoolExecutor() as executor:
         results = list(executor.map(parallel_get_postcode, solar_chunks))
-    flattened = [item for sublist in results for item in sublist]
-    postcodes = [item['postcode'] for sublist in flattened for item in sublist if type(item) == dict]
-    panels = [item for sublist in flattened for item in sublist if type(item) != dict]
 
+    panel_postcode_pairs = [pair for sublist in results for pair in sublist]
+    postcodes, panels = zip(*panel_postcode_pairs)
+    print(f"Found {len(postcodes)} panels")
+    postcodes = [p['postcode'] for p in postcodes]
     for panel,postcode in zip(panels,postcodes):
         if not postcode:
             continue
@@ -116,7 +130,7 @@ def main():
 
     for x in items_to_remove:
         buildings_dict.pop(x)
-    print("Combining duplicates...")
+    print(f"Combining {len(items_to_remove)} duplicates...")
     i = 0
 
     with ThreadPoolExecutor() as executor:
