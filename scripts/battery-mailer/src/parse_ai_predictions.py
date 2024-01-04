@@ -5,6 +5,7 @@ from math_utils import Location, centroid
 from enum import Enum
 from supabase import create_client, Client
 import datetime
+from concurrent.futures import ThreadPoolExecutor
 class SolarPanel:
     def __init__(self, lat, lon, area):
         self.lat = lat
@@ -34,6 +35,8 @@ def get_address_of(location: Location):
         "lat": location.latitude, "lon": location.longitude
     })
     response = response.json()
+    if not response['results']:
+        return None
 
     return response['results'][0]
 
@@ -49,11 +52,17 @@ def main():
     if not args.filename.endswith('.csv'):
         print('TypeError: File must be a .csv')
         return
+    if args.database:
+        url: str = "http://localhost:54321"
+        key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+
+        supabase: Client = create_client(url, key)
     campaign_id = args.filename.split('_')[0]
     solar_panels = []
+
     with open(args.filename, newline='') as f:
         reader = csv.reader(f, dialect="unix")
-        print("Parsing csv...")
+        print(f"Parsing {args.filename}")
         for row in reader:
             if row[0] == 'panel_lon_lat': continue
             latitude = float(row[0].split(', ')[1].rstrip(')'))
@@ -65,10 +74,18 @@ def main():
     print("Getting postcodes/addresses...")
 
     i = 0
-    for panel in solar_panels:
-        print(f"{i} / {len(solar_panels)}", end="\r")
-        i+=1
+    def parallel_get_postcode(panel):
         postcode = get_postcode_of(panel.location)
+        return (postcode, panel)
+
+    def parallel_get_address(panel):
+        address = get_address_of(panel.location)
+        return (address,panel)
+
+    with ThreadPoolExecutor() as executor:
+        results = list(executor.map(parallel_get_postcode, solar_panels))
+
+    for postcode, panel in results:
         if not postcode:
             continue
         if postcode not in buildings_dict:
@@ -85,10 +102,13 @@ def main():
         buildings_dict.pop(x)
     print("Combining duplicates...")
     i = 0
-    for array in duplicate_arrays:
-        print(f"{i} / {len(duplicate_arrays)}", end="\r")
-        i+=1
-        address = get_address_of(array.location)
+
+    with ThreadPoolExecutor() as executor:
+        results = list(executor.map(parallel_get_address, duplicate_arrays))
+
+    for (address,array) in results:
+        if not address:
+            continue
         formatted_addr = address["formatted_address"]
 
         if formatted_addr not in buildings_dict:
@@ -99,10 +119,12 @@ def main():
     if args.database:
         print("Uploading to database...")
         i=0
+        entries = []
         for b in buildings_dict:
             print(f"{i} / {len(buildings_dict)}", end="\r")
             i+=1
-            create_new_database_record_for(buildings_dict[b],campaign_id)
+            entries.append(create_new_database_record_for(buildings_dict[b],campaign_id))
+        supabase.table('campaign_customers').insert(entries).execute()
     print("Completed!")
 
 def catch_auto_audit_errors_on(building) -> AutoAuditError:
@@ -114,11 +136,6 @@ def catch_auto_audit_errors_on(building) -> AutoAuditError:
     return errors
 
 def create_new_database_record_for(building: Building, campaign_id):
-    url: str = "http://localhost:54321"
-    key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-
-    supabase: Client = create_client(url, key)
-
     date = str(datetime.datetime.now()).split(' ')
     date = f'{date[0]}T{date[1]}Z'
     database_entry = {
@@ -129,7 +146,7 @@ def create_new_database_record_for(building: Building, campaign_id):
         "audit_flags": catch_auto_audit_errors_on(building),
         "address": building.address
     }
-    supabase.table('campaign_customers').insert(database_entry).execute()
+    return database_entry
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="python parse_ai_predictions", description="Parses AI predictions of Solar Panels, and optionally adds them to a database.")
