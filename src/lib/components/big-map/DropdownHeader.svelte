@@ -1,9 +1,9 @@
+<svelte:options accessors />
+
 <script lang="ts">
 	export let header: string
 	export let droppedDown: boolean = false
 </script>
-
-<svelte:options accessors />
 
 <div class="dropdown-header">
 	<div class="icon">
@@ -22,7 +22,7 @@
 		{/if}
 	</div>
 	<div class="heading">
-		<h4>{header}</h4>
+		<h3>{header}</h3>
 	</div>
 </div>
 
@@ -30,12 +30,12 @@
 	.dropdown-icon {
 		position: relative;
 		transform: scale(0.8);
-		top: 2px;
+		top: 20px;
 	}
 
 	.dropdown-icon-rotated {
 		position: relative;
-		top: 2px;
+		top: 20px;
 		transform: scale(0.8) rotate(90deg);
 	}
 
@@ -45,8 +45,7 @@
 	}
 
 	.dropdown-button {
-		background-color: #d0d1d2;
+		background-color: #091408;
 		border: none;
 	}
-
 </style>

@@ -1,4 +1,5 @@
-import { heatmap } from "./bm-stores"
+import { get } from "svelte/store"
+import { heatmap, map } from "./bm-stores"
 
 export async function generateHeatmap() {
     let heatmapData: Array<google.maps.LatLng> = []
@@ -13,4 +14,14 @@ export async function generateHeatmap() {
     heatmap.set(new google.maps.visualization.HeatmapLayer({
         data: heatmapData
     }))
+}
+
+export async function toggleHeatmap() {
+    let hm = get(heatmap)
+    if (hm.getMap() === get(map)) {
+        hm.setMap(null)
+    } else {
+        hm.setMap(get(map))
+    }
+    heatmap.set(hm)
 }

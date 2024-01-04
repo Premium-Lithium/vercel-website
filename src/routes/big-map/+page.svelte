@@ -1,59 +1,29 @@
 <script lang="ts">
 	import {
 		type OptionPanel,
-		applyLabelColourToMarker,
-		checkInstalledTime,
-		checkQuoteTime,
-		checkWonTime,
-		feedbackMessage,
-		feedbackSubmitted,
-		heatmap,
-		hideFilterOptions,
-		hideLabelOptions,
-		hidePipelineOptions,
-		installDate,
-		labelFilter,
-		labels,
 		map,
 		mapOptionPanels,
-		pipelines,
-		quoteDate,
-		selectedPipelines,
-		showNullMarkers,
-		value,
-		wonDate,
-		enableFeedback
 	} from './bm-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
 	import { onMount } from 'svelte'
-	import { DateInput } from 'date-picker-svelte'
 	import {
 		getLabels,
 		getPipelines,
-		getSelectedPipelineData,
 		updateMap,
 		deletePanel,
 		makeAllMarkersInvisible,
-		clearMap,
-		applyFilters,
-		setFiltersToDefaultValues,
 		applyFiltersToPanel,
-		addPipelineCheckbox,
-		filterByLabel,
-		filterByStatus,
-		sendFeedbackEmail,
-		updateLabelFilter,
 		changeIconColourFor,
-		addFeedbackOptions
 	} from './bm-pipedrive-utils'
 	import { generateHeatmap } from './bm-heatmap-utils'
+	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
+	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
 
 	let loader: any
-	let handle: HTMLElement
-	let helpHandle: HTMLElement
 	let loading: boolean = false
+	let handle: HTMLElement
 
 	onMount(async () => {
 		loading = true
@@ -64,49 +34,12 @@
 	})
 
 	/**
-	 * Gets deals from all pipelines in selectedPipelines, creates map marker objects, and puts them on the map
-	 */
-	async function selectPipelines() {
-		clearMap()
-		await getSelectedPipelineData($selectedPipelines)
-		updateMap()
-	}
-
-	/**
-	 * Deletes panels until all panels are gone
-	 */
-	function clearPipelineCheckboxes() {
-		while ($mapOptionPanels.length !== 0) deletePanel($mapOptionPanels[0])
-		let checkboxes = document.getElementsByName('pipeline-checkbox')
-		for (let box of checkboxes) {
-			box.checked = false
-		}
-	}
-
-	/**
 	 * Adds the chosen stage to the filter array for that panel
 	 * @param panel panel to operate on
 	 * @param stage stage to filter by for that panel
 	 */
 	function addStage(panel: OptionPanel, stage: string) {
 		panel.stagesVisible.push(stage)
-	}
-
-	function clearFilters() {
-		setFiltersToDefaultValues()
-		let checkboxes = document.getElementsByName('filter-checkbox')
-		for (let box of checkboxes) {
-			box.checked = false
-		}
-	}
-
-	function clearLabelFilters() {
-		$labelFilter.length = 0
-		let checkboxes = document.getElementsByName('label-checkbox')
-		for (let box of checkboxes) {
-			box.checked = false
-		}
-		filterByLabel()
 	}
 
 	/**
@@ -132,13 +65,6 @@
 		updateMap()
 	}
 
-	async function toggleHeatmap() {
-		if ($heatmap.getMap() === $map) {
-			$heatmap.setMap(null)
-		} else {
-			$heatmap.setMap($map)
-		}
-	}
 </script>
 
 <div class="map-container">
@@ -151,198 +77,8 @@
 					<h2>Map Options</h2>
 					<div class="handle" bind:this={handle}>.</div>
 				</div>
-				<div class="header-tab">
-					{#if !$hidePipelineOptions}
-						<button
-							class="dropdown-button"
-							on:click={() => ($hidePipelineOptions = !$hidePipelineOptions)}
-						>
-							<svg width="18" height="19" class="dropdown-icon">
-								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-							</svg>
-						</button>
-					{:else}
-						<button
-							class="dropdown-button"
-							on:click={() => ($hidePipelineOptions = !$hidePipelineOptions)}
-						>
-							<svg width="18" height="19" class="dropdown-icon-rotated">
-								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-							</svg>
-						</button>
-					{/if}
-					<h3>Pipelines</h3>
-				</div>
-				{#if $hidePipelineOptions}
-					<div class="checkbox-stack">
-						{#each $pipelines as pipeline}
-							<label>
-								<input
-									name="pipeline-checkbox"
-									type="checkbox"
-									on:click={() => addPipelineCheckbox(pipeline)}
-								/>
-								{pipeline.name}</label
-							>
-						{/each}
-					</div>
-					<div class="pipeline-checkbox-buttons">
-						<button on:click={selectPipelines}>Display Selected Pipelines</button>
-						<button on:click={clearPipelineCheckboxes}>Clear Pipeline Selection</button>
-					</div>
-				{/if}
-				<div class="header-tab">
-					{#if !$hideFilterOptions}
-						<button
-							class="dropdown-button"
-							on:click={() => ($hideFilterOptions = !$hideFilterOptions)}
-						>
-							<svg width="18" height="19" class="dropdown-icon">
-								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-							</svg>
-						</button>
-					{:else}
-						<button
-							class="dropdown-button"
-							on:click={() => ($hideFilterOptions = !$hideFilterOptions)}
-						>
-							<svg width="18" height="19" class="dropdown-icon-rotated">
-								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-							</svg>
-						</button>
-					{/if}
-					<h3>Filters</h3>
-				</div>
-				<div class="checkbox-stack">
-					{#if $hideFilterOptions}
-						<div class="checkbox-stack">
-							<label class="checkbox-stack">
-								Only show deals with values above
-								<input name="value-slider" type="number" class="filter-value" bind:value={$value} />
-							</label>
-						</div>
-						<div class="status-options">
-							<label class="checkbox-stack">
-								Only show deals with status:
-								<label>
-									<input
-										name="filter-checkbox"
-										type="checkbox"
-										on:click={() => filterByStatus('won')}
-									/>
-									Won
-								</label>
-								<label>
-									<input
-										name="filter-checkbox"
-										type="checkbox"
-										on:click={() => filterByStatus('open')}
-									/>
-									Open
-								</label>
-								<label>
-									<input
-										name="filter-checkbox"
-										type="checkbox"
-										on:click={() => filterByStatus('lost')}
-									/>
-									Lost
-								</label>
-							</label>
-							<label>
-								Only show deals won after:
-								<div class="labelled-checkbox">
-									<input name="filter-checkbox" type="checkbox" bind:checked={$checkWonTime} />
-									<DateInput timePrecision={'minute'} bind:value={$wonDate} />
-								</div>
-							</label>
-							<label>
-								Only show deals installed after:
-								<div class="labelled-checkbox">
-									<input
-										name="filter-checkbox"
-										type="checkbox"
-										bind:checked={$checkInstalledTime}
-									/>
-									<DateInput timePrecision={'minute'} bind:value={$installDate} />
-								</div>
-							</label>
-							<label>
-								Only show deals quoted after:
-								<div class="labelled-checkbox">
-									<input name="filter-checkbox" type="checkbox" bind:checked={$checkQuoteTime} />
-									<DateInput timePrecision={'minute'} bind:value={$quoteDate} />
-								</div>
-							</label>
-						</div>
-						<label>
-							<input type="checkbox" name="filter-checkbox" bind:checked={$showNullMarkers} />
-							Show markers with no filter data
-						</label>
-						<div class="filter-buttons">
-							<button on:click={applyFilters}>Apply Filters</button>
-							<button on:click={clearFilters}>Clear Filters</button>
-						</div>
-					{/if}
-				</div>
-				<div class="labels">
-					<div class="header-tab">
-						{#if !$hideLabelOptions}
-							<button
-								class="dropdown-button"
-								on:click={() => ($hideLabelOptions = !$hideLabelOptions)}
-							>
-								<svg width="18" height="19" class="dropdown-icon">
-									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-								</svg>
-							</button>
-						{:else}
-							<button
-								class="dropdown-button"
-								on:click={() => ($hideLabelOptions = !$hideLabelOptions)}
-							>
-								<svg width="18" height="19" class="dropdown-icon-rotated">
-									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-								</svg>
-							</button>
-						{/if}
-						<h3>Labels</h3>
-					</div>
-					{#if $hideLabelOptions}
-						<div class="checkbox-stack">
-							{#each $labels as pdLabel}
-								<label>
-									<input
-										type="checkbox"
-										name="label-checkbox"
-										on:click={() => updateLabelFilter(pdLabel)}
-									/>
-									{pdLabel.name}
-								</label>
-							{/each}
-							<p />
-							<div>
-								<input
-									type="checkbox"
-									name="label-checkbox"
-									bind:checked={$applyLabelColourToMarker}
-								/>
-								Apply Label Colour to Marker
-							</div>
-							<div class="labelled-checkbox">
-								<button on:click={filterByLabel}> Apply Labels </button>
-								<button on:click={clearLabelFilters}> Clear Labels </button>
-							</div>
-						</div>
-					{/if}
-				</div>
-				<div class="heatmap">
-					<h3>Solar Install Heatmap</h3>
-					<p>Residential solar installs across the UK</p>
-					<div class="heatmap-button">
-						<button on:click={toggleHeatmap}>Toggle Heatmap</button>
-					</div>
-				</div>
+				<PipedriveSection/>
+				<HeatmapSection />
 			</div>
 		{/if}
 	</div>
@@ -408,48 +144,6 @@
 			</div>
 		</div>
 	{/each}
-	{#if $enableFeedback}
-		<div class="option-panel" use:movable={{ handle: helpHandle }}>
-			<div class="filter-controls">
-				<div class="header-row">
-					<h3>Feedback</h3>
-					<div class="handle" bind:this={helpHandle}>.</div>
-				</div>
-				<p>Provide your feedback with the fields below</p>
-				<div class="checkbox-stack">
-					<h5>Tick all that apply:</h5>
-					<label>
-						<input
-							id="bug-checkbox"
-							name="feedback-checkboxes"
-							type="checkbox"
-							on:click={() => addFeedbackOptions('Bug')}
-						/>Bug</label
-					>
-					<label>
-						<input
-							id="feature-checkbox"
-							name="feedback-checkboxes"
-							type="checkbox"
-							on:click={() => addFeedbackOptions('Feature')}
-						/>Feature</label
-					>
-					<textarea
-						id="feedback-textarea"
-						name="feedback-form"
-						class="feedback-form"
-						bind:value={$feedbackMessage}
-					/>
-					<div class="clear-stage-checkboxes">
-						<button on:click={sendFeedbackEmail}>Submit Feedback</button>
-					</div>
-				</div>
-			</div>
-			{#if feedbackSubmitted}
-				<p>Thanks!</p>
-			{/if}
-		</div>
-	{/if}
 	<div id="map">
 		<GoogleMap
 			bind:map={$map}
@@ -463,9 +157,32 @@
 </div>
 
 <style>
-	button,
-	input {
-		cursor: pointer;
+	@font-face {
+		font-family: 'Visby CF';
+		font-weight: 900;
+		src: url(/fonts/VisbyCF/VisbyCF-Heavy.otf) format('opentype');
+	}
+	@font-face {
+		font-family: 'Visby CF';
+		font-weight: 700;
+		src: url(/fonts/VisbyCF/VisbyCF-Bold.otf) format('opentype');
+	}
+	@font-face {
+		font-family: 'Visby CF';
+		font-weight: 600;
+		src: url(/fonts/VisbyCF/VisbyCF-DemiBold.otf) format('opentype');
+	}
+	@font-face {
+		font-family: 'Visby CF';
+		font-weight: 500;
+		src: url(/fonts/VisbyCF/VisbyCF-Regular.otf) format('opentype');
+	}
+
+	* {
+		color: #ffffff;
+		font-family: 'Visby CF';
+		font-style: normal;
+		font-weight: 500;
 	}
 
 	.map-container {
@@ -483,9 +200,9 @@
 		flex-direction: column;
 		width: auto;
 		height: auto;
-		background-color: #d0d1d2;
+		background-color: #091408;
 		border-radius: 8px;
-		border: 2px solid #3a4339;
+		border: 2px solid #ffffff;
 		justify-content: left;
 		padding: 8px;
 		z-index: 3;
@@ -502,7 +219,7 @@
 		display: flex;
 		justify-content: center;
 		vertical-align: middle;
-		border: 1px solid #3a4339;
+		border: 1px solid #ffffff;
 		border-radius: 8px;
 		height: 32px;
 		width: 32px;
@@ -513,8 +230,8 @@
 		flex-direction: column;
 		width: auto;
 		height: auto;
-		background-color: #d0d1d2;
-		border: 1px solid #3a4339;
+		background-color: #091408;
+		border: 1px solid #ffffff;
 		border-radius: 8px;
 		justify-content: left;
 		padding: 8px;
@@ -531,18 +248,13 @@
 		flex-direction: column;
 	}
 
-	.feedback-form {
-		width: 96%;
-		height: 80px;
-	}
-
 	.header-tab {
 		display: flex;
 		flex-direction: row;
 	}
 
 	.dropdown-button {
-		background-color: #d0d1d2;
+		background-color: #091408;
 		border: none;
 	}
 

@@ -1,8 +1,9 @@
 import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
-import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, feedbackMessage, feedbackOptions, feedbackSubmitted, installDate, labelFilter, labels, map, mapOptionPanels, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
+import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, installDate, labelFilter, labels, map, mapOptionPanels, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
 import { get } from 'svelte/store'
 
 export async function getPipelines() {
+    console.log("Fetching Pipelines")
     let pipelinesRes = await fetch('/big-map/pipelines', {
         method: 'GET',
         headers: {
@@ -11,9 +12,11 @@ export async function getPipelines() {
     })
     let pipelinesResponse = await pipelinesRes.json()
     pipelines.set(pipelinesResponse.body)
+    console.log("Fetched Pipelines")
 }
 
 export async function getLabels() {
+    console.log("Fetching Labels")
     let labelsRes = await fetch('/big-map/labels', {
         method: 'GET',
         headers: {
@@ -22,6 +25,7 @@ export async function getLabels() {
     })
     let labelsResponse = await labelsRes.json()
     labels.set(labelsResponse.body)
+    console.log("Fetched Labels")
 }
 
 export async function getSelectedPipelineData(selectedPipelines: Array<number>) {
@@ -91,7 +95,7 @@ function addMarker(opts: MarkerOptions) {
     })
     marker.addListener('click', () => {
         markerPopup.open({
-            anchor: marker,
+            anchor: marker
         })
     })
     opts.marker = marker
@@ -162,6 +166,25 @@ export function makeAllMarkersInvisible() {
     updateMap()
 }
 
+export function applyFilters() {
+    let currentPanels = get(mapOptionPanels)
+    makeAllMarkersInvisible()
+    for (let panel in currentPanels) {
+        for (let marker in currentPanels[panel].markers) {
+            if (
+                checkDateFilterFor(currentPanels[panel].markers[marker]) &&
+                currentPanels[panel].markers[marker].filterOption.value >= get(value) &&
+                (get(statusFilters).includes(currentPanels[panel].markers[marker].filterOption.status) ||
+                    get(statusFilters).length === 0)
+            ) {
+                currentPanels[panel].markers[marker].visible = true
+            }
+        }
+    }
+    mapOptionPanels.set(currentPanels)
+    updateMap()
+}
+
 /**
  * checks against each date filter (separately as some of the filters may not be chosen)
  * @param marker
@@ -172,7 +195,7 @@ export function checkDateFilterFor(marker: MarkerOptions): boolean {
     if (marker.deal) {
         if (get(checkWonTime)) {
             if (marker.deal.won_time) {
-                showMarker = new Date(marker.deal.won_time) > get(wonDate) ? true : false
+                showMarker = Date.parse(marker.deal.won_time) > Date.parse(get(wonDate)) ? true : false
             } else {
                 showMarker = nullMarkers
             }
@@ -180,7 +203,7 @@ export function checkDateFilterFor(marker: MarkerOptions): boolean {
         if (get(checkQuoteTime)) {
             if (marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) {
                 showMarker =
-                    new Date(marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) > get(installDate)
+                    Date.parse(marker.deal['e448eb2611c9c8a6aeca674511aa64c0a4d06520']) > Date.parse(get(installDate))
                         ? true
                         : false
             } else {
@@ -189,7 +212,7 @@ export function checkDateFilterFor(marker: MarkerOptions): boolean {
         }
         if (get(checkInstalledTime) && marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) {
             if (marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) {
-                new Date(marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) > get(quoteDate)
+                Date.parse(marker.deal['81fcad47a18a049303b461e360c0ec2d6c9fa68e']) > Date.parse(get(quoteDate))
                     ? true
                     : false
             } else {
@@ -217,31 +240,12 @@ export function addPipelineCheckbox(pipeline: PipeLineKey) {
     selectedPipelines.set(pipelines)
 }
 
-export function applyFilters() {
-    let currentPanels = get(mapOptionPanels)
-    makeAllMarkersInvisible()
-    for (let panel in currentPanels) {
-        for (let marker in currentPanels[panel].markers) {
-            if (
-                checkDateFilterFor(currentPanels[panel].markers[marker]) &&
-                currentPanels[panel].markers[marker].filterOption.value >= get(value) &&
-                (get(statusFilters).includes(currentPanels[panel].markers[marker].filterOption.status) ||
-                    get(statusFilters).length === 0)
-            ) {
-                currentPanels[panel].markers[marker].visible = true
-            }
-        }
-    }
-    mapOptionPanels.set(currentPanels)
-    updateMap()
-}
-
 export function setFiltersToDefaultValues() {
     value.set(0)
     statusFilters.set([])
-    wonDate.set(new Date(1420977600000))
-    installDate.set(new Date(1420977600000))
-    quoteDate.set(new Date(1420977600000))
+    wonDate.set("")
+    installDate.set("")
+    quoteDate.set("")
     applyFilters()
 }
 
@@ -282,6 +286,7 @@ export function updateLabelFilter(label: LabelInfo) {
         currentLabels.push(label.id)
     }
     labelFilter.set(currentLabels)
+    console.log(get(labelFilter))
 }
 
 export function filterByLabel() {
@@ -323,40 +328,4 @@ export function changeIconColourFor(panel: OptionPanel) {
         panel.markers[marker].marker.setIcon(svgMarker)
     }
     return panel
-}
-
-export async function sendFeedbackEmail() {
-    const message = formEmailContent()
-    await fetch('/send-mail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            sender: 'peter.gillingham@premiumlithium.com',
-            recipients: ['peter.gillingham@premiumlithium.com'],
-            subject: 'Big Map Feedback',
-            mail_body: message,
-            content_type: 'HTML'
-        })
-    })
-    feedbackSubmitted.set(true)
-}
-
-function formEmailContent(): string {
-    let message: string = ''
-    for (let i in get(feedbackOptions)) {
-        message += get(feedbackOptions)[i] + ', '
-    }
-    message += '\n'
-    message += get(feedbackMessage)
-    return message
-}
-
-export function addFeedbackOptions(option: string) {
-    let feedback = get(feedbackOptions)
-    if (feedback.includes(option)) {
-        feedback.splice(feedback.indexOf(option), 1)
-    } else {
-        feedback.push(option)
-    }
-    feedbackOptions.set(feedback)
 }
