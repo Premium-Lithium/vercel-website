@@ -4,7 +4,7 @@
 		type LabelInfo,
 		applyLabelColourToMarker,
 		labelFilter
-	} from '../../../routes/big-map/bm-stores'
+	} from '../../../routes/big-map/bm-pd-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import LabelledCheckbox from './LabelledCheckbox.svelte'
 	import MenuButton from './MenuButton.svelte'

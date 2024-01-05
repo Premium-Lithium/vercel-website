@@ -1,5 +1,6 @@
 import { get } from "svelte/store"
-import { heatmap, map } from "./bm-stores"
+import { map } from "./bm-pd-stores"
+import { heatmap } from "./bm-hm-stores"
 
 export async function generateHeatmap() {
     let heatmapData: Array<google.maps.LatLng> = []

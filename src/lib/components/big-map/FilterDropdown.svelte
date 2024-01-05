@@ -18,7 +18,7 @@
 		quoteDate,
 		value,
 		wonDate
-	} from '../../../routes/big-map/bm-stores'
+	} from '../../../routes/big-map/bm-pd-stores'
 	let shown: boolean
 
 	onMount(() => {})

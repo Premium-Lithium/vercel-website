@@ -1,4 +1,4 @@
-import type { LabelInfo } from "../bm-stores"
+import type { LabelInfo } from "../bm-pd-stores"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()

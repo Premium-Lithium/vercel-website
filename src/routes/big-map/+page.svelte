@@ -3,7 +3,7 @@
 		type OptionPanel,
 		map,
 		mapOptionPanels,
-	} from './bm-stores'
+	} from './bm-pd-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -21,6 +21,7 @@
 	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
 	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
+	import { getCampaignIdAndNames } from './bm-campaign-utils'
 
 	let loader: any
 	let loading: boolean = false
@@ -28,6 +29,7 @@
 
 	onMount(async () => {
 		loading = true
+		await getCampaignIdAndNames()
 		await generateHeatmap()
 		await getPipelines()
 		await getLabels()

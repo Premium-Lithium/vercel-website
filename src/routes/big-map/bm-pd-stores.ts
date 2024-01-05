@@ -85,7 +85,6 @@ export let checkWonTime: Writable<boolean> = writable(false)
 export let checkInstalledTime: Writable<boolean> = writable(false)
 export let checkQuoteTime: Writable<boolean> = writable(false)
 export let showNullMarkers: Writable<boolean> = writable(false)
-export let heatmap: Writable<google.maps.visualization.HeatmapLayer> = writable()
 export let hidePipelineOptions: Writable<boolean> = writable(false)
 export let hideFilterOptions: Writable<boolean> = writable(false)
 export let labelFilter: Writable<Array<string>> = writable([]) // Array of label IDs, not names

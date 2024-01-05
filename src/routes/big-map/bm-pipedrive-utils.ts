@@ -1,10 +1,10 @@
-import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
-import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, installDate, labelFilter, labels, map, mapOptionPanels, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
+import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-pd-stores'
+import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, installDate, labelFilter, labels, map, mapOptionPanels, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-pd-stores'
 import { get } from 'svelte/store'
 
 export async function getPipelines() {
     console.log("Fetching Pipelines")
-    let pipelinesRes = await fetch('/big-map/pipelines', {
+    let pipelinesRes = await fetch('/big-map/pipedrive/pipelines', {
         method: 'GET',
         headers: {
             'Content-Type': 'application-json'
@@ -17,7 +17,7 @@ export async function getPipelines() {
 
 export async function getLabels() {
     console.log("Fetching Labels")
-    let labelsRes = await fetch('/big-map/labels', {
+    let labelsRes = await fetch('/big-map/pipedrive/labels', {
         method: 'GET',
         headers: {
             'Content-Type': 'application-json'
@@ -30,7 +30,7 @@ export async function getLabels() {
 
 export async function getSelectedPipelineData(selectedPipelines: Array<number>) {
     let panels = []
-    let mapRes = await fetch('/big-map/deals', {
+    let mapRes = await fetch('/big-map/pipedrive/deals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ body: selectedPipelines })

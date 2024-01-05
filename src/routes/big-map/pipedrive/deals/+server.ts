@@ -1,4 +1,4 @@
-import type { MarkerOptions, LatLongObj } from "../bm-stores"
+import type { MarkerOptions, LatLongObj } from "../bm-pd-stores"
 import { CRM } from "$lib/crm/crm-utils"
 
 let crm = new CRM()
