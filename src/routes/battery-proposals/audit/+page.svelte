@@ -119,7 +119,7 @@
 			const { data, error } = await supabase
 				.from(batteryProposalsTableName)
 				.update({ 'audit_flags': newFlags })
-				.eq('customer_id', currentHouseToAudit.id)
+				.eq('customer_id', currentHouseToAudit['customer_id'])
 			if (error) {
 				console.log(error)
 				return
@@ -129,7 +129,7 @@
 				const { data, error } = await supabase
 					.from(batteryProposalsTableName)
 					.update({ 'audit_flags': [99] })
-					.eq('customer_id', currentHouseToAudit.id)
+					.eq('customer_id', currentHouseToAudit['customer_id'])
 				if (error) {
 					console.log(error)
 					return
