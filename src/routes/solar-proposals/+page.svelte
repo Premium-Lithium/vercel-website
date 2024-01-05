@@ -312,7 +312,7 @@
 					'DESIGN-COMPLETED',
 					'An OpenSolar design has been completed'
 				)
-
+				// WIP - save system image from OpenSolar when completing a project
 				// let res = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-systems`, {
 				// 	method: 'POST',
 				// 	body: JSON.stringify({
