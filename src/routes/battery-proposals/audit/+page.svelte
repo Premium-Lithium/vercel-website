@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
 	import { page } from '$app/stores'
+	import { PUBLIC_GOOGLE_API_KEY } from '$env/static/public'
 	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
@@ -24,7 +25,7 @@
 		try {
 			currentHouseM2 = currentHouseToAudit['campaign_specific_data']['solar_array_info'].reduce(
 				(p, v, i, a) => {
-					return p + v['area_m2']
+					return p + Number(v.split('area: ')[1].replace(')', ''))
 				},
 				0
 			)
@@ -35,7 +36,6 @@
 				]
 		}
 	}
-	$: console.log(allUnauditedHouses)
 	$: currentHouseToAudit = allUnauditedHouses[currentHousePointer]
 
 	let isAuthenticated = false
@@ -47,6 +47,7 @@
 	})
 
 	onMount(async () => {
+		loading = true
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
@@ -54,7 +55,6 @@
 		loadedAuditOptions = loadedAuditOptions.map((x) => {
 			return { ...x, 'value': true }
 		})
-
 		allUnauditedHouses = await loadAllUnauditedHousesFromSupabase(false)
 		loading = false
 
@@ -124,7 +124,6 @@
 			.from(batteryProposalsTableName)
 			.select('*')
 			.eq('campaign_id', campaign)
-
 		if (error) {
 			console.log(`Error fetching from ${batteryProposalsTableName}`)
 			return []
@@ -180,6 +179,32 @@
 		})
 		return results
 	}
+
+	function getImageUrl() {
+		if (currentHouseToAudit) {
+			if (currentHouseToAudit['campaign_specific_data']['screenshot_url']) {
+				return currentHouseToAudit['campaign_specific_data']['screenshot_url']
+			} else {
+				let arrInfo = currentHouseToAudit['campaign_specific_data']['solar_array_info']
+				let lats = arrInfo.map((x) => {
+					return Number(x.split('lat: ')[1].split(',')[0])
+				})
+				let lons = arrInfo.map((x) => {
+					return Number(x.split('lon: ')[1].split(',')[0])
+				})
+				let avgLat =
+					lats.reduce((p, v, i, a) => {
+						return p + v
+					}, 0) / lats.length
+				let avgLon =
+					lons.reduce((p, v, i, a) => {
+						return p + v
+					}, 0) / lons.length
+				return `https://maps.googleapis.com/maps/api/staticmap?center=${avgLat},${avgLon}&zoom=20&maptype=satellite&size=640x640&key=${PUBLIC_GOOGLE_API_KEY}`
+			}
+		}
+		return ''
+	}
 </script>
 
 {#if !isAuthenticated}
@@ -199,13 +224,7 @@
 					<h1>{currentHousePointer + 1} / {allUnauditedHouses.length}</h1>
 				</div>
 				<div class="images">
-					<img
-						src={currentHouseToAudit
-							? currentHouseToAudit['campaign_specific_data']['screenshot_url']
-							: ''}
-						alt=""
-						class="image"
-					/>
+					<img src={getImageUrl()} alt="" class="image" />
 					<div class="house-details">
 						<p class="array-text">
 							{currentHouseToAudit
