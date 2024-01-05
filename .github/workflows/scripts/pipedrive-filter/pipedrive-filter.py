@@ -65,7 +65,7 @@ def createLostLeadsSpreadSheet(deals, stages, pipelines):
             "Deal - Lost time",
             "Deal - Status",
             "Deal - Deal created",
-            "Deal - Pipeline"
+            "Deal - Pipeline",
             "Deal - Quote Issued",
             "Deal - Won Time",
             "Deal - Sales Contact",
