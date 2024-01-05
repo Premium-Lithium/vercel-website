@@ -1,5 +1,5 @@
 import { supabase } from "$lib/supabase";
-import type { MapResponse } from "../../bm-pd-stores";
+import type { MapResponse } from "../../bm-stores";
 
 // Gets all the campaign IDs and names 
 export async function POST({ request }) {

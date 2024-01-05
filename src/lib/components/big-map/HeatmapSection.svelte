@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toggleHeatmap } from '../../../routes/big-map/bm-heatmap-utils'
+	import { toggleCampaignHeatmap, toggleHeatmap } from '../../../routes/big-map/bm-heatmap-utils'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import MenuButton from './MenuButton.svelte'
 
@@ -17,7 +17,11 @@
 			</div>
 		</div>
 		<div class="campaign-heatmap">
-			
+			<h3>Solar Scan Heatmap</h3>
+			<p>Our internal solar panel database</p>
+			<div class="heatmap-button">
+				<MenuButton title="Toggle Heatmap" on:click={toggleCampaignHeatmap} />
+			</div>
 		</div>
 	</div>
 {/if}

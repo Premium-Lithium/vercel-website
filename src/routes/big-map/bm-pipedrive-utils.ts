@@ -1,4 +1,4 @@
-import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-pd-stores'
+import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
 import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, installDate, labelFilter, labels, map, mapOptionPanels, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-pd-stores'
 import { get } from 'svelte/store'
 
@@ -12,7 +12,6 @@ export async function getPipelines() {
     })
     let pipelinesResponse = await pipelinesRes.json()
     pipelines.set(pipelinesResponse.body)
-    console.log("Fetched Pipelines")
 }
 
 export async function getLabels() {
@@ -25,7 +24,6 @@ export async function getLabels() {
     })
     let labelsResponse = await labelsRes.json()
     labels.set(labelsResponse.body)
-    console.log("Fetched Labels")
 }
 
 export async function getSelectedPipelineData(selectedPipelines: Array<number>) {

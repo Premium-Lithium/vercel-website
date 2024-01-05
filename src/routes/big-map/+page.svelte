@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		type OptionPanel,
-		map,
-		mapOptionPanels,
-	} from './bm-pd-stores'
+	import { type OptionPanel, map, mapOptionPanels } from './bm-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -15,9 +11,9 @@
 		deletePanel,
 		makeAllMarkersInvisible,
 		applyFiltersToPanel,
-		changeIconColourFor,
+		changeIconColourFor
 	} from './bm-pipedrive-utils'
-	import { generateHeatmap } from './bm-heatmap-utils'
+	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
 	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
 	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
@@ -30,7 +26,8 @@
 	onMount(async () => {
 		loading = true
 		await getCampaignIdAndNames()
-		await generateHeatmap()
+		await generateOsHeatmap()
+		await generateCampaignHeatmap()
 		await getPipelines()
 		await getLabels()
 		loading = false
@@ -67,7 +64,6 @@
 		panel = applyFiltersToPanel(panel)
 		updateMap()
 	}
-
 </script>
 
 <div class="map-container">
@@ -80,7 +76,7 @@
 					<h2>Map Options</h2>
 					<div class="handle" bind:this={handle}>.</div>
 				</div>
-				<PipedriveSection/>
+				<PipedriveSection />
 				<HeatmapSection />
 				<CampaignSection />
 			</div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { labels, pipelines } from '../../../routes/big-map/bm-pd-stores'
+	import { labels, pipelines } from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import FilterDropdown from './FilterDropdown.svelte'
 	import LabelDropdown from './LabelDropdown.svelte'

@@ -28,7 +28,6 @@ export interface DealFilter {
     status: string
 }
 
-// Location of marker, address of marker, visibility of marker on map, marker object itself, content of popup when clicked, array of filters that this marker will show up for
 export interface MarkerOptions {
     latLng: LatLongObj
     address: string
@@ -48,7 +47,6 @@ export interface LatLongObj {
     lng: number
 }
 
-// Panel displaying options for each selected pipeline (for now, later on adding campaign etc.)
 export interface OptionPanel {
     pipeline: PipeLineKey | undefined
     hideStageOptions: boolean
@@ -67,17 +65,35 @@ export interface LabelInfo {
     color: string
 }
 
+export interface CampaignKey {
+    name: string
+    id: string
+}
+
+export interface CampaignElementStatus {
+    name: string
+    description: string
+    dateStarted: number
+}
+
+export interface CampaignElement {
+    formattedAddress: string
+    address: any
+    currentStatus: CampaignElementStatus
+    customerId: string
+}
+
+// Map/UI
 export let map: Writable<any> = writable()
-export let pipelines: Writable<Array<PipeLineKey>> = writable([]) // Array of all pipelines and IDs
-export let selectedPipelines: Writable<Array<number>> = writable([]) // Array of selected pipelines filtered by
 export let mapOptionPanels: Writable<Array<OptionPanel>> = writable([])
 export let loading: Writable<boolean> = writable(false)
+
+// Pipedrive
+export let pipelines: Writable<Array<PipeLineKey>> = writable([]) // Array of all pipelines and IDs
+export let selectedPipelines: Writable<Array<number>> = writable([]) // Array of selected pipelines filtered by
 export let value: Writable<number> = writable(0)
 export let labels: Writable<Array<LabelInfo>> = writable([])
 export let statusFilters: Writable<Array<string>> = writable([])
-export let feedbackOptions: Writable<Array<string>> = writable([])
-export let feedbackMessage: Writable<string> = writable()
-export let feedbackSubmitted: Writable<boolean> = writable(false)
 export let wonDate: Writable<string> = writable()
 export let installDate: Writable<string> = writable()
 export let quoteDate: Writable<string> = writable()
@@ -103,4 +119,17 @@ export const colourMap: Readable<Map<string, string>> = readable(new Map([
     ['dark-gray', '#464748']
 ]));
 
+// Feedback Email
 export const enableFeedback: Writable<boolean> = writable(false)
+export let feedbackOptions: Writable<Array<string>> = writable([])
+export let feedbackMessage: Writable<string> = writable()
+export let feedbackSubmitted: Writable<boolean> = writable(false)
+
+// Campaign
+export let campaignKey: Writable<Array<CampaignKey>> = writable([])
+export let selectedCampaigns: Writable<Array<CampaignKey>> = writable([])
+export let campaignMarkers: Writable<Array<google.maps.Marker>> = writable([])
+
+// Heatmap
+export let osHeatmap: Writable<google.maps.visualization.HeatmapLayer> = writable()
+export let campaignHeatmap : Writable<google.maps.visualization.HeatmapLayer> = writable()

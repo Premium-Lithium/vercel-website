@@ -18,7 +18,7 @@
 		quoteDate,
 		value,
 		wonDate
-	} from '../../../routes/big-map/bm-pd-stores'
+	} from '../../../routes/big-map/bm-stores'
 	let shown: boolean
 
 	onMount(() => {})
@@ -41,40 +41,40 @@
 <div class="dropdown">
 	<DropdownHeader header={'Filters'} bind:droppedDown={shown} />
 	{#if shown}
-	<div class="menu">
-		<div class="checkbox-options">
-			<p>Only show deals that are:</p>
-			{#each checkboxOptions as checkbox}
-				<LabelledCheckbox
-					label={checkbox}
-					on:change={() => filterByStatus(checkbox.toLowerCase())}
+		<div class="menu">
+			<div class="checkbox-options">
+				<p>Only show deals that are:</p>
+				{#each checkboxOptions as checkbox}
+					<LabelledCheckbox
+						label={checkbox}
+						on:change={() => filterByStatus(checkbox.toLowerCase())}
+					/>
+				{/each}
+			</div>
+			<div class="date-options">
+				<DatePicker
+					label={'Won'}
+					bind:date={$wonDate}
+					on:checked={() => ($checkWonTime = !$checkWonTime)}
 				/>
-			{/each}
+				<DatePicker
+					label={'Quoted'}
+					bind:date={$quoteDate}
+					on:checked={() => ($checkQuoteTime = !$checkQuoteTime)}
+				/>
+				<DatePicker
+					label={'Installed'}
+					bind:date={$installDate}
+					on:checked={() => ($checkInstalledTime = !$checkInstalledTime)}
+				/>
+			</div>
+			<div class="value-options" />
+			<ValuePicker label={'Only show deals with values above'} bind:value={$value} />
+			<div class="controls">
+				<MenuButton title="Apply Filters" on:click={applyFilters} />
+				<MenuButton title="Clear Filters" on:click={clearFilters} />
+			</div>
 		</div>
-		<div class="date-options">
-			<DatePicker
-				label={'Won'}
-				bind:date={$wonDate}
-				on:checked={() => ($checkWonTime = !$checkWonTime)}
-			/>
-			<DatePicker
-				label={'Quoted'}
-				bind:date={$quoteDate}
-				on:checked={() => ($checkQuoteTime = !$checkQuoteTime)}
-			/>
-			<DatePicker
-				label={'Installed'}
-				bind:date={$installDate}
-				on:checked={() => ($checkInstalledTime = !$checkInstalledTime)}
-			/>
-		</div>
-		<div class="value-options" />
-		<ValuePicker label={'Only show deals with values above'} bind:value={$value} />
-		<div class="controls">
-			<MenuButton title="Apply Filters" on:click={applyFilters} />
-			<MenuButton title="Clear Filters" on:click={clearFilters} />
-		</div>
-	</div>
 	{/if}
 </div>
 

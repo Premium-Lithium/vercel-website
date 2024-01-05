@@ -1,6 +1,5 @@
 import { get } from "svelte/store"
-import { campaignKey, selectedCampaigns, type CampaignElement, campaignMarkers } from "./bm-cm-stores"
-import { map, type LatLongObj } from "./bm-pd-stores"
+import { campaignKey, selectedCampaigns, type CampaignElement, campaignMarkers, map, type LatLongObj } from "./bm-stores"
 
 export async function getCampaignIdAndNames() {
     let res = await fetch('big-map/supabase/campaign-master', {
@@ -14,13 +13,13 @@ export async function getCampaignIdAndNames() {
     campaignKey.set(nameId.body)
 }
 
-export async function getAddressesInCampaign(campaign: string): Promise<Array<CampaignElement>> {
+export async function getAddressesInCampaign(id: string): Promise<Array<CampaignElement>> {
     let res = await fetch('big-map/supabase/campaign-addresses', {
         method: "POST",
         headers: {
             'Content-Type': 'application-json'
         },
-        body: JSON.stringify(campaign)
+        body: JSON.stringify(id)
     })
     let parsed = await res.json()
 
@@ -50,9 +49,9 @@ async function createMarkerForCampaignCustomer(customer: CampaignElement): Promi
     return marker
 }
 
-async function getLatLongForCustomer(customer: CampaignElement): Promise<LatLongObj> {
-    let latLng: LatLongObj = {lat: 0, lng: 0}
-    if ('geometry' in customer.address){
+export async function getLatLongForCustomer(customer: CampaignElement): Promise<LatLongObj> {
+    let latLng: LatLongObj = { lat: 0, lng: 0 }
+    if ('geometry' in customer.address) {
         latLng.lat = customer.address.geometry.location.lat
         latLng.lng = customer.address.geometry.location.lng
     } else {

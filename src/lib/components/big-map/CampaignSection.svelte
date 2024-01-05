@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { displaySelectedCampaigns } from '../../../routes/big-map/bm-campaign-utils'
-	import { campaignKey, selectedCampaigns, campaignMarkers } from '../../../routes/big-map/bm-cm-stores'
+	import {
+		campaignKey,
+		selectedCampaigns,
+		campaignMarkers
+	} from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import LabelledCheckbox from './LabelledCheckbox.svelte'
 	import MenuButton from './MenuButton.svelte'
@@ -22,7 +26,11 @@
 		}
 		$campaignMarkers.length = 0
 		for (let campaign of $campaignKey) {
-			let el = document.getElementsByClassName("checkbox-" + campaign.name.charAt(0).toUpperCase() + campaign.name.replaceAll('-', ' ').slice(1))
+			let el = document.getElementsByClassName(
+				'checkbox-' +
+					campaign.name.charAt(0).toUpperCase() +
+					campaign.name.replaceAll('-', ' ').slice(1)
+			)
 			for (let box of el) {
 				box.checked = false
 			}

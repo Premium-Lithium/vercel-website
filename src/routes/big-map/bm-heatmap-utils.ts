@@ -1,8 +1,9 @@
 import { get } from "svelte/store"
-import { map } from "./bm-pd-stores"
-import { heatmap } from "./bm-hm-stores"
+import { map, campaignHeatmap, osHeatmap, campaignKey } from "./bm-stores"
+import { getAddressesInCampaign } from "./bm-campaign-utils"
 
-export async function generateHeatmap() {
+export async function generateOsHeatmap() {
+    console.log("Generating OS Heatmap")
     let heatmapData: Array<google.maps.LatLng> = []
     const heatRes = await fetch('./heatmapCoords.csv')
     const data = await heatRes.text()
@@ -12,17 +13,43 @@ export async function generateHeatmap() {
         if (!isNaN(parseFloat(row[0])) && !isNaN(parseFloat(row[1])))
             heatmapData.push(new google.maps.LatLng(parseFloat(row[0]), parseFloat(row[1])))
     }
-    heatmap.set(new google.maps.visualization.HeatmapLayer({
+    osHeatmap.set(new google.maps.visualization.HeatmapLayer({
+        data: heatmapData
+    }))
+}
+
+export async function generateCampaignHeatmap() {
+    console.log("Generating Campaign Heatmap")
+    let heatmapData: Array<google.maps.LatLng> = []
+    for (let campaign of get(campaignKey)) {
+        let customerAddresses = await getAddressesInCampaign(campaign.id)
+        for (let customer of customerAddresses) {
+            if ("geometry" in customer.address) {
+                heatmapData.push(new google.maps.LatLng(customer.address.geometry.location.lat, customer.address.geometry.location.lng))
+            }
+        }
+    }
+    campaignHeatmap.set(new google.maps.visualization.HeatmapLayer({
         data: heatmapData
     }))
 }
 
 export async function toggleHeatmap() {
-    let hm = get(heatmap)
+    let hm = get(osHeatmap)
     if (hm.getMap() === get(map)) {
         hm.setMap(null)
     } else {
         hm.setMap(get(map))
     }
-    heatmap.set(hm)
+    osHeatmap.set(hm)
+}
+
+export function toggleCampaignHeatmap() {
+    let hm = get(campaignHeatmap)
+    if (hm.getMap() === get(map)) {
+        hm.setMap(null)
+    } else {
+        hm.setMap(get(map))
+    }
+    campaignHeatmap.set(hm)
 }
