@@ -119,7 +119,7 @@
 			const { data, error } = await supabase
 				.from(batteryProposalsTableName)
 				.update({ 'audit_flags': newFlags })
-				.eq('id', currentHouseToAudit.id)
+				.eq('customer_id', currentHouseToAudit.id)
 			if (error) {
 				console.log(error)
 				return
@@ -151,7 +151,7 @@
 		} else {
 			data = data.filter((x) => {
 				if (!x['audit_flags']) return true
-				let flagsToExclude = [0, 2, 20, 21, 22, 23, 24, 99]
+				let flagsToExclude = [0, 20, 21, 22, 23, 24, 99]
 				let flagged = false
 				flagsToExclude.forEach((i) => {
 					if (x['audit_flags'].includes(i)) {
