@@ -66,19 +66,40 @@
 						nextButton.click()
 						break
 					case 'Digit1':
+						if (!auditCheckboxes[0]) break
 						auditCheckboxes[0].checked = !auditCheckboxes[0].checked
 						break
 					case 'Digit2':
+						if (!auditCheckboxes[1]) break
 						auditCheckboxes[1].checked = !auditCheckboxes[1].checked
 						break
 					case 'Digit3':
+						if (!auditCheckboxes[2]) break
 						auditCheckboxes[2].checked = !auditCheckboxes[2].checked
 						break
 					case 'Digit4':
+						if (!auditCheckboxes[3]) break
 						auditCheckboxes[3].checked = !auditCheckboxes[3].checked
 						break
 					case 'Digit5':
+						if (!auditCheckboxes[4]) break
 						auditCheckboxes[4].checked = !auditCheckboxes[4].checked
+						break
+					case 'Digit6':
+						if (!auditCheckboxes[5]) break
+						auditCheckboxes[5].checked = !auditCheckboxes[5].checked
+						break
+					case 'Digit7':
+						if (!auditCheckboxes[6]) break
+						auditCheckboxes[6].checked = !auditCheckboxes[6].checked
+						break
+					case 'Digit8':
+						if (!auditCheckboxes[7]) break
+						auditCheckboxes[7].checked = !auditCheckboxes[7].checked
+						break
+					case 'Digit9':
+						if (!auditCheckboxes[8]) break
+						auditCheckboxes[8].checked = !auditCheckboxes[8].checked
 						break
 				}
 			})
