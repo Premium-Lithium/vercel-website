@@ -18,6 +18,7 @@
 	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
 	import { getCampaignIdAndNames } from './bm-campaign-utils'
+	import FloatingPanel from '$lib/components/big-map/FloatingPanel.svelte'
 
 	let loader: any
 	let loading: boolean = false
@@ -67,21 +68,15 @@
 </script>
 
 <div class="map-container">
-	<div class="control-panel" id="control-panel" use:movable={{ handle }}>
-		{#if loading}
-			<p>Loading</p>
+	<FloatingPanel panelTitle="Map Options">
+		{#if !loading}
+			<PipedriveSection />
+			<HeatmapSection />
+			<CampaignSection />
 		{:else}
-			<div class="filter-controls">
-				<div class="header-row">
-					<h2>Map Options</h2>
-					<div class="handle" bind:this={handle}>.</div>
-				</div>
-				<PipedriveSection />
-				<HeatmapSection />
-				<CampaignSection />
-			</div>
+			<p>Loading</p>
 		{/if}
-	</div>
+	</FloatingPanel>
 	{#each $mapOptionPanels as panel}
 		<div class="option-panel" use:movable={{ handle: panel.handle }}>
 			<div class="header-row">
