@@ -221,7 +221,7 @@
 					lons.reduce((p, v, i, a) => {
 						return p + v
 					}, 0) / lons.length
-				return `https://maps.googleapis.com/maps/api/staticmap?center=${avgLat},${avgLon}&zoom=20&maptype=satellite&size=640x640&key=${PUBLIC_GOOGLE_API_KEY}`
+				return `https://maps.googleapis.com/maps/api/staticmap?center=${avgLat},${avgLon}&zoom=20&maptype=satellite&size=640x640&key=${PUBLIC_GOOGLE_API_KEY}&markers=color:0xff0000|${avgLat},${avgLon}`
 			}
 		}
 		return ''
