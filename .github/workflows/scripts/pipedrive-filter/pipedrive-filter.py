@@ -91,6 +91,8 @@ def createLostLeadsSpreadSheet(deals, stages, pipelines):
         row.append(deal["add_time"])
         # pipeline
         row.append(pipelines[str(deal['pipeline_id'])]['name'])
+        # deal quote issued
+        row.append(deal["81fcad47a18a049303b461e360c0ec2d6c9fa68e"])
         row.append(deal['won_time'])
         if deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b'] != None:
             row.append(deal['da0db4682fb1eeb8aa85e1419d50dd5766fc6d2b']['name'])
