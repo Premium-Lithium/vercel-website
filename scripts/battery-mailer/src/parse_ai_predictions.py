@@ -12,6 +12,11 @@ import time
 
 last_api_call_time = time.time()
 lock = threading.Lock()
+def setup_threading():
+    global last_api_call_time
+    global lock
+    last_api_call_time = time.time()
+    lock = threading.Lock()
 class SolarPanel:
     def __init__(self, lat, lon, area):
         self.lat = lat
