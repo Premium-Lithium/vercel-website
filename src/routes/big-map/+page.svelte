@@ -22,7 +22,6 @@
 
 	let loader: any
 	let loading: boolean = false
-	let handle: HTMLElement
 
 	onMount(async () => {
 		loading = true
@@ -188,19 +187,6 @@
 	#map {
 		width: 100%;
 		height: 100%;
-	}
-	.control-panel {
-		position: absolute;
-		display: flex;
-		flex-direction: column;
-		width: auto;
-		height: auto;
-		background-color: #091408;
-		border-radius: 8px;
-		border: 2px solid #ffffff;
-		justify-content: left;
-		padding: 8px;
-		z-index: 3;
 	}
 
 	.header-row {
