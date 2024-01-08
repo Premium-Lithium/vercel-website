@@ -11,7 +11,11 @@
 		deletePanel,
 		makeAllMarkersInvisible,
 		applyFiltersToPanel,
-		changeIconColourFor
+		changeIconColourFor,
+		generateMarkersForPLCustomers,
+		generateMarkersForMCSSInstallers,
+		displayInstallerMarkers,
+		displayCustomerMarkers
 	} from './bm-pipedrive-utils'
 	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
 	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
@@ -19,12 +23,15 @@
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
 	import { getCampaignIdAndNames } from './bm-campaign-utils'
 	import FloatingPanel from '$lib/components/big-map/FloatingPanel.svelte'
+	import Button from '$lib/components/big-map/Button.svelte'
 
 	let loader: any
 	let loading: boolean = false
 
 	onMount(async () => {
 		loading = true
+		await generateMarkersForMCSSInstallers()
+		await generateMarkersForPLCustomers()
 		await getCampaignIdAndNames()
 		await generateOsHeatmap()
 		await generateCampaignHeatmap()
@@ -75,6 +82,8 @@
 		{:else}
 			<p>Loading</p>
 		{/if}
+		<Button label="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
+		<Button label="Toggle Customer Markers" on:click={displayCustomerMarkers} />
 	</FloatingPanel>
 	{#each $mapOptionPanels as panel}
 		<div class="option-panel" use:movable={{ handle: panel.handle }}>
@@ -173,7 +182,7 @@
 	}
 
 	* {
-		color: #ffffff;
+		color: #BBBBBB;
 		font-family: 'Visby CF';
 		font-style: normal;
 		font-weight: 500;

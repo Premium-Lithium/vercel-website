@@ -133,3 +133,9 @@ export let campaignMarkers: Writable<Array<google.maps.Marker>> = writable([])
 // Heatmap
 export let osHeatmap: Writable<google.maps.visualization.HeatmapLayer> = writable()
 export let campaignHeatmap : Writable<google.maps.visualization.HeatmapLayer> = writable()
+
+// TEMPORARY UNTIL PIPEDRIVE PROJECTS ACCESS
+export let installerMarkersArray: Writable<Array<google.maps.Marker>> = writable([])
+export let installersVisible: Writable<boolean> = writable(false)
+export let customerMarkersArray: Writable<Array<google.maps.Marker>> = writable([])
+export let customersVisible: Writable<boolean> = writable(false)

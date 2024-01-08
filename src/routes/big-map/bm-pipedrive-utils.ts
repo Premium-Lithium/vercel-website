@@ -1,5 +1,5 @@
 import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
-import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, installDate, labelFilter, labels, map, mapOptionPanels, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
+import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, installDate, installerMarkersArray, installersVisible, labelFilter, labels, map, mapOptionPanels, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
 import { get } from 'svelte/store'
 
 export async function getPipelines() {
@@ -326,4 +326,116 @@ export function changeIconColourFor(panel: OptionPanel) {
         panel.markers[marker].marker.setIcon(svgMarker)
     }
     return panel
+}
+
+
+// TEMPORARY UNTIL PIPEDRIVE PROJECT ACCESS
+
+export function displayInstallerMarkers() {
+    let installers = get(installerMarkersArray)
+    if (get(installersVisible)) {
+        for (let marker of installers) {
+            marker.setMap(null)
+        }
+        installersVisible.set(false)
+    } else {
+        for (let marker of installers) {
+            marker.setMap(get(map))
+        }
+        installersVisible.set(true)
+    }
+    installerMarkersArray.set(installers)
+}
+
+export function displayCustomerMarkers() {
+    let customers = get(customerMarkersArray)
+    console.log(displayCustomerMarkers, customers)
+    if (get(customersVisible)) {
+        for (let marker of customers) {
+            marker.setMap(null)
+        }
+        customersVisible.set(false)
+    } else {
+        for (let marker of customers) {
+            marker.setMap(get(map))
+        }
+        customersVisible.set(true)
+    }
+    customerMarkersArray.set(customers)
+}
+
+export async function generateMarkersForPLCustomers() {
+    let markerArr = []
+    const customers = await fetch('./customers.csv')
+    const data = await customers.text()
+    const lines = data.split('\n')
+    for (let line of lines) {
+        const customer = line.split(';')
+        try {
+            let marker = new google.maps.Marker({
+                position: new google.maps.LatLng(parseFloat(customer[27]), parseFloat(customer[28])),
+                title: customer[0],
+                icon: '/marker-base.svg'
+            })
+            let infowindow = new google.maps.InfoWindow({
+                content:"<p>" + customer[1].replaceAll('"', '') + " \n "+ customer[0].replaceAll('"', '') + " \n " + customer[3].replaceAll('"', '') + "</p>"
+            })
+            marker.addListener("click", () => {
+                infowindow.open({
+                    anchor: marker,
+                });
+            })
+            marker = setMarkerColour(marker, '#cb42f5')
+
+            markerArr.push(marker)
+        }
+        catch {
+            // If it can't find the address just ignore it
+        }
+        customerMarkersArray.set(markerArr)
+    }
+}
+
+export async function generateMarkersForMCSSInstallers() {
+    let markerArr = []
+    const installers = await fetch('./installers.csv')
+    const data = await installers.text()
+    const lines = data.split('\n')
+    for (let line of lines) {
+        const installer = line.split(';')
+        try {
+            let marker = new google.maps.Marker({
+                position: new google.maps.LatLng(parseFloat(installer[10]), parseFloat(installer[11])),
+                title: installer[0],
+                icon: '/marker-base.svg',
+            })
+            let infowindow = new google.maps.InfoWindow({
+                content: "<p>" + installer[0].replaceAll('"', '') + " \n " + installer[5].replaceAll('"', '') + "</p>"
+            })
+            marker.addListener("click", () => {
+                infowindow.open({
+                    anchor: marker,
+                });
+            })
+            marker = setMarkerColour(marker, '#4287f5')
+
+            markerArr.push(marker)
+
+        }
+        catch {
+            // If it can't find the address just ignore it
+        }
+    }
+    installerMarkersArray.set(markerArr)
+}
+
+function setMarkerColour(marker: google.maps.Marker, colour: string): google.maps.Marker {
+    marker.setIcon({
+        path: 'M 15.00,14.00 C 15.00,14.00 14.54,17.32 14.54,17.32 14.23,19.63 13.42,21.86 12.17,23.84 12.17,23.84 12.17,23.84 12.17,23.84 11.00,25.69 10.22,27.76 9.86,29.91 9.86,29.91 9.54,31.83 9.54,31.83M 4.00,14.00 C 4.00,14.00 4.36,17.35 4.36,17.35 4.61,19.69 5.42,21.92 6.73,23.87 6.73,23.87 6.73,23.87 6.73,23.87 7.96,25.70 8.75,27.77 9.06,29.95 9.06,29.95 9.32,31.88 9.32,31.88M 17.50,8.50 C 17.50,12.92 13.92,16.50 9.50,16.50 5.08,16.50 1.50,12.92 1.50,8.50 1.50,4.08 5.08,0.50 9.50,0.50 13.92,0.50 17.50,4.08 17.50,8.50 Z',
+        scale: 1,
+        fillColor: colour,
+        fillOpacity: 1,
+        anchor: new google.maps.Point(9, 33)
+    })
+    return marker
 }
