@@ -220,13 +220,10 @@
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
 			>
-			{#if projects[i].status.toLowerCase() != 'not started'}
+			{#if projects[i].status.toLowerCase() == 'design in progress'}
 				<button
 					class="modal-button"
-					on:click|stopPropagation={() => completeProject(projects[i], i)}
-					>{['design completed', 'quotes requested'].includes(projects[i].status.toLowerCase())
-						? 'Recomplete Project'
-						: 'Complete Project'}</button
+					on:click|stopPropagation={() => completeProject(projects[i], i)}>Complete Project</button
 				>
 			{/if}
 		</div>
