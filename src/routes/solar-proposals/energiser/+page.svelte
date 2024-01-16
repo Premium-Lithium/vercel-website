@@ -1,6 +1,10 @@
 <script>
 	import { page } from '$app/stores'
-	import { PUBLIC_GOOGLE_API_KEY, PUBLIC_OPEN_SOLAR_ORG_ID } from '$env/static/public'
+	import {
+		PUBLIC_GOOGLE_API_KEY,
+		PUBLIC_OPEN_SOLAR_ORG_ID,
+		PUBLIC_AWS_PRODUCTION_URL
+	} from '$env/static/public'
 	import Auth from '$lib/components/Auth.svelte'
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
@@ -185,8 +189,10 @@
 		project.status = 'PENDING_QUOTES'
 		await updateStatus(project.jobId, project.status)
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
-		// fire webhook
-		// await fetch('', {method: 'POST', body: JSON.stringify({'job_id': project.jobId})})
+		await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
+			method: 'POST',
+			body: JSON.stringify({ 'job_id': project.jobId })
+		})
 		awaitingResponse = false
 		await populateProjectList()
 	}
@@ -214,13 +220,10 @@
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
 			>
-			{#if projects[i].status.toLowerCase() != 'not started'}
+			{#if projects[i].status.toLowerCase() == 'design in progress'}
 				<button
 					class="modal-button"
-					on:click|stopPropagation={() => completeProject(projects[i], i)}
-					>{['design completed', 'quotes requested'].includes(projects[i].status.toLowerCase())
-						? 'Recomplete Project'
-						: 'Complete Project'}</button
+					on:click|stopPropagation={() => completeProject(projects[i], i)}>Complete Project</button
 				>
 			{/if}
 		</div>
