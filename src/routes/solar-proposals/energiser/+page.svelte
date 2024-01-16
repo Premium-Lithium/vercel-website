@@ -187,13 +187,11 @@
 	async function completeProject(project, i) {
 		awaitingResponse = true
 		modals[i].close()
-		projects.forEach(async (entry) => {
-			if (entry['jobId'] == project.jobId) {
-				entry.status = 'DESIGN_COMPLETED'
-				await updateStatus(project.jobId, entry.status)
-				await addOpenSolarIdToAddress(entry.openSolarId, project.jobId)
-			}
-		})
+		project.status = 'DESIGN_COMPLETED'
+		await updateStatus(project.jobId, project.status)
+		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
+		// fire webhook
+		// await fetch('', {method: 'POST', body: JSON.stringify({'job_id': project.jobId})})
 		awaitingResponse = false
 		await populateProjectList()
 	}
