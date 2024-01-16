@@ -50,12 +50,7 @@
 		const { data: getJobsData, error: getJobsError } = await supabase
 			.from('platform_jobs')
 			.select('*')
-			.in('status', [
-				'AWAITING_DESIGN',
-				'DESIGN_IN_PROGRESS',
-				'DESIGN_COMPLETED',
-				'QUOTES_REQUESTED'
-			])
+			.in('status', ['AWAITING_DESIGN', 'DESIGN_IN_PROGRESS', 'PENDING_QUOTES'])
 		let data = await Promise.all(
 			getJobsData.map(async (x) => {
 				let homeownerData = await supabase
@@ -187,7 +182,7 @@
 	async function completeProject(project, i) {
 		awaitingResponse = true
 		modals[i].close()
-		project.status = 'DESIGN_COMPLETED'
+		project.status = 'PENDING_QUOTES'
 		await updateStatus(project.jobId, project.status)
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
 		// fire webhook
@@ -295,7 +290,7 @@
 						</div>
 					</li>
 					{#each projects as project, i}
-						{#if ['design completed', 'quotes requested'].includes(project.status.toLowerCase())}
+						{#if ['pending quotes'].includes(project.status.toLowerCase())}
 							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
 								<div class="project-item">
 									<div class="address">{project.address.split(',')[0]}</div>
