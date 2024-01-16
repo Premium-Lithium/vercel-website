@@ -1,4 +1,8 @@
-import { PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN } from '$env/static/public'
+import {
+	PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN,
+	PUBLIC_OPEN_SOLAR_TOKEN,
+	PUBLIC_OPEN_SOLAR_ORG_ID
+} from '$env/static/public'
 import { json } from '@sveltejs/kit'
 
 export async function POST({ request }) {
@@ -9,7 +13,11 @@ export async function POST({ request }) {
 	let res = await fetch(`https://api.opensolar.com/api/orgs/${openSolarOrgId}/projects/`, {
 		method: 'POST',
 		headers: {
-			Authorization: `Bearer ${PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN}`,
+			Authorization: `Bearer ${
+				openSolarOrgId == PUBLIC_OPEN_SOLAR_ORG_ID
+					? PUBLIC_OPEN_SOLAR_TOKEN
+					: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_TOKEN
+			}`,
 			'Content-Type': 'application/json',
 			'Access-Control-Allow-Origin': '*',
 			'Access-Control-Allow-Methods': 'POST,PATCH,OPTIONS'
