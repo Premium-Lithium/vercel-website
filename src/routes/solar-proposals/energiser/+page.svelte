@@ -185,8 +185,10 @@
 		project.status = 'PENDING_QUOTES'
 		await updateStatus(project.jobId, project.status)
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
-		// fire webhook
-		// await fetch('', {method: 'POST', body: JSON.stringify({'job_id': project.jobId})})
+		await fetch('https://2k2ce7flu1.execute-api.eu-west-2.amazonaws.com/Prod/design-completed', {
+			method: 'POST',
+			body: JSON.stringify({ 'job_id': project.jobId })
+		})
 		awaitingResponse = false
 		await populateProjectList()
 	}
