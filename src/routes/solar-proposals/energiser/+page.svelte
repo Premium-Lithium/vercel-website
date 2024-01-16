@@ -1,6 +1,10 @@
 <script>
 	import { page } from '$app/stores'
-	import { PUBLIC_GOOGLE_API_KEY, PUBLIC_OPEN_SOLAR_ORG_ID } from '$env/static/public'
+	import {
+		PUBLIC_GOOGLE_API_KEY,
+		PUBLIC_OPEN_SOLAR_ORG_ID,
+		PUBLIC_AWS_PRODUCTION_URL
+	} from '$env/static/public'
 	import Auth from '$lib/components/Auth.svelte'
 	import Modal from '$lib/components/Modal.svelte'
 	import { supabase } from '$lib/supabase'
@@ -185,7 +189,7 @@
 		project.status = 'PENDING_QUOTES'
 		await updateStatus(project.jobId, project.status)
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
-		await fetch('https://2k2ce7flu1.execute-api.eu-west-2.amazonaws.com/Prod/design-completed', {
+		await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
 			method: 'POST',
 			body: JSON.stringify({ 'job_id': project.jobId })
 		})
