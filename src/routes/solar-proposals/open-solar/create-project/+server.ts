@@ -7,9 +7,12 @@ import { json } from '@sveltejs/kit'
 
 export async function POST({ request }) {
 	if (!request.body) return json({ status: 400, message: 'No body provided' })
-	const { project, openSolarOrgId } = await request.json()
-	let postcode = project.address.split(', ').at(-2).split(' ')
-	postcode = `${postcode[1]} ${postcode[2]}`
+	let { project, openSolarOrgId, postcode } = await request.json()
+	if (!postcode) {
+		postcode = project.address.split(', ').at(-2).split(' ')
+		postcode = `${postcode[1]} ${postcode[2]}`
+	}
+	postcode = postcode.toUpperCase()
 	let res = await fetch(`https://api.opensolar.com/api/orgs/${openSolarOrgId}/projects/`, {
 		method: 'POST',
 		headers: {
