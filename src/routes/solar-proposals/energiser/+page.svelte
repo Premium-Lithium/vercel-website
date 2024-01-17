@@ -189,15 +189,22 @@
 		project.status = 'PENDING_QUOTES'
 		await updateStatus(project.jobId, project.status)
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
-		let res = await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
+		fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
 			method: 'OPTIONS',
 			headers: {
 				'origin': $page.url.origin,
 				'Access-Control-Request-Method': 'POST',
 				'Access-Control-Allow-Headers': 'Content-Type'
 			}
+		}).then(async () => {
+			await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
+				method: 'POST',
+				body: JSON.stringify({ 'job_id': project.jobId }),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
 		})
-		console.log(res)
 		await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
 			method: 'POST',
 			body: JSON.stringify({ 'job_id': project.jobId }),
