@@ -191,15 +191,18 @@
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
 		let res = await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
 			method: 'OPTIONS',
-			headers: { 'Access-Control-Request-Method': 'POST' }
+			headers: {
+				'origin': $page.url.origin,
+				'Access-Control-Request-Method': 'POST',
+				'Access-Control-Allow-Headers': 'Content-Type'
+			}
 		})
 		console.log(res)
 		await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
 			method: 'POST',
 			body: JSON.stringify({ 'job_id': project.jobId }),
 			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Headers': '*'
+				'Content-Type': 'application/json'
 			}
 		})
 		awaitingResponse = false
