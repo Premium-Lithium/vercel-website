@@ -90,6 +90,7 @@
 					homeownerId: x.homeownerData.id,
 					jobId: x.jobData.id,
 					address: x.homeownerData.address,
+					postcode: x.homeownerData.postcode,
 					latLon: x.homeownerData.latLon,
 					status: getStringStatus(x.jobData.status),
 					openSolarId: x.jobData['open_solar_project_id']
@@ -120,7 +121,8 @@
 					address: project.address,
 					latLon: { 'lat': project.latLon.lat, 'lon': project.latLon.lng }
 				},
-				openSolarOrgId: PUBLIC_OPEN_SOLAR_ORG_ID
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_ORG_ID,
+				postcode: project.postcode
 			})
 		})
 		let data = await res.json()
