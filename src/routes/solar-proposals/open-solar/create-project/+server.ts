@@ -12,6 +12,7 @@ export async function POST({ request }) {
 		postcode = project.address.split(', ').at(-2).split(' ')
 		postcode = `${postcode[1]} ${postcode[2]}`
 	}
+	postcode = postcode.toUpperCase()
 	let res = await fetch(`https://api.opensolar.com/api/orgs/${openSolarOrgId}/projects/`, {
 		method: 'POST',
 		headers: {
