@@ -193,7 +193,8 @@
 			method: 'POST',
 			body: JSON.stringify({ 'job_id': project.jobId }),
 			headers: {
-				'Access-Control-Allow-Origin': '*'
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Headers': '*'
 			}
 		})
 		awaitingResponse = false
