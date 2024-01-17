@@ -191,7 +191,7 @@
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
 		fetch(`${$page.url.origin}/solar-proposals/energiser`, {
 			method: 'POST',
-			body: JSON.stringify({ 'job_id': project.jobId }),
+			body: JSON.stringify({ 'jobId': project.jobId }),
 			headers: {
 				'Content-Type': 'application/json'
 			}
