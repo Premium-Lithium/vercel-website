@@ -191,7 +191,10 @@
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
 		await fetch(`${PUBLIC_AWS_PRODUCTION_URL}/design-completed`, {
 			method: 'POST',
-			body: JSON.stringify({ 'job_id': project.jobId })
+			body: JSON.stringify({ 'job_id': project.jobId }),
+			headers: {
+				'Access-Control-Allow-Origin': '*'
+			}
 		})
 		awaitingResponse = false
 		await populateProjectList()
