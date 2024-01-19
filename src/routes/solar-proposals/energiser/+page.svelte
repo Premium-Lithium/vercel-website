@@ -70,7 +70,7 @@
 				if (x.homeownerData['lat_lon']) {
 					latLon = x.homeownerData['lat_lon']
 				} else {
-					latLon = await getLatLon(x.homeownerData.address)
+					latLon = await getLatLon(x.homeownerData.address, x.homeownerData.postcode)
 					await supabase
 						.from('platform_homeowners')
 						.update({ 'lat_lon': latLon })
@@ -100,10 +100,10 @@
 		console.log(projects)
 	}
 
-	async function getLatLon(address) {
+	async function getLatLon(address, postcode) {
 		let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 			method: 'POST',
-			body: JSON.stringify({ address: address })
+			body: JSON.stringify({ address: `${address}, ${postcode}` })
 		})
 		return (await res.json()).results[0].geometry.location
 	}
