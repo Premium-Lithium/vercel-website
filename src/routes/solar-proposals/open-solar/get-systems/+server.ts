@@ -25,7 +25,6 @@ export async function POST({ request }) {
 			}
 		}
 	)
-	console.log(res)
 	if (!res.ok) return json({ status: 400, message: res.statusText })
 
 	let data = await res.json()
