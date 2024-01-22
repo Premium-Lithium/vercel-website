@@ -56,26 +56,38 @@
 		const homeownerBinsFor7Days = binDataFor7Days(homeowners)
 		const homeownerBinsFor24Hours = binDataFor24Hours(homeowners)
 
-		// console.log(homeownerBinsFor7Days, homeownerBinsFor24Hours)
-		let rollingLength =
+		let homeownerRollingLength =
 			homeowners.length -
 			homeownerBinsFor7Days.reduce((p, v, i, a) => {
 				return p + v.length
 			}, 0)
 		homeownerCount = homeownerBinsFor7Days.map((x, i, a) => {
-			rollingLength += x.length
-			return { date: new Date(Date.now() - 86400000 * (6 - i)), value: rollingLength }
+			homeownerRollingLength += x.length
+			return { date: new Date(Date.now() - 86400000 * (6 - i)), value: homeownerRollingLength }
+		})
+
+		const installerBinsFor7Days = binDataFor7Days(installers)
+		const installerBinsFor24Hours = binDataFor24Hours(installers)
+
+		let installerRollingLength =
+			installers.length -
+			installerBinsFor7Days.reduce((p, v, i, a) => {
+				return p + v.length
+			}, 0)
+		installerCount = installerBinsFor7Days.map((x, i, a) => {
+			installerRollingLength += x.length
+			return { date: new Date(Date.now() - 86400000 * (6 - i)), value: installerRollingLength }
 		})
 	})
 </script>
 
 <div class="container">
 	{#if homeownerCount}
-		<LineGraph bind:data={homeownerCount} />
+		<LineGraph bind:data={homeownerCount} title="Homeowner signups (7d)" />
 	{/if}
-	<!-- <LineGraph bind:data />
-	<LineGraph bind:data />
-	<LineGraph bind:data /> -->
+	{#if installerCount}
+		<LineGraph bind:data={installerCount} title="Installer signups (7d)" />
+	{/if}
 </div>
 
 <style>
