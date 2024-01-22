@@ -78,7 +78,6 @@
 		}
 
 		const homeownerBinsFor7Days = binDataFor7Days(homeowners)
-		const homeownerBinsFor24Hours = binDataFor24Hours(homeowners)
 
 		let homeownerRollingLength =
 			homeowners.length -
@@ -91,7 +90,6 @@
 		})
 
 		const installerBinsFor7Days = binDataFor7Days(installers)
-		const installerBinsFor24Hours = binDataFor24Hours(installers)
 
 		let installerRollingLength =
 			installers.length -
