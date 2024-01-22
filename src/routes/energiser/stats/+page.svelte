@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte'
 	import LineGraph from './LineGraph.svelte'
 	import { getAllHomeowners, getAllInstallers } from './utils'
+	import { supabase } from '$lib/supabase'
 	let data = [
 		[8, 2],
 		[2, 2],
@@ -21,7 +22,30 @@
 	console.log(data)
 	let homeowners, installers
 	let homeownerCount, installerCount
-	onMount(async () => {
+
+	const homeownerChannel = supabase
+		.channel('custom-insert-channel')
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'platform_homeowners' },
+			async (payload) => {
+				await refreshGraphs()
+			}
+		)
+		.subscribe()
+	const installerChannel = supabase
+		.channel('custom-insert-channel')
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'platform_installers' },
+			async (payload) => {
+				await refreshGraphs()
+			}
+		)
+		.subscribe()
+	onMount(refreshGraphs)
+
+	async function refreshGraphs() {
 		homeowners = await getAllHomeowners()
 		installers = await getAllInstallers()
 
@@ -78,7 +102,7 @@
 			installerRollingLength += x.length
 			return { date: new Date(Date.now() - 86400000 * (6 - i)), value: installerRollingLength }
 		})
-	})
+	}
 </script>
 
 <div class="container">
