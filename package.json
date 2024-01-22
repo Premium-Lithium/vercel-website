@@ -73,6 +73,7 @@
 		"ajv-formats": "^2.1.1",
 		"cheerio": "1.0.0-rc.12",
 		"convert-svg-to-png": "^0.6.4",
+		"d3": "^7.8.5",
 		"dateformat": "^5.0.3",
 		"docxtemplater": "^3.42.2",
 		"docxtemplater-image-hyperlink-module-free": "^1.0.2",
