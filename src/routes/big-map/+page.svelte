@@ -18,7 +18,7 @@
 		displayCustomerMarkers
 	} from './bm-pipedrive-utils'
 	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
-	import { updateHomeownerMarkers } from './bm-platform-utils'
+	import { generatePlatformMarkers, updateHomeownerMarkers } from './bm-platform-utils'
 	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
 	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
@@ -35,11 +35,12 @@
 		.channel('platform-homeowners')
 		.on(
 			'postgres_changes',
-			{ event: '*', schema: 'public', table: 'platform_homeowners' },
-			(payload) => {
-				console.log(payload)
+			{ event: 'INSERT', schema: 'public', table: 'platform_homeowners' },
+			async (payload) => {
+				await updateHomeownerMarkers(payload)
 			}
 		)
+		.subscribe()
 
 	onMount(async () => {
 		loading = true
@@ -48,6 +49,7 @@
 		await getCampaignIdAndNames()
 		await generateOsHeatmap()
 		await generateCampaignHeatmap()
+		await generatePlatformMarkers()
 		// await getPipelines()
 		// await getLabels()
 		loading = false
