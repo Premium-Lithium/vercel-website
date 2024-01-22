@@ -1,5 +1,7 @@
 <script>
+	import { onMount } from 'svelte'
 	import LineGraph from './LineGraph.svelte'
+	import { getAllHomeowners, getAllInstallers } from './utils'
 	let data = [
 		[8, 2],
 		[2, 2],
@@ -17,10 +19,60 @@
 			return x.date.getTime() - y.date.getTime()
 		})
 	console.log(data)
+	let homeowners, installers
+	let homeownerCount, installerCount
+	onMount(async () => {
+		homeowners = await getAllHomeowners()
+		installers = await getAllInstallers()
+
+		const binDataFor7Days = (data) => {
+			const bins = new Array(7).fill(0).map(() => [])
+			const now = Date.now()
+			data.forEach((item) => {
+				const diffDays = Math.floor(
+					(now - new Date(item['date_signed_up']).getTime()) / (1000 * 60 * 60 * 24)
+				)
+				if (diffDays >= 0 && diffDays < 7) {
+					bins[6 - diffDays].push(item)
+				}
+			})
+			return bins
+		}
+
+		const binDataFor24Hours = (data) => {
+			const bins = new Array(24).fill(0).map(() => [])
+			const now = Date.now()
+			data.forEach((item) => {
+				const diffHours = Math.floor(
+					(now - new Date(item['date_signed_up']).getTime()) / (1000 * 60 * 60)
+				)
+				if (diffHours >= 0 && diffHours < 24) {
+					bins[diffHours].push(item)
+				}
+			})
+			return bins
+		}
+
+		const homeownerBinsFor7Days = binDataFor7Days(homeowners)
+		const homeownerBinsFor24Hours = binDataFor24Hours(homeowners)
+
+		// console.log(homeownerBinsFor7Days, homeownerBinsFor24Hours)
+		let rollingLength =
+			homeowners.length -
+			homeownerBinsFor7Days.reduce((p, v, i, a) => {
+				return p + v.length
+			}, 0)
+		homeownerCount = homeownerBinsFor7Days.map((x, i, a) => {
+			rollingLength += x.length
+			return { date: new Date(Date.now() - 86400000 * (6 - i)), value: rollingLength }
+		})
+	})
 </script>
 
 <div class="container">
-	<LineGraph bind:data />
+	{#if homeownerCount}
+		<LineGraph bind:data={homeownerCount} />
+	{/if}
 	<!-- <LineGraph bind:data />
 	<LineGraph bind:data />
 	<LineGraph bind:data /> -->

@@ -1,6 +1,6 @@
 import { supabase } from '$lib/supabase'
 
-async function getAllHomeowners() {
+export async function getAllHomeowners() {
 	const { data: getHomeownerData, error: getHomeownerError } = await supabase
 		.from('platform_homeowners')
 		.select('*')
@@ -12,7 +12,7 @@ async function getAllHomeowners() {
 	}
 }
 
-async function getAllInstallers() {
+export async function getAllInstallers() {
 	const { data: getInstallerData, error: getInstallerError } = await supabase
 		.from('platform_installers')
 		.select('*')
