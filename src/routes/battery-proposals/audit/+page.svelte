@@ -1,45 +1,62 @@
-<script>
+<script lang="ts">
 	import { browser } from '$app/environment'
 	import { page } from '$app/stores'
+	import { PUBLIC_GOOGLE_API_KEY } from '$env/static/public'
 	import MagicLink from '$lib/components/MagicLink.svelte'
 	import { supabase } from '$lib/supabase'
 	import { onMount } from 'svelte'
 
-	const batteryProposalsTableName = 'existing-solar-properties'
+	const batteryProposalsTableName = 'campaign_customers'
 
 	let allUnauditedHouses = []
 	let currentHouseToAudit = undefined
+	let auditCriteria = []
 	let currentHousePointer = 0
 	let loading = false
 	let currentHouseM2 = 0
 
 	currentHousePointer = +($page.url.searchParams.get('startIndex') ?? '0')
+	let campaign: string = ''
+	const urlParams = $page.url.searchParams
+	campaign = urlParams.get('campaignId') || ''
 
-	$: if (currentHouseToAudit)
-		currentHouseM2 = currentHouseToAudit['solar_array_info'].reduce((p, v, i, a) => {
-			return p + v['area_m2']
-		}, 0)
-
-	$: currentHouseToAudit = currentHouseToAudit = allUnauditedHouses[currentHousePointer]
+	$: if (currentHouseToAudit) {
+		console.log(currentHouseToAudit)
+		try {
+			currentHouseM2 = currentHouseToAudit['campaign_specific_data']['solar_array_info'].reduce(
+				(p, v, i, a) => {
+					return p + Number(v.split('area: ')[1].replace(')', ''))
+				},
+				0
+			)
+		} catch (e) {
+			currentHouseM2 =
+				currentHouseToAudit['campaign_specific_data']['roof_details']['wholeRoofStats'][
+					'areaMeters2'
+				]
+		}
+	}
+	$: currentHouseToAudit = allUnauditedHouses[currentHousePointer]
 
 	let isAuthenticated = false
-	let auditOption1, auditOption2, auditOption3, auditOption4, auditOption5, nextButton, auditForm
-	$: auditOptions = [
-		{ name: 'CLEAR_IMAGE', value: auditOption1 },
-		{ name: 'ADDRESS_CORRECT', value: auditOption2 },
-		{ name: 'CORRECT_PANEL_ESTIMATE', value: auditOption3 },
-		{ name: 'CLEAR_AND_SENSIBLE', value: auditOption4 },
-		{ name: 'SHADE_FREE', value: auditOption5 }
-	].map((x, i) => {
-		if (x.value) return { name: x.name, value: x.value.checked, index: i }
+	let nextButton, auditForm
+	let loadedAuditOptions = []
+	let auditCheckboxes = []
+	$: auditOptions = loadedAuditOptions.map((x, i) => {
+		return { name: x.name, value: x.value, index: i, description: x.description }
 	})
 
 	onMount(async () => {
+		loading = true
 		const { data, error } = await supabase.auth.getSession()
 		if (data.session == null) isAuthenticated = false
 		else isAuthenticated = true
-		loading = false
+		loadedAuditOptions = await loadAuditCriteria(campaign)
+		loadedAuditOptions = loadedAuditOptions.map((x) => {
+			return { ...x, 'value': true }
+		})
 		allUnauditedHouses = await loadAllUnauditedHousesFromSupabase(false)
+		loading = false
 
 		if (browser) {
 			document.addEventListener('keydown', (event) => {
@@ -49,19 +66,40 @@
 						nextButton.click()
 						break
 					case 'Digit1':
-						auditOption1.checked = !auditOption1.checked
+						if (!auditCheckboxes[0]) break
+						auditCheckboxes[0].checked = !auditCheckboxes[0].checked
 						break
 					case 'Digit2':
-						auditOption2.checked = !auditOption2.checked
+						if (!auditCheckboxes[1]) break
+						auditCheckboxes[1].checked = !auditCheckboxes[1].checked
 						break
 					case 'Digit3':
-						auditOption3.checked = !auditOption3.checked
+						if (!auditCheckboxes[2]) break
+						auditCheckboxes[2].checked = !auditCheckboxes[2].checked
 						break
 					case 'Digit4':
-						auditOption4.checked = !auditOption4.checked
+						if (!auditCheckboxes[3]) break
+						auditCheckboxes[3].checked = !auditCheckboxes[3].checked
 						break
 					case 'Digit5':
-						auditOption5.checked = !auditOption5.checked
+						if (!auditCheckboxes[4]) break
+						auditCheckboxes[4].checked = !auditCheckboxes[4].checked
+						break
+					case 'Digit6':
+						if (!auditCheckboxes[5]) break
+						auditCheckboxes[5].checked = !auditCheckboxes[5].checked
+						break
+					case 'Digit7':
+						if (!auditCheckboxes[6]) break
+						auditCheckboxes[6].checked = !auditCheckboxes[6].checked
+						break
+					case 'Digit8':
+						if (!auditCheckboxes[7]) break
+						auditCheckboxes[7].checked = !auditCheckboxes[7].checked
+						break
+					case 'Digit9':
+						if (!auditCheckboxes[8]) break
+						auditCheckboxes[8].checked = !auditCheckboxes[8].checked
 						break
 				}
 			})
@@ -76,12 +114,12 @@
 			let existingFlags = currentHouseToAudit['audit_flags']
 			let newFlags = [...(existingFlags ?? [])]
 			auditOptions.forEach((x) => {
-				if (!x.value && !newFlags.includes(20 + x.index)) newFlags.push(20 + x.index)
+				if (!x.value && !newFlags.includes(x.index)) newFlags.push(x.index)
 			})
 			const { data, error } = await supabase
 				.from(batteryProposalsTableName)
 				.update({ 'audit_flags': newFlags })
-				.eq('id', currentHouseToAudit.id)
+				.eq('customer_id', currentHouseToAudit['customer_id'])
 			if (error) {
 				console.log(error)
 				return
@@ -91,7 +129,7 @@
 				const { data, error } = await supabase
 					.from(batteryProposalsTableName)
 					.update({ 'audit_flags': [99] })
-					.eq('id', currentHouseToAudit.id)
+					.eq('customer_id', currentHouseToAudit['customer_id'])
 				if (error) {
 					console.log(error)
 					return
@@ -99,23 +137,21 @@
 			}
 		}
 		currentHousePointer += 1
-		auditOption1.checked = true
-		auditOption2.checked = true
-		auditOption3.checked = true
-		auditOption4.checked = true
-		auditOption5.checked = true
+		auditCheckboxes.forEach((x) => (x.checked = true))
 	}
 
 	async function loadAllUnauditedHousesFromSupabase(randomiseOrder = true) {
-		let { data, error } = await supabase.from(batteryProposalsTableName).select('*')
-
+		let { data, error } = await supabase
+			.from(batteryProposalsTableName)
+			.select('*')
+			.eq('campaign_id', campaign)
 		if (error) {
 			console.log(`Error fetching from ${batteryProposalsTableName}`)
 			return []
 		} else {
 			data = data.filter((x) => {
 				if (!x['audit_flags']) return true
-				let flagsToExclude = [0, 2, 20, 21, 22, 23, 24, 99]
+				let flagsToExclude = [0, 20, 21, 22, 23, 24, 99]
 				let flagged = false
 				flagsToExclude.forEach((i) => {
 					if (x['audit_flags'].includes(i)) {
@@ -133,122 +169,134 @@
 			}
 		}
 	}
+
+	async function loadAuditCriteria(campaignId: string) {
+		const { data: loadAuditData, error: loadAuditError } = await supabase
+			.from('campaign_master')
+			.select('audit_criteria')
+			.eq('campaign_id', campaignId)
+		if (loadAuditError) {
+			console.log(loadAuditError.message)
+			return
+		}
+		console.log(loadAuditData)
+
+		let auditCodes = loadAuditData[0]['audit_criteria']
+
+		let promises = auditCodes.map(async (x) => {
+			return supabase.from('campaign_audit_criteria').select('*').eq('id', x)
+		})
+
+		let results = (await Promise.all(promises)).map((x) => {
+			return x.data[0]
+		})
+
+		results = results.filter((x) => {
+			return x['human_required']
+		})
+
+		auditCheckboxes = results.map((x) => {
+			null
+		})
+		return results
+	}
+
+	function getImageUrl() {
+		if (currentHouseToAudit) {
+			if (currentHouseToAudit['campaign_specific_data']['screenshot_url']) {
+				return currentHouseToAudit['campaign_specific_data']['screenshot_url']
+			} else {
+				let arrInfo = currentHouseToAudit['campaign_specific_data']['solar_array_info']
+				let lats = arrInfo.map((x) => {
+					return Number(x.split('lat: ')[1].split(',')[0])
+				})
+				let lons = arrInfo.map((x) => {
+					return Number(x.split('lon: ')[1].split(',')[0])
+				})
+				let avgLat =
+					lats.reduce((p, v, i, a) => {
+						return p + v
+					}, 0) / lats.length
+				let avgLon =
+					lons.reduce((p, v, i, a) => {
+						return p + v
+					}, 0) / lons.length
+				return `https://maps.googleapis.com/maps/api/staticmap?center=${avgLat},${avgLon}&zoom=20&maptype=satellite&size=640x640&key=${PUBLIC_GOOGLE_API_KEY}&markers=color:0xff0000|${avgLat},${avgLon}`
+			}
+		}
+		return ''
+	}
 </script>
 
 {#if !isAuthenticated}
 	<MagicLink
 		bind:isAuthenticated
-		redirectUrl={`battery-proposals/audit?startIndex=` +
-			($page.url.searchParams.get('startIndex') ?? '0')}
+		redirectUrl={`battery-proposals/audit?startIndex=${currentHousePointer}&campaignId=${campaign}`}
 	/>
 {:else}
 	<div class="container">
-		{#key currentHouseToAudit}
-			<div class="header">
-				<h1>{currentHousePointer + 1} / {allUnauditedHouses.length}</h1>
+		{#if allUnauditedHouses.length == 0}
+			<div class="error-message">
+				<p>No houses to audit</p>
 			</div>
-			<div class="images">
-				<img
-					src={currentHouseToAudit ? currentHouseToAudit['screenshot_url'] : ''}
-					alt=""
-					class="image"
-				/>
-				<div class="house-details">
-					<p class="saving-text">
-						£{Math.round(
-							currentHouseToAudit ? currentHouseToAudit['potential_savings_with_battery_gbp'] : ''
-						)} saving
-					</p>
-					<p class="array-text">
-						{currentHouseToAudit ? currentHouseToAudit['solar_array_info'].length : ''} array{currentHouseToAudit
-							? currentHouseToAudit['solar_array_info'].length == 1
-								? ''
-								: 's'
-							: ''}
-					</p>
-					<p class="meter-squared">
-						{currentHouseToAudit ? Math.round(currentHouseM2) : ''}m² array size
-					</p>
+		{:else}
+			{#key currentHouseToAudit}
+				<div class="header">
+					<h1>{currentHousePointer + 1} / {allUnauditedHouses.length}</h1>
 				</div>
+				<div class="images">
+					<img src={getImageUrl()} alt="" class="image" />
+					<div class="house-details">
+						<p class="array-text">
+							{currentHouseToAudit
+								? currentHouseToAudit['campaign_specific_data']['solar_array_info'].length
+								: ''} array{currentHouseToAudit
+								? currentHouseToAudit['campaign_specific_data']['solar_array_info'].length == 1
+									? ''
+									: 's'
+								: ''}
+						</p>
+						<p class="meter-squared">
+							{currentHouseToAudit ? Math.round(currentHouseM2) : ''}m² array size
+						</p>
+					</div>
+				</div>
+			{/key}
+			<div class="legend">
+				<ul class="audit-legend">
+					{#each auditOptions as audit}
+						<li class="audit-legend-entry">{audit.description}</li>
+					{/each}
+				</ul>
 			</div>
-		{/key}
-		<div class="legend">
-			<ul class="audit-legend">
-				<li class="audit-legend-entry">Does the image show the roof and panels clearly?</li>
-				<li class="audit-legend-entry">Is the address likely to be correct?</li>
-				<li class="audit-legend-entry">Does the area estimate / number of panels seem correct?</li>
-				<li class="audit-legend-entry">Is it clear and sensible for us to send to customers?</li>
-				<li class="audit-legend-entry">Is the roof mostly shade free?</li>
-			</ul>
-		</div>
 
-		<form action="" class="audit-options" bind:this={auditForm} on:submit={onSubmit}>
-			<div class="input-wrapper">
-				<label for="audit-option-1">1</label>
-				<input
-					type="checkbox"
-					name="audit-option-1"
-					id="audit-option-1"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption1}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-2">2</label>
-				<input
-					type="checkbox"
-					name="audit-option-2"
-					id="audit-option-2"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption2}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-3">3</label>
-				<input
-					type="checkbox"
-					name="audit-option-3"
-					id="audit-option-3"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption3}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-4">4</label>
-				<input
-					type="checkbox"
-					name="audit-option-4"
-					id="audit-option-4"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption4}
-				/>
-			</div>
-			<div class="input-wrapper">
-				<label for="audit-option-5">5</label>
-				<input
-					type="checkbox"
-					name="audit-option-5"
-					id="audit-option-5"
-					class="audit-option"
-					checked={true}
-					bind:this={auditOption5}
-				/>
-			</div>
-		</form>
+			<form action="" class="audit-options" bind:this={auditForm} on:submit={onSubmit}>
+				{#each auditOptions as audit, i}
+					<div class="input-wrapper">
+						<label for={`audit-option-${i}`}>{i + 1}</label>
+						<input
+							type="checkbox"
+							name={`audit-option-${i}`}
+							id={`audit-option-${i}`}
+							class="audit-option"
+							checked={true}
+							on:click={() => (audit.value = !audit.value)}
+							bind:this={auditCheckboxes[i]}
+						/>
+					</div>
+				{/each}
+			</form>
 
-		<input
-			type="button"
-			value="Next"
-			class="next-button"
-			bind:this={nextButton}
-			on:click={() => {
-				auditForm.requestSubmit()
-			}}
-		/>
+			<input
+				type="button"
+				value="Next"
+				class="next-button"
+				bind:this={nextButton}
+				on:click={() => {
+					auditForm.requestSubmit()
+				}}
+			/>
+		{/if}
 	</div>
 {/if}
 
@@ -282,7 +330,7 @@
 		text-align: center;
 		border-radius: 0px 0px 16px 16px;
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-columns: 1fr 1fr;
 	}
 
 	.images {
@@ -368,5 +416,16 @@
 		color: white;
 		width: 100%;
 		text-align: center;
+	}
+
+	.house-details > p {
+		margin: 16px;
+	}
+
+	.error-message {
+		width: 100%;
+		text-align: center;
+		color: white;
+		font-size: 24px;
 	}
 </style>

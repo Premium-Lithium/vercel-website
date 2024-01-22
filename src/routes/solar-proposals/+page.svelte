@@ -312,6 +312,27 @@
 					'DESIGN-COMPLETED',
 					'An OpenSolar design has been completed'
 				)
+				// WIP - save system image from OpenSolar when completing a project
+				// let res = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-systems`, {
+				// 	method: 'POST',
+				// 	body: JSON.stringify({
+				// 		'openSolarId': entry.openSolarId,
+				// 		'openSolarOrgId': PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+				// 	})
+				// })
+				// res = await res.json()
+				// let systemId = res.systems[0].uuid
+				// res = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-image`, {
+				// 	method: 'POST',
+				// 	body: JSON.stringify({
+				// 		'openSolarId': entry.openSolarId,
+				// 		'openSolarOrgId': PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID,
+				// 		systemId
+				// 	})
+				// })
+				// res = await res.json()
+				// let pdf = res.url
+				// console.log(pdf)
 			}
 		})
 		await updateWorkerData(uniqueIdentifier, workerData[0])
