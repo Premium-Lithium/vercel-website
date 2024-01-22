@@ -17,14 +17,7 @@
 	let supabaseAuth = undefined
 	let modals = []
 	let menuModal
-
-	// PARAMETERS
-
-	const numOfProjects = 1000
-	const minSaving = 300.0
-	const maxSaving = 2000.0
-	const minPanels = 4
-	const maxPanels = 24
+	let errorMessage = ''
 
 	$: if (supabaseAuth) {
 		uniqueIdentifier = supabaseAuth.user.id
@@ -70,7 +63,7 @@
 				if (x.homeownerData['lat_lon']) {
 					latLon = x.homeownerData['lat_lon']
 				} else {
-					latLon = await getLatLon(x.homeownerData.address)
+					latLon = await getLatLon(x.homeownerData.address, x.homeownerData.postcode)
 					await supabase
 						.from('platform_homeowners')
 						.update({ 'lat_lon': latLon })
@@ -97,13 +90,12 @@
 				}
 			]
 		})
-		console.log(projects)
 	}
 
-	async function getLatLon(address) {
+	async function getLatLon(address, postcode) {
 		let res = await fetch(`${$page.url.origin}/solar-proposals/geocoding`, {
 			method: 'POST',
-			body: JSON.stringify({ address: address })
+			body: JSON.stringify({ address: `${address}, ${postcode}` })
 		})
 		return (await res.json()).results[0].geometry.location
 	}
@@ -186,7 +178,24 @@
 	}
 
 	async function completeProject(project, i) {
+		errorMessage = ''
 		awaitingResponse = true
+		let systems = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-systems`, {
+			method: 'POST',
+			body: JSON.stringify({
+				'openSolarOrgId': PUBLIC_OPEN_SOLAR_ORG_ID,
+				'openSolarId': project.openSolarId
+			}),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		})
+		awaitingResponse = false
+		systems = await systems.json()
+		if (systems.status == 400) {
+			errorMessage = 'No systems detected. Check the OpenSolar project.'
+			return
+		}
 		modals[i].close()
 		project.status = 'PENDING_QUOTES'
 		await updateStatus(project.jobId, project.status)
@@ -230,6 +239,9 @@
 					class="modal-button"
 					on:click|stopPropagation={() => completeProject(projects[i], i)}>Complete Project</button
 				>
+			{/if}
+			{#if errorMessage}
+				<p style="color: red">{errorMessage}</p>
 			{/if}
 		</div>
 	</Modal>
