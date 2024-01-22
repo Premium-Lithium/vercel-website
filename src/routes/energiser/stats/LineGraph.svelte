@@ -43,7 +43,7 @@
 	<div class="container">
 		<h class="title">{title}</h>
 		<svg {width} {height}>
-			{#each d3.ticks(d3.extent(data.map((x) => x.value))[0], d3.extent(data.map((x) => x.value))[1], 5) as tickValue}
+			{#each d3.ticks(0, d3.nice(0, d3.extent(data.map((x) => x.value))[1], 5)[1], 5) as tickValue}
 				<g transform={`translate(20,${y(tickValue)})`}>
 					<line x2={innerWidth} stroke="black" stroke-opacity="0.2" />
 					<text text-anchor="middle" dx="-0.75em" x={0} font-size="12px">
@@ -51,6 +51,7 @@
 					</text>
 				</g>
 			{/each}
+
 			{#each x.ticks(d3.utcHour.every(24)) as tickValue}
 				<g transform={`translate(${x(tickValue) + marginLeft},20)`}>
 					<line y2={innerHeight - 10} stroke="black" stroke-opacity="0.2" />
