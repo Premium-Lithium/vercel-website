@@ -12,7 +12,7 @@
 	}
 </script>
 
-<div class="map-button">
+<div class="big-map-button">
 	<button
 		class="large-button typography-label-medium"
 		class:large-button__secondary={buttonClass == 'secondary'}
@@ -27,7 +27,7 @@
 </div>
 
 <style>
-	.map-button {
+	.big-map-button {
 		display: flex;
 		padding: 6px 14px;
 		justify-content: center;

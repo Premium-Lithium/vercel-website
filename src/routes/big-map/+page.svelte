@@ -18,15 +18,28 @@
 		displayCustomerMarkers
 	} from './bm-pipedrive-utils'
 	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
+	import { updateHomeownerMarkers } from './bm-platform-utils'
 	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
 	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
 	import { getCampaignIdAndNames } from './bm-campaign-utils'
 	import FloatingPanel from '$lib/components/big-map/FloatingPanel.svelte'
 	import Button from '$lib/components/big-map/Button.svelte'
+	import PlatformSections from '$lib/components/big-map/PlatformSections.svelte'
+	import { supabase } from '$lib/supabase'
 
 	let loader: any
 	let loading: boolean = false
+
+	const homeownerSubscription = supabase
+		.channel('platform-homeowners')
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'platform_homeowners' },
+			(payload) => {
+				console.log(payload)
+			}
+		)
 
 	onMount(async () => {
 		loading = true
@@ -35,8 +48,8 @@
 		await getCampaignIdAndNames()
 		await generateOsHeatmap()
 		await generateCampaignHeatmap()
-		await getPipelines()
-		await getLabels()
+		// await getPipelines()
+		// await getLabels()
 		loading = false
 	})
 
@@ -79,6 +92,7 @@
 			<PipedriveSection />
 			<HeatmapSection />
 			<CampaignSection />
+			<PlatformSections />
 		{:else}
 			<p>Loading</p>
 		{/if}
@@ -182,7 +196,7 @@
 	}
 
 	* {
-		color: #BBBBBB;
+		color: #bbbbbb;
 		font-family: 'Visby CF';
 		font-style: normal;
 		font-weight: 500;
