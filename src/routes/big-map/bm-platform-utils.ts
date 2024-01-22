@@ -44,8 +44,6 @@ function createMarkerForHomeowner(homeowner: PlatformHomeowner): PlatformMarker 
                 position: new google.maps.LatLng(homeowner.lat_lon.lat, homeowner.lat_lon.lng),
                 title: homeowner.name,
                 icon: '/marker-base.svg',
-                map: get(map),
-                visible: true
             }),
             address: homeowner.address + " " + homeowner.postcode,
             content: formHomeownerMarkerContent(homeowner),
@@ -54,7 +52,7 @@ function createMarkerForHomeowner(homeowner: PlatformHomeowner): PlatformMarker 
                 verified: (homeowner.email_verify_code === "verified") ? true : false,
                 solution: homeowner.solution
             },
-            visible: true,
+            visible: false,
             colour: "#C9FC50"
         }
         let markerPopup = new google.maps.InfoWindow({
@@ -80,10 +78,8 @@ function createMarkerForInstaller(installer: PlatformInstaller): PlatformMarker 
                 position: new google.maps.LatLng(installer.lat_lon.lat, installer.lat_lon.lng),
                 title: installer.company_name,
                 icon: '/marker-base.svg',
-                map: get(map),
-                visible: true
             }),
-            visible: true,
+            visible: false,
             content: formInstallerMarkerContent(installer),
             filterOption: {
                 signUpDate: installer.date_signed_up,
@@ -113,6 +109,19 @@ function formInstallerMarkerContent(installer: PlatformInstaller): string {
 
 function formHomeownerMarkerContent(homeowner: PlatformHomeowner): string {
     return "content goes here"
+}
+
+export function displayMarkers(markerArr: Array<PlatformMarker>): Array<PlatformMarker> {
+    for (let marker of markerArr) {
+        // once filters implemented next line will only toggle markers that should be shown based on the filters
+        marker.visible = !marker.visible
+        if (marker.visible) {
+            marker.marker.setMap(get(map))
+        } else {
+            marker.marker.setMap(null)
+        }
+    }
+    return markerArr
 }
 
 // Updates the set of homeowner markers when the database updates

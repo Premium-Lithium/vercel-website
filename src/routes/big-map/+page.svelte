@@ -25,7 +25,7 @@
 	import { getCampaignIdAndNames } from './bm-campaign-utils'
 	import FloatingPanel from '$lib/components/big-map/FloatingPanel.svelte'
 	import Button from '$lib/components/big-map/Button.svelte'
-	import PlatformSections from '$lib/components/big-map/PlatformSections.svelte'
+	import PlatformSection from '$lib/components/big-map/PlatformSection.svelte'
 	import { supabase } from '$lib/supabase'
 
 	let loader: any
@@ -94,14 +94,17 @@
 			<PipedriveSection />
 			<HeatmapSection />
 			<CampaignSection />
-			<PlatformSections />
+			<PlatformSection />
 		{:else}
 			<p>Loading</p>
 		{/if}
 		<Button label="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
 		<Button label="Toggle Customer Markers" on:click={displayCustomerMarkers} />
 	</FloatingPanel>
+
+
 	{#each $mapOptionPanels as panel}
+	<!-- terribly ugly part needs refactoring into component -->
 		<div class="option-panel" use:movable={{ handle: panel.handle }}>
 			<div class="header-row">
 				<h4>{panel.pipeline?.name}: {panel.markers.length} Markers</h4>
