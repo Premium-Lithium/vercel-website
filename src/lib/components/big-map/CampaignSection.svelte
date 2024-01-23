@@ -3,7 +3,8 @@
 	import {
 		campaignKey,
 		selectedCampaigns,
-		campaignMarkers
+		campaignMarkers,
+		campaignLoading
 	} from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import LabelledCheckbox from './LabelledCheckbox.svelte'
@@ -40,17 +41,24 @@
 
 <DropdownHeader header="Campaigns" bind:droppedDown={shown} />
 {#if shown}
-	<div class="cm-menus">
-		<p>Don't try and display them all at once!</p>
-		{#each $campaignKey as campaign, index}
-			<LabelledCheckbox
-				label={campaign.name.charAt(0).toUpperCase() + campaign.name.replaceAll('-', ' ').slice(1)}
-				on:change={() => handleCheck(index)}
-			/>
-		{/each}
-		<MenuButton title="Show Selected Campaigns" on:click={displaySelectedCampaigns} />
-		<MenuButton title="Clear Campaigns" on:click={handleClearCampaigns} />
-	</div>
+	{#if !$campaignLoading}
+		<div class="cm-menus">
+			<p>Don't try and display them all at once!</p>
+			{#each $campaignKey as campaign, index}
+				<LabelledCheckbox
+					label={campaign.name.charAt(0).toUpperCase() +
+						campaign.name.replaceAll('-', ' ').slice(1)}
+					on:change={() => handleCheck(index)}
+				/>
+			{/each}
+			<MenuButton title="Show Selected Campaigns" on:click={displaySelectedCampaigns} />
+			<MenuButton title="Clear Campaigns" on:click={handleClearCampaigns} />
+		</div>
+	{:else}
+		<div class="cm-menus">
+			<p>Loading</p>
+		</div>
+	{/if}
 {/if}
 
 <style>

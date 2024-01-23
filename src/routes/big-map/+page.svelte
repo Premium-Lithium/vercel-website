@@ -24,13 +24,11 @@
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
 	import { getCampaignIdAndNames } from './bm-campaign-utils'
 	import FloatingPanel from '$lib/components/big-map/FloatingPanel.svelte'
-	import Button from '$lib/components/big-map/Button.svelte'
 	import PlatformSection from '$lib/components/big-map/PlatformSection.svelte'
 	import { supabase } from '$lib/supabase'
 	import MenuButton from '$lib/components/big-map/MenuButton.svelte'
 
 	let loader: any
-	let loading: boolean = false
 
 	const homeownerSubscription = supabase
 		.channel('platform-homeowners')
@@ -44,16 +42,14 @@
 		.subscribe()
 
 	onMount(async () => {
-		loading = true
 		await generateMarkersForMCSSInstallers()
 		await generateMarkersForPLCustomers()
 		await getCampaignIdAndNames()
 		await generateOsHeatmap()
 		await generateCampaignHeatmap()
 		await generatePlatformMarkers()
-		// await getPipelines()
-		// await getLabels()
-		loading = false
+		await getPipelines()
+		await getLabels()
 	})
 
 	/**
@@ -91,21 +87,16 @@
 
 <div class="map-container">
 	<FloatingPanel panelTitle="Map Options">
-		{#if !loading}
-			<PipedriveSection />
-			<HeatmapSection />
-			<CampaignSection />
-			<PlatformSection />
-		{:else}
-			<p>Loading</p>
-		{/if}
-		<MenuButton title="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
-		<Button label="Toggle Customer Markers" on:click={displayCustomerMarkers} />
+		<PipedriveSection />
+		<HeatmapSection />
+		<CampaignSection />
+		<PlatformSection />
+		<!-- <MenuButton title="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
+		<MenuButton title="Toggle Customer Markers" on:click={displayCustomerMarkers} /> -->
 	</FloatingPanel>
 
-
 	{#each $mapOptionPanels as panel}
-	<!-- terribly ugly part needs refactoring into component -->
+		<!-- terribly ugly part needs refactoring into component -->
 		<div class="option-panel" use:movable={{ handle: panel.handle }}>
 			<div class="header-row">
 				<h4>{panel.pipeline?.name}: {panel.markers.length} Markers</h4>

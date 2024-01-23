@@ -13,11 +13,12 @@
 </script>
 
 <div class="menu-button">
-	<Button label={title} buttonClass={buttonClass} on:click={dispatchClick} />
+	<Button label={title} {buttonClass} on:click={dispatchClick} />
 </div>
 
 <style>
 	.menu-button {
 		margin: 4px;
+		max-width: 240px;
 	}
 </style>

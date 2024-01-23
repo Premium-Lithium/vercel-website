@@ -1,5 +1,5 @@
 import { get } from "svelte/store"
-import { map, campaignHeatmap, osHeatmap, campaignKey } from "./bm-stores"
+import { map, campaignHeatmap, osHeatmap, campaignKey, heatmapLoading } from "./bm-stores"
 import { getAddressesInCampaign } from "./bm-campaign-utils"
 
 export async function generateOsHeatmap() {
@@ -16,6 +16,7 @@ export async function generateOsHeatmap() {
     osHeatmap.set(new google.maps.visualization.HeatmapLayer({
         data: heatmapData
     }))
+    heatmapLoading.set(false)
 }
 
 export async function generateCampaignHeatmap() {

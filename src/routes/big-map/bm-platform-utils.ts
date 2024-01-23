@@ -1,4 +1,4 @@
-import { map, platformHomeownerMarkers, platformInstallerMarkers, type PlatformHomeowner, type PlatformInstaller, type PlatformMarker } from "./bm-stores";
+import { customerMarkersArray, homeownerColour, installerColour, map, markerBasePath, markerSquarePath, markerTrianglePath, platformHomeownerMarkers, platformInstallerMarkers, platformJobs, platformLoading, type PlatformHomeowner, type PlatformInstaller, type PlatformMarker } from "./bm-stores";
 import { get } from 'svelte/store'
 
 // Creates array of markers for 
@@ -16,6 +16,16 @@ export async function generatePlatformMarkers() {
             'Content-Type': 'application-json'
         }
     })
+    let jobRes = await fetch('big-map/supabase/platform-jobs', {
+        method: "GET",
+        headers: {
+            'Content-Type': 'application-json'
+        }
+    })
+    let jobs = await jobRes.json()
+    if (jobRes.ok) {
+        platformJobs.set(jobs.body)
+    }
     let homeowners = (await homeownerRes.json()).homeowners
     let homeownerMarkerArray: Array<PlatformMarker> = get(platformHomeownerMarkers)
     for (let homeowner of homeowners) {
@@ -32,13 +42,15 @@ export async function generatePlatformMarkers() {
             installerMarkerArray.push(installerMarker)
         }
     }
-    platformHomeownerMarkers.set(homeownerMarkerArray)
-    platformInstallerMarkers.set(installerMarkerArray)
+    platformHomeownerMarkers.set(changeMarkerColour(homeownerMarkerArray, get(homeownerColour)))
+    platformInstallerMarkers.set(changeMarkerColour(installerMarkerArray, get(installerColour)))
+    platformLoading.set(false)
 }
 
-function createMarkerForHomeowner(homeowner: PlatformHomeowner): PlatformMarker |null {
+function createMarkerForHomeowner(homeowner: PlatformHomeowner): PlatformMarker | null {
     if (homeowner.lat_lon) {
         let homeownerMarker: PlatformMarker = {
+            data: homeowner,
             latLng: homeowner.lat_lon,
             marker: new google.maps.Marker({
                 position: new google.maps.LatLng(homeowner.lat_lon.lat, homeowner.lat_lon.lng),
@@ -47,13 +59,15 @@ function createMarkerForHomeowner(homeowner: PlatformHomeowner): PlatformMarker 
             }),
             address: homeowner.address + " " + homeowner.postcode,
             content: formHomeownerMarkerContent(homeowner),
+            verified: (homeowner.email_verify_code === "verified") ? true : false,
+            type: "homeowner",
             filterOption: {
                 signUpDate: homeowner.date_signed_up,
-                verified: (homeowner.email_verify_code === "verified") ? true : false,
-                solution: homeowner.solution
+                solution: homeowner.solution,
+                awaitingDesign: false
             },
             visible: false,
-            colour: "#C9FC50"
+            colour: get(homeownerColour)
         }
         let markerPopup = new google.maps.InfoWindow({
             content: homeownerMarker.content,
@@ -69,25 +83,27 @@ function createMarkerForHomeowner(homeowner: PlatformHomeowner): PlatformMarker 
     return null
 }
 
-function createMarkerForInstaller(installer: PlatformInstaller): PlatformMarker | null{
+function createMarkerForInstaller(installer: PlatformInstaller): PlatformMarker | null {
     if (installer.lat_lon) {
         let installerMarker: PlatformMarker = {
+            data: installer,
             latLng: installer.lat_lon,
             address: installer.address + " " + installer.postcode,
+            verified: (installer.email_verify_code === "verified") ? true : false,
             marker: new google.maps.Marker({
                 position: new google.maps.LatLng(installer.lat_lon.lat, installer.lat_lon.lng),
                 title: installer.company_name,
-                icon: '/marker-base.svg',
+                icon: '/marker-base.svg'
             }),
             visible: false,
             content: formInstallerMarkerContent(installer),
+            type: "installer",
             filterOption: {
                 signUpDate: installer.date_signed_up,
-                verified: (installer.email_verify_code === "verified") ? true : false,
                 mcsCertified: (installer.mcs_certification?.status === "Active") ? true : false,
                 installation_preferences: installer.installation_preferences
             },
-            colour: "#C9FC50"
+            colour: get(installerColour)
         }
         let markerPopup = new google.maps.InfoWindow({
             content: installerMarker.content,
@@ -126,14 +142,22 @@ export function displayMarkers(markerArr: Array<PlatformMarker>): Array<Platform
 
 // Updates the set of homeowner markers when the database updates
 export async function updateHomeownerMarkers(payload: any) {
-    console.log("Supabase Response: ", payload)
+    console.log("Supabase Response: ", payload.new)
+    let newMarker = createMarkerForHomeowner(payload.new)
+    let markers = get(platformInstallerMarkers)
+    if (newMarker) {
+        markers.push(newMarker)
+        
+    }
+
 }
 
 export function changeMarkerColour(markerArr: Array<PlatformMarker>, colour: string): Array<PlatformMarker> {
+    console.log(colour)
     for (let marker of markerArr) {
         marker.colour = colour
         const svgMarker = {
-            path: 'M 15.00,14.00 C 15.00,14.00 14.54,17.32 14.54,17.32 14.23,19.63 13.42,21.86 12.17,23.84 12.17,23.84 12.17,23.84 12.17,23.84 11.00,25.69 10.22,27.76 9.86,29.91 9.86,29.91 9.54,31.83 9.54,31.83M 4.00,14.00 C 4.00,14.00 4.36,17.35 4.36,17.35 4.61,19.69 5.42,21.92 6.73,23.87 6.73,23.87 6.73,23.87 6.73,23.87 7.96,25.70 8.75,27.77 9.06,29.95 9.06,29.95 9.32,31.88 9.32,31.88M 17.50,8.50 C 17.50,12.92 13.92,16.50 9.50,16.50 5.08,16.50 1.50,12.92 1.50,8.50 1.50,4.08 5.08,0.50 9.50,0.50 13.92,0.50 17.50,4.08 17.50,8.50 Z',
+            path: selectMarkerType(marker),
             scale: 1,
             fillColor: marker.colour,
             fillOpacity: 1,
@@ -142,4 +166,20 @@ export function changeMarkerColour(markerArr: Array<PlatformMarker>, colour: str
         marker.marker.setIcon(svgMarker)
     }
     return markerArr
+}
+
+function selectMarkerType(marker: PlatformMarker) {
+    if (marker.type === "installer") {
+        if (marker.verified)
+            return get(markerTrianglePath)
+    }
+    if (marker.verified)
+        for (let job of get(platformJobs)) {
+            if (marker.data.id === job.homeowner_id)
+                if (job.status === "AWAITING_DESIGN")
+                    return get(markerSquarePath)
+                else if (job.status === "PENDING_QUOTES")
+                    return get(markerTrianglePath)
+        }
+    return get(markerBasePath)
 }

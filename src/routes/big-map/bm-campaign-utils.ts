@@ -1,5 +1,5 @@
 import { get } from "svelte/store"
-import { campaignKey, selectedCampaigns, type CampaignElement, campaignMarkers, map, type LatLongObj } from "./bm-stores"
+import { campaignKey, selectedCampaigns, type CampaignElement, campaignMarkers, map, type LatLongObj, campaignLoading } from "./bm-stores"
 
 export async function getCampaignIdAndNames() {
     let res = await fetch('big-map/supabase/campaign-master', {
@@ -11,6 +11,7 @@ export async function getCampaignIdAndNames() {
     let nameId = await res.json()
 
     campaignKey.set(nameId.body)
+    campaignLoading.set(false)
 }
 
 export async function getAddressesInCampaign(id: string): Promise<Array<CampaignElement>> {
