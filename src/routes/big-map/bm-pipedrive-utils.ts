@@ -331,7 +331,6 @@ export function changeIconColourFor(panel: OptionPanel) {
 
 
 // TEMPORARY UNTIL PIPEDRIVE PROJECT ACCESS
-
 export function displayInstallerMarkers() {
     let installers = get(installerMarkersArray)
     if (get(installersVisible)) {

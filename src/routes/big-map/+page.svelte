@@ -101,78 +101,80 @@
 </script>
 
 <div class="map-container">
-	<FloatingPanel panelTitle="Map Options">
-		<PipedriveSection />
-		<HeatmapSection />
-		<CampaignSection />
-		<PlatformSection />
-		<!-- <MenuButton title="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
-		<MenuButton title="Toggle Customer Markers" on:click={displayCustomerMarkers} /> -->
-	</FloatingPanel>
+	<div class="interface">
+		<FloatingPanel panelTitle="Map Options">
+			<PipedriveSection />
+			<HeatmapSection />
+			<CampaignSection />
+			<PlatformSection />
+			<!-- <MenuButton title="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
+			<MenuButton title="Toggle Customer Markers" on:click={displayCustomerMarkers} /> -->
+		</FloatingPanel>
 
-	{#each $mapOptionPanels as panel}
-		<!-- terribly ugly part needs refactoring into component -->
-		<div class="option-panel" use:movable={{ handle: panel.handle }}>
-			<div class="header-row">
-				<h4>{panel.pipeline?.name}: {panel.markers.length} Markers</h4>
-				<div class="handle" bind:this={panel.handle}>.</div>
-			</div>
-			<div class="colour-picker">
-				<ColorPicker bind:hex={panel.colour} />
-				<br />
-			</div>
-			<div class="set-marker-colour">
-				<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
-			</div>
-			<div class="checkbox-stack">
-				<div class="header-tab">
-					{#if !panel.hideStageOptions}
-						<button
-							class="dropdown-button"
-							on:click={() => (panel.hideStageOptions = !panel.hideStageOptions)}
-						>
-							<svg width="18" height="19" class="dropdown-icon">
-								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-							</svg>
-						</button>
-					{:else}
-						<button
-							class="dropdown-button"
-							on:click={() => (panel.hideStageOptions = !panel.hideStageOptions)}
-						>
-							<svg width="18" height="19" class="dropdown-icon-rotated">
-								<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
-							</svg>
-						</button>
-					{/if}
-					<h4>Stages</h4>
+		{#each $mapOptionPanels as panel}
+			<!-- terribly ugly part needs refactoring into component -->
+			<div class="option-panel" use:movable={{ handle: panel.handle }}>
+				<div class="header-row">
+					<h4>{panel.pipeline?.name}: {panel.markers.length} Markers</h4>
+					<div class="handle" bind:this={panel.handle}>.</div>
 				</div>
-				{#if panel.hideStageOptions}
-					{#each panel.stages as stage}
-						<label>
-							<input
-								name="stage-checkbox"
-								type="checkbox"
-								on:click={() => addStage(panel, stage)}
-							/>
-							{stage}</label
-						>
-					{/each}
-					<div class="labelled-checkbox">
-						<div class="add-checked-stages">
-							<button on:click={() => applyStages(panel)}>Apply Stages</button>
-						</div>
-						<div class="clear-stage-checkboxes">
-							<button on:click={() => clearStages(panel)}>Clear Stages</button>
-						</div>
+				<div class="colour-picker">
+					<ColorPicker bind:hex={panel.colour} />
+					<br />
+				</div>
+				<div class="set-marker-colour">
+					<button on:click={() => changeIconColourFor(panel)}>Change Marker Colour</button>
+				</div>
+				<div class="checkbox-stack">
+					<div class="header-tab">
+						{#if !panel.hideStageOptions}
+							<button
+								class="dropdown-button"
+								on:click={() => (panel.hideStageOptions = !panel.hideStageOptions)}
+							>
+								<svg width="18" height="19" class="dropdown-icon">
+									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+								</svg>
+							</button>
+						{:else}
+							<button
+								class="dropdown-button"
+								on:click={() => (panel.hideStageOptions = !panel.hideStageOptions)}
+							>
+								<svg width="18" height="19" class="dropdown-icon-rotated">
+									<path d="M0.5 17.5V1.5L16.5 9.68182L0.5 17.5Z" fill="#35bbed" stroke="black" />
+								</svg>
+							</button>
+						{/if}
+						<h4>Stages</h4>
 					</div>
-					<div class="delete-panel">
-						<button on:click={() => deletePanel(panel)}>Remove from Map</button>
-					</div>
-				{/if}
+					{#if panel.hideStageOptions}
+						{#each panel.stages as stage}
+							<label>
+								<input
+									name="stage-checkbox"
+									type="checkbox"
+									on:click={() => addStage(panel, stage)}
+								/>
+								{stage}</label
+							>
+						{/each}
+						<div class="labelled-checkbox">
+							<div class="add-checked-stages">
+								<button on:click={() => applyStages(panel)}>Apply Stages</button>
+							</div>
+							<div class="clear-stage-checkboxes">
+								<button on:click={() => clearStages(panel)}>Clear Stages</button>
+							</div>
+						</div>
+						<div class="delete-panel">
+							<button on:click={() => deletePanel(panel)}>Remove from Map</button>
+						</div>
+					{/if}
+				</div>
 			</div>
-		</div>
-	{/each}
+		{/each}
+	</div>
 	<div id="map">
 		<GoogleMap
 			bind:map={$map}
@@ -207,7 +209,7 @@
 		src: url(/fonts/VisbyCF/VisbyCF-Regular.otf) format('opentype');
 	}
 
-	* {
+	.interface {
 		color: #bbbbbb;
 		font-family: 'Visby CF';
 		font-style: normal;

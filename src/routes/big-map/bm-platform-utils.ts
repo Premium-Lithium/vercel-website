@@ -120,11 +120,21 @@ function createMarkerForInstaller(installer: PlatformInstaller): PlatformMarker 
 }
 
 function formInstallerMarkerContent(installer: PlatformInstaller): string {
-    return "content goes here"
+    return `
+        <h1>${installer.company_name}</h1>
+        <p>Contact Name: ${installer.first_name + " " + installer.last_name}
+        <p>Address: ${installer.address + " " + installer.postcode}<p>
+        <p>Sign Up Date: ${(new Date(installer.date_signed_up)).toISOString().split('T')[0]}</p>
+        <p>MCS Certification: ${installer.mcs_certification?.status}</p>
+    `
 }
 
 function formHomeownerMarkerContent(homeowner: PlatformHomeowner): string {
-    return "content goes here"
+    return `
+        <h1>${homeowner.name}</h1>
+        <p>Address: ${homeowner.address + " " + homeowner.postcode}</p>
+        <p>Sign Up Date: ${(new Date(homeowner.date_signed_up)).toISOString().split('T')[0]}</p>
+    `
 }
 
 export function displayMarkers(markerArr: Array<PlatformMarker>): Array<PlatformMarker> {
