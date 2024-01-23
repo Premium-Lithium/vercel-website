@@ -89,7 +89,7 @@ function createMarkerForInstaller(installer: PlatformInstaller): PlatformMarker 
             data: installer,
             latLng: installer.lat_lon,
             address: installer.address + " " + installer.postcode,
-            verified: (installer.email_verify_code === "verified") ? true : false,
+            verified: (installer.mcs_certification) ? true : false,
             marker: new google.maps.Marker({
                 position: new google.maps.LatLng(installer.lat_lon.lat, installer.lat_lon.lng),
                 title: installer.company_name,
@@ -120,13 +120,16 @@ function createMarkerForInstaller(installer: PlatformInstaller): PlatformMarker 
 }
 
 function formInstallerMarkerContent(installer: PlatformInstaller): string {
-    return `
-        <h1>${installer.company_name}</h1>
-        <p>Contact Name: ${installer.first_name + " " + installer.last_name}
-        <p>Address: ${installer.address + " " + installer.postcode}<p>
-        <p>Sign Up Date: ${(new Date(installer.date_signed_up)).toISOString().split('T')[0]}</p>
-        <p>MCS Certification: ${installer.mcs_certification?.status}</p>
+    let message = `
+    <h1>${installer.company_name}</h1>
+    <p>Contact Name: ${installer.first_name + " " + installer.last_name}
+    <p>Address: ${installer.address + " " + installer.postcode}<p>
+    <p>Sign Up Date: ${(new Date(installer.date_signed_up)).toISOString().split('T')[0]}</p>
     `
+    if (installer.mcs_certification?.status) {
+        message += `<p>MCS Certification: ${installer.mcs_certification?.status}</p>`
+    }
+    return message
 }
 
 function formHomeownerMarkerContent(homeowner: PlatformHomeowner): string {
