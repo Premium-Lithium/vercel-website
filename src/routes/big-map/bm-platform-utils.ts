@@ -142,14 +142,21 @@ export function displayMarkers(markerArr: Array<PlatformMarker>): Array<Platform
 
 // Updates the set of homeowner markers when the database updates
 export async function updateHomeownerMarkers(payload: any) {
-    console.log("Supabase Response: ", payload.new)
     let newMarker = createMarkerForHomeowner(payload.new)
+    let markers = get(platformHomeownerMarkers)
+    if (newMarker) {
+        markers.push(newMarker)
+        platformHomeownerMarkers.set(markers)
+    }
+}
+
+export async function updateInstallerMarkers(payload: any) {
+    let newMarker = createMarkerForInstaller(payload.new)
     let markers = get(platformInstallerMarkers)
     if (newMarker) {
         markers.push(newMarker)
-        
+        platformInstallerMarkers.set(markers)
     }
-
 }
 
 export function changeMarkerColour(markerArr: Array<PlatformMarker>, colour: string): Array<PlatformMarker> {

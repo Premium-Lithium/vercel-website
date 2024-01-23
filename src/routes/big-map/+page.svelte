@@ -18,7 +18,11 @@
 		displayCustomerMarkers
 	} from './bm-pipedrive-utils'
 	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
-	import { generatePlatformMarkers, updateHomeownerMarkers } from './bm-platform-utils'
+	import {
+		generatePlatformMarkers,
+		updateHomeownerMarkers,
+		updateInstallerMarkers
+	} from './bm-platform-utils'
 	import PipedriveSection from '$lib/components/big-map/PipedriveSection.svelte'
 	import HeatmapSection from '$lib/components/big-map/HeatmapSection.svelte'
 	import CampaignSection from '$lib/components/big-map/CampaignSection.svelte'
@@ -37,6 +41,17 @@
 			{ event: 'INSERT', schema: 'public', table: 'platform_homeowners' },
 			async (payload) => {
 				await updateHomeownerMarkers(payload)
+			}
+		)
+		.subscribe()
+
+	const installerSubscription = supabase
+		.channel('platform_installers')
+		.on(
+			'postgres_changes',
+			{ event: 'INSERT', schema: 'public', table: 'platform_installers' },
+			async (payload) => {
+				await updateInstallerMarkers(payload)
 			}
 		)
 		.subscribe()
