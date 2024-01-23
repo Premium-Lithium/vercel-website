@@ -39,6 +39,9 @@
 		cursor: pointer;
 		width: 100%;
 		margin: 0;
+		font-family: 'Visby CF';
+		font-style: normal;
+		font-weight: 500;
 
 		&:hover {
 			background: #86d6f4;

@@ -209,11 +209,14 @@
 		src: url(/fonts/VisbyCF/VisbyCF-Regular.otf) format('opentype');
 	}
 
-	.interface {
-		color: #bbbbbb;
+	* {
 		font-family: 'Visby CF';
 		font-style: normal;
 		font-weight: 500;
+	}
+
+	.interface {
+		color: #bbbbbb;
 	}
 
 	.map-container {
@@ -252,7 +255,7 @@
 		border: 1px solid #ffffff;
 		border-radius: 8px;
 		justify-content: left;
-		padding: 8px;
+		padding: 4px;
 		z-index: 2;
 	}
 

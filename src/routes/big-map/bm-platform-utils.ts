@@ -1,4 +1,4 @@
-import { customerMarkersArray, homeownerColour, installerColour, map, markerBasePath, markerSquarePath, markerTrianglePath, platformHomeownerMarkers, platformInstallerMarkers, platformJobs, platformLoading, type PlatformHomeowner, type PlatformInstaller, type PlatformMarker } from "./bm-stores";
+import { homeownerColour, installerColour, map, markerBasePath, markerSquarePath, markerTrianglePath, platformHomeownerMarkers, platformInstallerMarkers, platformJobs, platformLoading, type PlatformHomeowner, type PlatformInstaller, type PlatformMarker } from "./bm-stores";
 import { get } from 'svelte/store'
 
 // Creates array of markers for 

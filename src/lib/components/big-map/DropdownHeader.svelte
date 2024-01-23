@@ -31,12 +31,20 @@
 		position: relative;
 		transform: scale(0.8);
 		top: 20px;
+
+		&:hover {
+			cursor: pointer;
+		}
 	}
 
 	.dropdown-icon-rotated {
 		position: relative;
 		top: 20px;
 		transform: scale(0.8) rotate(90deg);
+
+		&:hover {
+			cursor: pointer;
+		}
 	}
 
 	.dropdown-header {
