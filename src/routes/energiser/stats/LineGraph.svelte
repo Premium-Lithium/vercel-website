@@ -9,6 +9,7 @@
 	export let marginRight = 20
 	export let marginBottom = 22.5
 	export let marginLeft = 25
+	export let offset = 7.5
 	const innerHeight = height - marginTop - marginBottom
 	const innerWidth = width - marginLeft - marginRight
 	let show = false
@@ -21,7 +22,10 @@
 		[data.map((x) => d3.utcDay.floor(x.date))[0], data.map((x) => x.date).at(-1)],
 		[marginLeft, width - marginRight]
 	)
-	$: y = d3.scaleLinear(d3.extent(data.map((x) => x.value)), [height - marginBottom, marginTop])
+	$: y = d3.scaleLinear(
+		[0, d3.nice(0, d3.extent(data.map((x) => x.value))[1], 5)[1]],
+		[height - marginBottom, marginTop]
+	)
 	$: line = d3
 		.line(
 			(d) => x(d.date),
@@ -52,8 +56,8 @@
 			{/each}
 
 			{#each x.ticks(d3.utcHour.every(24)) as tickValue}
-				<g transform={`translate(${x(tickValue) + marginLeft - 2.5},${marginBottom})`}>
-					<line y2={innerHeight + 7.5} stroke="black" stroke-opacity="0.2" />
+				<g transform={`translate(${x(tickValue) + marginLeft - offset},${marginBottom})`}>
+					<line y2={innerHeight + offset} stroke="black" stroke-opacity="0.2" />
 					<text text-anchor="middle" dy="0.1em" y={innerHeight + marginBottom} font-size="12px">
 						{tickValue.toDateString().split(' ')[0]}
 					</text>
@@ -67,7 +71,7 @@
 					stroke="#799730"
 					filter="drop-shadow(0px 0px 4px #d4fd73)"
 					stroke-width="2"
-					transform={`translate(${-marginLeft - 10},0)`}
+					transform={`translate(${-marginLeft + offset},0)`}
 					d={line(data)}
 				/>
 			{/if}
