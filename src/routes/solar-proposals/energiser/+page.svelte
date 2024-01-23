@@ -47,7 +47,7 @@
 		const { data: getJobsData, error: getJobsError } = await supabase
 			.from('platform_jobs')
 			.select('*')
-			.in('status', ['AWAITING_DESIGN', 'DESIGN_IN_PROGRESS', 'PENDING_QUOTES'])
+			.in('status', ['AWAITING_DESIGN', 'DESIGN_IN_PROGRESS', 'PENDING_QUOTES', 'DESIGN_COMPLETED'])
 		let data = await Promise.all(
 			getJobsData.map(async (x) => {
 				let homeownerData = await supabase
@@ -197,7 +197,7 @@
 			return
 		}
 		modals[i].close()
-		project.status = 'PENDING_QUOTES'
+		project.status = 'DESIGN_COMPLETED'
 		await updateStatus(project.jobId, project.status)
 		await addOpenSolarIdToAddress(project.openSolarId, project.jobId)
 		fetch(`${$page.url.origin}/solar-proposals/energiser`, {
