@@ -4,7 +4,9 @@
 	import MenuButton from './MenuButton.svelte'
 	import {
 		homeownerColour,
+		homeownerMarkersVisible,
 		installerColour,
+		installerMarkersVisible,
 		platformHomeownerMarkers,
 		platformInstallerMarkers,
 		platformLoading
@@ -16,7 +18,17 @@
 	let installersShown: boolean = false
 	let keyShown: boolean = false
 
-	const keySize = 36
+	const keySize = 25
+
+	function toggleHomeownerMarkers() {
+		$homeownerMarkersVisible = !$homeownerMarkersVisible
+		$platformHomeownerMarkers = displayMarkers($platformHomeownerMarkers)
+	}
+
+	function toggleInstallerMarkers() {
+		$installerMarkersVisible = !$installerMarkersVisible
+		$platformInstallerMarkers = displayMarkers($platformInstallerMarkers)
+	}
 </script>
 
 <DropdownHeader header="Platform" bind:droppedDown={shown} />
@@ -29,7 +41,9 @@
 					{#if homeownersShown}
 						<div class="pf-menus">
 							<div class="colour-picker">
-								<ColorPicker bind:hex={$homeownerColour} />
+								<div class="selector">
+									<ColorPicker bind:hex={$homeownerColour} />
+								</div>
 								<MenuButton
 									title="Change Colour"
 									buttonClass="secondary"
@@ -40,11 +54,7 @@
 										))}
 								/>
 							</div>
-							<MenuButton
-								title="Show Homeowners"
-								on:click={() =>
-									($platformHomeownerMarkers = displayMarkers($platformHomeownerMarkers))}
-							/>
+							<MenuButton title="Toggle Homeowners" on:click={toggleHomeownerMarkers} />
 						</div>
 					{/if}
 				</div>
@@ -53,7 +63,9 @@
 					{#if installersShown}
 						<div class="pf-menus">
 							<div class="colour-picker">
-								<ColorPicker bind:hex={$installerColour} />
+								<div class="selector">
+									<ColorPicker bind:hex={$installerColour} />
+								</div>
 								<MenuButton
 									title="Change Colour"
 									buttonClass="secondary"
@@ -64,62 +76,80 @@
 										))}
 								/>
 							</div>
-							<MenuButton
-								title="Show Installers"
-								on:click={() =>
-									($platformInstallerMarkers = displayMarkers($platformInstallerMarkers))}
-							/>
+							<MenuButton title="Toggle Installers" on:click={toggleInstallerMarkers} />
 						</div>
 					{/if}
 				</div>
-				<DropdownHeader header="Key" bind:droppedDown={keyShown} />
-				{#if keyShown}
-					<div class="pf-menus">
-						<div class="legend">
-							<h4>Homeowners</h4>
-							<div class="marker-key">
-								<div class="marker-icon">
-									<svg width={keySize} height={keySize}
-										><circle cx={keySize/2} cy={keySize/2} r={(keySize/2) - 1} fill={$homeownerColour} />
-									</svg>
-								</div>
-								<p>Unverified Homeowner</p>
-							</div>
-							<div class="marker-key">
-								<div class="marker-icon">
-									<svg width={keySize} height={keySize}>
-										<rect width={keySize} height={keySize} fill={$homeownerColour} />
-									</svg>
-								</div>
-								<p>Homeowner Awaiting Design</p>
-							</div>
-							<div class="marker-key">
-								<div class="marker-icon">
-									<svg width={keySize} height={keySize}>
-										<polygon points={`${keySize/2}, ${0}, ${0}, ${keySize}, ${keySize}, ${keySize}`} fill={$homeownerColour} />
-									</svg>
-								</div>
-								<p>Homeowner Pending Quotes</p>
-							</div>
-							<h4>Installers</h4>
-							<div class="marker-key">
-								<div class="marker-icon">
-									<svg width={keySize} height={keySize}
-										><circle cx={keySize/2} cy={keySize/2} r={(keySize/2) - 1} fill={$installerColour} /></svg
-									>
-								</div>
-								<p>Unverified Installer</p>
-							</div>
-							<div class="marker-key">
-								<div class="marker-icon">
-									<svg width={keySize} height={keySize}>
-										<polygon points={`${keySize/2}, ${0}, ${0}, ${keySize}, ${keySize}, ${keySize}`} fill={$installerColour} />
-									</svg>
-								</div>
-								<p>Verified Installer</p>
+				{#if $installerMarkersVisible || $homeownerMarkersVisible}
+					<DropdownHeader header="Key" bind:droppedDown={keyShown} />
+					{#if keyShown}
+						<div class="pf-menus">
+							<div class="legend">
+								{#if $homeownerMarkersVisible}
+									<h4>Homeowners</h4>
+									<div class="marker-key">
+										<div class="marker-icon">
+											<svg width={keySize} height={keySize}
+												><circle
+													cx={keySize / 2}
+													cy={keySize / 2}
+													r={keySize / 2 - 1}
+													fill={$homeownerColour}
+												/>
+											</svg>
+										</div>
+										<p>Unverified Homeowner</p>
+									</div>
+									<div class="marker-key">
+										<div class="marker-icon">
+											<svg width={keySize} height={keySize}>
+												<rect width={keySize} height={keySize} fill={$homeownerColour} />
+											</svg>
+										</div>
+										<p>Homeowner Awaiting Design</p>
+									</div>
+									<div class="marker-key">
+										<div class="marker-icon">
+											<svg width={keySize} height={keySize}>
+												<polygon
+													points={`${keySize / 2}, ${0}, ${0}, ${keySize}, ${keySize}, ${keySize}`}
+													fill={$homeownerColour}
+												/>
+											</svg>
+										</div>
+										<p>Homeowner Pending Quotes</p>
+									</div>
+								{/if}
+								{#if $installerMarkersVisible}
+									<h4>Installers</h4>
+									<div class="marker-key">
+										<div class="marker-icon">
+											<svg width={keySize} height={keySize}
+												><circle
+													cx={keySize / 2}
+													cy={keySize / 2}
+													r={keySize / 2 - 1}
+													fill={$installerColour}
+												/></svg
+											>
+										</div>
+										<p>Unverified Installer</p>
+									</div>
+									<div class="marker-key">
+										<div class="marker-icon">
+											<svg width={keySize} height={keySize}>
+												<polygon
+													points={`${keySize / 2}, ${0}, ${0}, ${keySize}, ${keySize}, ${keySize}`}
+													fill={$installerColour}
+												/>
+											</svg>
+										</div>
+										<p>Verified Installer</p>
+									</div>
+								{/if}
 							</div>
 						</div>
-					</div>
+					{/if}
 				{/if}
 			</div>
 		</div>
@@ -140,6 +170,7 @@
 	.colour-picker {
 		display: flex;
 		flex-direction: row;
+		margin-top: -16px;
 	}
 
 	.legend {
@@ -152,7 +183,11 @@
 		margin-left: -24px;
 	}
 
+	.selector {
+		margin-top: 6px;
+	}
 	.marker-icon {
 		margin-right: 8px;
+		margin-top: 10px;
 	}
 </style>

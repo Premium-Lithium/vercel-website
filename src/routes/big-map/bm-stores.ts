@@ -262,6 +262,8 @@ export let platformInstallerMarkers: Writable<Array<PlatformMarker>> = writable(
 export let platformJobs: Writable<Array<PlatformJob>> = writable([])
 export let installerColour: Writable<string> = writable("#35bbed")
 export let homeownerColour: Writable<string> = writable("#c9fc50")
+export let homeownerMarkersVisible: Writable<boolean> = writable(false)
+export let installerMarkersVisible: Writable<boolean> = writable(false)
 
 // Markers
 export let markerBasePath: Readable<string> = readable("M 15.00,14.00 C 15.00,14.00 14.54,17.32 14.54,17.32 14.23,19.63 13.42,21.86 12.17,23.84 12.17,23.84 12.17,23.84 12.17,23.84 11.00,25.69 10.22,27.76 9.86,29.91 9.86,29.91 9.54,31.83 9.54,31.83M 4.00,14.00 C 4.00,14.00 4.36,17.35 4.36,17.35 4.61,19.69 5.42,21.92 6.73,23.87 6.73,23.87 6.73,23.87 6.73,23.87 7.96,25.70 8.75,27.77 9.06,29.95 9.06,29.95 9.32,31.88 9.32,31.88M 17.50,8.50 C 17.50,12.92 13.92,16.50 9.50,16.50 5.08,16.50 1.50,12.92 1.50,8.50 1.50,4.08 5.08,0.50 9.50,0.50 13.92,0.50 17.50,4.08 17.50,8.50 Z")
