@@ -15,6 +15,8 @@
 	let homeownersShown: boolean = false
 	let installersShown: boolean = false
 	let keyShown: boolean = false
+
+	const keySize = 36
 </script>
 
 <DropdownHeader header="Platform" bind:droppedDown={shown} />
@@ -76,34 +78,44 @@
 						<div class="legend">
 							<h4>Homeowners</h4>
 							<div class="marker-key">
-								<svg width="50" height="50"
-									><circle cx="25" cy="25" r="24" fill={$homeownerColour} /></svg
-								>
+								<div class="marker-icon">
+									<svg width={keySize} height={keySize}
+										><circle cx={keySize/2} cy={keySize/2} r={(keySize/2) - 1} fill={$homeownerColour} />
+									</svg>
+								</div>
 								<p>Unverified Homeowner</p>
 							</div>
 							<div class="marker-key">
-								<svg width="50" height="50">
-									<rect width="50" height="50" fill={$homeownerColour} />
-								</svg>
+								<div class="marker-icon">
+									<svg width={keySize} height={keySize}>
+										<rect width={keySize} height={keySize} fill={$homeownerColour} />
+									</svg>
+								</div>
 								<p>Homeowner Awaiting Design</p>
 							</div>
 							<div class="marker-key">
-								<svg width="50" height="50">
-									<polygon points="25, 0, 0, 50, 50, 50" fill={$homeownerColour} />
-								</svg>
+								<div class="marker-icon">
+									<svg width={keySize} height={keySize}>
+										<polygon points={`${keySize/2}, ${0}, ${0}, ${keySize}, ${keySize}, ${keySize}`} fill={$homeownerColour} />
+									</svg>
+								</div>
 								<p>Homeowner Pending Quotes</p>
 							</div>
 							<h4>Installers</h4>
 							<div class="marker-key">
-								<svg width="50" height="50"
-									><circle cx="25" cy="25" r="24" fill={$installerColour} /></svg
-								>
+								<div class="marker-icon">
+									<svg width={keySize} height={keySize}
+										><circle cx={keySize/2} cy={keySize/2} r={(keySize/2) - 1} fill={$installerColour} /></svg
+									>
+								</div>
 								<p>Unverified Installer</p>
 							</div>
 							<div class="marker-key">
-								<svg width="50" height="50">
-									<polygon points="25, 0, 0, 50, 50, 50" fill={$installerColour} />
-								</svg>
+								<div class="marker-icon">
+									<svg width={keySize} height={keySize}>
+										<polygon points={`${keySize/2}, ${0}, ${0}, ${keySize}, ${keySize}, ${keySize}`} fill={$installerColour} />
+									</svg>
+								</div>
 								<p>Verified Installer</p>
 							</div>
 						</div>
@@ -131,9 +143,16 @@
 	}
 
 	.legend {
+		display: flex;
+		flex-direction: column;
 	}
 	.marker-key {
 		display: flex;
 		flex-direction: row;
+		margin-left: -24px;
+	}
+
+	.marker-icon {
+		margin-right: 8px;
 	}
 </style>
