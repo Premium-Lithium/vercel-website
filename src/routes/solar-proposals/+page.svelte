@@ -1,4 +1,6 @@
 <script>
+	import toastr from 'toastr'
+	import 'toastr/build/toastr.min.css'
 	import { page } from '$app/stores'
 	import {
 		PUBLIC_GOOGLE_API_KEY,
@@ -212,8 +214,25 @@
 	async function createOpenSolarProject(project, comingFromOpen = false) {
 		if (awaitingResponse & !comingFromOpen) return
 		awaitingResponse = true
-		console.log(project)
-		let res = await fetch(`${$page.url.pathname}/open-solar/create-project`, {
+		let res = await fetch(`${$page.url.pathname}/open-solar/get-roles`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+			})
+		})
+		res = await res.json()
+		let user = res.filter((x) => {
+			return x['email'] == supabaseAuth.user.email
+		})
+		if (user.length == 0) {
+			console.log(user)
+			toastr.error(`Couldn't find user. Are you signed in to the correct email?`)
+			awaitingResponse = false
+			return
+		}
+		let userId = user[0].id
+		res = await fetch(`${$page.url.pathname}/open-solar/create-project/with-user`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -223,7 +242,8 @@
 					latLon: { 'lat': project.latLon.lat, 'lon': project.latLon.lng },
 					uniqueIdentifier
 				},
-				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID,
+				userId
 			})
 		})
 		let data = await res.json()
