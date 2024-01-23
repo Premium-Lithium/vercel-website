@@ -27,6 +27,7 @@
 	import Button from '$lib/components/big-map/Button.svelte'
 	import PlatformSection from '$lib/components/big-map/PlatformSection.svelte'
 	import { supabase } from '$lib/supabase'
+	import MenuButton from '$lib/components/big-map/MenuButton.svelte'
 
 	let loader: any
 	let loading: boolean = false
@@ -98,7 +99,7 @@
 		{:else}
 			<p>Loading</p>
 		{/if}
-		<Button label="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
+		<MenuButton title="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
 		<Button label="Toggle Customer Markers" on:click={displayCustomerMarkers} />
 	</FloatingPanel>
 

@@ -3,6 +3,7 @@
 	import Button from './Button.svelte'
 
 	export let title: string
+	export let buttonClass: 'primary' | 'secondary' | 'tertiary' = 'primary'
 
 	const dispatch = createEventDispatcher()
 
@@ -11,10 +12,12 @@
 	}
 </script>
 
-<div class="button">
-	<Button label={title} on:click={dispatchClick} />
+<div class="menu-button">
+	<Button label={title} buttonClass={buttonClass} on:click={dispatchClick} />
 </div>
 
 <style>
-	
+	.menu-button {
+		margin: 4px;
+	}
 </style>

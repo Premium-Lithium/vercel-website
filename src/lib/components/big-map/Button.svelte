@@ -3,7 +3,6 @@
 
 	export let label: string
 	export let buttonClass: 'primary' | 'secondary' | 'tertiary' = 'primary'
-	export let dropShadow: boolean = false
 
 	const dispatch = createEventDispatcher()
 
@@ -12,21 +11,22 @@
 	}
 </script>
 
-<div class="big-map-button">
+<div>
 	<button
-		class="large-button typography-label-medium"
+		class="big-map-button typography-label-medium"
 		class:large-button__secondary={buttonClass == 'secondary'}
 		class:large-button__tertiary={buttonClass == 'tertiary'}
-		class:large-button__dropshadow={dropShadow}
 		on:click={dispatchClick}
 	>
-		<span>
-			{label}
-		</span>
+		<div class="big-map-button-content">
+			<span>
+				{label}
+			</span>
+		</div>
 	</button>
 </div>
 
-<style>
+<style lang="scss">
 	.big-map-button {
 		display: flex;
 		padding: 6px 14px;
@@ -53,9 +53,6 @@
 			outline-offset: 2px;
 		}
 
-		&.large-button__aloneIcon {
-			padding: 6px 6px;
-		}
 		&.large-button__secondary {
 			background: #c9fc50;
 			border: 2px solid #c9fc50;
@@ -97,20 +94,16 @@
 			color: #232424;
 			cursor: not-allowed;
 		}
-
-		&.large-button__dropshadow {
-			box-shadow: 2.8px 2.8px 2.2px rgba(0, 0, 0, 0.056), 6.7px 6.7px 5.3px rgba(0, 0, 0, 0.081),
-				12.5px 12.5px 10px rgba(0, 0, 0, 0.1), 22.3px 22.3px 17.9px rgba(0, 0, 0, 0.119),
-				41.8px 41.8px 33.4px rgba(0, 0, 0, 0.144), 100px 100px 80px rgba(0, 0, 0, 0.2);
-			transition: box-shadow 200ms ease;
-
-			&:hover,
-			:active,
-			:focus {
-				box-shadow: 2.8px 2.8px 2.2px rgba(0, 0, 0, 0.084), 6.7px 6.7px 5.3px rgba(0, 0, 0, 0.122),
-					12.5px 12.5px 10px rgba(0, 0, 0, 0.15), 22.3px 22.3px 17.9px rgba(0, 0, 0, 0.179),
-					41.8px 41.8px 33.4px rgba(0, 0, 0, 0.216), 100px 100px 80px rgba(0, 0, 0, 0.3);
-			}
-		}
 	}
+
+	.big-map-button-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        & span {
+            color: #000000;
+        }
+		
+    }
 </style>
