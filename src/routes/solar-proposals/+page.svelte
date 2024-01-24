@@ -1,4 +1,6 @@
 <script>
+	import toastr from 'toastr'
+	import 'toastr/build/toastr.min.css'
 	import { page } from '$app/stores'
 	import {
 		PUBLIC_GOOGLE_API_KEY,
@@ -142,8 +144,6 @@
 			assignedprojectids: assignedProjects
 		})
 
-		console.log(data)
-
 		if (error) {
 			console.error('Error fetching random campaign customers:', error)
 			return
@@ -212,8 +212,24 @@
 	async function createOpenSolarProject(project, comingFromOpen = false) {
 		if (awaitingResponse & !comingFromOpen) return
 		awaitingResponse = true
-		console.log(project)
-		let res = await fetch(`${$page.url.pathname}/open-solar/create-project`, {
+		let res = await fetch(`${$page.url.pathname}/open-solar/get-roles`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+			})
+		})
+		res = await res.json()
+		let user = res.filter((x) => {
+			return x['email'] == supabaseAuth.user.email || x['user_email'] == supabaseAuth.user.email
+		})
+		if (user.length == 0) {
+			toastr.error(`Couldn't find user. Are you signed in to the correct email?`)
+			awaitingResponse = false
+			return
+		}
+		let userId = user[0].id
+		res = await fetch(`${$page.url.pathname}/open-solar/create-project/with-user`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -223,7 +239,8 @@
 					latLon: { 'lat': project.latLon.lat, 'lon': project.latLon.lng },
 					uniqueIdentifier
 				},
-				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
+				openSolarOrgId: PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID,
+				userId
 			})
 		})
 		let data = await res.json()
@@ -286,32 +303,39 @@
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (
-				entry['customerId'] == project.projectId &&
-				(entry.status == 'in_progress' || entry.status == 'completed')
-			) {
-				let existingFlags = entry.flags
-				entry.status = 'completed'
-				const { pass, flags } = await performAutomaticAudit(entry.openSolarId)
-				flags.forEach(async (flag) => {
-					await addFlagToProject(project, flag)
-				})
-				let newFlags = [
-					...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
-				] // merge flag arrays, removing duplicates
-				await addOpenSolarLinkToAddress(
-					entry.openSolarId,
-					project.projectId,
-					uniqueIdentifier,
-					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
-					newFlags
-				)
-				await updateStatus(
-					project.campaignId,
-					project.projectId,
-					'DESIGN-COMPLETED',
-					'An OpenSolar design has been completed'
-				)
+			if (entry['customerId'] == project.projectId) {
+				if (entry.status == 'in_progress' || entry.status == 'completed') {
+					let existingFlags = entry.flags
+					entry.status = 'completed'
+					const { pass, flags } = await performAutomaticAudit(entry.openSolarId)
+					flags.forEach(async (flag) => {
+						await addFlagToProject(project, flag)
+					})
+					let newFlags = [
+						...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
+					] // merge flag arrays, removing duplicates
+					await addOpenSolarLinkToAddress(
+						entry.openSolarId,
+						project.projectId,
+						uniqueIdentifier,
+						workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
+						newFlags
+					)
+					await updateStatus(
+						project.campaignId,
+						project.projectId,
+						'DESIGN-COMPLETED',
+						'An OpenSolar design has been completed'
+					)
+				} else {
+					entry.status = 'completed'
+					await updateStatus(
+						project.campaignId,
+						project.projectId,
+						'DESIGN-COMPLETED',
+						'An OpenSolar design has been completed with flags'
+					)
+				}
 				// WIP - save system image from OpenSolar when completing a project
 				// let res = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-systems`, {
 				// 	method: 'POST',
@@ -436,11 +460,15 @@
 	async function addFlagToProject(project, flag) {
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (
-				(entry['customerId'] == project.projectId && entry.status == 'in_progress') ||
-				entry.status == 'completed'
-			) {
+			if (entry['customerId'] == project.projectId) {
 				if (!entry.flags.includes(flag)) entry.flags = [...entry.flags, flag]
+				await addOpenSolarLinkToAddress(
+					null,
+					project.projectId,
+					workerData[0].worker_id,
+					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length + 1,
+					entry.flags
+				)
 			}
 		})
 		await updateWorkerData(uniqueIdentifier, workerData[0])
@@ -643,7 +671,7 @@
 	}
 
 	.inner-modal {
-		min-width: 25vw;
+		min-width: 100%;
 	}
 
 	.bold {
