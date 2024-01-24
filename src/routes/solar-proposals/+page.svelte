@@ -144,8 +144,6 @@
 			assignedprojectids: assignedProjects
 		})
 
-		console.log(data)
-
 		if (error) {
 			console.error('Error fetching random campaign customers:', error)
 			return
@@ -226,7 +224,6 @@
 			return x['email'] == supabaseAuth.user.email || x['user_email'] == supabaseAuth.user.email
 		})
 		if (user.length == 0) {
-			console.log(user)
 			toastr.error(`Couldn't find user. Are you signed in to the correct email?`)
 			awaitingResponse = false
 			return
@@ -308,7 +305,6 @@
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (entry['customerId'] == project.projectId) {
 				if (entry.status == 'in_progress' || entry.status == 'completed') {
-					console.log(entry)
 					let existingFlags = entry.flags
 					entry.status = 'completed'
 					const { pass, flags } = await performAutomaticAudit(entry.openSolarId)
@@ -462,7 +458,6 @@
 	}
 
 	async function addFlagToProject(project, flag) {
-		console.log(flag)
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
 			if (entry['customerId'] == project.projectId) {
