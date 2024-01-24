@@ -223,7 +223,7 @@
 		})
 		res = await res.json()
 		let user = res.filter((x) => {
-			return x['email'] == supabaseAuth.user.email
+			return x['email'] == supabaseAuth.user.email || x['user_email'] == supabaseAuth.user.email
 		})
 		if (user.length == 0) {
 			console.log(user)
