@@ -306,32 +306,40 @@
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (
-				entry['customerId'] == project.projectId &&
-				(entry.status == 'in_progress' || entry.status == 'completed')
-			) {
-				let existingFlags = entry.flags
-				entry.status = 'completed'
-				const { pass, flags } = await performAutomaticAudit(entry.openSolarId)
-				flags.forEach(async (flag) => {
-					await addFlagToProject(project, flag)
-				})
-				let newFlags = [
-					...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
-				] // merge flag arrays, removing duplicates
-				await addOpenSolarLinkToAddress(
-					entry.openSolarId,
-					project.projectId,
-					uniqueIdentifier,
-					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
-					newFlags
-				)
-				await updateStatus(
-					project.campaignId,
-					project.projectId,
-					'DESIGN-COMPLETED',
-					'An OpenSolar design has been completed'
-				)
+			if (entry['customerId'] == project.projectId) {
+				if (entry.status == 'in_progress' || entry.status == 'completed') {
+					console.log(entry)
+					let existingFlags = entry.flags
+					entry.status = 'completed'
+					const { pass, flags } = await performAutomaticAudit(entry.openSolarId)
+					flags.forEach(async (flag) => {
+						await addFlagToProject(project, flag)
+					})
+					let newFlags = [
+						...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
+					] // merge flag arrays, removing duplicates
+					await addOpenSolarLinkToAddress(
+						entry.openSolarId,
+						project.projectId,
+						uniqueIdentifier,
+						workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
+						newFlags
+					)
+					await updateStatus(
+						project.campaignId,
+						project.projectId,
+						'DESIGN-COMPLETED',
+						'An OpenSolar design has been completed'
+					)
+				} else {
+					entry.status = 'completed'
+					await updateStatus(
+						project.campaignId,
+						project.projectId,
+						'DESIGN-COMPLETED',
+						'An OpenSolar design has been completed with flags'
+					)
+				}
 				// WIP - save system image from OpenSolar when completing a project
 				// let res = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-systems`, {
 				// 	method: 'POST',
@@ -454,13 +462,18 @@
 	}
 
 	async function addFlagToProject(project, flag) {
+		console.log(flag)
 		let workerData = await getWorkerData(uniqueIdentifier)
 		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (
-				(entry['customerId'] == project.projectId && entry.status == 'in_progress') ||
-				entry.status == 'completed'
-			) {
+			if (entry['customerId'] == project.projectId) {
 				if (!entry.flags.includes(flag)) entry.flags = [...entry.flags, flag]
+				await addOpenSolarLinkToAddress(
+					null,
+					project.projectId,
+					workerData[0].worker_id,
+					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length + 1,
+					entry.flags
+				)
 			}
 		})
 		await updateWorkerData(uniqueIdentifier, workerData[0])
