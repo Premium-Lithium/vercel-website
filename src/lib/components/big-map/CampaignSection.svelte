@@ -36,6 +36,9 @@
 				box.checked = false
 			}
 		}
+		console.log($selectedCampaigns)
+		$selectedCampaigns = []
+		console.log($selectedCampaigns)
 	}
 </script>
 

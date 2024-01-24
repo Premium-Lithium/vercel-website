@@ -23,10 +23,12 @@ export async function generateCampaignHeatmap() {
     console.log("Generating Campaign Heatmap")
     let heatmapData: Array<google.maps.LatLng> = []
     for (let campaign of get(campaignKey)) {
-        let customerAddresses = await getAddressesInCampaign(campaign.id)
-        for (let customer of customerAddresses) {
-            if ("geometry" in customer.address) {
-                heatmapData.push(new google.maps.LatLng(customer.address.geometry.location.lat, customer.address.geometry.location.lng))
+        if (!(campaign.name.includes('new-solar'))) {
+            let customerAddresses = await getAddressesInCampaign(campaign.id)
+            for (let customer of customerAddresses) {
+                if ("geometry" in customer.address) {
+                    heatmapData.push(new google.maps.LatLng(customer.address.geometry.location.lat, customer.address.geometry.location.lng))
+                }
             }
         }
     }
