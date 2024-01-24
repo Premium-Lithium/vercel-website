@@ -35,6 +35,7 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
         body: JSON.stringify({ body: selectedPipelines })
     })
     let mapProps = await mapRes.json()
+    console.log(mapProps)
     if (mapRes.ok) {
         for (let p in selectedPipelines) {
             let panel: OptionPanel = {
@@ -64,7 +65,7 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
                 stageId: mapProps.body[m].stageId,
                 deal: mapProps.body[m].deal,
                 colour: mapProps.body[m].colour,
-                labelID: mapProps.body[m].labelID
+                labelID: mapProps.body[m].labelID,
             }
             panels
                 .find(
@@ -285,7 +286,6 @@ export function updateLabelFilter(label: LabelInfo) {
         currentLabels.push(label.id)
     }
     labelFilter.set(currentLabels)
-    console.log(get(labelFilter))
 }
 
 export function filterByLabel() {
@@ -349,7 +349,6 @@ export function displayInstallerMarkers() {
 
 export function displayCustomerMarkers() {
     let customers = get(customerMarkersArray)
-    console.log(displayCustomerMarkers, customers)
     if (get(customersVisible)) {
         for (let marker of customers) {
             marker.setMap(null)
@@ -378,7 +377,11 @@ export async function generateMarkersForPLCustomers() {
                 icon: '/marker-base.svg'
             })
             let infowindow = new google.maps.InfoWindow({
-                content:"<p>" + customer[1].replaceAll('"', '') + " \n "+ customer[0].replaceAll('"', '') + " \n " + customer[3].replaceAll('"', '') + "</p>"
+                content: `
+                    <h1>${customer[1].replaceAll('"', '')}</h1>
+                    <p>${customer[0].replaceAll('"', '')}</p>
+                    <p>${customer[3].replaceAll('"', '')}</p>
+                `
             })
             marker.addListener("click", () => {
                 infowindow.open({
@@ -409,8 +412,18 @@ export async function generateMarkersForMCSSInstallers() {
                 title: installer[0],
                 icon: '/marker-base.svg',
             })
+            let content = `
+                <h1>${installer[0].replaceAll('"', '')}</h1>
+                <p>Address: ${installer[5].replaceAll('"', '')}</p>
+                <p>Phone Number: ${installer[6].replaceAll('"', '')}</p>
+                <p>Email: ${installer[9].replaceAll('"', '')}</p>
+                <p>Certification Number: ${installer[1].replaceAll('"', '')}</p>
+            `
+            if (installer[7]) {
+                content += `<a href="${installer[7].replaceAll('"', '')}" target="_blank">Website</a>`
+            }
             let infowindow = new google.maps.InfoWindow({
-                content: "<p>" + installer[0].replaceAll('"', '') + " \n " + installer[5].replaceAll('"', '') + "</p>"
+                content: content
             })
             marker.addListener("click", () => {
                 infowindow.open({

@@ -1,4 +1,4 @@
-<script lang="ts">
+	<script lang="ts">
 	import { toggleCampaignHeatmap, toggleHeatmap } from '../../../routes/big-map/bm-heatmap-utils'
 	import { heatmapLoading } from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'

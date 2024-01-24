@@ -12,6 +12,7 @@ export async function POST({ request }) {
             markers.push(deals[marker])
         }
     }
+    console.log("fin")
     return new Response(JSON.stringify({ ok: true, message: 'Got deals for all pipelines', statusCode: 200, body: markers }))
 }
 
@@ -21,6 +22,7 @@ export async function POST({ request }) {
  * @returns Array of markers
  */
 async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOptions>> {
+    console.log("getting deals")
     let markers: Array<MarkerOptions> = []
     let finished = false
     let nextPagination: number = 0
@@ -43,7 +45,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     colour: "#c9fc50",
                     labelID: deals.data[deal].label
                 }
-                marker = setContentOfMarker(marker, deals.data[deal])
+                marker = await setContentOfMarker(marker, deals.data[deal])
                 markers.push(marker)
             }
         }
@@ -53,6 +55,7 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
             finished = true
         }
     }
+    console.log("returning markers")
     return markers
 }
 
@@ -62,12 +65,13 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
  * @param deal deal to pull data from
  * @returns marker with content
  */
-function setContentOfMarker(marker: MarkerOptions, deal: any): MarkerOptions {
+async function setContentOfMarker(marker: MarkerOptions, deal: any): MarkerOptions {
     const content = `
     <h1>${deal.title}</h1>
     <p>Address: ${marker.address}</p>
     <p>Status: ${marker.filterOption.status}</p>
-    <p>Value: £${marker.filterOption.value}
+    <p>Value: £${marker.filterOption.value}</p>
+    <a href="https://premiumlithium.pipedrive.com/deal/${marker.deal.id}" target="_blank">Deal</a>
     `
     marker.content = content
     return marker

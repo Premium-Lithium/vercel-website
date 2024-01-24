@@ -63,7 +63,6 @@
 			deletePanel($mapOptionPanels[0])
 		}
 		$selectedPipelines = []
-		console.log($selectedPipelines)
 	}
 </script>
 

@@ -31,6 +31,7 @@
 	import PlatformSection from '$lib/components/big-map/PlatformSection.svelte'
 	import { supabase } from '$lib/supabase'
 	import MenuButton from '$lib/components/big-map/MenuButton.svelte'
+	import KnownInstallerSection from '$lib/components/big-map/KnownInstallerSection.svelte'
 
 	let loader: any
 
@@ -107,8 +108,7 @@
 			<HeatmapSection />
 			<CampaignSection />
 			<PlatformSection />
-			<!-- <MenuButton title="Toggle MCS Installer Markers" on:click={displayInstallerMarkers} />
-			<MenuButton title="Toggle Customer Markers" on:click={displayCustomerMarkers} /> -->
+			<KnownInstallerSection />
 		</FloatingPanel>
 
 		{#each $mapOptionPanels as panel}
