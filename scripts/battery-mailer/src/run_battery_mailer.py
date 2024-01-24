@@ -31,6 +31,7 @@ WIDTH = 1920
 HEIGHT = 1080
 
 
+
 def main():
     buildings: List[Building] = extract_buildings_from('minimal.kml')
 
@@ -40,7 +41,7 @@ def main():
         customer_id = create_new_database_record_for(building, google_chrome)
         # generate_flyer_for(customer_id)
 
-    google_chrome.quit();
+    google_chrome.quit()
 
 
 def create_new_database_record_for(building: Building, driver):
@@ -158,18 +159,6 @@ def extract_buildings_from(kml_file_path: Path):
     #     buildings.append(new_building)
 
     buildings = []
-
-    for solar_array in solar_arrays:
-        address = get_address_of(solar_array.location)
-        formatted_addr = address["formatted_address"]
-
-        if formatted_addr not in buildings_dict:
-            building_info = { "address": address, "arrays": [] }
-            buildings_dict[formatted_addr] = building_info
-
-        buildings_dict[formatted_addr]["arrays"].append(solar_array)
-
-    print("Combining arrays into buildings...")
 
     for formatted_addr, building_info in buildings_dict.items():
         new_building = Building(formatted_addr, building_info["address"], building_info["arrays"])
