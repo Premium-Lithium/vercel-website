@@ -45,6 +45,7 @@
 		clearMap()
 		await getSelectedPipelineData($selectedPipelines)
 		updateMap()
+		console.log($mapOptionPanels)
 	}
 
 	function getPipelineKeyFromName(pipelineName: string): PipeLineKey | undefined {
@@ -75,7 +76,7 @@
 			{/each}
 			<div class="controls">
 				<MenuButton title="Select Pipelines" on:click={handleSelectPipelines} />
-				<MenuButton title="Clear Selection" on:click={handleClearPipelines} />
+				<MenuButton title="Clear Selection" on:click={handleClearPipelines} buttonClass="tertiary"/>
 			</div>
 		</div>
 	{/if}

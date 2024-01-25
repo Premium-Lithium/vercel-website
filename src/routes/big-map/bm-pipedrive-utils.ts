@@ -1,5 +1,5 @@
 import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
-import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, installDate, installerMarkersArray, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
+import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, filterByPostcode, installDate, installerMarkersArray, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, postcodeFilters, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
 import { get } from 'svelte/store'
 
 export async function getPipelines() {
@@ -66,6 +66,7 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
                 deal: mapProps.body[m].deal,
                 colour: mapProps.body[m].colour,
                 labelID: mapProps.body[m].labelID,
+                postcode: mapProps.body[m].postcode
             }
             panels
                 .find(
@@ -166,16 +167,28 @@ export function makeAllMarkersInvisible() {
     updateMap()
 }
 
+export function applyPostcodeFilter(marker: MarkerOptions): boolean {
+    console.log(get(filterByPostcode))
+    if (get(filterByPostcode)) {
+        let postcodes = get(postcodeFilters);
+        console.log(marker.address, postcodes.some(str => marker.address.slice(0, -7).includes(str)))
+        if (postcodes.some(str => marker.address.slice(0, -7).includes(str)))
+            return true
+        return false
+    }
+    return true
+}
+
 export function applyFilters() {
     let currentPanels = get(mapOptionPanels)
     makeAllMarkersInvisible()
     for (let panel in currentPanels) {
         for (let marker in currentPanels[panel].markers) {
-            if (
-                checkDateFilterFor(currentPanels[panel].markers[marker]) &&
-                currentPanels[panel].markers[marker].filterOption.value >= get(value) &&
-                (get(statusFilters).includes(currentPanels[panel].markers[marker].filterOption.status) ||
-                    get(statusFilters).length === 0)
+            if (applyPostcodeFilter(currentPanels[panel].markers[marker]) &&
+                (checkDateFilterFor(currentPanels[panel].markers[marker]) &&
+                    currentPanels[panel].markers[marker].filterOption.value >= get(value) &&
+                    (get(statusFilters).includes(currentPanels[panel].markers[marker].filterOption.status) ||
+                        get(statusFilters).length === 0))
             ) {
                 currentPanels[panel].markers[marker].visible = true
             }

@@ -72,7 +72,7 @@
 			<ValuePicker label={'Only show deals with values above'} bind:value={$value} />
 			<div class="controls">
 				<MenuButton title="Apply Filters" on:click={applyFilters} />
-				<MenuButton title="Clear Filters" on:click={clearFilters} />
+				<MenuButton title="Clear Filters" on:click={clearFilters} buttonClass="tertiary"/>
 			</div>
 		</div>
 	{/if}

@@ -55,7 +55,7 @@
 				/>
 			{/each}
 			<MenuButton title="Show Selected Campaigns" on:click={displaySelectedCampaigns} />
-			<MenuButton title="Clear Campaigns" on:click={handleClearCampaigns} />
+			<MenuButton title="Clear Campaigns" on:click={handleClearCampaigns} buttonClass="tertiary"/>
 		</div>
 	{:else}
 		<div class="cm-menus">

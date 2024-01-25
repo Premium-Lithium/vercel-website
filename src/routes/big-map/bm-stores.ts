@@ -52,6 +52,7 @@ export interface MarkerOptions {
     deal: any
     colour: string
     labelID: string
+    postcode: string
 }
 
 export interface LatLongObj {
@@ -234,6 +235,10 @@ export const colourMap: Readable<Map<string, string>> = readable(new Map([
     ['green', '#C9FC50'],
     ['dark-gray', '#464748']
 ]));
+
+// Postcode filtering
+export const postcodeFilters: Readable<Array<string>> = readable(['TR', 'PL', 'TQ', 'EX', 'DT', 'BH', 'SO', 'PO'])
+export let filterByPostcode: Writable<boolean> = writable(false)
 
 // Feedback Email
 export const enableFeedback: Writable<boolean> = writable(false)

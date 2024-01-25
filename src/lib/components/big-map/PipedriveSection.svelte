@@ -1,11 +1,19 @@
 <script lang="ts">
-	import { labels, pipedriveLoading, pipelines } from '../../../routes/big-map/bm-stores'
+	import { applyFilters } from '../../../routes/big-map/bm-pipedrive-utils'
+	import { filterByPostcode, labels, pipedriveLoading, pipelines } from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import FilterDropdown from './FilterDropdown.svelte'
 	import LabelDropdown from './LabelDropdown.svelte'
+	import MenuButton from './MenuButton.svelte'
 	import PipelineDropdown from './PipelineDropdown.svelte'
 
 	let shown: boolean = false
+
+	function postcodeFilter() {
+		$filterByPostcode = !$filterByPostcode
+		applyFilters()
+	}
+
 </script>
 
 <DropdownHeader header="PipeDrive" bind:droppedDown={shown} />
@@ -15,6 +23,7 @@
 			<PipelineDropdown pipelines={$pipelines} />
 			<FilterDropdown checkboxOptions={['Won', 'Open', 'Lost']} />
 			<LabelDropdown labels={$labels} />
+			<MenuButton title="Toggle Postcode Filter" on:click={postcodeFilter} buttonClass="secondary" />
 		</div>
 	{:else}
 		<div class="pd-menus">

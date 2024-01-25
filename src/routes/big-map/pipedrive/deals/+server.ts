@@ -43,7 +43,15 @@ async function getAllDealsInPipeline(pipeline: string): Promise<Array<MarkerOpti
                     stageId: deals.data[deal].stage_id,
                     deal: deals.data[deal],
                     colour: "#c9fc50",
-                    labelID: deals.data[deal].label
+                    labelID: deals.data[deal].label,
+                    // split the address to get the part with the city + postcode, split that to get the first half of postcode, replace not letters with empty characters
+                    postcode: ((address.split(',')[address.split(',').length - 2]).split(' ')[(address.split(',')[address.split(',').length - 2]).split(' ').length - 2]),
+                }
+                try {
+                    marker.postcode = marker.postcode.replace(/[^a-zA-Z]/g, '')
+                }
+                catch {
+                    // L + ratio + you have no postcode
                 }
                 marker = await setContentOfMarker(marker, deals.data[deal])
                 markers.push(marker)

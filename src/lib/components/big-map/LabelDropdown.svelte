@@ -37,7 +37,7 @@
 			/>
 			<div class="controls">
 				<MenuButton title="Apply Labels" on:click={filterByLabel} />
-				<MenuButton title="Clear Labels" on:click={handleClearLabels} />
+				<MenuButton title="Clear Labels" on:click={handleClearLabels} buttonClass="tertiary"/>
 			</div>
 		</div>
 	{/if}
