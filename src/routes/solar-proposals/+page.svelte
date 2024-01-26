@@ -87,7 +87,6 @@
 			.from('solar_turk_workers')
 			.select('*')
 			.eq('worker_id', id)
-		console.log(data)
 		return data
 	}
 
