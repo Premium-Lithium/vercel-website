@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { postcodeFilter, map, postcodes } from '../../../routes/big-map/bm-stores'
+	import { postcodeFilter, postcodes } from '../../../routes/big-map/bm-stores'
 	import MenuButton from './MenuButton.svelte'
 	import { get } from 'svelte/store'
 	import { filterMarkersByPostcode } from '../../../routes/big-map/bm-postcode-utils'

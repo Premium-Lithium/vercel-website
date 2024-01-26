@@ -1,6 +1,6 @@
 // import { CRM } from '$lib/crm/crm-utils'
 import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
-import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, filterByPostcode, installDate, installerMarkersArray, installersLoading, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, postcodeFilters, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
+import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, installDate, installerMarkersArray, installersLoading, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
 import { get } from 'svelte/store'
 import CircularJSON from 'circular-json';
 
@@ -457,7 +457,6 @@ function setMarkerColour(marker: google.maps.Marker, colour: string): google.map
     return marker
 }
 
-// TODO: move to server side
 export async function getDetailsOfVisibleMarkers() {
     let currentPanels = get(mapOptionPanels)
     console.log(currentPanels)

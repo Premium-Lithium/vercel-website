@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { applyFilters, getDetailsOfVisibleMarkers } from '../../../routes/big-map/bm-pipedrive-utils'
-	import { filterByPostcode, labels, pipedriveLoading, pipelines } from '../../../routes/big-map/bm-stores'
+	import { labels, pipedriveLoading, pipelines } from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import FilterDropdown from './FilterDropdown.svelte'
 	import LabelDropdown from './LabelDropdown.svelte'
