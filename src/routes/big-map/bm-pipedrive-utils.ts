@@ -1,6 +1,10 @@
+// import { CRM } from '$lib/crm/crm-utils'
 import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
 import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, filterByPostcode, installDate, installerMarkersArray, installersLoading, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, postcodeFilters, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
 import { get } from 'svelte/store'
+import CircularJSON from 'circular-json';
+
+// const crm = new CRM()   
 
 export async function getPipelines() {
     console.log("Fetching Pipelines")
@@ -166,26 +170,15 @@ export function makeAllMarkersInvisible() {
     updateMap()
 }
 
-export function applyPostcodeFilter(marker: MarkerOptions): boolean {
-    if (get(filterByPostcode)) {
-        let postcodes = get(postcodeFilters);
-        if (postcodes.some(str => marker.address.slice(0, -7).includes(str)))
-            return true
-        return false
-    }
-    return true
-}
-
 export function applyFilters() {
     let currentPanels = get(mapOptionPanels)
     makeAllMarkersInvisible()
     for (let panel in currentPanels) {
         for (let marker in currentPanels[panel].markers) {
-            if (applyPostcodeFilter(currentPanels[panel].markers[marker]) &&
-                (checkDateFilterFor(currentPanels[panel].markers[marker]) &&
-                    currentPanels[panel].markers[marker].filterOption.value >= get(value) &&
-                    (get(statusFilters).includes(currentPanels[panel].markers[marker].filterOption.status) ||
-                        get(statusFilters).length === 0))
+            if ((checkDateFilterFor(currentPanels[panel].markers[marker]) &&
+                currentPanels[panel].markers[marker].filterOption.value >= get(value) &&
+                (get(statusFilters).includes(currentPanels[panel].markers[marker].filterOption.status) ||
+                    get(statusFilters).length === 0))
             ) {
                 currentPanels[panel].markers[marker].visible = true
             }
@@ -462,4 +455,24 @@ function setMarkerColour(marker: google.maps.Marker, colour: string): google.map
         anchor: new google.maps.Point(9, 33)
     })
     return marker
+}
+
+// TODO: move to server side
+export async function getDetailsOfVisibleMarkers() {
+    let currentPanels = get(mapOptionPanels)
+    console.log(currentPanels)
+    let res = await fetch('/big-map/pipedrive/reporting', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: CircularJSON.stringify({
+            panels: currentPanels
+        })
+    })
+    let data = await res.json()
+    if (data.length > 1) {
+        console.log(data)
+        // conversion to excel or whatever goes here
+    }
 }

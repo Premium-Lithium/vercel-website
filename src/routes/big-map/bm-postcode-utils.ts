@@ -1,7 +1,9 @@
-import { get } from "svelte/store"
-import { layersLoading, postcodeFilter, type PostcodeFilterElement } from "./bm-stores"
+import { installerMarkersArray, layersLoading, mapOptionPanels, platformHomeownerMarkers, platformInstallerMarkers, postcodeFilter, postcodes, type LatLongObj, type PostcodeFilterElement } from "./bm-stores"
 import * as turf from '@turf/turf'
+import { get } from "svelte/store";
 import { parseString } from 'xml2js';
+import { updateMap } from "./bm-pipedrive-utils";
+import { displayMarkers } from "./bm-platform-utils";
 
 interface Coordinates {
     longitude: number;
@@ -19,10 +21,9 @@ export async function loadKmlLayers() {
     let kmlLayers = (await layers.json()).body
     let postcodeAreaFilter: Array<PostcodeFilterElement> = []
     for (let layer of kmlLayers) {
-        try{
+        try {
             let polygonCoords = await createPolygon(layer)
             let polygon = turf.polygon([polygonCoords.features[0].geometry.coordinates[0]])
-            // TODO: create postcodeFilter array {name polygon selected}
             let postcodeArea: PostcodeFilterElement = {
                 name: layer.name,
                 selected: false,
@@ -79,11 +80,72 @@ async function extractPolygonCoordinates(kml: string): Promise<Coordinates[][]> 
     });
 }
 
-
 function convertToGeoJSON(coordinates: Coordinates[][]): any {
     const polygons = coordinates.map((polygonCoords) => {
         const coordinatesArray = polygonCoords.map(coord => [coord.longitude, coord.latitude]);
         return turf.polygon([coordinatesArray]);
     });
     return turf.featureCollection(polygons);
+}
+
+export function filterMarkersByPostcode() {
+    let postcodeRegions = get(postcodeFilter)
+    let selectedPostcodes = get(postcodes)
+    console.log(postcodeRegions, selectedPostcodes)
+    for (let postcode of selectedPostcodes) {
+        for (let region of postcodeRegions) {
+            if (region.name === postcode) {
+                updatePipedriveMarkers(region.layer)
+                updatePlatformMarkers(region.layer)
+                updateInstallerMarkers(region.layer)
+            }
+        }
+    }
+}
+
+function updatePipedriveMarkers(polygon: turf.helpers.Feature<turf.helpers.Polygon, turf.helpers.Properties>) {
+    let currentPanels = get(mapOptionPanels)
+    for (let panel in currentPanels) {
+        for (let marker of currentPanels[panel].markers) {
+            if (!(checkIfMarkerWithinPostcode(marker.latLng, polygon))) {
+                marker.visible = false
+            }
+        }
+    }
+    mapOptionPanels.set(currentPanels)
+    updateMap()
+}
+
+function updatePlatformMarkers(polygon: turf.helpers.Feature<turf.helpers.Polygon, turf.helpers.Properties>) {
+    let installers = get(platformInstallerMarkers)
+    let homeowners = get(platformHomeownerMarkers)
+    for (let installer of installers) {
+        if (checkIfMarkerWithinPostcode(installer.latLng, polygon))
+            installer.visible = false
+    }
+    for (let homeowner of homeowners) {
+        if (checkIfMarkerWithinPostcode(homeowner.latLng, polygon))
+            homeowner.visible = false
+    }
+    platformInstallerMarkers.set(installers)
+    platformHomeownerMarkers.set(homeowners)
+    displayMarkers(installers)
+    displayMarkers(homeowners)
+}
+
+function updateInstallerMarkers(polygon: turf.helpers.Feature<turf.helpers.Polygon, turf.helpers.Properties>) {
+    let installerMarkers = get(installerMarkersArray)
+    for (let marker of installerMarkers) {
+        let latLng = marker.getPosition()
+        if (latLng)
+            if (!(checkIfMarkerWithinPostcode({ lat: latLng.lat(), lng: latLng.lng() }, polygon))) {
+                marker.setMap(null)
+            }
+    }
+}
+
+function checkIfMarkerWithinPostcode(markerLoc: LatLongObj, polygon: turf.helpers.Feature<turf.helpers.Polygon, turf.helpers.Properties>): boolean {
+    if (turf.pointsWithinPolygon(turf.points([[markerLoc.lng, markerLoc.lat]]), polygon).features[0])
+        return true
+    return false
 }

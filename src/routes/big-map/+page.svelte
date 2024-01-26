@@ -57,7 +57,7 @@
 		.subscribe()
 
 	onMount(async () => {
-		// await loadKmlLayers()
+		await loadKmlLayers()
 		await generateMarkersForMCSSInstallers()
 		await generateMarkersForPLCustomers()
 		await getCampaignIdAndNames()
@@ -110,9 +110,9 @@
 			<PlatformSection />
 			<KnownInstallerSection />
 		</FloatingPanel>
-		<!-- {#if !$layersLoading}
+		{#if !$layersLoading}
 			<PostcodeFilter />
-		{/if} -->
+		{/if}
 		{#each $mapOptionPanels as panel}
 			<!-- terribly ugly part needs refactoring into component -->
 			<div class="option-panel" use:movable={{ handle: panel.handle }}>

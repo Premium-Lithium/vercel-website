@@ -1,7 +1,6 @@
-import { stage } from '$lib/components/ProgressBar.svelte';
+// import { stage } from '$lib/components/ProgressBar.svelte';
 import { pd, getField, getOptionIdFor, readCustomDealField } from '$lib/pipedrive-utils';
 import pipedrive from 'pipedrive';
-
 
 export class CRM {
 	pdDealsApi;
@@ -95,6 +94,15 @@ export class CRM {
 		try {
 			const person = await this.pdPersonsApi.getPerson(personID)
 			return person.data.phone[0].value
+		} catch {
+			return null
+		}
+	}
+
+	async getEmailFromPersonID(personID: number) {
+		try {
+			const person = await this.pdPersonsApi.getPerson(personID)
+			return person.data.email[0].value
 		} catch {
 			return null
 		}

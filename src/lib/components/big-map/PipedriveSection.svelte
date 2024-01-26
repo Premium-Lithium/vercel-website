@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applyFilters } from '../../../routes/big-map/bm-pipedrive-utils'
+	import { applyFilters, getDetailsOfVisibleMarkers } from '../../../routes/big-map/bm-pipedrive-utils'
 	import { filterByPostcode, labels, pipedriveLoading, pipelines } from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import FilterDropdown from './FilterDropdown.svelte'
@@ -9,9 +9,8 @@
 
 	let shown: boolean = false
 
-	function postcodeFilter() {
-		$filterByPostcode = !$filterByPostcode
-		applyFilters()
+	async function detailButton() {
+		await getDetailsOfVisibleMarkers()
 	}
 
 </script>
@@ -23,7 +22,7 @@
 			<PipelineDropdown pipelines={$pipelines} />
 			<FilterDropdown checkboxOptions={['Won', 'Open', 'Lost']} />
 			<LabelDropdown labels={$labels} />
-			<MenuButton title="Toggle Postcode Filter" on:click={postcodeFilter} buttonClass="secondary" />
+			<!-- <MenuButton title="Get Visible Marker Details" on:click={detailButton} buttonClass="tertiary" /> -->
 		</div>
 	{:else}
 		<div class="pd-menus">

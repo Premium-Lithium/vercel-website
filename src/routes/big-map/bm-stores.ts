@@ -209,12 +209,12 @@ export interface PlatformMarker {
 
 // Map/UI
 export let map: Writable<any> = writable()
-export let mapOptionPanels: Writable<Array<OptionPanel>> = writable([])
 export let loading: Writable<boolean> = writable(false)
 
 // Pipedrive
 export let pipelines: Writable<Array<PipeLineKey>> = writable([]) // Array of all pipelines and IDs
 export let selectedPipelines: Writable<Array<number>> = writable([]) // Array of selected pipelines filtered by
+export let mapOptionPanels: Writable<Array<OptionPanel>> = writable([])
 export let value: Writable<number> = writable(0)
 export let labels: Writable<Array<LabelInfo>> = writable([])
 export let statusFilters: Writable<Array<string>> = writable([])
@@ -244,9 +244,8 @@ export const colourMap: Readable<Map<string, string>> = readable(new Map([
 ]));
 
 // Postcode filtering
-export const postcodeFilters: Readable<Array<string>> = readable(['TR', 'PL', 'TQ', 'EX', 'DT', 'BH', 'SO', 'PO'])
 export const postcodeFilter: Writable<Array<PostcodeFilterElement>> = writable([])
-export let filterByPostcode: Writable<boolean> = writable(false)
+export let postcodes: Writable<Array<string>> = writable([])
 
 // Feedback Email
 export const enableFeedback: Writable<boolean> = writable(false)
