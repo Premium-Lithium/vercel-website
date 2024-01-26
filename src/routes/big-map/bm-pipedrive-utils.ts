@@ -1,5 +1,5 @@
 import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
-import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, filterByPostcode, installDate, installerMarkersArray, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, postcodeFilters, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
+import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, filterByPostcode, installDate, installerMarkersArray, installersLoading, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, postcodeFilters, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
 import { get } from 'svelte/store'
 
 export async function getPipelines() {
@@ -35,7 +35,6 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
         body: JSON.stringify({ body: selectedPipelines })
     })
     let mapProps = await mapRes.json()
-    console.log(mapProps)
     if (mapRes.ok) {
         for (let p in selectedPipelines) {
             let panel: OptionPanel = {
@@ -168,10 +167,8 @@ export function makeAllMarkersInvisible() {
 }
 
 export function applyPostcodeFilter(marker: MarkerOptions): boolean {
-    console.log(get(filterByPostcode))
     if (get(filterByPostcode)) {
         let postcodes = get(postcodeFilters);
-        console.log(marker.address, postcodes.some(str => marker.address.slice(0, -7).includes(str)))
         if (postcodes.some(str => marker.address.slice(0, -7).includes(str)))
             return true
         return false
@@ -453,6 +450,7 @@ export async function generateMarkersForMCSSInstallers() {
         }
     }
     installerMarkersArray.set(markerArr)
+    installersLoading.set(false)
 }
 
 function setMarkerColour(marker: google.maps.Marker, colour: string): google.maps.Marker {

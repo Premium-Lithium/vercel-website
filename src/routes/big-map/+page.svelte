@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type OptionPanel, map, mapOptionPanels } from './bm-stores'
+	import { type OptionPanel, map, mapOptionPanels, layersLoading } from './bm-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -14,8 +14,6 @@
 		changeIconColourFor,
 		generateMarkersForPLCustomers,
 		generateMarkersForMCSSInstallers,
-		displayInstallerMarkers,
-		displayCustomerMarkers
 	} from './bm-pipedrive-utils'
 	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
 	import {
@@ -30,8 +28,9 @@
 	import FloatingPanel from '$lib/components/big-map/FloatingPanel.svelte'
 	import PlatformSection from '$lib/components/big-map/PlatformSection.svelte'
 	import { supabase } from '$lib/supabase'
-	import MenuButton from '$lib/components/big-map/MenuButton.svelte'
 	import KnownInstallerSection from '$lib/components/big-map/KnownInstallerSection.svelte'
+	import PostcodeFilter from '$lib/components/big-map/PostcodeFilter.svelte'
+	import { loadKmlLayers } from './bm-postcode-utils'
 
 	let loader: any
 
@@ -58,6 +57,7 @@
 		.subscribe()
 
 	onMount(async () => {
+		// await loadKmlLayers()
 		await generateMarkersForMCSSInstallers()
 		await generateMarkersForPLCustomers()
 		await getCampaignIdAndNames()
@@ -110,7 +110,9 @@
 			<PlatformSection />
 			<KnownInstallerSection />
 		</FloatingPanel>
-
+		<!-- {#if !$layersLoading}
+			<PostcodeFilter />
+		{/if} -->
 		{#each $mapOptionPanels as panel}
 			<!-- terribly ugly part needs refactoring into component -->
 			<div class="option-panel" use:movable={{ handle: panel.handle }}>

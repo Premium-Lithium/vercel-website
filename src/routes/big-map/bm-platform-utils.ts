@@ -173,7 +173,6 @@ export async function updateInstallerMarkers(payload: any) {
 }
 
 export function changeMarkerColour(markerArr: Array<PlatformMarker>, colour: string): Array<PlatformMarker> {
-    console.log(colour)
     for (let marker of markerArr) {
         marker.colour = colour
         const svgMarker = {

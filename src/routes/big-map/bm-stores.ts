@@ -1,4 +1,5 @@
 import { writable, type Writable, readable, type Readable } from "svelte/store"
+import type * as turf from '@turf/turf'
 
 export interface MapResponse {
     ok: boolean,
@@ -111,6 +112,12 @@ export interface PlatformSolution {
 export interface MCSRegistration {
     registering_body: string
     status: string
+}
+
+export interface PostcodeFilterElement {
+    name: string
+    selected: boolean
+    layer: turf.helpers.Feature<turf.helpers.Polygon, turf.helpers.Properties>
 }
 
 export interface InstallerProfile {
@@ -238,6 +245,7 @@ export const colourMap: Readable<Map<string, string>> = readable(new Map([
 
 // Postcode filtering
 export const postcodeFilters: Readable<Array<string>> = readable(['TR', 'PL', 'TQ', 'EX', 'DT', 'BH', 'SO', 'PO'])
+export const postcodeFilter: Writable<Array<PostcodeFilterElement>> = writable([])
 export let filterByPostcode: Writable<boolean> = writable(false)
 
 // Feedback Email
@@ -280,3 +288,5 @@ export let pipedriveLoading: Writable<boolean> = writable(true)
 export let campaignLoading: Writable<boolean> = writable(true)
 export let heatmapLoading: Writable<boolean> = writable(true)
 export let platformLoading: Writable<boolean> = writable(true)
+export let installersLoading: Writable<boolean> = writable(true)
+export let layersLoading: Writable<boolean> = writable(true)
