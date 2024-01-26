@@ -471,7 +471,15 @@ export async function getDetailsOfVisibleMarkers() {
     })
     let data = await res.json()
     if (data.length > 1) {
-        console.log(data)
-        // conversion to excel or whatever goes here
+        const blob = new Blob([data.map(row => row.join(",")).join("\n")], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "marker-information.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
     }
 }

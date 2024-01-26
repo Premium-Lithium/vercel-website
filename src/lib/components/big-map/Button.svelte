@@ -3,7 +3,8 @@
 
 	export let label: string
 	export let buttonClass: 'primary' | 'secondary' | 'tertiary' = 'primary'
-
+	export let disabled: boolean = false
+	
 	const dispatch = createEventDispatcher()
 
 	function dispatchClick(event) {
@@ -17,6 +18,7 @@
 		class:large-button__secondary={buttonClass == 'secondary'}
 		class:large-button__tertiary={buttonClass == 'tertiary'}
 		on:click={dispatchClick}
+		disabled={disabled}
 	>
 		<div class="big-map-button-content">
 			<span>

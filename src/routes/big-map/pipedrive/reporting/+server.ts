@@ -8,15 +8,13 @@ export async function POST({ request }) {
     for (let panel in panels) {
         for (let marker in panels[panel].markers)
             if (panels[panel].markers[marker].visible) {
-                console.log(panels[panel].markers[marker])
                 data.push([
-                    panels[panel].markers[marker].deal.title,
-                    panels[panel].markers[marker].address,
-                    await crm.getEmailFromPersonID(panels[panel].markers[marker].deal.person_id),
+                    panels[panel].markers[marker].deal.title.replaceAll(',', ' '),
+                    panels[panel].markers[marker].address.replaceAll(',', ' '),
+                    (await crm.getEmailFromPersonID(panels[panel].markers[marker].deal.person_id)).replaceAll(',', ' '),
                     await crm.getPhoneNumberFromPersonID(panels[panel].markers[marker].deal.person_id)
                 ])
             }
     }
-
     return new Response(JSON.stringify(data))
 }

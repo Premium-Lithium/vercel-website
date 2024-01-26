@@ -1,4 +1,4 @@
-import { installerMarkersArray, layersLoading, mapOptionPanels, platformHomeownerMarkers, platformInstallerMarkers, postcodeFilter, postcodes, type LatLongObj, type PostcodeFilterElement } from "./bm-stores"
+import { installerMarkersArray, layersLoading, map, mapOptionPanels, platformHomeownerMarkers, platformInstallerMarkers, postcodeFilter, postcodes, type LatLongObj, type PostcodeFilterElement } from "./bm-stores"
 import * as turf from '@turf/turf'
 import { get } from "svelte/store";
 import { parseString } from 'xml2js';
@@ -121,16 +121,24 @@ function updatePlatformMarkers(polygon: turf.helpers.Feature<turf.helpers.Polygo
     let homeowners = get(platformHomeownerMarkers)
     for (let installer of installers) {
         if (checkIfMarkerWithinPostcode(installer.latLng, polygon))
-            installer.visible = false
+            installer.visible = true
+        if (installer.visible) {
+            installer.marker.setMap(get(map))
+        } else {
+            installer.marker.setMap(null)
+        }
     }
     for (let homeowner of homeowners) {
         if (checkIfMarkerWithinPostcode(homeowner.latLng, polygon))
-            homeowner.visible = false
+            homeowner.visible = true
+        if (homeowner.visible) {
+            homeowner.marker.setMap(get(map))
+        } else {
+            homeowner.marker.setMap(null)
+        }
     }
     platformInstallerMarkers.set(installers)
     platformHomeownerMarkers.set(homeowners)
-    displayMarkers(installers)
-    displayMarkers(homeowners)
 }
 
 function updateInstallerMarkers(polygon: turf.helpers.Feature<turf.helpers.Polygon, turf.helpers.Properties>) {

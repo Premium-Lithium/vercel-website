@@ -4,6 +4,7 @@
 
 	export let title: string
 	export let buttonClass: 'primary' | 'secondary' | 'tertiary' = 'primary'
+	export let disabled: boolean = false
 
 	const dispatch = createEventDispatcher()
 
@@ -13,7 +14,7 @@
 </script>
 
 <div class="menu-button">
-	<Button label={title} {buttonClass} on:click={dispatchClick} />
+	<Button label={title} {buttonClass} on:click={dispatchClick} disabled={disabled}/>
 </div>
 
 <style>
