@@ -355,7 +355,6 @@
 
 		await Promise.all(promises)
 
-		console.log(workerData[0])
 		await updateWorkerData(uniqueIdentifier, workerData[0])
 
 		awaitingResponse = false
@@ -401,7 +400,6 @@
 	}
 
 	async function addOpenSolarLinkToAddress(openSolarId, houseId, workerId, numCompleted, flags) {
-		console.log(flags)
 		let { data, error: selectError } = await supabase
 			.from('campaign_customers')
 			.select('*')
@@ -412,7 +410,6 @@
 		}
 		data = data[0]
 		let openSolarProjects = data['campaign_specific_data']['open_solar_projects']
-		console.log(openSolarProjects)
 		if (!openSolarProjects) {
 			openSolarProjects = [
 				{
