@@ -373,9 +373,9 @@ export class CRM {
 		return false
 	}
 
-	async getStagesFor(pipelineId: number) {
+	async getStagesFor(pipelineId: number, pipelineName: string) {
 		const pipelineStages = await this.pdPipelinesApi.getPipeline(pipelineId)
-		let stages = (((await this.pdStagesApi.getStages(pipelineStages.data.id)).data).map(obj => obj.name))
+		let stages = (((await this.pdStagesApi.getStages({pipelineId: pipelineStages.data.id, limit: 200})).data).filter(obj => obj.pipeline_name === pipelineName).map(obj => obj.name))
 		return stages
 	}
 

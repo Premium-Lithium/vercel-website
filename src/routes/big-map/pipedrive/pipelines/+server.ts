@@ -23,7 +23,7 @@ async function getPipelines(): Promise<Array<PipeLineKey>> {
             let pipelineKey: PipeLineKey = {
                 name: pipelines.data[pipeline].name,
                 id: pipelines.data[pipeline].id,
-                stages: await crm.getStagesFor(pipelines.data[pipeline].id)
+                stages: await crm.getStagesFor(pipelines.data[pipeline].id, pipelines.data[pipeline].name)
             }
             pipelinesKeysArr.push(pipelineKey)
         }

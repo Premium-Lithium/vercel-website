@@ -1,6 +1,6 @@
 // import { CRM } from '$lib/crm/crm-utils'
 import type { MarkerOptions, PipeLineKey, OptionPanel, LabelInfo } from './bm-stores'
-import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, customerMarkersArray, customersVisible, installDate, installerMarkersArray, installersLoading, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
+import { applyLabelColourToMarker, checkInstalledTime, checkQuoteTime, checkWonTime, colourMap, installDate, installerMarkersArray, installersLoading, installersVisible, labelFilter, labels, map, mapOptionPanels, pipedriveLoading, pipelines, quoteDate, selectedPipelines, showNullMarkers, statusFilters, value, wonDate } from './bm-stores'
 import { get } from 'svelte/store'
 import CircularJSON from 'circular-json';
 
@@ -16,6 +16,7 @@ export async function getPipelines() {
     })
     let pipelinesResponse = await pipelinesRes.json()
     pipelines.set(pipelinesResponse.body)
+    pipedriveLoading.set(false)
 }
 
 export async function getLabels() {
@@ -28,7 +29,6 @@ export async function getLabels() {
     })
     let labelsResponse = await labelsRes.json()
     labels.set(labelsResponse.body)
-    pipedriveLoading.set(false)
 }
 
 export async function getSelectedPipelineData(selectedPipelines: Array<number>) {
@@ -40,6 +40,7 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
     })
     let mapProps = await mapRes.json()
     if (mapRes.ok) {
+        console.log(selectedPipelines)
         for (let p in selectedPipelines) {
             let panel: OptionPanel = {
                 pipeline: get(pipelines).find((obj) => obj.id === selectedPipelines[p]),
@@ -53,9 +54,10 @@ export async function getSelectedPipelineData(selectedPipelines: Array<number>) 
                 hideStageOptions: false
             }
             // Loop over each stage in pipeline, add name to the list
-            panel.stages = panel.pipeline?.stages.map((obj) => obj.name)
+            panel.stages = panel.pipeline?.stages
             panels.push(panel)
         }
+        console.log(panels)
         for (let m in mapProps.body) {
             let marker: MarkerOptions = {
                 latLng: mapProps.body[m].latLng,
