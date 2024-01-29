@@ -3,7 +3,6 @@ import * as turf from '@turf/turf'
 import { get } from "svelte/store";
 import { parseString } from 'xml2js';
 import { updateMap } from "./bm-pipedrive-utils";
-import { displayMarkers } from "./bm-platform-utils";
 
 interface Coordinates {
     longitude: number;
@@ -36,6 +35,7 @@ export async function loadKmlLayers() {
         }
     }
     layersLoading.set(false)
+    console.log(postcodeAreaFilter)
     postcodeFilter.set(postcodeAreaFilter)
 }
 
