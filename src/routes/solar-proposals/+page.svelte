@@ -75,7 +75,8 @@
 					address: x.address,
 					latLon: x.lat_lon,
 					status: statusToString(x.status),
-					campaignId: x['campaign_id']
+					campaignId: x['campaign_id'],
+					flags: x.flags
 				}
 			]
 		})
@@ -109,15 +110,20 @@
 		projectData = projectData[0]
 
 		let projectStatus = 'Not started'
+		let projectFlags = []
 		projectData['assigned_projects'].forEach((x) => {
-			if (x['customerId'] === projectId) projectStatus = x.status
+			if (x['customerId'] === projectId) {
+				projectStatus = x.status
+				projectFlags = x['flags']
+			}
 		})
 		return {
 			id: houseData['customer_id'],
 			address: houseData?.address['formatted_address'],
 			lat_lon: houseData?.address.geometry.location,
 			campaign_id: houseData['campaign_id'],
-			status: projectStatus
+			status: projectStatus,
+			flags: projectFlags ?? []
 		}
 	}
 
@@ -261,7 +267,7 @@
 		modals[i].close()
 		awaitingResponse = true
 		let workerData = await getWorkerData(uniqueIdentifier)
-		workerData[0]['assigned_projects'].forEach(async (entry) => {
+		const promises = workerData[0]['assigned_projects'].map(async (entry) => {
 			if (entry['customerId'] == project.projectId) {
 				if (entry.openSolarId) {
 					let res = await fetch(`${$page.url.pathname}/open-solar/get-project`, {
@@ -288,6 +294,7 @@
 				}
 			}
 		})
+		await Promise.all(promises)
 	}
 
 	async function onListClick(project, i) {
@@ -298,27 +305,33 @@
 		return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lon}&size=${size}x${size}&zoom=${zoom}&maptype=satellite&scale=2&key=${PUBLIC_GOOGLE_API_KEY}&markers=color:0x35bbed|${lat},${lon}`
 	}
 
-	async function completeProject(project, i) {
+	async function completeProject(project, i, clearFlags = true) {
 		awaitingResponse = true
 		modals[i].close()
 		let workerData = await getWorkerData(uniqueIdentifier)
-		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (entry['customerId'] == project.projectId) {
-				if (entry.status == 'in_progress' || entry.status == 'completed') {
+
+		const promises = workerData[0]['assigned_projects'].map(async (entry) => {
+			if (entry['customerId'] === project.projectId) {
+				if (entry.status === 'in_progress' || entry.status === 'completed') {
 					let existingFlags = entry.flags
 					entry.status = 'completed'
 					const { pass, flags } = await performAutomaticAudit(entry.openSolarId)
-					flags.forEach(async (flag) => {
-						await addFlagToProject(project, flag)
-					})
-					let newFlags = [
-						...new Set([...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)), ...flags])
-					] // merge flag arrays, removing duplicates
+
+					let newFlags = clearFlags
+						? [...new Set([...flags])]
+						: [
+								...new Set([
+									...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)),
+									...flags
+								])
+						  ]
+
+					entry.flags = newFlags
 					await addOpenSolarLinkToAddress(
 						entry.openSolarId,
 						project.projectId,
 						uniqueIdentifier,
-						workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length,
+						workerData[0]['assigned_projects'].filter((x) => x.status === 'completed').length,
 						newFlags
 					)
 					await updateStatus(
@@ -336,33 +349,15 @@
 						'An OpenSolar design has been completed with flags'
 					)
 				}
-				// WIP - save system image from OpenSolar when completing a project
-				// let res = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-systems`, {
-				// 	method: 'POST',
-				// 	body: JSON.stringify({
-				// 		'openSolarId': entry.openSolarId,
-				// 		'openSolarOrgId': PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID
-				// 	})
-				// })
-				// res = await res.json()
-				// let systemId = res.systems[0].uuid
-				// res = await fetch(`${$page.url.origin}/solar-proposals/open-solar/get-image`, {
-				// 	method: 'POST',
-				// 	body: JSON.stringify({
-				// 		'openSolarId': entry.openSolarId,
-				// 		'openSolarOrgId': PUBLIC_OPEN_SOLAR_SOLAR_PROPOSAL_ORG_ID,
-				// 		systemId
-				// 	})
-				// })
-				// res = await res.json()
-				// let pdf = res.url
-				// console.log(pdf)
 			}
 		})
+
+		await Promise.all(promises)
+
 		await updateWorkerData(uniqueIdentifier, workerData[0])
 
 		awaitingResponse = false
-		populateProjectList()
+		await populateProjectList()
 	}
 
 	async function performAutomaticAudit(openSolarId) {
@@ -379,6 +374,9 @@
 			console.log(res.statusText)
 		} else {
 			let systems = (await res.json()).systems
+			if (!systems) {
+				return { pass: false, flags: ['NO_SYSTEM_FOUND'] }
+			}
 			const totalPanels = systems.reduce((p, v, i, a) => {
 				return p + v.total_module_quantity
 			}, 0)
@@ -459,48 +457,52 @@
 
 	async function addFlagToProject(project, flag) {
 		let workerData = await getWorkerData(uniqueIdentifier)
-		workerData[0]['assigned_projects'].forEach(async (entry) => {
-			if (entry['customerId'] == project.projectId) {
-				if (!entry.flags.includes(flag)) entry.flags = [...entry.flags, flag]
-				await addOpenSolarLinkToAddress(
+
+		const promises = workerData[0]['assigned_projects'].map(async (entry) => {
+			if (entry['customerId'] === project.projectId) {
+				if (!entry.flags.includes(flag)) {
+					entry.flags = [...entry.flags, flag]
+				}
+				return addOpenSolarLinkToAddress(
 					null,
 					project.projectId,
 					workerData[0].worker_id,
-					workerData[0]['assigned_projects'].filter((x) => x.status == 'completed').length + 1,
+					workerData[0]['assigned_projects'].filter((x) => x.status === 'completed').length + 1,
 					entry.flags
 				)
 			}
 		})
+		await Promise.all(promises)
 		await updateWorkerData(uniqueIdentifier, workerData[0])
 	}
 
 	async function panelsAlreadyInstalledClicked(project, i) {
 		await addFlagToProject(project, 'PANELS_ALREADY_INSTALLED')
-		await completeProject(project, i)
+		await completeProject(project, i, false)
 		modals[i].close()
 	}
 
 	async function roofTooComplicatedClicked(project, i) {
 		await addFlagToProject(project, 'ROOF_TOO_COMPLICATED')
-		await completeProject(project, i)
+		await completeProject(project, i, false)
 		modals[i].close()
 	}
 
 	async function notResidentialClicked(project, i) {
 		await addFlagToProject(project, 'PROPERTY_NOT_RESIDENTIAL')
-		await completeProject(project, i)
+		await completeProject(project, i, false)
 		modals[i].close()
 	}
 
 	async function notSuitableForSolarClicked(project, i) {
 		await addFlagToProject(project, 'NOT_SUITABLE_FOR_SOLAR')
-		await completeProject(project, i)
+		await completeProject(project, i, false)
 		modals[i].close()
 	}
 
 	async function pinNotOnRoofClicked(project, i) {
 		await addFlagToProject(project, 'ADDRESS_UNCLEAR')
-		await completeProject(project, i)
+		await completeProject(project, i, false)
 		modals[i].close()
 	}
 </script>
@@ -517,31 +519,37 @@
 			<button class="modal-button" on:click={openOpenSolarProject(projects[i], i)}
 				>Open OpenSolar Project</button
 			>
-			<button
-				class="warning-button"
-				on:click|stopPropagation={() => pinNotOnRoofClicked(projects[i], i)}
-				>Pin isn't on roof / address unclear</button
-			>
-			<button
-				class="warning-button"
-				on:click|stopPropagation={() => panelsAlreadyInstalledClicked(projects[i], i)}
-				>Panels are already installed</button
-			>
-			<button
-				class="warning-button"
-				on:click|stopPropagation={() => roofTooComplicatedClicked(projects[i], i)}
-				>Roof is too complicated</button
-			>
-			<button
-				class="warning-button"
-				on:click|stopPropagation={() => notResidentialClicked(projects[i], i)}
-				>Not a residential property</button
-			>
-			<button
-				class="warning-button"
-				on:click|stopPropagation={() => notSuitableForSolarClicked(projects[i], i)}
-				>Not suitable for solar</button
-			>
+			{#if projects[i].flags.length == 0}
+				<button
+					class="warning-button"
+					on:click|stopPropagation={() => pinNotOnRoofClicked(projects[i], i)}
+					>Pin isn't on roof / address unclear</button
+				>
+				<button
+					class="warning-button"
+					on:click|stopPropagation={() => panelsAlreadyInstalledClicked(projects[i], i)}
+					>Panels are already installed</button
+				>
+				<button
+					class="warning-button"
+					on:click|stopPropagation={() => roofTooComplicatedClicked(projects[i], i)}
+					>Roof is too complicated</button
+				>
+				<button
+					class="warning-button"
+					on:click|stopPropagation={() => notResidentialClicked(projects[i], i)}
+					>Not a residential property</button
+				>
+				<button
+					class="warning-button"
+					on:click|stopPropagation={() => notSuitableForSolarClicked(projects[i], i)}
+					>Not suitable for solar</button
+				>
+			{:else}
+				{#each projects[i].flags as flag}
+					<p class="flag">{flag.replaceAll('_', ' ')}</p>
+				{/each}
+			{/if}
 			{#if projects[i].status.toLowerCase() != 'not started'}
 				<button
 					class="modal-button"
@@ -605,7 +613,7 @@
 						</div>
 					</li>
 					{#each projects as project, i}
-						{#if project.status.toLowerCase() != 'completed'}
+						{#if project.status.toLowerCase() != 'completed' && project.flags.length == 0}
 							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
 								<div class="project-item" class:bold={project.status == 'In progress'}>
 									<div class="address">{project.address.split(',')[0]}</div>
@@ -628,7 +636,30 @@
 						</div>
 					</li>
 					{#each projects as project, i}
-						{#if project.status.toLowerCase() == 'completed'}
+						{#if project.status.toLowerCase() == 'completed' && project.flags.length == 0}
+							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
+								<div class="project-item">
+									<div class="address">{project.address.split(',')[0]}</div>
+									<div class={'status'}>
+										{project.status}
+									</div>
+								</div>
+							</li>
+						{/if}
+					{/each}
+				</ul>
+			</div>
+			<h3 style="text-align: center;" class:disabled={awaitingResponse}>Flagged Projects</h3>
+			<div class="project-list" class:disabled={awaitingResponse}>
+				<ul>
+					<li>
+						<div class="project-header" style="pointer-events: none">
+							<div class="address">Address</div>
+							<div class="status">Status</div>
+						</div>
+					</li>
+					{#each projects as project, i}
+						{#if project.status.toLowerCase() == 'completed' && project.flags.length != 0}
 							<li on:click={() => onListClick(project, i)} class:disabled={awaitingResponse}>
 								<div class="project-item">
 									<div class="address">{project.address.split(',')[0]}</div>
@@ -648,6 +679,16 @@
 </div>
 
 <style>
+	.flag {
+		margin: 4px 0px;
+		border: thin solid black;
+		padding: 4px;
+		border-radius: 4px;
+		background: #f9bf3b;
+		color: black;
+		font-weight: bold;
+	}
+
 	.hamburger {
 		width: 40px;
 		height: 30px;
