@@ -41,12 +41,12 @@ async function addLatLongToDatabase(homeowner: PlatformHomeowner) {
 }
 
 async function getLatLongFromAddress(address: string) {
-    let res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
+    let req = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
         { method: 'GET' }
     )
-    let results = await res.json()
-    console.log(results)
-    if (results.status !== 'ZERO_RESULTS')
-        return (await res.json()).results[0].geometry.location
+    let res = await req.json()
+    console.log(res)
+    if (res.status !== 'ZERO_RESULTS')
+        return res.results[0].geometry.location
     return null
 }
