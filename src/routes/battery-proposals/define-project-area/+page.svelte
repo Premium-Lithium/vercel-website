@@ -195,49 +195,45 @@
 		</button>
 	</form>
 </Modal>
-{#if !isAuthenticated}
-	<MagicLink bind:isAuthenticated redirectUrl={'/battery-proposals/define-project-area'} />
-{:else}
-	<div class="container">
-		<form on:submit={handleSubmit}>
-			<label for="left">Left Longitude:</label>
-			<input type="number" step="any" id="left" name="left" bind:value={left} required />
+<div class="container">
+	<form on:submit={handleSubmit}>
+		<label for="left">Left Longitude:</label>
+		<input type="number" step="any" id="left" name="left" bind:value={left} required />
 
-			<label for="bottom">Bottom Latitude:</label>
-			<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
+		<label for="bottom">Bottom Latitude:</label>
+		<input type="number" step="any" id="bottom" name="bottom" bind:value={bottom} required />
 
-			<label for="right">Right Longitude:</label>
-			<input type="number" step="any" id="right" name="right" bind:value={right} required />
+		<label for="right">Right Longitude:</label>
+		<input type="number" step="any" id="right" name="right" bind:value={right} required />
 
-			<label for="top">Top Latitude:</label>
-			<input type="number" step="any" id="top" name="top" bind:value={top} required />
+		<label for="top">Top Latitude:</label>
+		<input type="number" step="any" id="top" name="top" bind:value={top} required />
 
-			<label for="targetArea">Target Area (km²):</label>
-			<input
-				type="number"
-				step="0.1"
-				id="targetArea"
-				name="targetArea"
-				bind:value={targetArea}
-				required
-			/>
+		<label for="targetArea">Target Area (km²):</label>
+		<input
+			type="number"
+			step="0.1"
+			id="targetArea"
+			name="targetArea"
+			bind:value={targetArea}
+			required
+		/>
 
-			<button type="submit" disabled={awaitingResponse}>
-				{`${awaitingResponse ? 'Splitting up regions...' : 'Define project regions'}`}
-			</button>
-		</form>
+		<button type="submit" disabled={awaitingResponse}>
+			{`${awaitingResponse ? 'Splitting up regions...' : 'Define project regions'}`}
+		</button>
+	</form>
 
-		{#if errorMessage != ''}
-			<p style="color: red">{errorMessage}</p>
-		{/if}
-		<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
-		{#if polygons.length}
-			<button type="submit" disabled={polygons.length == 0} on:click={saveKmlModal.showModal()}
-				>Save KMLS</button
-			>
-		{/if}
-	</div>
-{/if}
+	{#if errorMessage != ''}
+		<p style="color: red">{errorMessage}</p>
+	{/if}
+	<GoogleMap bind:map bind:loader minZoom={10} initialZoom={14} />
+	{#if polygons.length}
+		<button type="submit" disabled={polygons.length == 0} on:click={saveKmlModal.showModal()}
+			>Save KMLS</button
+		>
+	{/if}
+</div>
 
 <style>
 	.options {
