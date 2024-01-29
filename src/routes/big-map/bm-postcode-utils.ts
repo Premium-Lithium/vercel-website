@@ -19,7 +19,7 @@ export async function loadKmlLayers() {
     })
     let postcodeRegions = await (await layers.json())
     let kmlLayers: Array<{ name: string, kml: string }> = []
-    for (let postcode of postcodeRegions) {
+    const promises = postcodeRegions.map(async (postcode: any) => {
         let req = await fetch('big-map/postcode/region-data/', {
             method: "POST",
             headers: { 'Content-Type': 'Application-JSON' },
@@ -28,7 +28,8 @@ export async function loadKmlLayers() {
         let res = await req.json()
         if (res)
             kmlLayers.push({ name: postcode.name.slice(0, -4), kml: res })
-    }
+    })
+    await Promise.all(promises)
     let postcodeAreaFilter: Array<PostcodeFilterElement> = []
     for (let layer of kmlLayers) {
         let polygonCoords = await createPolygon(layer)
