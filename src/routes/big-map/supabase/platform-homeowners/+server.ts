@@ -22,7 +22,8 @@ async function getHomeownerData(): Promise<{ ok: boolean, body: PlatformHomeowne
         for (let homeowner of data) {
             if (!(homeowner.lat_lon)) {
                 homeowner.lat_lon = await getLatLongFromAddress(homeowner.address + " " + homeowner.postcode)
-                await addLatLongToDatabase(homeowner)
+                if (homeowner.lat_lon)
+                    await addLatLongToDatabase(homeowner)
             }
         }
     }
@@ -43,5 +44,8 @@ async function getLatLongFromAddress(address: string) {
     let res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyD0mi2qm_Ig4ppWNoVV0i4MXaE5zgjIzTA`,
         { method: 'GET' }
     )
-    return (await res.json()).results[0].geometry.location
+    let results = await res.json()
+    if (results[0].geometry)
+        return (await res.json()).results[0].geometry.location
+    return null
 }
