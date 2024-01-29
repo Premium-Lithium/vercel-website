@@ -29,7 +29,7 @@ export async function GET() {
 }
 
 async function createLayerFor(kmlFile: string): Promise<string> {
-    const tempDir = '/temp-kml.kml'
+    const tempDir = '/tmp/temp-kml.kml'
     const { data, error } = await supabase
         .storage
         .from('postcode-kml')
