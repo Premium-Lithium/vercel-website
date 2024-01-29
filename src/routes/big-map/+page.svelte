@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type OptionPanel, map, mapOptionPanels, layersLoading } from './bm-stores'
+	import { type OptionPanel, map, mapOptionPanels, layersLoading, postcodeFilteringVisible } from './bm-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -31,6 +31,7 @@
 	import KnownInstallerSection from '$lib/components/big-map/KnownInstallerSection.svelte'
 	import PostcodeFilter from '$lib/components/big-map/PostcodeFilter.svelte'
 	import { loadKmlLayers } from './bm-postcode-utils'
+	import MenuButton from '$lib/components/big-map/MenuButton.svelte'
 
 	let loader: any
 
@@ -109,8 +110,9 @@
 			<CampaignSection />
 			<PlatformSection />
 			<KnownInstallerSection />
+			<MenuButton title="Postcode Filter Options" buttonClass="secondary" on:click={() => $postcodeFilteringVisible = !$postcodeFilteringVisible}/>
 		</FloatingPanel>
-		{#if !$layersLoading}
+		{#if !$layersLoading && $postcodeFilteringVisible}
 			<PostcodeFilter />
 		{/if}
 		{#each $mapOptionPanels as panel}

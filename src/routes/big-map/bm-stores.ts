@@ -246,6 +246,7 @@ export const colourMap: Readable<Map<string, string>> = readable(new Map([
 // Postcode filtering
 export const postcodeFilter: Writable<Array<PostcodeFilterElement>> = writable([])
 export let postcodes: Writable<Array<string>> = writable([])
+export let postcodeFilteringVisible: Writable<boolean> = writable(false)
 
 // Feedback Email
 export const enableFeedback: Writable<boolean> = writable(false)
