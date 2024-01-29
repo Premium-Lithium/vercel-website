@@ -16,7 +16,6 @@ export async function generateOsHeatmap() {
     osHeatmap.set(new google.maps.visualization.HeatmapLayer({
         data: heatmapData
     }))
-    heatmapLoading.set(false)
 }
 
 export async function generateCampaignHeatmap() {
@@ -35,6 +34,7 @@ export async function generateCampaignHeatmap() {
     campaignHeatmap.set(new google.maps.visualization.HeatmapLayer({
         data: heatmapData
     }))
+    heatmapLoading.set(false)
 }
 
 export async function toggleHeatmap() {
