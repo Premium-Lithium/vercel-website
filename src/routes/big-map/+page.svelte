@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { type OptionPanel, map, mapOptionPanels, layersLoading, postcodeFilteringVisible } from './bm-stores'
+	import {
+		type OptionPanel,
+		map,
+		mapOptionPanels,
+		layersLoading,
+		postcodeFilteringVisible
+	} from './bm-stores'
 	import GoogleMap from '$lib/components/GoogleMap.svelte'
 	import { movable } from '@svelte-put/movable'
 	import ColorPicker from 'svelte-awesome-color-picker'
@@ -13,7 +19,7 @@
 		applyFiltersToPanel,
 		changeIconColourFor,
 		generateMarkersForPLCustomers,
-		generateMarkersForMCSSInstallers,
+		generateMarkersForMCSSInstallers
 	} from './bm-pipedrive-utils'
 	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
 	import {
@@ -58,15 +64,18 @@
 		.subscribe()
 
 	onMount(async () => {
-		await loadKmlLayers()
-		await generateMarkersForMCSSInstallers()
-		await generateMarkersForPLCustomers()
-		await getCampaignIdAndNames()
-		await generateOsHeatmap()
-		await generateCampaignHeatmap()
-		await generatePlatformMarkers()
-		await getPipelines()
-		await getLabels()
+		await Promise.all([
+			loadKmlLayers(),
+			generateMarkersForMCSSInstallers(),
+			generateMarkersForPLCustomers(),
+			getCampaignIdAndNames(),
+			generateOsHeatmap(),
+			generatePlatformMarkers(),
+			getPipelines(),
+			getLabels()
+		])
+		// has to come after the campaign function
+		generateCampaignHeatmap()
 	})
 
 	/**
@@ -110,7 +119,11 @@
 			<CampaignSection />
 			<PlatformSection />
 			<KnownInstallerSection />
-			<MenuButton title="Postcode Filter Options" buttonClass="secondary" on:click={() => $postcodeFilteringVisible = !$postcodeFilteringVisible}/>
+			<MenuButton
+				title="Postcode Filter Options"
+				buttonClass="secondary"
+				on:click={() => ($postcodeFilteringVisible = !$postcodeFilteringVisible)}
+			/>
 		</FloatingPanel>
 		{#if !$layersLoading && $postcodeFilteringVisible}
 			<PostcodeFilter />
