@@ -24,7 +24,7 @@ export async function GET() {
                 layerArr.push({name: data[file].name.slice(0, -4), kml: postcodeString})
         }
     }
-
+    console.log(layerArr)
     return new Response(JSON.stringify({ok: true, body: layerArr}))
 }
 
