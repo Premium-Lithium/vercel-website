@@ -45,7 +45,7 @@ async function getLatLongFromAddress(address: string) {
         { method: 'GET' }
     )
     let results = await res.json()
-    if (results[0].geometry)
+    if ('geometry' in results[0])
         return (await res.json()).results[0].geometry.location
     return null
 }
