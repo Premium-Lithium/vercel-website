@@ -12,6 +12,7 @@
 		platformLoading
 	} from '../../../routes/big-map/bm-stores'
 	import ColorPicker from 'svelte-awesome-color-picker'
+	import LoadingWheel from './LoadingWheel.svelte'
 
 	let shown: boolean = false
 	let homeownersShown: boolean = false
@@ -155,7 +156,7 @@
 		</div>
 	{:else}
 		<div class="pf-menus">
-			<p>Loading</p>
+			<LoadingWheel />
 		</div>
 	{/if}
 {/if}

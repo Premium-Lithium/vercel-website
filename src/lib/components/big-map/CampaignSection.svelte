@@ -8,6 +8,7 @@
 	} from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
 	import LabelledCheckbox from './LabelledCheckbox.svelte'
+	import LoadingWheel from './LoadingWheel.svelte'
 	import MenuButton from './MenuButton.svelte'
 
 	let shown: boolean = false
@@ -59,7 +60,7 @@
 		</div>
 	{:else}
 		<div class="cm-menus">
-			<p>Loading</p>
+			<LoadingWheel />
 		</div>
 	{/if}
 {/if}

@@ -2,6 +2,7 @@
 	import { toggleCampaignHeatmap, toggleHeatmap } from '../../../routes/big-map/bm-heatmap-utils'
 	import { heatmapLoading } from '../../../routes/big-map/bm-stores'
 	import DropdownHeader from './DropdownHeader.svelte'
+	import LoadingWheel from './LoadingWheel.svelte'
 	import MenuButton from './MenuButton.svelte'
 
 	let shown: boolean = false
@@ -28,7 +29,7 @@
 		</div>
 	{:else}
 		<div class="hm-menus">
-			<p>Loading</p>
+			<LoadingWheel />
 		</div>
 	{/if}
 {/if}

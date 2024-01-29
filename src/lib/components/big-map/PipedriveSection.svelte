@@ -14,6 +14,7 @@
 	import LabelDropdown from './LabelDropdown.svelte'
 	import MenuButton from './MenuButton.svelte'
 	import PipelineDropdown from './PipelineDropdown.svelte'
+	import LoadingWheel from './LoadingWheel.svelte';
 
 	let shown: boolean = false
 	let downloading: boolean = false
@@ -44,7 +45,7 @@
 		</div>
 	{:else}
 		<div class="pd-menus">
-			<p>Loading</p>
+			<LoadingWheel />
 		</div>
 	{/if}
 {/if}
