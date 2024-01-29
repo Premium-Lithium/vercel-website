@@ -18,7 +18,6 @@
 		makeAllMarkersInvisible,
 		applyFiltersToPanel,
 		changeIconColourFor,
-		generateMarkersForPLCustomers,
 		generateMarkersForMCSSInstallers
 	} from './bm-pipedrive-utils'
 	import { generateCampaignHeatmap, generateOsHeatmap } from './bm-heatmap-utils'
@@ -67,7 +66,6 @@
 		await Promise.all([
 			loadKmlLayers(),
 			generateMarkersForMCSSInstallers(),
-			generateMarkersForPLCustomers(),
 			getCampaignIdAndNames(),
 			generateOsHeatmap(),
 			generatePlatformMarkers(),

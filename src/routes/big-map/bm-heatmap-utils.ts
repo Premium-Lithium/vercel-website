@@ -5,9 +5,9 @@ import { getAddressesInCampaign } from "./bm-campaign-utils"
 export async function generateOsHeatmap() {
     console.log("Generating OS Heatmap")
     let heatmapData: Array<google.maps.LatLng> = []
-    const heatRes = await fetch('./heatmapCoords.csv')
-    const data = await heatRes.text()
-    const lines = data.split('\n')
+    const heatRes = await fetch('/big-map/supabase/os-heatmap')
+    const data = await heatRes.json()
+    const lines = data.data.split('\n')
     for (let line = 2; line < lines.length; line++) {
         let row = lines[line].split(',')
         if (!isNaN(parseFloat(row[0])) && !isNaN(parseFloat(row[1])))

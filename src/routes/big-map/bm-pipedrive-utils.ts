@@ -350,63 +350,11 @@ export function displayInstallerMarkers() {
     installerMarkersArray.set(installers)
 }
 
-export function displayCustomerMarkers() {
-    let customers = get(customerMarkersArray)
-    if (get(customersVisible)) {
-        for (let marker of customers) {
-            marker.setMap(null)
-        }
-        customersVisible.set(false)
-    } else {
-        for (let marker of customers) {
-            marker.setMap(get(map))
-        }
-        customersVisible.set(true)
-    }
-    customerMarkersArray.set(customers)
-}
-
-export async function generateMarkersForPLCustomers() {
-    let markerArr = []
-    const customers = await fetch('./customers.csv')
-    const data = await customers.text()
-    const lines = data.split('\n')
-    for (let line of lines) {
-        const customer = line.split(';')
-        try {
-            let marker = new google.maps.Marker({
-                position: new google.maps.LatLng(parseFloat(customer[27]), parseFloat(customer[28])),
-                title: customer[0],
-                icon: '/marker-base.svg'
-            })
-            let infowindow = new google.maps.InfoWindow({
-                content: `
-                    <h1>${customer[1].replaceAll('"', '')}</h1>
-                    <p>${customer[0].replaceAll('"', '')}</p>
-                    <p>${customer[3].replaceAll('"', '')}</p>
-                `
-            })
-            marker.addListener("click", () => {
-                infowindow.open({
-                    anchor: marker,
-                });
-            })
-            marker = setMarkerColour(marker, '#cb42f5')
-
-            markerArr.push(marker)
-        }
-        catch {
-            // If it can't find the address just ignore it
-        }
-        customerMarkersArray.set(markerArr)
-    }
-}
-
 export async function generateMarkersForMCSSInstallers() {
     let markerArr = []
-    const installers = await fetch('./installers.csv')
-    const data = await installers.text()
-    const lines = data.split('\n')
+    const installers = await fetch('/big-map/supabase/mcs-installers')
+    const data = await installers.json()
+    const lines = data.data.split('\n')
     for (let line of lines) {
         const installer = line.split(';')
         try {

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		displayCustomerMarkers,
 		displayInstallerMarkers
 	} from '../../../routes/big-map/bm-pipedrive-utils'
 	import { installersLoading } from '../../../routes/big-map/bm-stores'
@@ -20,8 +19,6 @@
 		<LoadingWheel />
 	{/if}
 {/if}
-
-<!-- <MenuButton title="Toggle Customer Markers" on:click={displayCustomerMarkers} /> -->
 
 <style>
 </style>
