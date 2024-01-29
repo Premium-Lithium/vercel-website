@@ -10,30 +10,12 @@
 import { supabase } from "$lib/supabase"
 
 export async function GET() {
-    let layerArr: Array<{name: string, kml: string}> = []
-
     const { data, error } = await supabase
         .storage
         .from('postcode-kml')
-        .list('', {limit: 125, offset: 0})
+        .list('', { limit: 125, offset: 0 })
     if (data) {
-        for (let file in data) {
-            let postcodeString: string = await createLayerFor(data[file].name)
-            if (postcodeString !== "")
-                layerArr.push({name: data[file].name.slice(0, -4), kml: postcodeString})
-        }
+        return new Response(JSON.stringify(data))
     }
-    return new Response(JSON.stringify({ok: true, body: layerArr}))
-}
-
-async function createLayerFor(kmlFile: string): Promise<string> {
-    const tempDir = '/temp-kml.kml'
-    const { data, error } = await supabase
-        .storage
-        .from('postcode-kml')
-        .download(kmlFile)
-    let kmlString = await data?.text()
-    if (kmlString)
-        return kmlString
-    return ""
+    return new Response(JSON.stringify(error))
 }

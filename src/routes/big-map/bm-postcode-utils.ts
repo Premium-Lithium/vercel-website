@@ -17,11 +17,22 @@ export async function loadKmlLayers() {
     let layers = await fetch('/big-map/postcode/', {
         method: "GET"
     })
-    let kmlLayers = (await layers.json()).body
+    let postcodeRegions = await (await layers.json())
+    let kmlLayers: Array<{ name: string, kml: string }> = []
+    for (let postcode of postcodeRegions) {
+        let req = await fetch('big-map/postcode/region-data/', {
+            method: "POST",
+            headers: { 'Content-Type': 'Application-JSON' },
+            body: JSON.stringify(postcode.name)
+        })
+        let res = await req.json()
+        if (res)
+            kmlLayers.push({ name: postcode.name.slice(0, -4), kml: res })
+    }
     let postcodeAreaFilter: Array<PostcodeFilterElement> = []
     for (let layer of kmlLayers) {
-        try {
-            let polygonCoords = await createPolygon(layer)
+        let polygonCoords = await createPolygon(layer)
+        if (polygonCoords) {
             let polygon = turf.polygon([polygonCoords.features[0].geometry.coordinates[0]])
             let postcodeArea: PostcodeFilterElement = {
                 name: layer.name,
@@ -30,9 +41,6 @@ export async function loadKmlLayers() {
             }
             postcodeAreaFilter.push(postcodeArea)
         }
-        catch {
-            // don't care
-        }
     }
     layersLoading.set(false)
     postcodeFilter.set(postcodeAreaFilter)
@@ -40,43 +48,49 @@ export async function loadKmlLayers() {
 
 async function createPolygon(layer: { name: string, kml: string }) {
     let polygonCoords = await extractPolygonCoordinates(layer.kml)
-    const geoJSONPolygons = convertToGeoJSON(polygonCoords);
+    let geoJSONPolygons
+    if (polygonCoords && polygonCoords[0].length > 3) {
+        geoJSONPolygons = convertToGeoJSON(polygonCoords);
+    }
     return geoJSONPolygons
 }
 
-async function extractPolygonCoordinates(kml: string): Promise<Coordinates[][]> {
-    return new Promise((resolve, reject) => {
-        parseString(kml, (err, result) => {
-            if (err) {
-                reject(err);
-            } else {
-                try {
-                    const placemarks = result.kml.Document[0].Placemark || result.kml.Placemark || [];
-                    const polygonCoordinates: Coordinates[][] = placemarks.map((placemark: any) => {
-                        if (placemark.Polygon && placemark.Polygon[0].outerBoundaryIs && placemark.Polygon[0].outerBoundaryIs[0].LinearRing) {
-                            const coordsString: string = placemark.Polygon[0].outerBoundaryIs[0].LinearRing[0].coordinates[0];
-                            const vertices: Coordinates[] = coordsString.split(' ').map((coordString: string) => {
-                                const [longitude, latitude, altitude]: number[] = coordString.split(',').map(Number);
-                                return { longitude, latitude, altitude };
-                            });
+async function extractPolygonCoordinates(kml: string): Promise<Coordinates[][] | undefined> {
+    if (kml) {
+        return new Promise((resolve, reject) => {
+            parseString(kml, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    try {
+                        const placemarks = result.kml.Document[0].Placemark || result.kml.Placemark || [];
+                        const polygonCoordinates: Coordinates[][] = placemarks.map((placemark: any) => {
+                            if (placemark.Polygon && placemark.Polygon[0].outerBoundaryIs && placemark.Polygon[0].outerBoundaryIs[0].LinearRing) {
+                                const coordsString: string = placemark.Polygon[0].outerBoundaryIs[0].LinearRing[0].coordinates[0];
+                                const vertices: Coordinates[] = coordsString.split(' ').map((coordString: string) => {
+                                    const [longitude, latitude, altitude]: number[] = coordString.split(',').map(Number);
+                                    return { longitude, latitude, altitude };
+                                });
 
-                            // Ensure LinearRing has 4 or more positions
-                            if (vertices.length >= 4) {
-                                // Append the first element to the end to close the polygon
-                                vertices.push(vertices[0]);
-                                return vertices;
+                                // Ensure LinearRing has 4 or more positions
+                                if (vertices.length >= 4) {
+                                    // Append the first element to the end to close the polygon
+                                    vertices.push(vertices[0]);
+                                    return vertices;
+                                }
                             }
-                        }
 
-                        return [];
-                    });
-                    resolve(polygonCoordinates);
-                } catch (error) {
-                    reject(error);
+                            return [];
+                        });
+                        resolve(polygonCoordinates);
+                    } catch (error) {
+                        reject(error);
+                    }
                 }
-            }
+            });
         });
-    });
+    }
+    // return null
 }
 
 function convertToGeoJSON(coordinates: Coordinates[][]): any {
