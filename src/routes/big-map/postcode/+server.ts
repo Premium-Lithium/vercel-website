@@ -8,7 +8,6 @@
 // return array
 
 import { supabase } from "$lib/supabase"
-import type { PostcodeFilterElement } from "../bm-stores"
 
 export async function GET() {
     let layerArr: Array<{name: string, kml: string}> = []
@@ -24,12 +23,11 @@ export async function GET() {
                 layerArr.push({name: data[file].name.slice(0, -4), kml: postcodeString})
         }
     }
-    console.log(layerArr)
     return new Response(JSON.stringify({ok: true, body: layerArr}))
 }
 
 async function createLayerFor(kmlFile: string): Promise<string> {
-    const tempDir = '/tmp/temp-kml.kml'
+    const tempDir = '/temp-kml.kml'
     const { data, error } = await supabase
         .storage
         .from('postcode-kml')

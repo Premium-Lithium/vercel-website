@@ -35,7 +35,6 @@ export async function loadKmlLayers() {
         }
     }
     layersLoading.set(false)
-    console.log(postcodeAreaFilter)
     postcodeFilter.set(postcodeAreaFilter)
 }
 
