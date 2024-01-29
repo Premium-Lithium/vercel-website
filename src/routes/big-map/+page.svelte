@@ -123,6 +123,7 @@
 				on:click={() => ($postcodeFilteringVisible = !$postcodeFilteringVisible)}
 				disabled={$layersLoading}
 			/>
+			<MenuButton title="Reset All Options" on:click={() => location.reload()}/>
 		</FloatingPanel>
 		{#if !$layersLoading && $postcodeFilteringVisible}
 			<PostcodeFilter />
