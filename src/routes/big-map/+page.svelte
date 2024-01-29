@@ -120,9 +120,10 @@
 			<PlatformSection />
 			<KnownInstallerSection />
 			<MenuButton
-				title="Postcode Filter Options"
+				title={($layersLoading) ? "Loading Postcode Regions" : "Postcode Filter Options"}
 				buttonClass="secondary"
 				on:click={() => ($postcodeFilteringVisible = !$postcodeFilteringVisible)}
+				disabled={$layersLoading}
 			/>
 		</FloatingPanel>
 		{#if !$layersLoading && $postcodeFilteringVisible}
