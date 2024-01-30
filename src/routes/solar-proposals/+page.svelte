@@ -319,12 +319,7 @@
 
 					let newFlags = clearFlags
 						? [...new Set([...flags])]
-						: [
-								...new Set([
-									...existingFlags.filter((x) => flagsVisibleToWorker.includes(x)),
-									...flags
-								])
-						  ]
+						: [...new Set([...existingFlags, ...flags])]
 
 					entry.flags = newFlags
 					await addOpenSolarLinkToAddress(
@@ -353,7 +348,6 @@
 		})
 
 		await Promise.all(promises)
-
 		await updateWorkerData(uniqueIdentifier, workerData[0])
 
 		awaitingResponse = false
