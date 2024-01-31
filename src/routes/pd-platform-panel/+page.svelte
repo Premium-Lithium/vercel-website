@@ -5,6 +5,7 @@
 
 	const dealId = $page.url.searchParams.get('selectedIds')
 
+	let message: string = ""
 	let sdk: AppExtensionsSDK
 
 	onMount(async () => {
@@ -16,6 +17,16 @@
 
 	async function getDealDetails(id: string) {}
 </script>
+
+<div class="panel">
+	{#if message}
+		<span>{message}</span>
+	{/if}
+	<div class="panel-body">
+		<p>Deal ID: {dealId}</p>
+	</div>
+	
+</div>
 
 <style>
     
