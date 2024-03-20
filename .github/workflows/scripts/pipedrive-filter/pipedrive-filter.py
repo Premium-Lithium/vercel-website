@@ -167,8 +167,9 @@ def createReportingSpreadSheet(deals, stages, pipelines):
 
 def uploadToSharepoint(pathToFile):
     print("Uploading to Sharepoint")
-    username = "peter.gillingham@premiumlithium.com"
-    password = "5Qy4Wp$83F^Y"
+    # Should be in env but no one runs this anymore
+    username = ""
+    password = ""
 
     login = UserCredential(username, password)
     ctx = ClientContext(
